@@ -1,4 +1,4 @@
-pluginManagement {
+﻿pluginManagement {
     repositories {
         maven("https://maven.fabricmc.net")
         mavenCentral()
@@ -32,7 +32,8 @@ listOf(
     "1.18.2",
     "1.18",
     "1.17.1",
-    "1.16.5"
+    "1.16.5",
+    "1.16.1"
 ).forEach { version ->
     include(":$version")
     project(":$version").apply {

@@ -19,12 +19,15 @@ public class EnterNetherPortalTask extends Task {
     private final Task getPortalTask;
     private final Dimension targetDimension;
 
-    private final TimerGame portalTimeout = new TimerGame(10);
+    private final TimerGame portalTimeout = new TimerGame(25);
     private final TimeoutWanderTask wanderTask = new TimeoutWanderTask(5);
 
     private final Predicate<BlockPos> goodPortal;
 
     private boolean leftPortal;
+
+    /** Stick to one portal cell so adjacent NETHER_PORTAL blocks don't flip GetToBlock every tick. */
+    private BlockPos lockedPortal = null;
 
     public EnterNetherPortalTask(Task getPortalTask, Dimension targetDimension, Predicate<BlockPos> goodPortal) {
         if (targetDimension == Dimension.END)
@@ -49,6 +52,7 @@ public class EnterNetherPortalTask extends Task {
     @Override
     protected void onStart() {
         leftPortal = false;
+        lockedPortal = null;
         portalTimeout.reset();
         wanderTask.resetWander();
     }
@@ -56,6 +60,12 @@ public class EnterNetherPortalTask extends Task {
     @Override
     protected Task onTick() {
         AltoClef mod = AltoClef.getInstance();
+
+        // Already in the destination dimension - do NOT keep chasing NETHER_PORTAL
+        // (after teleport, stale overworld portal coords / nearby exit portal caused GetToBlock loops).
+        if (WorldHelper.getCurrentDimension() == targetDimension) {
+            return null;
+        }
 
         if (wanderTask.isActive() && !wanderTask.isFinished()) {
             setDebugState("Exiting portal for a bit.");
@@ -100,6 +110,16 @@ public class EnterNetherPortalTask extends Task {
         };
 
         if (mod.getBlockScanner().anyFound(standablePortal, Blocks.NETHER_PORTAL)) {
+            // Lock onto one portal cell; adjacent portal blocks used to flip GetToBlock and forceCancel pathing.
+            if (lockedPortal == null || !standablePortal.test(lockedPortal)
+                    || mod.getWorld().getBlockState(lockedPortal).getBlock() != Blocks.NETHER_PORTAL) {
+                lockedPortal = mod.getBlockScanner().getNearestBlock(standablePortal, Blocks.NETHER_PORTAL)
+                        .map(BlockPos::toImmutable).orElse(null);
+            }
+            if (lockedPortal != null) {
+                setDebugState("Going to locked portal " + lockedPortal.toShortString());
+                return new GetToBlockTask(lockedPortal, false);
+            }
             setDebugState("Going to found portal");
             return new DoToClosestBlockTask(blockPos -> new GetToBlockTask(blockPos, false), standablePortal, Blocks.NETHER_PORTAL);
         }

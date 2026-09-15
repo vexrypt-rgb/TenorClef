@@ -93,9 +93,11 @@ public abstract class DoStuffInContainerTask extends Task {
             nearest = mod.getBlockScanner().getNearestBlock(currentPos, blockPos -> WorldHelper.canReach(blockPos), containerBlocks);
         }
         if (nearest.isEmpty()) {
-            // If all else fails, try using our placed task
+            // If all else fails, try using our placed task — but never a blacklisted spot
             nearest = Optional.ofNullable(placeTask.getPlaced());
-            if (nearest.isPresent() && !mod.getBlockScanner().isBlockAtPosition(nearest.get(), containerBlocks)) {
+            if (nearest.isPresent() && (
+                    !mod.getBlockScanner().isBlockAtPosition(nearest.get(), containerBlocks)
+                    || mod.getBlockScanner().isUnreachable(nearest.get()))) {
                 nearest = Optional.empty();
             }
         }

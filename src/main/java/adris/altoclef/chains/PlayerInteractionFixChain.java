@@ -94,8 +94,12 @@ public class PlayerInteractionFixChain extends TaskChain {
             shiftDepressTimeout.reset();
         }
 
-        // Refresh inventory
+        // Refresh inventory - skip while any screen is open (craft/chest); refreshInventory
+        // double-clicks every slot and causes "Ignoring click in mismatching container".
         if (generalDuctTapeSwapTimeout.elapsed()) {
+            if (MinecraftClient.getInstance().currentScreen != null) {
+                return Float.NEGATIVE_INFINITY;
+            }
             if (!mod.getControllerExtras().isBreakingBlock()) {
                 Debug.logMessage("Refreshed inventory...");
                 mod.getSlotHandler().refreshInventory();

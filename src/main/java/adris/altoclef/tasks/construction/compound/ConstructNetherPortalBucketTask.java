@@ -13,6 +13,7 @@ import adris.altoclef.tasks.movement.TimeoutWanderTask;
 import adris.altoclef.tasks.speedrun.beatgame.BeatMinecraftTask;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.ItemTarget;
+import adris.altoclef.util.helpers.StorageHelper;
 import adris.altoclef.util.helpers.WorldHelper;
 import adris.altoclef.util.progresscheck.MovementProgressChecker;
 import adris.altoclef.util.time.TimerGame;
@@ -88,6 +89,13 @@ public class ConstructNetherPortalBucketTask extends Task {
     // Stored here to cache lava blacklist
     private final Task collectLavaTask = TaskCatalogue.getItemTask(Items.LAVA_BUCKET, 1);
     private final TimerGame refreshTimer = new TimerGame(11);
+    // Stall recovery while crafting/collecting the 2nd bucket (or first if EarlyOverworld skipped)
+    private final TimerGame bucketAcquireTimer = new TimerGame(75);
+    private boolean bucketAcquireTiming = false;
+    private final TimerGame noFluidProgressTimer = new TimerGame(90);
+    private final TimerGame secondBucketIronLogTimer = new TimerGame(15);
+    /** Set when Construct gives up so EarlyOverworld can tear down goToNether and re-acquire. */
+    public boolean abortedForReacquire = false;
     private BlockPos portalOrigin = null;
     private Task getToLakeTask = null;
     private BlockPos currentDestroyTarget = null;
@@ -97,6 +105,13 @@ public class ConstructNetherPortalBucketTask extends Task {
     @Override
     protected void onStart() {
         currentDestroyTarget = null;
+        firstSearch = true;
+        lavaSearchTimer.reset();
+        refreshTimer.reset();
+        bucketAcquireTiming = false;
+        bucketAcquireTimer.reset();
+        noFluidProgressTimer.reset();
+        abortedForReacquire = false;
 
         AltoClef mod = AltoClef.getInstance();
         mod.getBehaviour().push();
@@ -156,9 +171,13 @@ public class ConstructNetherPortalBucketTask extends Task {
             }
         }
         if (refreshTimer.elapsed()) {
-            Debug.logMessage("Duct tape: Refreshing inventory again just in case");
+            // NEVER refresh while a container/craft screen is open - double-clicking every
+            // inventory slot desyncs the handler and causes "Ignoring click in mismatching container".
+            if (MinecraftClient.getInstance().currentScreen == null && !mod.getControllerExtras().isBreakingBlock()) {
+                Debug.logMessage("Duct tape: Refreshing inventory again just in case");
+                mod.getSlotHandler().refreshInventory();
+            }
             refreshTimer.reset();
-            mod.getSlotHandler().refreshInventory();
         }
 
         //If too far, reset.
@@ -180,21 +199,67 @@ public class ConstructNetherPortalBucketTask extends Task {
             progressChecker.reset();
             return TaskCatalogue.getItemTask(Items.FLINT_AND_STEEL, 1);
         }
-        // Get bucket if we don't have one.
-        int bucketCount = mod.getItemStorage().getItemCount(Items.BUCKET, Items.LAVA_BUCKET, Items.WATER_BUCKET);
-        if (bucketCount < 2) {
-            setDebugState("Getting buckets");
+        // Bucket gate: EarlyOverworld crafts 1 empty intentionally. Do NOT stall for 2 empties
+        // before water/lava ? scoop water with the first, craft the 2nd at the lava lake.
+        int emptyBuckets = mod.getItemStorage().getItemCount(Items.BUCKET);
+        int waterBuckets = mod.getItemStorage().getItemCount(Items.WATER_BUCKET);
+        int lavaBuckets = mod.getItemStorage().getItemCount(Items.LAVA_BUCKET);
+        int bucketCount = emptyBuckets + waterBuckets + lavaBuckets;
+        if (bucketCount < 1) {
+            setDebugState("Getting first bucket");
             progressChecker.reset();
-            // If we have lava/water, get the inverse. Otherwise we dropped a bucket, just get a bucket.
-            if (mod.getItemStorage().hasItem(Items.LAVA_BUCKET)) {
-                return TaskCatalogue.getItemTask(Items.WATER_BUCKET, 1);
-            } else if (mod.getItemStorage().hasItem(Items.WATER_BUCKET)) {
-                return TaskCatalogue.getItemTask(Items.LAVA_BUCKET, 1);
+            if (!bucketAcquireTiming) {
+                bucketAcquireTiming = true;
+                bucketAcquireTimer.reset();
+                Debug.logMessage("Construct: acquiring first bucket (have 0)");
+            } else if (bucketAcquireTimer.elapsed()) {
+                Debug.logMessage("Construct: first bucket acquire stalled - close screens + wander retry");
+                StorageHelper.closeScreen();
+                bucketAcquireTimer.reset();
+                return wanderTask;
             }
-            if (mod.getEntityTracker().itemDropped(Items.WATER_BUCKET, Items.LAVA_BUCKET)) {
-                return new PickupDroppedItemTask(new ItemTarget(new Item[]{Items.WATER_BUCKET, Items.LAVA_BUCKET}, 1), true);
+            if (mod.getEntityTracker().itemDropped(Items.WATER_BUCKET, Items.LAVA_BUCKET, Items.BUCKET)) {
+                return new PickupDroppedItemTask(new ItemTarget(new Item[]{Items.WATER_BUCKET, Items.LAVA_BUCKET, Items.BUCKET}, 1), true);
             }
-            return TaskCatalogue.getItemTask(Items.BUCKET, 2);
+            return TaskCatalogue.getItemTask(Items.BUCKET, 1);
+        }
+        bucketAcquireTiming = false;
+
+        // Complementary fluid when we already hold lava XOR water with no empty to scoop.
+        if (lavaBuckets > 0 && waterBuckets == 0 && emptyBuckets == 0) {
+            setDebugState("Getting water (have lava)");
+            progressChecker.reset();
+            return TaskCatalogue.getItemTask(Items.WATER_BUCKET, 1);
+        }
+        // Need 2nd bucket for lava scoop while holding water ? mine iron if short, else craft at lake.
+        if (waterBuckets > 0 && lavaBuckets == 0 && emptyBuckets == 0 && portalOrigin != null) {
+            int iron = mod.getItemStorage().getItemCount(Items.IRON_INGOT);
+            if (iron < 3) {
+                setDebugState("Mining iron for 2nd bucket at lava");
+                progressChecker.reset();
+                if (secondBucketIronLogTimer.elapsed()) {
+                    Debug.logMessage("Construct: need iron for 2nd bucket (iron=" + iron + " empty=" + emptyBuckets
+                            + " water=" + waterBuckets + " lava=" + lavaBuckets + ")");
+                    secondBucketIronLogTimer.reset();
+                }
+                return TaskCatalogue.getItemTask(Items.IRON_INGOT, 3);
+            }
+        }
+
+        // No water/lava and no portal site yet for too long ? abort so EarlyOverworld hard-resets Construct.
+        boolean hasFluid = waterBuckets > 0 || lavaBuckets > 0;
+        if (!hasFluid && portalOrigin == null) {
+            if (noFluidProgressTimer.elapsed()) {
+                Debug.logMessage("Construct: no water/lava progress - aborting for EarlyOverworld reacquire"
+                        + " (empty=" + emptyBuckets + " water=" + waterBuckets + " lava=" + lavaBuckets + ")");
+                StorageHelper.closeScreen();
+                abortedForReacquire = true;
+                hardResetBuildState();
+                noFluidProgressTimer.reset();
+                return wanderTask;
+            }
+        } else {
+            noFluidProgressTimer.reset();
         }
 
         boolean needsToLookForPortal = portalOrigin == null;
@@ -216,7 +281,7 @@ public class ConstructNetherPortalBucketTask extends Task {
                 BlockPos lavaPos = findLavaLake(mod, mod.getPlayer().getBlockPos());
                 if (lavaPos != null) {
                     // We have a lava lake, set our portal origin!
-                    BlockPos foundPortalRegion = getPortalableRegion(mod, lavaPos, mod.getPlayer().getBlockPos(), new Vec3i(-1, 0, 0), PORTALABLE_REGION_SIZE, 20);
+                    BlockPos foundPortalRegion = getPortalableRegion(mod, lavaPos, mod.getPlayer().getBlockPos(), new Vec3i(-1, 0, 0), PORTALABLE_REGION_SIZE, 48);
                     if (foundPortalRegion == null) {
                         Debug.logWarning("Failed to find portalable region nearby. Consider increasing the search timeout range");
                     } else {
@@ -264,7 +329,10 @@ public class ConstructNetherPortalBucketTask extends Task {
 
             // We need to place obsidian here.
             if (mod.getBlockScanner().isUnreachable(framePos)) {
+                Debug.logMessage("Portal frame unreachable, picking a new lava lake spot");
                 portalOrigin = null;
+                currentDestroyTarget = null;
+                return wanderTask;
             }
             return new PlaceObsidianBucketTask(framePos);
         }
@@ -299,6 +367,30 @@ public class ConstructNetherPortalBucketTask extends Task {
     @Override
     protected String toDebugString() {
         return "Construct Nether Portal";
+    }
+
+    public boolean consumeAbortedForReacquire() {
+        if (abortedForReacquire) {
+            abortedForReacquire = false;
+            return true;
+        }
+        return false;
+    }
+
+    /** Clear portal site + timers so EarlyOverworld retry is not an identical instant loop. */
+    public void hardResetBuildState() {
+        portalOrigin = null;
+        currentDestroyTarget = null;
+        getToLakeTask = null;
+        firstSearch = true;
+        bucketAcquireTiming = false;
+        bucketAcquireTimer.reset();
+        noFluidProgressTimer.reset();
+        lavaSearchTimer.reset();
+        refreshTimer.reset();
+        progressChecker.reset();
+        // Keep abortedForReacquire so EarlyOverworld can observe + consume it
+        Debug.logMessage("Construct: hardResetBuildState (portalOrigin cleared)");
     }
 
     private BlockPos findLavaLake(AltoClef mod, BlockPos playerPos) {

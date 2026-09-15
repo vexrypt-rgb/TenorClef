@@ -58,7 +58,7 @@ public abstract class ChatInputSuggestorMixin {
     private TextFieldWidget textField;
     @Shadow
     @Final
-    private List<OrderedText> messages;
+    private List<net.minecraft.text.OrderedText> messages;
 
     @Shadow
     private int width;
@@ -96,7 +96,7 @@ public abstract class ChatInputSuggestorMixin {
     }
 
     @Inject(method = "provideRenderText", at = @At("HEAD"), cancellable = true)
-    public void inj(String original, int firstCharacterIndex, CallbackInfoReturnable<OrderedText> cir) {
+    public void inj(String original, int firstCharacterIndex, CallbackInfoReturnable<net.minecraft.text.OrderedText> cir) {
         String full = this.textField.getText();
 
         if (!full.startsWith(AltoClef.getCommandExecutor().getCommandPrefix())) return;

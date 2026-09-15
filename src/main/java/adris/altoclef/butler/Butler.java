@@ -91,6 +91,9 @@ public class Butler {
         boolean debug = ButlerConfig.getInstance().whisperFormatDebug;
         // Ignore messages from other bots.
         if (message.startsWith(BUTLER_MESSAGE_START)) {
+            if (adris.altoclef.tasks.speedrun.testrun2.fleet.FleetProtocol.handle(username, message)) {
+                return;
+            }
             if (debug) {
                 Debug.logMessage("    Rejecting: MSG is detected to be sent from another bot.");
             }
@@ -98,6 +101,14 @@ public class Butler {
         }
 
         if (userAuth.isUserAuthorized(username)) {
+            String reject = ButlerGuard.rejectReason(mod, username, message);
+            if (reject != null) {
+                if (debug) {
+                    Debug.logMessage("    Rejecting butler: " + reject);
+                }
+                sendWhisper(username, "` denied: " + reject, MessagePriority.UNAUTHORIZED);
+                return;
+            }
             executeWhisper(username, message);
         } else {
             if (debug) {
@@ -146,7 +157,10 @@ public class Butler {
         sendWhisper("Command Executing: " + message, MessagePriority.TIMELY);
 
         String prefix = mod.getModSettings().getCommandPrefix();
-        AltoClef.getCommandExecutor().execute(prefix + message, () -> {
+        String body = message.trim();
+        if (body.startsWith(prefix)) body = body.substring(prefix.length()).trim();
+        else if (body.startsWith("@")) body = body.substring(1).trim();
+        AltoClef.getCommandExecutor().execute(prefix + body, () -> {
             // On finish
             sendWhisper("Command Finished: " + message, MessagePriority.TIMELY);
             if (!commandInstantRan) {

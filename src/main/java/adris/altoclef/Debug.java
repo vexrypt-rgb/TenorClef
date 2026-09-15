@@ -12,7 +12,7 @@ public class Debug {
 
     public static void logInternal(String message) {
         if (canLog(DEBUG_LOG_LEVEL)) {
-            System.out.println("ALTO CLEF: " + message);
+            System.out.println("TENORCLEF: " + message);
         }
     }
 
@@ -23,9 +23,13 @@ public class Debug {
     private static String getLogPrefix() {
         AltoClef altoClef = AltoClef.getInstance();
         if (altoClef != null) {
-            return altoClef.getModSettings().getChatLogPrefix();
+            String p = altoClef.getModSettings().getChatLogPrefix();
+            if (p != null && (p.contains("Alto") || p.contains("alto"))) {
+                return "[TenorClef] ";
+            }
+            if (p != null && !p.isBlank()) return p;
         }
-        return "[Alto Clef] ";
+        return "[TenorClef] ";
     }
 
     public static void logMessage(String message, boolean prefix) {

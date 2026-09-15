@@ -1,6 +1,7 @@
 package adris.altoclef.control;
 
 import adris.altoclef.AltoClef;
+import adris.altoclef.tasks.entity.AbstractKillEntityTask;
 import adris.altoclef.multiversion.versionedfields.Entities;
 import adris.altoclef.multiversion.item.ItemVer;
 import adris.altoclef.util.helpers.LookHelper;
@@ -20,7 +21,6 @@ import net.minecraft.entity.projectile.thrown.PotionEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.SwordItem;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.math.Vec3d;
 
@@ -39,25 +39,9 @@ public class KillAura {
     private Entity forceHit = null;
     public boolean attackedLastTick = false;
 
+    /** Equip best sword for combat (never axe). Delegates to shared combat equip. */
     public static void equipWeapon(AltoClef mod) {
-        List<ItemStack> invStacks = mod.getItemStorage().getItemStacksPlayerInventory(true);
-        if (!invStacks.isEmpty()) {
-            float handDamage = Float.NEGATIVE_INFINITY;
-            for (ItemStack invStack : invStacks) {
-                if (invStack.getItem() instanceof SwordItem item) {
-                    float itemDamage = item.getMaterial().getAttackDamage();
-                    Item handItem = StorageHelper.getItemStackInSlot(PlayerSlot.getEquipSlot()).getItem();
-                    if (handItem instanceof SwordItem handToolItem) {
-                        handDamage = handToolItem.getMaterial().getAttackDamage();
-                    }
-                    if (itemDamage > handDamage) {
-                        mod.getSlotHandler().forceEquipItem(item);
-                    } else {
-                        mod.getSlotHandler().forceEquipItem(handItem);
-                    }
-                }
-            }
-        }
+        AbstractKillEntityTask.equipWeapon(mod);
     }
 
     public void tickStart() {

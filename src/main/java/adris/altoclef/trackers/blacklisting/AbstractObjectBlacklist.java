@@ -22,13 +22,24 @@ public abstract class AbstractObjectBlacklist<T> {
             BlacklistEntry entry = new BlacklistEntry();
             entry.numberOfFailuresAllowed = numberOfFailuresAllowed;
             entry.numberOfFailures = 0;
+            entry.totalAttempts = 0;
             entry.bestDistanceSq = Double.POSITIVE_INFINITY;
             entry.bestTool = MiningRequirement.HAND;
             entries.put(item, entry);
         }
         BlacklistEntry entry = entries.get(item);
+        entry.totalAttempts++;
         double newDistance = getPos(item).squaredDistanceTo(mod.getPlayer().getPos());
         MiningRequirement newTool = StorageHelper.getCurrentMiningRequirement();
+        // Cap resets: after allowed*3 total attempts, force permanent unreachable (stop thrash).
+        int hardCap = Math.max(4, numberOfFailuresAllowed) * 3;
+        if (entry.totalAttempts > hardCap) {
+            entry.numberOfFailures = numberOfFailuresAllowed + 1;
+            entry.numberOfFailuresAllowed = numberOfFailuresAllowed;
+            Debug.logMessage("Blacklist HARD-CAP: " + item.toString()
+                    + " after " + entry.totalAttempts + " attempts (allowed=" + numberOfFailuresAllowed + ")");
+            return;
+        }
         // For distance, add a slight threshold so it doesn't reset EVERY time we move a tiny bit closer.
         if (newTool.ordinal() > entry.bestTool.ordinal() || (newDistance < entry.bestDistanceSq - 1)) {
             if (newTool.ordinal() > entry.bestTool.ordinal()) entry.bestTool = newTool;
@@ -59,6 +70,7 @@ public abstract class AbstractObjectBlacklist<T> {
     private static class BlacklistEntry {
         public int numberOfFailuresAllowed;
         public int numberOfFailures;
+        public int totalAttempts;
         public double bestDistanceSq;
         public MiningRequirement bestTool;
     }

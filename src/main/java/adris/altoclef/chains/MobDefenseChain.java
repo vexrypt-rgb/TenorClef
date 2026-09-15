@@ -34,6 +34,7 @@ import net.minecraft.entity.projectile.thrown.PotionEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.item.MiningToolItem;
 import net.minecraft.item.SwordItem;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.math.BlockPos;
@@ -53,7 +54,7 @@ public class MobDefenseChain extends SingleTaskChain {
     private static final double ARROW_KEEP_DISTANCE_VERTICAL = 10;
     private static final double SAFE_KEEP_DISTANCE = 8;
     private static final List<Class<? extends Entity>> ignoredMobs = List.of(Entities.WARDEN, WitherEntity.class, EndermanEntity.class, BlazeEntity.class,
-            WitherSkeletonEntity.class, HoglinEntity.class, ZoglinEntity.class, PiglinBruteEntity.class, VindicatorEntity.class, MagmaCubeEntity.class);
+            WitherSkeletonEntity.class, HoglinEntity.class, ZoglinEntity.class, Entities.PIGLIN_BRUTE, VindicatorEntity.class, MagmaCubeEntity.class);
 
     private static boolean shielding = false;
     private final DragonBreathTracker dragonBreathTracker = new DragonBreathTracker();
@@ -319,14 +320,28 @@ public class MobDefenseChain extends SingleTaskChain {
             if (!toDealWithList.isEmpty()) {
 
                 // Depending on our weapons/armor, we may choose to straight up kill hostiles if we're not dodging their arrows.
-                SwordItem bestSword = getBestSword(mod);
+                // Melee damage for fight/flee gate may count axe; KillAura/equip still prefers sword.
+                float damage = getBestMeleeAttackDamage(mod);
 
                 int armor = mod.getPlayer().getArmor();
-                float damage = bestSword == null ? 0 : (bestSword.getMaterial().getAttackDamage()) + 1;
 
-                int shield = hasShield(mod) && bestSword != null ? 3 : 0;
+                int shield = hasShield(mod) && damage > 0 ? 3 : 0;
 
                 int canDealWith = (int) Math.ceil((armor * 3.6 / 20.0) + (damage * 0.8) + (shield));
+                // Early-game floor: always be willing to fight at least a couple of melee mobs
+                // (zombies/spiders). Running away in caves with no sword used to mean death.
+                if (damage > 0) {
+                    canDealWith = Math.max(canDealWith, 2);
+                } else {
+                    // Fist/fallback â€” still try one zombie rather than infinite flee
+                    canDealWith = Math.max(canDealWith, 1);
+                }
+                // Prefer fighting zombies/spiders over fleeing when only melee hostiles
+                boolean onlySimpleMelee = toDealWithList.stream().allMatch(e ->
+                        e instanceof ZombieEntity || e instanceof SpiderEntity || e instanceof SilverfishEntity);
+                if (onlySimpleMelee) {
+                    canDealWith = Math.max(canDealWith, toDealWithList.size());
+                }
 
                 if (canDealWith >= getDangerousnessScore(toDealWithList) || needsChangeOnAttack) {
                     // we just decided to attack, so we should either get it, or hit something before running away again
@@ -385,6 +400,28 @@ public class MobDefenseChain extends SingleTaskChain {
             }
         }
         return bestSword;
+    }
+
+    /** Best melee damage from sword or axe (axe for fight/flee gate only; combat equip prefers sword). */
+    private static float getBestMeleeAttackDamage(AltoClef mod) {
+        Item[] WEAPONS = new Item[]{
+                Items.NETHERITE_SWORD, Items.DIAMOND_SWORD, Items.IRON_SWORD, Items.GOLDEN_SWORD,
+                Items.STONE_SWORD, Items.WOODEN_SWORD,
+                Items.NETHERITE_AXE, Items.DIAMOND_AXE, Items.IRON_AXE, Items.GOLDEN_AXE,
+                Items.STONE_AXE, Items.WOODEN_AXE
+        };
+        float best = 0;
+        for (Item item : WEAPONS) {
+            if (!mod.getItemStorage().hasItem(item)) continue;
+            float dmg = 1;
+            if (item instanceof SwordItem sword) {
+                dmg = sword.getMaterial().getAttackDamage() + 1;
+            } else if (item instanceof MiningToolItem tool) {
+                dmg = tool.getMaterial().getAttackDamage() + 1;
+            }
+            if (dmg > best) best = dmg;
+        }
+        return best;
     }
 
     private BlockPos isInsideFireAndOnFire(AltoClef mod) {
@@ -550,7 +587,7 @@ public class MobDefenseChain extends SingleTaskChain {
         // If we merely force field them, we will run into them and get the wither effect which will kill us.
 
         Class<?>[] dangerousMobs = new Class[]{Entities.WARDEN, WitherEntity.class, WitherSkeletonEntity.class,
-                HoglinEntity.class, ZoglinEntity.class, PiglinBruteEntity.class, VindicatorEntity.class};
+                HoglinEntity.class, ZoglinEntity.class, Entities.PIGLIN_BRUTE, VindicatorEntity.class};
 
         double range = SAFE_KEEP_DISTANCE - 2;
 

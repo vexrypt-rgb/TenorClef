@@ -37,6 +37,7 @@ version = "${project.name}-${project.mod_version}"
 group = project.maven_group
 
 def mappingsVersions = [
+        11601: "1.16.1+build.21",
         11605: "1.16.5+build.10",
         11701: "1.17.1+build.65",
         11800: "1.18+build.1",
@@ -52,6 +53,7 @@ def mappingsVersions = [
 ]
 
 def fabricApiVersions = [
+        11601: "0.18.0+build.387-1.16.1",
         11605: "0.42.0+1.16",
         11701: "0.46.1+1.17",
         11800: "0.44.0+1.18",
@@ -124,16 +126,53 @@ dependencies {
     shadow('com.fasterxml.jackson.core:jackson-databind:2.16.0')
 
     // Thank you georgeagostino for fixing my garbage
+    // 1.16.1: reuse 1.16.5 baritone jar (no published 1.16.1 artifact yet)
+    def baritoneMcVersion = (mcVersion == 11601) ? "1.16.5" : project.name
     if (getProject().hasProperty("altoclef.development")) {
         // Must run build from baritone-plus once
-        modImplementation "baritone-api-fabric:baritone-unoptimized-fabric-${project.name}"
-        include "baritone-api-fabric:baritone-unoptimized-fabric-${project.name}"
+        modImplementation "baritone-api-fabric:baritone-unoptimized-fabric-${baritoneMcVersion}"
+        include "baritone-api-fabric:baritone-unoptimized-fabric-${baritoneMcVersion}"
     } else {
-        modImplementation "cabaletta:baritone-unoptimized-fabric:${project.name}"
-        include "cabaletta:baritone-unoptimized-fabric:${project.name}"
+        modImplementation "cabaletta:baritone-unoptimized-fabric:${baritoneMcVersion}"
+        include "cabaletta:baritone-unoptimized-fabric:${baritoneMcVersion}"
     }
     //modImplementation 'baritone-api-fabric:baritone-api-fabric:1.6.3'
     //implementation files('baritone-plus/build/libs/baritone-unoptimized-fabric-1.6.3.jar')
+
+    // Tungsten physics A* (1.21 / 1.21.1 only). Optional: jar may be absent â€” facade falls back to Baritone.
+    // Build with:  cd vendor\tungsten && .\gradlew.bat remapJar
+    // Then copy build\libs\tungsten-fabric-*-*.jar to libs\  (or leave in vendor build/libs).
+    // COMPILE NOTE: do not run altoclef compileJava while runClient is live.
+    if (mcVersion == 12101 || mcVersion == 12100) {
+        def tungstenJars = []
+        def libsDir = file("${rootProject.projectDir}/libs")
+        def vendorLibs = file("${rootProject.projectDir}/vendor/tungsten/build/libs")
+        if (libsDir.exists()) {
+            libsDir.eachFileMatch(~/tungsten.*\.jar/) { f ->
+                if (!f.name.contains('sources') && !f.name.contains('dev') && !f.name.contains('javadoc')) {
+                    tungstenJars << f
+                }
+            }
+        }
+        // Prefer libs/ copy; only fall back to vendor build/libs if libs empty (avoids duplicate mod jars).
+        if (tungstenJars.isEmpty() && vendorLibs.exists()) {
+            vendorLibs.eachFileMatch(~/tungsten.*\.jar/) { f ->
+                if (!f.name.contains('sources') && !f.name.contains('dev') && !f.name.contains('javadoc')) {
+                    tungstenJars << f
+                }
+            }
+        }
+        tungstenJars = tungstenJars.unique { it.name }
+        if (!tungstenJars.isEmpty()) {
+            println "[altoclef] Tungsten jars for ${project.name}: ${tungstenJars*.name}"
+            tungstenJars.each { jarFile ->
+                modImplementation files(jarFile)
+                include files(jarFile)
+            }
+        } else {
+            println "[altoclef] Tungsten jar not found for ${project.name} â€” Baritone fallback (see docs/TUNGSTEN_BACKEND.md)"
+        }
+    }
 }
 shadowJar {
     configurations = [project.configurations.shadow]

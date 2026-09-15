@@ -1,0 +1,302 @@
+package adris.altoclef.tasks.speedrun;
+
+import adris.altoclef.AltoClef;
+import adris.altoclef.TaskCatalogue;
+import adris.altoclef.tasks.construction.PlaceObsidianBucketTask;
+import adris.altoclef.tasks.container.LootContainerTask;
+import adris.altoclef.tasks.misc.EquipArmorTask;
+import adris.altoclef.tasks.movement.DefaultGoToDimensionTask;
+import adris.altoclef.tasks.movement.GetToBlockTask;
+import adris.altoclef.tasks.resources.CollectFoodTask;
+import adris.altoclef.tasks.resources.MineAndCollectTask;
+import adris.altoclef.tasksystem.Task;
+import adris.altoclef.util.Dimension;
+import adris.altoclef.util.ItemTarget;
+import adris.altoclef.util.MiningRequirement;
+import adris.altoclef.util.helpers.ItemHelper;
+import adris.altoclef.util.helpers.StorageHelper;
+import adris.altoclef.util.helpers.WorldHelper;
+import net.minecraft.block.Blocks;
+import net.minecraft.item.Item;
+import net.minecraft.item.Items;
+import net.minecraft.util.math.BlockPos;
+
+import java.util.Optional;
+import java.util.Arrays;
+
+/**
+ * Modern 1.16-style Early Overworld speedrun logic.
+ *
+ * Priority order (inspired by current RSG meta):
+ *
+ * 1. Basic wood + tools (axe + pick)
+ * 2. Shipwreck / ocean ruins ONLY if the chest is safely reachable on land / surface
+ *    (Baritone is poor underwater — we deliberately skip submerged chests)
+ * 3. Buried treasure map following (if we have one) — future work
+ * 4. Surface iron + lava / water for portal
+ * 5. Ruined portal if available
+ * 6. Craft iron pick, bucket, flint & steel
+ * 7. Build / enter Nether portal as fast as possible
+ *
+ * Important: If the only good chests are underwater, the bot ignores them and
+ * falls back to surface iron → portal. This avoids getting stuck swimming.
+ *
+ * This task is finished once we are in the Nether.
+ */
+public class EarlyOverworldSpeedrunTask extends Task {
+
+    private final AltoClef mod;
+
+    // Sub-task cache
+    private Task currentSubTask = null;
+
+    // Simple state tracking
+    private boolean hasBasicTools = false;
+    private boolean hasIronPick = false;
+    private boolean hasPortalIgniter = false;
+    private boolean hasBucket = false;
+
+    public EarlyOverworldSpeedrunTask(AltoClef mod) {
+        this.mod = mod;
+    }
+
+    @Override
+    protected void onStart() {
+        setDebugState("Early Overworld – modern speedrun route");
+        currentSubTask = null;
+    }
+
+    @Override
+    protected Task onTick() {
+        // Already in Nether? We're done with early overworld.
+        if (WorldHelper.getCurrentDimension() == Dimension.NETHER) {
+            setDebugState("Entered Nether – early overworld complete");
+            return null;
+        }
+
+        updateFlags();
+
+        // ---------- Priority 1: Basic wood tools ----------
+        if (!hasBasicTools) {
+            setDebugState("Getting basic wood tools");
+            return ensureBasicTools();
+        }
+
+        // ---------- Priority 2: Food safety ----------
+        if (StorageHelper.calculateInventoryFoodScore(mod) < 10) {
+            setDebugState("Collecting emergency food");
+            return new CollectFoodTask(15);
+        }
+
+        // ---------- Priority 3: Land-accessible shipwreck / ocean structure loot ----------
+        // ONLY loot chests that are not underwater. Baritone is bad in water,
+        // so submerged shipwrecks are ignored and we fall back to surface iron.
+        Optional<BlockPos> safeChest = findNearbySafeSurfaceChest();
+        if (safeChest.isPresent()) {
+            setDebugState("Looting nearby surface / land-accessible chest");
+            return new LootContainerTask(safeChest.get(), java.util.Arrays.asList(getImportantLootItems()));
+        }
+
+        // ---------- Priority 4: Iron pick (surface path) ----------
+        if (!hasIronPick) {
+            setDebugState("Getting iron pickaxe (surface route – skipping underwater chests)");
+            return ensureIronPick();
+        }
+
+        // ---------- Priority 5: Bucket ----------
+        if (!hasBucket) {
+            setDebugState("Crafting bucket");
+            return TaskCatalogue.getItemTask(Items.BUCKET, 1);
+        }
+
+        // ---------- Priority 6: Portal igniter ----------
+        if (!hasPortalIgniter) {
+            setDebugState("Getting flint and steel / fire charge");
+            return ensurePortalIgniter();
+        }
+
+        // ---------- Priority 7: Enter / build Nether portal ----------
+        // This is the reliable fallback when water chests are not viable.
+        setDebugState("Building / entering Nether portal (safe surface route)");
+        return enterNether();
+    }
+
+    // -------------------------------------------------------------------------
+    // Helper methods
+    // -------------------------------------------------------------------------
+
+    private void updateFlags() {
+        hasBasicTools = StorageHelper.miningRequirementMetInventory(mod, MiningRequirement.WOOD)
+                || StorageHelper.miningRequirementMetInventory(mod, MiningRequirement.STONE)
+                || StorageHelper.miningRequirementMetInventory(mod, MiningRequirement.IRON);
+
+        hasIronPick = StorageHelper.itemInventoryIncludes(mod, Items.IRON_PICKAXE)
+                || StorageHelper.itemInventoryIncludes(mod, Items.DIAMOND_PICKAXE)
+                || StorageHelper.itemInventoryIncludes(mod, Items.NETHERITE_PICKAXE);
+
+        hasPortalIgniter = StorageHelper.itemInventoryIncludes(mod, Items.FLINT_AND_STEEL)
+                || StorageHelper.itemInventoryIncludes(mod, Items.FIRE_CHARGE);
+
+        hasBucket = StorageHelper.itemInventoryIncludes(mod, Items.BUCKET)
+                || StorageHelper.itemInventoryIncludes(mod, Items.WATER_BUCKET)
+                || StorageHelper.itemInventoryIncludes(mod, Items.LAVA_BUCKET);
+    }
+
+    private Task ensureBasicTools() {
+        // Wood axe + wood/stone pick is enough to start
+        if (!StorageHelper.itemInventoryIncludes(mod, Items.WOODEN_AXE)
+                && !StorageHelper.itemInventoryIncludes(mod, Items.STONE_AXE)
+                && !StorageHelper.itemInventoryIncludes(mod, Items.IRON_AXE)) {
+            return TaskCatalogue.getItemTask(Items.WOODEN_AXE, 1);
+        }
+        if (!StorageHelper.miningRequirementMetInventory(mod, MiningRequirement.STONE)
+                && !StorageHelper.miningRequirementMetInventory(mod, MiningRequirement.IRON)) {
+            return TaskCatalogue.getItemTask(Items.STONE_PICKAXE, 1);
+        }
+        // We have enough
+        return null;
+    }
+
+    private Task ensureIronPick() {
+        // Prefer smelting iron if we already have ore
+        if (StorageHelper.getItemCount(mod, Items.RAW_IRON) > 0
+                || StorageHelper.getItemCount(mod, Items.IRON_ORE) > 0) {
+            return TaskCatalogue.getItemTask(Items.IRON_PICKAXE, 1);
+        }
+
+        // Otherwise mine iron
+        return TaskCatalogue.getItemTask(Items.IRON_PICKAXE, 1);
+    }
+
+    private Task ensurePortalIgniter() {
+        if (StorageHelper.itemInventoryIncludes(mod, Items.IRON_INGOT)
+                && StorageHelper.itemInventoryIncludes(mod, Items.FLINT)) {
+            return TaskCatalogue.getItemTask(Items.FLINT_AND_STEEL, 1);
+        }
+        // Fallback – get flint first
+        if (!StorageHelper.itemInventoryIncludes(mod, Items.FLINT)) {
+            return TaskCatalogue.getItemTask(Items.FLINT, 1);
+        }
+        return TaskCatalogue.getItemTask(Items.FLINT_AND_STEEL, 1);
+    }
+
+    private Task enterNether() {
+        // Re-use the solid existing dimension task for now.
+        // Later we can add ruined-portal preference and faster bucket portal building.
+        return new DefaultGoToDimensionTask(Dimension.NETHER);
+    }
+
+    /**
+     * Find a nearby chest that is safe for Baritone (not underwater).
+     *
+     * Rules:
+     * - Must be relatively close
+     * - The chest block itself must NOT be waterlogged / submerged
+     * - Prefer chests that have air or solid ground access
+     *
+     * If the only chests are underwater, we return empty and the bot
+     * continues with the surface iron → portal route instead of drowning.
+     */
+    private Optional<BlockPos> findNearbySafeSurfaceChest() {
+        Optional<BlockPos> chest = mod.getBlockScanner().getNearestBlock(Blocks.CHEST, Blocks.TRAPPED_CHEST);
+        if (chest.isEmpty()) return Optional.empty();
+
+        BlockPos pos = chest.get();
+
+        // Distance limit – don't run halfway across the world
+        if (mod.getPlayer().squaredDistanceTo(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) > 70 * 70) {
+            return Optional.empty();
+        }
+
+        // Reject underwater / waterlogged chests
+        if (isUnderwaterOrWaterlogged(pos)) {
+            setDebugState("Ignoring underwater chest at " + pos + " (Baritone is bad in water)");
+            return Optional.empty();
+        }
+
+        // Accept land / surface accessible chests
+        return Optional.of(pos);
+    }
+
+    /**
+     * Returns true if the chest is underwater or heavily waterlogged.
+     * Simple but effective check for our purposes.
+     */
+    private boolean isUnderwaterOrWaterlogged(BlockPos pos) {
+        // Check the chest itself and a few blocks around / above it
+        if (mod.getWorld().getBlockState(pos).getFluidState().isStill()
+                || !mod.getWorld().getFluidState(pos).isEmpty()) {
+            return true;
+        }
+
+        // Also reject if the block above is water (common for ocean ruins / shipwrecks)
+        BlockPos above = pos.up();
+        if (!mod.getWorld().getFluidState(above).isEmpty()) {
+            return true;
+        }
+
+        // Extra safety: if the player would have to swim to reach it
+        // (very rough – if chest is significantly below sea level and surrounded by water)
+        if (pos.getY() < 62) {
+            // Check a few neighbouring blocks for water
+            for (BlockPos check : new BlockPos[]{pos.north(), pos.south(), pos.east(), pos.west()}) {
+                if (!mod.getWorld().getFluidState(check).isEmpty()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private Item[] getImportantLootItems() {
+        // High-value early-game items from shipwrecks / buried treasure
+        return new Item[]{
+                Items.IRON_INGOT,
+                Items.IRON_NUGGET,
+                Items.GOLD_INGOT,
+                Items.GOLD_NUGGET,
+                Items.DIAMOND,
+                Items.EMERALD,
+                Items.FILLED_MAP,          // buried treasure map
+                Items.MAP,
+                Items.COOKED_COD,
+                Items.COOKED_SALMON,
+                Items.BREAD,
+                Items.APPLE,
+                Items.TNT,
+                Items.OBSIDIAN,
+                Items.FLINT,
+                Items.FEATHER,
+                Items.LEATHER,
+                Items.IRON_SWORD,
+                Items.IRON_PICKAXE,
+                Items.IRON_AXE,
+                Items.IRON_SHOVEL,
+                Items.IRON_HELMET,
+                Items.IRON_CHESTPLATE,
+                Items.IRON_LEGGINGS,
+                Items.IRON_BOOTS
+        };
+    }
+
+    @Override
+    protected void onStop(Task interruptTask) {
+        // nothing special
+    }
+
+    @Override
+    protected boolean isEqual(Task other) {
+        return other instanceof EarlyOverworldSpeedrunTask;
+    }
+
+    @Override
+    protected String toDebugString() {
+        return "EarlyOverworldSpeedrunTask";
+    }
+
+    @Override
+    public boolean isFinished() {
+        return WorldHelper.getCurrentDimension() == Dimension.NETHER;
+    }
+}

@@ -438,6 +438,41 @@ public class StorageHelper {
         );
     }
 
+    public static int getItemCount(AltoClef mod, Item... items) {
+        return mod.getItemStorage().getItemCount(items);
+    }
+
+    /** Whether the player inventory contains any of the given items. */
+    public static boolean itemInventoryIncludes(AltoClef mod, Item... items) {
+        return mod.getItemStorage().hasItem(items);
+    }
+
+    /** Whether any of the given items is currently in hotbar slots 0-8. */
+    public static boolean isItemInHotbar(AltoClef mod, Item... items) {
+        for (Slot slot : mod.getItemStorage().getSlotsWithItemPlayerInventory(false, items)) {
+            int inv = slot.getInventorySlot();
+            if (inv >= 0 && inv < 9) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Overload matching WIP call sites that pass mod explicitly. */
+    public static boolean miningRequirementMetInventory(AltoClef mod, MiningRequirement requirement) {
+        return miningRequirementMetInventory(requirement);
+    }
+
+    /** Overload matching WIP call sites that pass mod explicitly. */
+    public static int calculateInventoryFoodScore(AltoClef mod) {
+        return calculateInventoryFoodScore();
+    }
+
+    /** Overload matching WIP call sites that pass mod explicitly. */
+    public static boolean isArmorEquipped(AltoClef mod, Item... any) {
+        return isArmorEquipped(any);
+    }
+
     private static boolean isScreenOpenInner(Predicate<ScreenHandler> pNotNull) {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
         if (player != null)

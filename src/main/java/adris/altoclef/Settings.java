@@ -443,6 +443,37 @@ public class Settings implements IFailableConfigFile {
     private List<BlockRange> areasToProtect = Collections.emptyList();
 
 
+
+    /**
+     * @testrun / SpeedrunBeatMinecraftTask: target ender pearls from barter (default 14).
+     */
+    private int speedrunPearlTarget = 14;
+
+    /**
+     * @testrun: target blaze rods from fortress (default 7).
+     */
+    private int speedrunBlazeRodTarget = 7;
+
+    /**
+     * @testrun: skip CollectFood in early overworld (default false — gather food unless skipfood).
+     */
+    private boolean speedrunSkipFood = false;
+
+    /**
+     * @testrun travel mover: auto | tungsten | baritone (travel only; mining stays Baritone).
+     */
+    private String speedrunMoverPreference = "auto";
+
+    /**
+     * @testrun: extra phase/subgoal Debug.logMessage (rate-limited).
+     */
+    private boolean speedrunVerbose = false;
+
+    /**
+     * @testrun: chat one-liner on phase change (Speedrun PHASE=X (+Ys, total Zm)).
+     */
+    private boolean speedrunPhaseChatHud = true;
+
     //////////////////////////////////////////////////////////////////////////////////////////
     ////////** END SETTINGS w/ COMMENTS **////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -648,6 +679,30 @@ public class Settings implements IFailableConfigFile {
 
     public BlockPos getHomeBasePosition() {
         return homeBasePosition;
+    }
+
+    public int getSpeedrunPearlTarget() {
+        return speedrunPearlTarget;
+    }
+
+    public int getSpeedrunBlazeRodTarget() {
+        return speedrunBlazeRodTarget;
+    }
+
+    public boolean getSpeedrunSkipFood() {
+        return speedrunSkipFood;
+    }
+
+    public String getSpeedrunMoverPreference() {
+        return speedrunMoverPreference;
+    }
+
+    public boolean getSpeedrunVerbose() {
+        return speedrunVerbose;
+    }
+
+    public boolean getSpeedrunPhaseChatHud() {
+        return speedrunPhaseChatHud;
     }
 
     @Override

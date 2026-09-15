@@ -75,6 +75,8 @@ public class DoToClosestBlockTask extends AbstractDoToClosestObjectTask<BlockPos
 
     @Override
     protected boolean isValid(AltoClef mod, BlockPos obj) {
+        // Never keep pursuing a blacklisted unreachable target
+        if (mod.getBlockScanner().isUnreachable(obj)) return false;
         // Assume we're valid since we're in the same chunk.
         if (!mod.getChunkTracker().isChunkLoaded(obj)) return true;
         // Our valid predicate

@@ -97,7 +97,7 @@ public class DefaultGoToDimensionTask extends Task {
 
         if (netherPortalIsClose(mod)) {
             setDebugState("Going to nether portal");
-            return new EnterNetherPortalTask(Dimension.NETHER);
+            return new EnterNetherPortalTask(Dimension.OVERWORLD);
         }
 
         Optional<BlockPos> closest = mod.getMiscBlockTracker().getLastUsedNetherPortal(Dimension.NETHER);
@@ -138,6 +138,25 @@ public class DefaultGoToDimensionTask extends Task {
         if (mod.getBlockScanner().anyFound(Blocks.NETHER_PORTAL)) {
             Optional<BlockPos> closest = mod.getBlockScanner().getNearestBlock( Blocks.NETHER_PORTAL);
             return closest.isPresent() && closest.get().isWithinDistance(mod.getPlayer().getPos(), 2000);
+        }
+        return false;
+    }
+
+
+    /** Hard-reset cached ConstructNetherPortalBucketTask so PORTAL_BUILD retry is not identical. */
+    public void hardResetPortalBuild() {
+        if (_cachedNetherBucketConstructionTask instanceof ConstructNetherPortalBucketTask construct) {
+            construct.hardResetBuildState();
+        }
+    }
+
+    /** True once Construct aborted for reacquire; consumes the flag after hard reset. */
+    public boolean consumeConstructAbort() {
+        if (_cachedNetherBucketConstructionTask instanceof ConstructNetherPortalBucketTask construct) {
+            if (construct.consumeAbortedForReacquire()) {
+                construct.hardResetBuildState();
+                return true;
+            }
         }
         return false;
     }

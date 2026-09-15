@@ -3,6 +3,7 @@ package adris.altoclef;
 import adris.altoclef.commands.*;
 import adris.altoclef.commands.random.ScanCommand;
 import adris.altoclef.commands.random.DummyTaskCommand;
+import adris.altoclef.commands.random.CycleTestCommand;
 import adris.altoclef.commandsystem.exception.CommandException;
 
 /**
@@ -36,10 +37,37 @@ public class AltoClefCommands {
                 new ReloadSettingsCommand(),
                 new GamerCommand(),
                 new MarvionCommand(),
+                new TestRunCommand(),
+                new ManhuntCommand(),
+                new RunnerCommand(),
+                new CycleTestCommand(),
                 new DummyTaskCommand(),
                 new FollowCommand(),
                 new ScanCommand(),
-                new GiveCommand()
+                new GiveCommand(),
+                new TungstenGotoCommand(),
+                new BuildSchematicCommand(),
+                new T2CoreCommand(),
+                new Testrun2Command(),
+                new ExtraGetCommand(),
+                new AgentCommand(),
+                new AgentDoCommand(),
+                new EscapeCommand(),
+                new HomeCommand(),
+                new SetHomeCommand(),
+                new BackCommand(),
+                new LogDumpCommand(),
+                new VillageCommand(),
+                new T2DoctorCommand(),
+                new T2PanicCommand(),
+                new T2MenuCommand(),
+                new MapArtCommand(),
+                new DjCommand(),
+                new ButlerCommand(),
+                new FleetCommand(),
+                new HeadlessCommand(),
+                new ZeroCycleCommand(),
+                new GroundZeroCommand()
         );
     }
 }

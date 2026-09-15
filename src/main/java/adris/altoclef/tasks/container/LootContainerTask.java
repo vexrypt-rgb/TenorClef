@@ -51,6 +51,10 @@ public class LootContainerTask extends Task {
 
     @Override
     protected Task onTick() {
+        // Once looting is done, stay done — do NOT reopen the container.
+        if (weDoneHere) {
+            return null;
+        }
         if (!ContainerType.screenHandlerMatches(ContainerType.CHEST)) {
             setDebugState("Interact with container");
             return new InteractWithBlockTask(chest);
@@ -91,12 +95,10 @@ public class LootContainerTask extends Task {
                 mod.getSlotHandler().clickSlot(Slot.UNDEFINED, 0, SlotActionType.PICKUP);
             }
             Optional<Slot> garbage = StorageHelper.getGarbageSlot(mod);
-            // Try throwing away cursor slot if it's garbage
             garbage.ifPresent(slot -> mod.getSlotHandler().clickSlot(slot, 0, SlotActionType.PICKUP));
             mod.getSlotHandler().clickSlot(Slot.UNDEFINED, 0, SlotActionType.PICKUP);
-        } else {
-            StorageHelper.closeScreen();
         }
+        StorageHelper.closeScreen();
         mod.getBehaviour().pop();
     }
 

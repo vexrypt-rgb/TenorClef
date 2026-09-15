@@ -218,6 +218,15 @@ public class AltoClef implements ModInitializer {
         if (InputHelper.isKeyPressed(GLFW.GLFW_KEY_LEFT_CONTROL) && InputHelper.isKeyPressed(GLFW.GLFW_KEY_K)) {
             stopTasks();
         }
+        try {
+            adris.altoclef.tasks.speedrun.testrun2.gui.T2MenuKeys.tick();
+        } catch (Throwable ignored) {}
+        try {
+            adris.altoclef.tasks.speedrun.testrun2.dj.DjPlayer.tick();
+        } catch (Throwable ignored) {}
+        try {
+            adris.altoclef.tasks.speedrun.testrun2.util.QueueWatch.tick(this);
+        } catch (Throwable ignored) {}
 
         // TODO: should this go here?
         storageTracker.setDirty();
@@ -249,6 +258,9 @@ public class AltoClef implements ModInitializer {
         if (settings.shouldShowTaskChain()) {
             commandStatusOverlay.render(this, context);
         }
+        try {
+            adris.altoclef.tasks.speedrun.testrun2.gui.SegnoOverlay.render(context);
+        } catch (Throwable ignored) {}
 
         if (settings.shouldShowDebugTickMs()) {
             altoClefTickChart.render(this, context, 1, context.getScaledWindowWidth() / 2 - 124);

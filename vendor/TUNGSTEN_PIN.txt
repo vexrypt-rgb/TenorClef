@@ -1,0 +1,6 @@
+repo=https://github.com/3ndetz/Tungsten
+branch=altoclef-compat
+commit=5cb12ad65c0e045aa5a02d017c98df64eeda6d40
+license=GPL-3.0 (repo); fabric.mod.json claims CC0-1.0 — treat as GPL for distribution
+note=Local patch: fabric.mod.json minecraft depends set to >=1.21 for 1.21.1 runClient
+upstream_why=Preferred over KaptainWutax/Tungsten (stale) and easier than sparse-checkout of UnionClef/tungsten. UnionClef tungsten has more 1.21.1 physics fixes — consider rebasing vendor later.

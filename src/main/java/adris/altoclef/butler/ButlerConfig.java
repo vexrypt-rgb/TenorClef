@@ -17,7 +17,7 @@ public class ButlerConfig {
     /**
      * If true, will use whitelist to only accept users from said whitelist.
      */
-    public boolean useButlerWhitelist = false;
+    public boolean useButlerWhitelist = true;
     /**
      * Servers have different messaging plugins that change the way messages are displayed.
      * Rather than attempt to implement all of them and introduce a big security risk,
@@ -35,6 +35,8 @@ public class ButlerConfig {
      * create the following messages.
      */
     public String[] whisperFormats = new String[]{
+            "{from} whispers: {message}",
+            "{from} whispers to you: {message}",
             "{from} {to} {message}"
     };
     /**
@@ -60,7 +62,7 @@ public class ButlerConfig {
      * <p>
      * Disable this if you want to be able to send normal messages and not butler commands.
      */
-    public boolean requirePrefixMsg = false;
+    public boolean requirePrefixMsg = true;
 
     public static ButlerConfig getInstance() {
         return _instance;

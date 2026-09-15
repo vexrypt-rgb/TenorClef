@@ -6,9 +6,11 @@ import adris.altoclef.tasksystem.ITaskRequiresGrounded;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.Dimension;
 import adris.altoclef.util.helpers.WorldHelper;
+import adris.altoclef.util.progresscheck.MovementProgressChecker;
 import adris.altoclef.util.time.TimerGame;
 import baritone.api.pathing.goals.Goal;
 import baritone.api.pathing.goals.GoalBlock;
+import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 
 public class GetToBlockTask extends CustomBaritoneGoalTask implements ITaskRequiresGrounded {
@@ -18,6 +20,7 @@ public class GetToBlockTask extends CustomBaritoneGoalTask implements ITaskRequi
     private final Dimension _dimension;
     private int finishedTicks = 0;
     private final TimerGame wanderTimer = new TimerGame(2);
+    private boolean portalPatientInit = false;
 
     public GetToBlockTask(BlockPos position, boolean preferStairs) {
         this(position, preferStairs, null);
@@ -37,9 +40,34 @@ public class GetToBlockTask extends CustomBaritoneGoalTask implements ITaskRequi
         this(position, false);
     }
 
+    /** True once we have been isFinished for >10s while still being ticked (parent stuck). */
+    private boolean staleFinished = false;
+    private boolean staleFinishedWarned = false;
+
+    /** Parents should clear/replace this subtask when true. */
+    public boolean isStaleFinished() {
+        return staleFinished || (isFinished() && finishedTicks > 10 * 20);
+    }
+
     @Override
     protected Task onTick() {
+        AltoClef modEarly = AltoClef.getInstance();
+        // Post-death reportal often needs 100+ block walks; default 6s progress checker
+        // fails during long Baritone calcs and abandons a live portal via wander.
+        if (!portalPatientInit && modEarly.getWorld() != null
+                && modEarly.getWorld().getBlockState(_position).getBlock() == Blocks.NETHER_PORTAL) {
+            portalPatientInit = true;
+            checker = new MovementProgressChecker(40, 0.05, 2.0, 0.001, 5);
+        }
+        if (portalPatientInit) {
+            if (modEarly.getClientBaritone().getPathingBehavior().isPathing()
+                    || modEarly.getClientBaritone().getPathingBehavior().ticksRemainingInSegment().isPresent()) {
+                checker.reset();
+            }
+        }
         if (_dimension != null && WorldHelper.getCurrentDimension() != _dimension) {
+            staleFinished = false;
+            finishedTicks = 0;
             return new DefaultGoToDimensionTask(_dimension);
         }
 
@@ -47,12 +75,19 @@ public class GetToBlockTask extends CustomBaritoneGoalTask implements ITaskRequi
             finishedTicks++;
         } else {
             finishedTicks = 0;
+            staleFinished = false;
+            staleFinishedWarned = false;
         }
-        if (finishedTicks > 10*20) {
-            wanderTimer.reset();
-            Debug.logWarning("GetToBlock was finished for 10 seconds yet is still being called, wandering");
-            finishedTicks = 0;
-            return new TimeoutWanderTask();
+        // Parent keeps calling a finished GetToBlock (e.g. portal entry after dimension change).
+        // Do NOT wander forever - idle so parent can observe isFinished/isStaleFinished and replace.
+        if (finishedTicks > 10 * 20) {
+            staleFinished = true;
+            if (!staleFinishedWarned) {
+                staleFinishedWarned = true;
+                Debug.logWarning("GetToBlock was finished for 10 seconds yet is still being called (stale) at "
+                        + _position.toShortString() + " - idling; parent must clear/replace");
+            }
+            return null;
         }
         if (!wanderTimer.elapsed()) {
             return new TimeoutWanderTask();
@@ -103,9 +138,22 @@ public class GetToBlockTask extends CustomBaritoneGoalTask implements ITaskRequi
         return new GoalBlock(_position);
     }
 
+
+    @Override
+    protected boolean shouldWanderOnFail(AltoClef mod) {
+        // Never wander-abandon a live nether portal goal (post-death reportal).
+        return mod.getWorld() == null
+                || mod.getWorld().getBlockState(_position).getBlock() != Blocks.NETHER_PORTAL;
+    }
+
     @Override
     protected void onWander(AltoClef mod) {
         super.onWander(mod);
+        // Never blacklist nether portal blocks — EnterNetherPortalTask goals them, and
+        // blacklisting causes post-death GetToBlock thrash (Try 1..4) that abandons a live portal.
+        if (mod.getWorld() != null && mod.getWorld().getBlockState(_position).getBlock() == Blocks.NETHER_PORTAL) {
+            return;
+        }
         mod.getBlockScanner().requestBlockUnreachable(_position);
     }
 }

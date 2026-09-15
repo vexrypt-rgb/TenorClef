@@ -16,6 +16,7 @@ import adris.altoclef.util.JankCraftingRecipeMapping;
 import adris.altoclef.util.RecipeTarget;
 import adris.altoclef.util.helpers.ItemHelper;
 import adris.altoclef.util.helpers.StorageHelper;
+import adris.altoclef.util.helpers.WorldHelper;
 import adris.altoclef.util.slots.PlayerSlot;
 import adris.altoclef.util.slots.Slot;
 import adris.altoclef.util.time.TimerGame;
@@ -434,9 +435,10 @@ class DoCraftInTableTask extends DoStuffInContainerTask {
     @Override
     protected double getCostToMakeNew(AltoClef mod) {
         // Get the nearest crafting table.
-        Optional<BlockPos> closestCraftingTable = mod.getBlockScanner().getNearestBlock(Blocks.CRAFTING_TABLE);
+        Optional<BlockPos> closestCraftingTable = mod.getBlockScanner().getNearestBlock(
+                mod.getPlayer().getPos(), WorldHelper::canReach, Blocks.CRAFTING_TABLE);
 
-        // If a crafting table is within 40 blocks of the player, return positive infinity.
+        // If a reachable crafting table is within 40 blocks, don't place another.
         if (closestCraftingTable.isPresent() && closestCraftingTable.get().isWithinDistance(mod.getPlayer().getPos(), 40)) {
             return Double.POSITIVE_INFINITY;
         }

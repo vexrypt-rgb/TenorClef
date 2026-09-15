@@ -113,6 +113,14 @@ public abstract class CustomBaritoneGoalTask extends Task implements ITaskRequir
             checker.reset();
         }
         if (WorldHelper.isInNetherPortal()) {
+            BlockPos here = mod.getPlayer().getBlockPos();
+            if (cachedGoal != null && cachedGoal.isInGoal(here)) {
+                controls.release(Input.SNEAK);
+                controls.release(Input.MOVE_BACK);
+                controls.release(Input.MOVE_FORWARD);
+                setDebugState("At portal goal - staying for dimension travel");
+                return null;
+            }
             if (!mod.getClientBaritone().getPathingBehavior().isPathing()) {
                 setDebugState("Getting out from nether portal");
                 controls.hold(Input.SNEAK);
@@ -161,9 +169,13 @@ public abstract class CustomBaritoneGoalTask extends Task implements ITaskRequir
                     return wanderTask;
                 }
                 if (!checker.check(mod)) {
-                    Debug.logMessage("Failed to make progress on goal, wandering.");
                     onWander(mod);
-                    return wanderTask;
+                    if (shouldWanderOnFail(mod)) {
+                        Debug.logMessage("Failed to make progress on goal, wandering.");
+                        return wanderTask;
+                    }
+                    // Subclass declined wander (e.g. GetToBlock -> NETHER_PORTAL): keep trying.
+                    checker.reset();
                 }
             }
         }
@@ -191,5 +203,10 @@ public abstract class CustomBaritoneGoalTask extends Task implements ITaskRequir
     protected abstract Goal newGoal(AltoClef mod);
 
     protected void onWander(AltoClef mod) {
+    }
+
+    /** Subclasses may return false to keep pursuing after a progress fail (no wander). */
+    protected boolean shouldWanderOnFail(AltoClef mod) {
+        return true;
     }
 }

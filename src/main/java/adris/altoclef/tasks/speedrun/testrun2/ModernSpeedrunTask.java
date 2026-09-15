@@ -335,12 +335,14 @@ public class ModernSpeedrunTask extends Task {
 
         if (phase == Phase.DONE) return null;
 
+        // Naked walk-in is a ruined-portal suicide after death. Need a pick.
         if (WorldHelper.getCurrentDimension() == Dimension.OVERWORLD
-                && portalNearby(mod)) {
+                && portalNearby(mod)
+                && count(mod, Items.IRON_PICKAXE) >= 1) {
             usedCloser = false;
             closer = null;
             if (phase != Phase.PORTAL && phaseTicks >= 40) setPhase(Phase.PORTAL);
-            T2History.note("WHY walk-in: nether portal exists");
+            T2History.note("WHY walk-in: portal + iron pick");
             return stick(new EnterNetherPortalTask(Dimension.NETHER));
         }
 
@@ -760,22 +762,31 @@ public class ModernSpeedrunTask extends Task {
         int pearls = count(mod, Items.ENDER_PEARL);
         int gold = count(mod, Items.GOLD_INGOT) + count(mod, Items.GOLD_BLOCK) * 9
                 + count(mod, Items.GOLD_NUGGET) / 9;
-        if (!wearingGold(mod) && goldSkip < 20 * 40) {
-            goldSkip++;
+        // Never time out the helm. 40s skip was sending us to a fortress
+        // unarmored, then mining gold over lava.
+        if (!wearingGold(mod)) {
             T2History.note("WHY nether: gold helm on head before fortress");
-            if (count(mod, Items.GOLDEN_HELMET) < 1) {
-                if (gold < 5) {
-                    T2Log.warn("E96", "need 5 gold for helm");
-                    return TaskCatalogue.getItemTask(Items.GOLD_INGOT, 5);
+            if (count(mod, Items.GOLDEN_HELMET) >= 1) {
+                try {
+                    return new adris.altoclef.tasks.misc.EquipArmorTask(Items.GOLDEN_HELMET);
+                } catch (Throwable t) {
+                    T2Log.warn("E96", "equip ctor failed");
                 }
-                return TaskCatalogue.getItemTask(Items.GOLDEN_HELMET, 1);
             }
-            try {
-                return new adris.altoclef.tasks.misc.EquipArmorTask(Items.GOLDEN_HELMET);
-            } catch (Throwable t) {
-                T2Log.warn("E96", "equip ctor failed, craft path");
-                return TaskCatalogue.getItemTask(Items.GOLDEN_HELMET, 1);
+            if (gold < 5) {
+                T2Log.warn("E96", "need 5 gold for helm");
+                // Stay high. CollectGoldIngot loves lava-lake ore.
+                if (mod.getPlayer().getBlockY() < 48) {
+                    T2History.note("WHY nether: climb off lava before gold");
+                    try {
+                        return new GetToBlockTask(mod.getPlayer().getBlockPos().up(12));
+                    } catch (Throwable ignored) {
+                        return new TimeoutWanderTask();
+                    }
+                }
+                return TaskCatalogue.getItemTask(Items.GOLD_INGOT, 5);
             }
+            return TaskCatalogue.getItemTask(Items.GOLDEN_HELMET, 1);
         }
 
         if (pearls < SpeedrunOpt.PEARLS && gold >= 8 && tradeTicks < TRADE_MAX_TICKS) {

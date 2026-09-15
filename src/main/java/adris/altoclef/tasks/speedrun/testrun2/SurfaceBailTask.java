@@ -27,7 +27,8 @@ public class SurfaceBailTask extends Task {
             BlockPos feet = mod.getPlayer().getBlockPos();
             int sky = mod.getWorld().getLightLevel(LightType.SKY, feet);
             int y = feet.getY();
-            return sky <= 1 || (y < 55 && sky <= 4);
+            // sky 1 vs 2 flickers at the cave mouth. Only treat closed caves.
+            return sky <= 0 || (y < 50 && sky <= 2);
         } catch (Throwable t) {
             return false;
         }

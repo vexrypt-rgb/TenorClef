@@ -370,6 +370,9 @@ public class ModernSpeedrunTask extends Task {
             }
             return stick(new SurfaceBailTask());
         }
+        if (active instanceof SurfaceBailTask && !active.isFinished()) {
+            return active;
+        }
         Task unstick = unstickCraft(mod);
         if (unstick != null) return unstick;
 
@@ -636,7 +639,10 @@ public class ModernSpeedrunTask extends Task {
             recraftPause--;
             return new StepOffTableTask();
         }
-        if (SurfaceBailTask.underground(mod)) {
+        if (active instanceof SurfaceBailTask && !active.isFinished()) {
+            return active;
+        }
+        if (SurfaceBailTask.underground(mod) && !(active instanceof SurfaceBailTask)) {
             T2History.note("WHY iron: surface before pick craft");
             pickCraftLock = false;
             return new SurfaceBailTask();
@@ -835,6 +841,10 @@ public class ModernSpeedrunTask extends Task {
     private Task stick(Task wanted) {
         if (wanted == null) return null;
         if (active instanceof StepOffTableTask && !active.isFinished()) {
+            return active;
+        }
+        if (active instanceof SurfaceBailTask && !active.isFinished()
+                && !(wanted instanceof EnterNetherPortalTask)) {
             return active;
         }
         if (active instanceof ConstructNetherPortalBucketTask && !active.isFinished()

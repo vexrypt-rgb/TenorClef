@@ -100,15 +100,15 @@ public final class HolePillar {
 
     /**
      * Climbed far enough from pillar start.
-     * +2 alone is not enough while the shaft collar (walls below feet) is still closed —
+     * +2 alone is not enough while the shaft collar (walls below feet) is still closed â€”
      * that was the S130 re-arm thrash: END risen @+2y, cool 4s, fall back in, START again.
      */
     public static boolean risenEnough(AltoClef mod) {
         if (startY == Integer.MIN_VALUE || mod == null || mod.getPlayer() == null) return false;
         int y = mod.getPlayer().getBlockY();
-        if (y >= startY + 3) return true;
-        if (y < startY + 2) return false;
-        // +2 only counts when truly opened out: not boxed AND collar below feet broken.
+        if (y >= startY + 4) return true;
+        if (y < startY + 3) return false;
+        // +3 only if collar open — else fall straight back into the shaft.
         BlockPos feet = mod.getPlayer().getBlockPos();
         int below = wallCount(mod, feet.add(0, -1, 0));
         return !boxed(mod) && below < 3;
@@ -122,9 +122,11 @@ public final class HolePillar {
         if (banTicks > 0 && mod != null && mod.getPlayer() != null) {
             int x = mod.getPlayer().getBlockX();
             int z = mod.getPlayer().getBlockZ();
-            if (x != banX || z != banZ) {
+            int manh = Math.abs(x - banX) + Math.abs(z - banZ);
+            // 1-block nudge inside the same shaft must NOT clear the ban.
+            if (manh >= 2) {
                 T2Log.force("S138", "shaft ban clear left-xz ban=" + banX + "," + banZ
-                        + " now=" + x + "," + z + " left=" + banTicks);
+                        + " now=" + x + "," + z + " manh=" + manh + " left=" + banTicks);
                 banTicks = 0;
                 reCoolCount = 0;
             } else {
@@ -157,7 +159,7 @@ public final class HolePillar {
                                 + "," + banZ + " " + snap(mod));
                     }
                 } else {
-                    // Cool done and not boxed here — still keep a short ban so sameXz
+                    // Cool done and not boxed here â€” still keep a short ban so sameXz
                     // cannot instantly re-arm if they drop back in within ~3s.
                     if (banTicks <= 0 && banX != Integer.MIN_VALUE) {
                         banTicks = 20 * 3;
@@ -333,14 +335,14 @@ public final class HolePillar {
         int y = mod.getPlayer().getBlockY();
         if (holding && risenEnough(mod)) {
             // Full clear: short cool. Marginal paths should not reach here often.
-            int coolTicks = (y >= startY + 3) ? (20 * 4) : (20 * 10);
+            int coolTicks = (y >= startY + 4) ? (20 * 4) : (20 * 10);
             logEnd(mod, "risen y=" + y + " startY=" + startY, coolTicks);
             reset();
             release();
             return false;
         }
-        // Stuck hopping at +1/+2 without a real escape — give up before infinite hold.
-        if (holding && step >= 40 && y < startY + 3) {
+        // Stuck hopping at +1/+2 without a real escape â€” give up before infinite hold.
+        if (holding && step >= 50 && y < startY + 4) {
             logEnd(mod, "stuck-low step=" + step + " y=" + y + " startY=" + startY, 20 * 12);
             reset();
             release();

@@ -888,6 +888,14 @@ public class ModernSpeedrunTask extends Task {
         if (active instanceof UnstickWalkTask && !active.isFinished()) {
             return active;
         }
+        if (active instanceof HolePillarTask && !active.isFinished()) {
+            return active;
+        }
+        if (phase == Phase.IRON && active instanceof GetToBlockTask && !active.isFinished()
+                && !(wanted instanceof EnterNetherPortalTask)
+                && !(wanted instanceof StepOffTableTask)) {
+            return active;
+        }
         if (wanted instanceof EnterNetherPortalTask) {
             active = wanted;
             return active;
@@ -988,18 +996,34 @@ public class ModernSpeedrunTask extends Task {
         }
         int x = mod.getPlayer().getBlockX();
         int z = mod.getPlayer().getBlockZ();
-        if (x == lastIronX && z == lastIronZ) ironStill++;
+        int gx = x >> 2;
+        int gz = z >> 2;
+        if (gx == lastIronX && gz == lastIronZ) ironStill++;
         else {
             ironStill = 0;
-            lastIronX = x;
-            lastIronZ = z;
+            lastIronX = gx;
+            lastIronZ = gz;
         }
-        if (ironStill == 20 * 20) {
-            T2Log.warn("E70", "iron frozen 20s @" + x + "," + z + " — walk");
+        int ironN = count(mod, Items.IRON_INGOT) + count(mod, Items.IRON_ORE);
+        boolean cheapPick = count(mod, Items.WOODEN_PICKAXE) + count(mod, Items.STONE_PICKAXE) >= 1;
+        if (ironStill == 20 * 12) {
+            T2Log.warn("E70", "iron frozen 12s @" + x + "," + z + " — walk");
             McCompat.cancelPathing();
+            adris.altoclef.tasks.speedrun.testrun2.core.T2Input.noJump();
             adris.altoclef.tasks.speedrun.testrun2.core.T2Input.walkTurn();
+            HolePillar.reset();
             active = null;
             return stick(offsetWalk(mod));
+        }
+        if (ironStill >= 20 * 35 && cheapPick && ironN < 3) {
+            T2Log.warn("E94", "iron frozen 35s iron=" + ironN + " — skip pick, PORTAL");
+            skipIronPick = true;
+            pickCraftLock = false;
+            ironStill = 0;
+            HolePillar.reset();
+            setPhase(Phase.PORTAL);
+            active = null;
+            return stick(portal(mod));
         }
         if (ironStill > 20 * 50) {
             T2Log.warn("E70", "iron frozen 50s — wander");

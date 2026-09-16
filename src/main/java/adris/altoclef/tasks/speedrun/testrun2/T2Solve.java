@@ -45,6 +45,7 @@ public final class T2Solve {
 
     public static Task tick(AltoClef mod, String phase, Task child) {
         if (mod.getPlayer() == null) return null;
+        HolePillar.coolTick();
         if (cool > 0) cool--;
 
         int x = mod.getPlayer().getBlockX();
@@ -114,25 +115,32 @@ public final class T2Solve {
             return null;
         }
 
-        // 4. Boxed hole with blocks — pillar. Do NOT no-jump. Holds off S100.
+        // 4. 1x1 shaft only. Pause CollectIron so it cannot mine the pillar.
+        boolean walking = childName.contains("GetToBlock") || childName.contains("Wander") || childName.contains("HolePillar");
         if (!wet && !"PORTAL".equals(phase)
                 && !childName.contains("Craft") && !childName.contains("StepOff")
+                && !walking
+                && !HolePillar.givingUp()
                 && HolePillar.boxed(mod) && HolePillar.hasPlace(mod)
                 && (flips >= 3 || sameXz > 20 * 2 || "S130".equals(lastFix))) {
             act("S130", "pillar-out @" + x + "," + y + "," + z + " ph=" + phase);
             cool = 20 * 4;
             cancelPath(mod);
-            HolePillar.tick(mod);
-            return null;
+            return new HolePillarTask();
         }
-        if ("S130".equals(lastFix) && cool > 0) {
-            HolePillar.tick(mod);
-            return null;
+        if ("S130".equals(lastFix) && cool > 0 && !HolePillar.givingUp() && HolePillar.boxed(mod)) {
+            return new HolePillarTask();
         }
 
-        // 5. Jump in place — including CraftInTable (iron pick / wood pick)
+        // 5. Jump in place — walk. Do not pillar a tunnel.
         if (!wet && flips >= 6 && sameXz > 20 * 2 && !"BOOTSTRAP".equals(phase)
-                && !childName.contains("StepOff")) {
+                && !childName.contains("StepOff") && !walking) {
+            if (HolePillar.hasPlace(mod) && HolePillar.boxed(mod) && !HolePillar.givingUp()) {
+                act("S130", "jump-pit pillar @" + x + "," + y + "," + z);
+                cool = 20 * 4;
+                cancelPath(mod);
+                return new HolePillarTask();
+            }
             act("S100", "stop jump-walk @" + x + "," + z + " ph=" + phase + " child=" + childName);
             adris.altoclef.tasks.speedrun.testrun2.core.T2Input.noJump();
             flips = 0;

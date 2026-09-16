@@ -59,7 +59,12 @@ public class PlayerInteractionFixChain extends TaskChain {
 
         AltoClef mod = AltoClef.getInstance();
 
-        if (mod.getUserTaskChain().isActive() && betterToolTimer.elapsed()) {
+        boolean t2Hold = false;
+        try {
+            t2Hold = adris.altoclef.tasks.speedrun.testrun2.HolePillar.busy();
+        } catch (Throwable ignored) {}
+
+        if (!t2Hold && mod.getUserTaskChain().isActive() && betterToolTimer.elapsed()) {
             // Equip the right tool for the job if we're not using one.
             betterToolTimer.reset();
             if (mod.getControllerExtras().isBreakingBlock()) {
@@ -96,7 +101,7 @@ public class PlayerInteractionFixChain extends TaskChain {
 
         // Refresh inventory - skip while any screen is open (craft/chest); refreshInventory
         // double-clicks every slot and causes "Ignoring click in mismatching container".
-        if (generalDuctTapeSwapTimeout.elapsed()) {
+        if (!t2Hold && generalDuctTapeSwapTimeout.elapsed()) {
             if (MinecraftClient.getInstance().currentScreen != null) {
                 return Float.NEGATIVE_INFINITY;
             }

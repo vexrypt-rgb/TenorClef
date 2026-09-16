@@ -13,6 +13,7 @@ public final class T2MenuKeys {
     private T2MenuKeys() {}
 
     public static void tick() {
+        T2MenuScreen.poll();
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc == null) return;
         if (mc.currentScreen != null) {

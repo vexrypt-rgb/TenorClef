@@ -14,7 +14,7 @@ public class T2MenuCommand extends Command {
 
     @Override
     protected void call(AltoClef mod, ArgParser parser) {
-        T2MenuScreen.open();
+        T2MenuScreen.openSoon();
         finish();
     }
 }

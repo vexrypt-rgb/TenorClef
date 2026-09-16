@@ -17,6 +17,9 @@ public final class HolePillar {
     private static int step;
     private static int lastY = Integer.MIN_VALUE;
     private static int rose;
+    private static int failCool;
+    private static int startY = Integer.MIN_VALUE;
+    private static boolean holding;
 
     private HolePillar() {}
 
@@ -24,14 +27,39 @@ public final class HolePillar {
         step = 0;
         lastY = Integer.MIN_VALUE;
         rose = 0;
+        startY = Integer.MIN_VALUE;
+        holding = false;
         release();
     }
 
     public static boolean boxed(AltoClef mod) {
         if (mod.getPlayer() == null || mod.getWorld() == null) return false;
         BlockPos feet = mod.getPlayer().getBlockPos();
-        if (!wall(mod, feet) || !wall(mod, feet.add(0, 1, 0))) return false;
-        return solid(mod, feet.add(0, 2, 0));
+        // Geometry only. Sky light lies (caves, overhangs, night).
+        // 4 walls at feet AND head = 1x1 shaft. A 3-wall cave tunnel is not a pit.
+        return wallCount(mod, feet) >= 4 && wallCount(mod, feet.add(0, 1, 0)) >= 4;
+    }
+
+    public static boolean givingUp() {
+        return failCool > 0;
+    }
+
+    public static boolean busy() {
+        return holding || failCool > 0;
+    }
+
+    public static void coolTick() {
+        if (failCool > 0) failCool--;
+        if (failCool == 0 && !holding) { /* idle */ }
+    }
+
+    private static int wallCount(AltoClef mod, BlockPos feet) {
+        int n = 0;
+        if (solid(mod, feet.add(0, 0, -1))) n++;
+        if (solid(mod, feet.add(0, 0, 1))) n++;
+        if (solid(mod, feet.add(1, 0, 0))) n++;
+        if (solid(mod, feet.add(-1, 0, 0))) n++;
+        return n;
     }
 
     private static boolean wall(AltoClef mod, BlockPos feet) {
@@ -46,15 +74,29 @@ public final class HolePillar {
     /** One tick. Returns true if it took over inputs. */
     public static boolean tick(AltoClef mod) {
         if (mod.getPlayer() == null) return false;
+        if (failCool > 0) {
+            failCool--;
+            holding = false;
+            release();
+            return false;
+        }
         if (!boxed(mod) || !hasPlace(mod)) {
             step = 0;
+            holding = false;
             return false;
         }
         int y = mod.getPlayer().getBlockY();
-        if (lastY != Integer.MIN_VALUE && y > lastY) rose++;
+        if (startY == Integer.MIN_VALUE) startY = y;
         lastY = y;
-        if (rose >= 4) {
-            // climbed out
+        // A 1-block hop is NOT progress. Need +3 from where pillar started.
+        if (y >= startY + 3) {
+            reset();
+            release();
+            return false;
+        }
+        if (step >= 30 && y <= startY + 1) {
+            failCool = 20 * 12;
+            T2Log.warn("S131", "pillar no rise startY=" + startY + " y=" + y + " — walk");
             reset();
             release();
             return false;
@@ -64,6 +106,7 @@ public final class HolePillar {
             step = 0;
             return false;
         }
+        holding = true;
         lookDown();
         MinecraftClient mc = MinecraftClient.getInstance();
         try { mc.options.jumpKey.setPressed(true); } catch (Throwable ignored) {}

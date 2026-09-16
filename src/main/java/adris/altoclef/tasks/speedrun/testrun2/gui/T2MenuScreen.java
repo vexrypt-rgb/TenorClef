@@ -7,16 +7,21 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * In-game button panel. Buttons are created in {@code init()} so 1.16
- * does not wipe them. Widget construction is reflective.
+ * In-game button panel. 1.16 addButton is protected — attach via
+ * setAccessible. fill() without restoring textures makes widgets
+ * invisible; renderBackground + painted labels stay readable.
  */
 public class T2MenuScreen extends Screen {
 
     private static int tab;
+    private static int pendingOpen;
 
     private static final String[][] TAB_TASKS_L = {
             {"testrun2  RSG", "testrun2"},
@@ -69,16 +74,21 @@ public class T2MenuScreen extends Screen {
     private Object bindBox;
     private boolean dropProv;
     private boolean dropModel;
+    private final List<int[]> hits = new ArrayList<>();
+    private final List<String> hitCmd = new ArrayList<>();
+    private final List<String> hitLab = new ArrayList<>();
 
     public T2MenuScreen() {
         super(titleText());
     }
 
     public static void open() {
+        pendingOpen = 0;
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc == null) return;
         Runnable show = () -> {
             try {
+                if (mc.currentScreen instanceof T2MenuScreen) return;
                 T2MenuScreen screen = new T2MenuScreen();
                 try {
                     mc.getClass().getMethod("openScreen", Screen.class).invoke(mc, screen);
@@ -97,6 +107,28 @@ public class T2MenuScreen extends Screen {
         }
     }
 
+    /** Chat closes the screen after the command. Wait it out. */
+    public static void openSoon() {
+        pendingOpen = 12;
+        Debug.logMessage("T2MENU queued");
+    }
+
+    public static void poll() {
+        if (pendingOpen <= 0) return;
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc == null) return;
+        if (mc.currentScreen != null) {
+            String n = mc.currentScreen.getClass().getSimpleName();
+            if (n.contains("Chat") || n.contains("Command")) return;
+            if (mc.currentScreen instanceof T2MenuScreen) {
+                pendingOpen = 0;
+                return;
+            }
+        }
+        pendingOpen--;
+        if (pendingOpen <= 0) open();
+    }
+
     private static Text titleText() {
         try {
             return (Text) Text.class.getMethod("literal", String.class).invoke(null, "TenorClef");
@@ -113,6 +145,9 @@ public class T2MenuScreen extends Screen {
     @Override
     protected void init() {
         super.init();
+        hits.clear();
+        hitCmd.clear();
+        hitLab.clear();
         int bw = 200;
         int bh = 20;
         int left = Math.max(16, this.width / 2 - 220);
@@ -146,9 +181,9 @@ public class T2MenuScreen extends Screen {
         int top = 8;
         int mid = this.width / 2;
         attach(button(mid - 220, top, 210, 18,
-                "API ▾  " + preset.label, "DROP:PROV"));
+                "API  " + preset.label, "DROP:PROV"));
         attach(button(mid + 10, top, 210, 18,
-                "Model ▾  " + cfg.model, "DROP:MODEL"));
+                "Model  " + cfg.model, "DROP:MODEL"));
         if (dropProv) {
             int py = top + 20;
             for (AgentPresets.Preset p : AgentPresets.ALL) {
@@ -183,76 +218,140 @@ public class T2MenuScreen extends Screen {
         return false;
     }
 
-    /** 1.16+ */
+    /**
+     * Never Method.invoke Screen.render on this — that virtual-dispatches
+     * back into this method and leaves BufferBuilder mid-quad.
+     */
+    //#if MC >= 12001
+    @Override
+    public void render(net.minecraft.client.gui.DrawContext context, int mouseX, int mouseY, float delta) {
+        try { this.renderBackground(context); } catch (Throwable ignored) {}
+        super.render(context, mouseX, mouseY, delta);
+        paintLabels(context, null);
+    }
+    //#else
+    @Override
     public void render(net.minecraft.client.util.math.MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        paint(matrices);
+        try { this.renderBackground(matrices); } catch (Throwable ignored) {}
         try {
-            Screen.class.getMethod("render",
-                    net.minecraft.client.util.math.MatrixStack.class, int.class, int.class, float.class)
-                    .invoke(this, matrices, mouseX, mouseY, delta);
+            com.mojang.blaze3d.systems.RenderSystem.enableTexture();
+            com.mojang.blaze3d.systems.RenderSystem.enableBlend();
         } catch (Throwable ignored) {}
+        super.render(matrices, mouseX, mouseY, delta);
+        paintLabels(null, matrices);
+    }
+    //#endif
+
+    private void paintLabels(Object ctx, Object matrices) {
+        drawStr(ctx, matrices, "TenorClef", 16, 8, 0xFFFFFF);
     }
 
-    /** pre-1.16 fallback */
-    public void render(int mouseX, int mouseY, float delta) {
-        paint(null);
-        try {
-            Screen.class.getMethod("render", int.class, int.class, float.class)
-                    .invoke(this, mouseX, mouseY, delta);
-        } catch (Throwable ignored) {}
+    private void fillSafe(Object ctx, Object matrices, int x1, int y1, int x2, int y2, int color) {
+        if (ctx != null) {
+            try {
+                ctx.getClass().getMethod("fill", int.class, int.class, int.class, int.class, int.class)
+                        .invoke(ctx, x1, y1, x2, y2, color);
+                return;
+            } catch (Throwable ignored) {}
+        }
+        if (matrices != null) {
+            try {
+                fill((net.minecraft.client.util.math.MatrixStack) matrices, x1, y1, x2, y2, color);
+            } catch (Throwable ignored) {}
+        }
     }
 
-    private void paint(Object matrices) {
-        try {
-            if (matrices != null) {
-                Screen.class.getMethod("fill",
-                        net.minecraft.client.util.math.MatrixStack.class,
-                        int.class, int.class, int.class, int.class, int.class)
-                        .invoke(this, matrices, 0, 0, this.width, this.height, 0xC0101010);
-            } else {
-                Screen.class.getMethod("fill", int.class, int.class, int.class, int.class, int.class)
-                        .invoke(this, 0, 0, this.width, this.height, 0xC0101010);
+    private void drawStr(Object ctx, Object matrices, String s, int x, int y, int color) {
+        if (s == null) return;
+        if (ctx != null) {
+            try {
+                ctx.getClass().getMethod("drawText",
+                                net.minecraft.client.font.TextRenderer.class, String.class,
+                                int.class, int.class, int.class, boolean.class)
+                        .invoke(ctx, this.textRenderer, s, x, y, color, true);
+                return;
+            } catch (Throwable ignored) {}
+        }
+        if (matrices != null) {
+            try {
+                this.textRenderer.drawWithShadow(
+                        (net.minecraft.client.util.math.MatrixStack) matrices, s, (float) x, (float) y, color);
+                return;
+            } catch (Throwable ignored) {}
+        }
+    }
+
+    @Override
+    public boolean mouseClicked(double mx, double my, int button) {
+        if (button == 0) {
+            for (int i = hits.size() - 1; i >= 0; i--) {
+                int[] b = hits.get(i);
+                if (mx >= b[0] && mx <= b[0] + b[2] && my >= b[1] && my <= b[1] + b[3]) {
+                    runCmd(i < hitCmd.size() ? hitCmd.get(i) : null);
+                    return true;
+                }
             }
-        } catch (Throwable ignored) {}
+        }
         try {
-            Object title = titleText();
-            if (matrices != null) {
-                this.textRenderer.getClass()
-                        .getMethod("drawWithShadow",
-                                net.minecraft.client.util.math.MatrixStack.class,
-                                Class.forName("net.minecraft.text.Text"),
-                                float.class, float.class, int.class)
-                        .invoke(this.textRenderer, matrices, title, 16f, 8f, 0xFFFFFF);
-            }
-        } catch (Throwable ignored) {}
+            return super.mouseClicked(mx, my, button);
+        } catch (Throwable t) {
+            return false;
+        }
+    }
+
+    private void rebuild() {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc != null) {
+            try {
+                Screen.class.getMethod("init", MinecraftClient.class, int.class, int.class)
+                        .invoke(this, mc, this.width, this.height);
+                return;
+            } catch (Throwable ignored) {}
+        }
+        this.init();
     }
 
     private void attach(Object btn) {
         if (btn == null) return;
-        try {
-            this.getClass().getMethod("addButton",
-                    Class.forName("net.minecraft.client.gui.widget.AbstractButtonWidget"))
-                    .invoke(this, btn);
-            return;
-        } catch (Throwable ignored) {}
-        try {
-            this.getClass().getMethod("addDrawableChild",
-                    Class.forName("net.minecraft.client.gui.Element"))
-                    .invoke(this, btn);
-            return;
-        } catch (Throwable ignored) {}
-        for (Method m : Screen.class.getMethods()) {
-            if (m.getParameterCount() == 1 && m.getName().startsWith("add")) {
+        Class<?> c = this.getClass();
+        while (c != null && c != Object.class) {
+            for (Method m : c.getDeclaredMethods()) {
+                if (m.getParameterCount() != 1) continue;
+                String n = m.getName();
+                if (!n.equals("addButton") && !n.equals("addDrawableChild") && !n.equals("addSelectableChild")) {
+                    continue;
+                }
                 try {
+                    m.setAccessible(true);
                     m.invoke(this, btn);
                     return;
                 } catch (Throwable ignored) {}
             }
+            c = c.getSuperclass();
         }
-        Debug.logWarning("T2MENU no addButton on this Screen");
+        // last resort: push onto Screen.buttons
+        try {
+            Field f = null;
+            Class<?> s = Screen.class;
+            for (String name : new String[]{"buttons", "field_22786", "children"}) {
+                try { f = s.getDeclaredField(name); break; } catch (Throwable ignored) {}
+            }
+            if (f != null) {
+                f.setAccessible(true);
+                Object list = f.get(this);
+                if (list instanceof List) {
+                    ((List<Object>) list).add(btn);
+                }
+            }
+        } catch (Throwable t) {
+            Debug.logWarning("T2MENU attach failed");
+        }
     }
 
     private Object button(int x, int y, int w, int h, String label, String cmd) {
+        hits.add(new int[]{x, y, w, h});
+        hitCmd.add(cmd);
+        hitLab.add(label);
         Object text;
         try {
             text = Text.class.getMethod("literal", String.class).invoke(null, label);
@@ -264,44 +363,7 @@ public class T2MenuScreen extends Screen {
                 return null;
             }
         }
-        Runnable press = () -> {
-            if (cmd != null && cmd.startsWith("TAB:")) {
-                try { tab = Integer.parseInt(cmd.substring(4)); } catch (Throwable ignored) {}
-                dropProv = false;
-                dropModel = false;
-                this.init();
-                return;
-            }
-            if (cmd != null && cmd.startsWith("DROP:")) {
-                if (cmd.endsWith("PROV")) {
-                    dropProv = !dropProv;
-                    dropModel = false;
-                } else {
-                    dropModel = !dropModel;
-                    dropProv = false;
-                }
-                this.init();
-                return;
-            }
-            if (cmd != null && cmd.startsWith("PROV:")) {
-                applyProvider(cmd.substring(5));
-                dropProv = false;
-                this.init();
-                return;
-            }
-            if (cmd != null && cmd.startsWith("MODEL:")) {
-                applyModel(cmd.substring(6));
-                dropModel = false;
-                this.init();
-                return;
-            }
-            if ("SAVECFG".equals(cmd)) {
-                saveFields();
-                return;
-            }
-            closeMe();
-            if (cmd != null) exec(cmd);
-        };
+        Runnable press = () -> runCmd(cmd);
         try {
             Class<?> bw = Class.forName("net.minecraft.client.gui.widget.ButtonWidget");
             try {
@@ -317,8 +379,8 @@ public class T2MenuScreen extends Screen {
                         .invoke(b, x, y, w, h);
                 return b.getClass().getMethod("build").invoke(b);
             } catch (NoSuchMethodException ignored) {}
-            for (Constructor<?> c : bw.getConstructors()) {
-                Class<?>[] p = c.getParameterTypes();
+            for (Constructor<?> ctor : bw.getConstructors()) {
+                Class<?>[] p = ctor.getParameterTypes();
                 if (p.length == 6 && p[0] == int.class) {
                     Object action = Proxy.newProxyInstance(bw.getClassLoader(), new Class<?>[]{p[5]},
                             (pr, m, a) -> {
@@ -328,13 +390,52 @@ public class T2MenuScreen extends Screen {
                                 if ("toString".equals(m.getName())) return label;
                                 return null;
                             });
-                    return c.newInstance(x, y, w, h, text, action);
+                    return ctor.newInstance(x, y, w, h, text, action);
                 }
             }
         } catch (Throwable t) {
             Debug.logWarning("T2MENU button: " + t.getMessage());
         }
         return null;
+    }
+
+    private void runCmd(String cmd) {
+        if (cmd != null && cmd.startsWith("TAB:")) {
+            try { tab = Integer.parseInt(cmd.substring(4)); } catch (Throwable ignored) {}
+            dropProv = false;
+            dropModel = false;
+            rebuild();
+            return;
+        }
+        if (cmd != null && cmd.startsWith("DROP:")) {
+            if (cmd.endsWith("PROV")) {
+                dropProv = !dropProv;
+                dropModel = false;
+            } else {
+                dropModel = !dropModel;
+                dropProv = false;
+            }
+            rebuild();
+            return;
+        }
+        if (cmd != null && cmd.startsWith("PROV:")) {
+            applyProvider(cmd.substring(5));
+            dropProv = false;
+            rebuild();
+            return;
+        }
+        if (cmd != null && cmd.startsWith("MODEL:")) {
+            applyModel(cmd.substring(6));
+            dropModel = false;
+            rebuild();
+            return;
+        }
+        if ("SAVECFG".equals(cmd)) {
+            saveFields();
+            return;
+        }
+        closeMe();
+        if (cmd != null) exec(cmd);
     }
 
     private Object textField(int x, int y, int w, int h, String value) {
@@ -368,12 +469,7 @@ public class T2MenuScreen extends Screen {
         try {
             return this.getClass().getField("textRenderer").get(this);
         } catch (Throwable t) {
-            try {
-                return this.getClass().getField("client").get(this).getClass()
-                        .getField("textRenderer").get(MinecraftClient.getInstance());
-            } catch (Throwable t2) {
-                return MinecraftClient.getInstance().textRenderer;
-            }
+            return MinecraftClient.getInstance().textRenderer;
         }
     }
 
@@ -418,7 +514,7 @@ public class T2MenuScreen extends Screen {
         cfg.url = fieldText(urlBox);
         cfg.model = fieldText(modelBox);
         String b = fieldText(bindBox);
-        if (!b.isBlank()) cfg.bind = b;
+        if (b != null && !b.isEmpty()) cfg.bind = b;
         cfg.save();
         Debug.logMessage("T2MENU saved key=" + (cfg.hasKey() ? "yes" : "no")
                 + " model=" + cfg.model + " bind=" + cfg.bind);
@@ -442,9 +538,8 @@ public class T2MenuScreen extends Screen {
             try {
                 prefix = AltoClef.getCommandExecutor().getCommandPrefix();
             } catch (Throwable ignored) {}
-            String line = prefix + name;
             AltoClef.getCommandExecutor().executeWithPrefix(name);
-            Debug.logMessage("T2MENU " + line);
+            Debug.logMessage("T2MENU " + prefix + name);
         } catch (Throwable t) {
             Debug.logWarning("T2MENU exec " + t.getMessage());
         }

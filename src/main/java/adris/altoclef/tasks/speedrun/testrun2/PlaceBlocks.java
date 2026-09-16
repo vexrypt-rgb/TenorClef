@@ -72,8 +72,12 @@ public final class PlaceBlocks {
             mod.getSlotHandler().forceEquipItem(found);
         } catch (Throwable ignored) {}
         hot = hotbarSlot(mod);
-        if (hot >= 0) select(mod, hot);
-        return hot;
+        if (hot >= 0) {
+            select(mod, hot);
+            return hot;
+        }
+        select(mod, 1);
+        return hotbarSlot(mod);
     }
 
     private static ItemStack stack(AltoClef mod, int i) {

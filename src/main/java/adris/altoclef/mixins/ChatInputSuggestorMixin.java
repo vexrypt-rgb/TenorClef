@@ -16,7 +16,9 @@ import net.minecraft.client.gui.screen.ChatInputSuggestor;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.MutableText;
+//#if MC >= 11605
 import net.minecraft.text.OrderedText;
+//#endif
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -41,6 +43,9 @@ import java.util.Optional;
  */
 @Mixin(ChatInputSuggestor.class)
 public abstract class ChatInputSuggestorMixin {
+
+    // OrderedText / Style-based command highlighting exists on 1.16.5+; 1.16.1 uses String highlight API.
+    //#if MC >= 11605
 
     @Unique
     private static final Style SEMICOLOMN_STYLE = Style.EMPTY.withColor(Formatting.LIGHT_PURPLE);
@@ -347,4 +352,5 @@ public abstract class ChatInputSuggestorMixin {
                         .append(Text.literal(" at position " + index + ": " + substr + " <--[HERE]"));
     }
 
+    //#endif
 }

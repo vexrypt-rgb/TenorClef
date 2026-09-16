@@ -1,5 +1,7 @@
 package adris.altoclef.trackers;
 
+import adris.altoclef.multiversion.RecipeVer;
+
 import adris.altoclef.AltoClef;
 import adris.altoclef.multiversion.recipemanager.RecipeManagerWrapper;
 import adris.altoclef.multiversion.recipemanager.WrappedRecipeEntry;
@@ -110,8 +112,7 @@ public class CraftingRecipeTracker extends Tracker{
             if (craftingRecipe instanceof SpecialCraftingRecipe) continue;
 
             // the arguments shouldn't be used, we can just pass null
-            ItemStack result = new ItemStack(craftingRecipe.getResult(null).getItem(), craftingRecipe.getResult(null).getCount());
-
+            ItemStack result = RecipeVer.getOutput(craftingRecipe, null);
             Item[][] altoclefRecipeItems = getShapedCraftingRecipe(craftingRecipe.getIngredients());
 
             adris.altoclef.util.CraftingRecipe altoclefRecipe = adris.altoclef.util.CraftingRecipe.newShapedRecipe(altoclefRecipeItems, result.getCount());
@@ -141,7 +142,7 @@ public class CraftingRecipeTracker extends Tracker{
         int x = 0;
 
         for (Ingredient ingredient : ingredients) {
-            ItemStack[] stacks = ingredient.getMatchingStacks();
+                ItemStack[] stacks = ingredient.getMatchingStacks();
             Item[] items = new Item[stacks.length];
 
             for (int i = 0; i < stacks.length; i++) {

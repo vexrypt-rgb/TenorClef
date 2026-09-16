@@ -50,8 +50,22 @@ public class SafeNetherPortalTask extends Task {
 
         if (mod.getPlayer().getPortalCooldown() < 10) {
             if (positions != null && directions != null) {
+                //#if MC >= 11605
                 BlockPos pos1 = mod.getPlayer().getSteppingPos().offset(axis, 1);
                 BlockPos pos2 = mod.getPlayer().getSteppingPos().offset(axis, -1);
+                //#else
+                //$$ BlockPos stepping = ((adris.altoclef.mixins.EntityAccessor) mod.getPlayer()).invokeGetLandingPos();
+                //$$ BlockPos pos1 = new BlockPos(
+                //$$         stepping.getX() + (axis == Direction.Axis.X ? 1 : 0),
+                //$$         stepping.getY() + (axis == Direction.Axis.Y ? 1 : 0),
+                //$$         stepping.getZ() + (axis == Direction.Axis.Z ? 1 : 0)
+                //$$ );
+                //$$ BlockPos pos2 = new BlockPos(
+                //$$         stepping.getX() + (axis == Direction.Axis.X ? -1 : 0),
+                //$$         stepping.getY() + (axis == Direction.Axis.Y ? -1 : 0),
+                //$$         stepping.getZ() + (axis == Direction.Axis.Z ? -1 : 0)
+                //$$ );
+                //#endif
 
                 if (mod.getWorld().getBlockState(pos1).isAir() || mod.getWorld().getBlockState(pos1).getBlock().equals(Blocks.SOUL_SAND)) {
                     boolean passed = false;

@@ -60,9 +60,9 @@ public class JankCraftingRecipeMapping {
                         .filter(itemTarget -> itemTarget != null && !itemTarget.isEmpty())
                         .collect(Collectors.toList());
                 // Check if the recipe has ingredients
-                if (!checkRecipe.value().getIngredients().isEmpty()) {
+                if (!RecipeVer.getIngredients(checkRecipe.value()).isEmpty()) {
                     // Iterate through the ingredients of the recipe
-                    for (Ingredient ingredient : checkRecipe.value().getIngredients()) {
+                    for (Ingredient ingredient : RecipeVer.getIngredients(checkRecipe.value())) {
                         // Skip empty ingredients
                         if (ingredient.isEmpty()) {
                             continue;

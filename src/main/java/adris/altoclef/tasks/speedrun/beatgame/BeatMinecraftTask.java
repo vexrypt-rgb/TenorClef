@@ -1019,7 +1019,14 @@ public class BeatMinecraftTask extends Task {
             Box box = new Box(blockPos.getX() - 5, blockPos.getY() - 5, blockPos.getZ() - 5,
                     blockPos.getX() + 5, blockPos.getY() + 5, blockPos.getZ() + 5);
 
+            //#if MC >= 11605
             Stream<BlockState> states = BlockPos.stream(box).map(pos -> mod.getWorld().getBlockState(pos));
+            //#else
+            //$$ Stream<BlockState> states = BlockPos.stream(
+            //$$         new BlockPos(net.minecraft.util.math.MathHelper.floor(box.minX), net.minecraft.util.math.MathHelper.floor(box.minY), net.minecraft.util.math.MathHelper.floor(box.minZ)),
+            //$$         new BlockPos(net.minecraft.util.math.MathHelper.floor(box.maxX), net.minecraft.util.math.MathHelper.floor(box.maxY), net.minecraft.util.math.MathHelper.floor(box.maxZ))
+            //$$ ).map(pos -> mod.getWorld().getBlockState(pos));
+            //#endif
 
             if (states.anyMatch((state) -> state.getBlock().equals(Blocks.WATER))) {
                 blacklistedChests.add(blockPos);

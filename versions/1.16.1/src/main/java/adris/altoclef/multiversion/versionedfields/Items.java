@@ -929,7 +929,7 @@ public class Items {
     public static final Item PHANTOM_SPAWN_EGG = net.minecraft.item.Items.PHANTOM_SPAWN_EGG;
     public static final Item PIG_SPAWN_EGG = net.minecraft.item.Items.PIG_SPAWN_EGG;
     public static final Item PIGLIN_SPAWN_EGG = net.minecraft.item.Items.PIGLIN_SPAWN_EGG;
-    public static final Item PIGLIN_BRUTE_SPAWN_EGG = net.minecraft.item.Items.PIGLIN_BRUTE_SPAWN_EGG;
+    public static final Item PIGLIN_BRUTE_SPAWN_EGG = UNSUPPORTED; // absent on 1.16.1 (added 1.16.2)
     public static final Item PILLAGER_SPAWN_EGG = net.minecraft.item.Items.PILLAGER_SPAWN_EGG;
     public static final Item POLAR_BEAR_SPAWN_EGG = net.minecraft.item.Items.POLAR_BEAR_SPAWN_EGG;
     public static final Item PUFFERFISH_SPAWN_EGG = net.minecraft.item.Items.PUFFERFISH_SPAWN_EGG;

@@ -46,6 +46,10 @@ public final class T2Solve {
     public static Task tick(AltoClef mod, String phase, Task child) {
         if (mod.getPlayer() == null) return null;
         HolePillar.coolTick();
+        if (HolePillar.consumeSameXzReset()) {
+            sameXz = 0;
+            flips = 0;
+        }
         if (cool > 0) cool--;
 
         int x = mod.getPlayer().getBlockX();
@@ -96,7 +100,7 @@ public final class T2Solve {
         guiAge = 0;
 
         // Only when jump-stuck ON the table. A standing wooden-pick craft
-        // is same-XZ for >2s on purpose — do not cancel it.
+        // is same-XZ for >2s on purpose â€” do not cancel it.
         if (tableUnder(mod) && flips >= 4 && !wet
                 && !childName.contains("StepOff")) {
             act("S108", "step off table @" + x + "," + y + "," + z);
@@ -176,7 +180,7 @@ public final class T2Solve {
             return null;
         }
 
-        // 5. Lava and no water during construct — log only. Do not swap the child.
+        // 5. Lava and no water during construct â€” log only. Do not swap the child.
         if (count(mod, Items.LAVA_BUCKET) >= 1 && count(mod, Items.WATER_BUCKET) < 1
                 && ("PORTAL".equals(phase) || childName.contains("Construct"))) {
             act("S105", "need water (overlay only, not swapping construct)");
@@ -191,7 +195,7 @@ public final class T2Solve {
             return null;
         }
 
-        // 7. Piglin, no gold — log only. Replacing the tunnel with @get helm is how escape dies.
+        // 7. Piglin, no gold â€” log only. Replacing the tunnel with @get helm is how escape dies.
         if (WorldHelper.getCurrentDimension() == Dimension.NETHER
                 && count(mod, Items.GOLDEN_HELMET) < 1
                 && piglinNear(mod)
@@ -202,7 +206,7 @@ public final class T2Solve {
 
         // 8. Null child in a live phase
         if (child == null && "PORTAL".equals(phase)) {
-            act("S111", "portal child missing — parent must set construct");
+            act("S111", "portal child missing â€” parent must set construct");
             return null;
         }
 

@@ -64,6 +64,9 @@ public final class T2Codes {
     public static final String S134_PILLAR_COOL_END = "S134";
     public static final String S135_PILLAR_SUPPRESS = "S135";
     public static final String S136_PILLAR_END = "S136";
+    public static final String S137_PILLAR_RECOOL = "S137";
+    public static final String S138_PILLAR_BAN_CLEAR = "S138";
+    public static final String E132_SHAFT_STUCK = "E132";
 
     private T2Codes() {}
 
@@ -71,7 +74,7 @@ public final class T2Codes {
         return String.join("\n",
                 "T2 codes:",
                 "  I02 pulse every 30s",
-                "  E10  submerged — WaterBail once",
+                "  E10  submerged â€” WaterBail once",
                 "  E102 standing in water, velocity ~0",
                 "  E20  combat overlay",
                 "  E110 piglin in range, no gold helmet",
@@ -100,6 +103,7 @@ public final class T2Codes {
                 "  E109 mining with no pick",
                 "  E116 fell 8+ blocks in overworld",
                 "  E131 HolePillar<->CollectIron thrash at same xz",
+                "  E132 shaft stuck re-cool loop",
                 "SOLVE S130 pillar-out of 1x1 shaft",
                 "SOLVE S131 pillar fail / no rise / no blocks",
                 "SOLVE S132 pillar clear (risen enough)",
@@ -107,6 +111,9 @@ public final class T2Codes {
                 "SOLVE S134 pillar failCool expired",
                 "SOLVE S135 S130 suppressed (cool/busy)",
                 "SOLVE S136 HolePillarTask finished (reason)",
+                "SOLVE S137 pillar re-cool still boxed at ban xz",
+                "SOLVE S138 shaft ban cleared (left xz)",
+                "  E132 shaft stuck: re-cool x3+ still boxed",
                 "SOLVE S100 stop jump + walk",
                 "SOLVE S102 swim forward",
                 "SOLVE S103 get bread",

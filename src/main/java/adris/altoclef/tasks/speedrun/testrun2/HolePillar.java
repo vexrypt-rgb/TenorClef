@@ -24,6 +24,14 @@ public final class HolePillar {
     private static String lastArmReason = "-";
     private static boolean coolWasOn;
 
+    // After END, ban re-arming S130 on this xz until the player leaves the column.
+    private static int banX = Integer.MIN_VALUE;
+    private static int banZ;
+    private static int banTicks;
+    private static int lastCoolArmed;
+    private static int reCoolCount;
+    private static boolean sameXzResetNeeded;
+
     // Thrash: CollectIron <-> HolePillar at same xz
     private static int thrashX = Integer.MIN_VALUE;
     private static int thrashZ;
@@ -60,7 +68,7 @@ public final class HolePillar {
     }
 
     public static boolean busy() {
-        return holding || failCool > 0;
+        return holding || failCool > 0 || banTicks > 0;
     }
 
     public static boolean holding() {
@@ -71,6 +79,10 @@ public final class HolePillar {
         return failCool;
     }
 
+    public static int banTicksLeft() {
+        return banTicks;
+    }
+
     public static int startY() {
         return startY;
     }
@@ -79,16 +91,47 @@ public final class HolePillar {
         return lastEndReason;
     }
 
-    /** Climbed far enough from pillar start (1-block hop is not enough). */
+    /** True once after cool/ban logic wants T2Solve to zero sameXz. */
+    public static boolean consumeSameXzReset() {
+        if (!sameXzResetNeeded) return false;
+        sameXzResetNeeded = false;
+        return true;
+    }
+
+    /**
+     * Climbed far enough from pillar start.
+     * +2 alone is not enough while the shaft collar (walls below feet) is still closed —
+     * that was the S130 re-arm thrash: END risen @+2y, cool 4s, fall back in, START again.
+     */
     public static boolean risenEnough(AltoClef mod) {
         if (startY == Integer.MIN_VALUE || mod == null || mod.getPlayer() == null) return false;
         int y = mod.getPlayer().getBlockY();
         if (y >= startY + 3) return true;
-        // Opened out after rising - treat as clear (not a boxed flicker at startY).
-        return y >= startY + 2 && !boxed(mod);
+        if (y < startY + 2) return false;
+        // +2 only counts when truly opened out: not boxed AND collar below feet broken.
+        BlockPos feet = mod.getPlayer().getBlockPos();
+        int below = wallCount(mod, feet.add(0, -1, 0));
+        return !boxed(mod) && below < 3;
     }
 
     public static void coolTick() {
+        AltoClef mod = null;
+        try { mod = AltoClef.getInstance(); } catch (Throwable ignored) {}
+
+        // Leaving the banned column clears the ban early.
+        if (banTicks > 0 && mod != null && mod.getPlayer() != null) {
+            int x = mod.getPlayer().getBlockX();
+            int z = mod.getPlayer().getBlockZ();
+            if (x != banX || z != banZ) {
+                T2Log.force("S138", "shaft ban clear left-xz ban=" + banX + "," + banZ
+                        + " now=" + x + "," + z + " left=" + banTicks);
+                banTicks = 0;
+                reCoolCount = 0;
+            } else {
+                banTicks--;
+            }
+        }
+
         if (failCool > 0) {
             failCool--;
             coolWasOn = true;
@@ -96,16 +139,49 @@ public final class HolePillar {
                 T2Log.force("S134", "pillar cool expire after " + lastArmReason
                         + " end=" + lastEndReason);
                 coolWasOn = false;
+                // Still in the same shaft column and still boxed -> re-cool escalate,
+                // never hand S130 an instant re-arm with sameXz already huge.
+                if (stillBannedBoxed(mod)) {
+                    int next = Math.min(20 * 20, Math.max(20 * 8, lastCoolArmed * 2));
+                    reCoolCount++;
+                    failCool = next;
+                    lastCoolArmed = next;
+                    banTicks = Math.max(banTicks, next);
+                    sameXzResetNeeded = true;
+                    T2Log.force("S137", "re-cool still-boxed@" + banX + "," + banZ
+                            + " n=" + reCoolCount + " ticks=" + next
+                            + " end=" + lastEndReason + " " + snap(mod));
+                    if (reCoolCount >= 3) {
+                        T2Log.force("E132", "SHAFT_STUCK reCool=" + reCoolCount
+                                + " @" + banX + "," + (mod.getPlayer() == null ? "?" : mod.getPlayer().getBlockY())
+                                + "," + banZ + " " + snap(mod));
+                    }
+                } else {
+                    // Cool done and not boxed here — still keep a short ban so sameXz
+                    // cannot instantly re-arm if they drop back in within ~3s.
+                    if (banTicks <= 0 && banX != Integer.MIN_VALUE) {
+                        banTicks = 20 * 3;
+                    }
+                    sameXzResetNeeded = true;
+                }
             }
         } else if (coolWasOn) {
             coolWasOn = false;
         }
     }
 
+    private static boolean stillBannedBoxed(AltoClef mod) {
+        if (mod == null || mod.getPlayer() == null) return false;
+        if (banX == Integer.MIN_VALUE) return false;
+        if (mod.getPlayer().getBlockX() != banX || mod.getPlayer().getBlockZ() != banZ) return false;
+        return boxed(mod);
+    }
+
     /** Dense one-liner: walls/sky/place/hold/cool/y. */
     public static String snap(AltoClef mod) {
         if (mod == null || mod.getPlayer() == null || mod.getWorld() == null) {
-            return "pos=? walls=?/?/? sky=? place=? hold=" + holding + " cool=" + failCool;
+            return "pos=? walls=?/?/? sky=? place=? hold=" + holding + " cool=" + failCool
+                    + " ban=" + banTicks;
         }
         BlockPos feet = mod.getPlayer().getBlockPos();
         int wf = wallCount(mod, feet);
@@ -124,6 +200,7 @@ public final class HolePillar {
                 + " boxed=" + boxed(mod)
                 + " hold=" + holding
                 + " cool=" + failCool
+                + " ban=" + banTicks
                 + " startY=" + (startY == Integer.MIN_VALUE ? "-" : String.valueOf(startY))
                 + " step=" + step;
     }
@@ -141,9 +218,17 @@ public final class HolePillar {
     /** Why escape ended. Sets failCool when armCoolTicks > 0. */
     public static void logEnd(AltoClef mod, String reason, int armCoolTicks) {
         lastEndReason = reason;
+        if (mod != null && mod.getPlayer() != null) {
+            banX = mod.getPlayer().getBlockX();
+            banZ = mod.getPlayer().getBlockZ();
+        }
         if (armCoolTicks > 0) {
             failCool = armCoolTicks;
+            lastCoolArmed = armCoolTicks;
+            banTicks = Math.max(banTicks, armCoolTicks);
+            sameXzResetNeeded = true;
             T2Log.force("S133", "cool arm ticks=" + armCoolTicks + " reason=" + reason
+                    + " ban=" + banX + "," + banZ
                     + " " + snap(mod));
         }
         T2Log.force("S136", "END reason=" + reason
@@ -160,6 +245,7 @@ public final class HolePillar {
         lastSuppressMs = now;
         T2Log.force("S135", "S130 suppressed why=" + why
                 + " cool=" + failCool
+                + " ban=" + banTicks
                 + " hold=" + holding
                 + " " + snap(mod));
     }
@@ -246,7 +332,16 @@ public final class HolePillar {
         }
         int y = mod.getPlayer().getBlockY();
         if (holding && risenEnough(mod)) {
-            logEnd(mod, "risen y=" + y + " startY=" + startY, 20 * 4);
+            // Full clear: short cool. Marginal paths should not reach here often.
+            int coolTicks = (y >= startY + 3) ? (20 * 4) : (20 * 10);
+            logEnd(mod, "risen y=" + y + " startY=" + startY, coolTicks);
+            reset();
+            release();
+            return false;
+        }
+        // Stuck hopping at +1/+2 without a real escape — give up before infinite hold.
+        if (holding && step >= 40 && y < startY + 3) {
+            logEnd(mod, "stuck-low step=" + step + " y=" + y + " startY=" + startY, 20 * 12);
             reset();
             release();
             return false;

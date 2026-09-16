@@ -126,20 +126,32 @@ dependencies {
     shadow('com.fasterxml.jackson.core:jackson-databind:2.16.0')
 
     // Thank you georgeagostino for fixing my garbage
-    // 1.16.1: reuse 1.16.5 baritone jar (no published 1.16.1 artifact yet)
-    def baritoneMcVersion = (mcVersion == 11601) ? "1.16.5" : project.name
-    if (getProject().hasProperty("altoclef.development")) {
-        // Must run build from baritone-plus once
-        modImplementation "baritone-api-fabric:baritone-unoptimized-fabric-${baritoneMcVersion}"
-        include "baritone-api-fabric:baritone-unoptimized-fabric-${baritoneMcVersion}"
+    // 1.16.1 needs AltoClef-patched Baritone: stock mirancz 1.16.1 lacks AltoClefSettings,
+    // and the 1.16.5 jar crashes (ChunkDeltaUpdateS2CPacket.method_30621 / visitUpdates).
+    // libs/baritone-unoptimized-fabric-1.16.1.jar = mirancz 1.16.5 AltoClef jar with
+    // postHandleMultiBlockChange no-op'd for 1.16.1.
+    if (mcVersion == 11601) {
+        def baritone1161 = file("${rootProject.projectDir}/libs/baritone-unoptimized-fabric-1.16.1.jar")
+        if (!baritone1161.exists()) {
+            throw new GradleException("Missing ${baritone1161.name} in libs/. Need AltoClef-patched Baritone for 1.16.1.")
+        }
+        modImplementation files(baritone1161)
+        include files(baritone1161)
     } else {
-        modImplementation "cabaletta:baritone-unoptimized-fabric:${baritoneMcVersion}"
-        include "cabaletta:baritone-unoptimized-fabric:${baritoneMcVersion}"
+        def baritoneMcVersion = project.name
+        if (getProject().hasProperty("altoclef.development")) {
+            // Must run build from baritone-plus once
+            modImplementation "baritone-api-fabric:baritone-unoptimized-fabric-${baritoneMcVersion}"
+            include "baritone-api-fabric:baritone-unoptimized-fabric-${baritoneMcVersion}"
+        } else {
+            modImplementation "cabaletta:baritone-unoptimized-fabric:${baritoneMcVersion}"
+            include "cabaletta:baritone-unoptimized-fabric:${baritoneMcVersion}"
+        }
     }
     //modImplementation 'baritone-api-fabric:baritone-api-fabric:1.6.3'
     //implementation files('baritone-plus/build/libs/baritone-unoptimized-fabric-1.6.3.jar')
 
-    // Tungsten physics A* (1.21 / 1.21.1 only). Optional: jar may be absent â€” facade falls back to Baritone.
+    // Tungsten physics A* (1.21 / 1.21.1 only). Optional: jar may be absent — facade falls back to Baritone.
     // Build with:  cd vendor\tungsten && .\gradlew.bat remapJar
     // Then copy build\libs\tungsten-fabric-*-*.jar to libs\  (or leave in vendor build/libs).
     // COMPILE NOTE: do not run altoclef compileJava while runClient is live.
@@ -170,7 +182,7 @@ dependencies {
                 include files(jarFile)
             }
         } else {
-            println "[altoclef] Tungsten jar not found for ${project.name} â€” Baritone fallback (see docs/TUNGSTEN_BACKEND.md)"
+            println "[altoclef] Tungsten jar not found for ${project.name} Ã¢â‚¬â€ Baritone fallback (see docs/TUNGSTEN_BACKEND.md)"
         }
     }
 }

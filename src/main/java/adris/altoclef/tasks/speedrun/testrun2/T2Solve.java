@@ -115,31 +115,53 @@ public final class T2Solve {
             return null;
         }
 
+        // Thrash detector: CollectIron <-> HolePillar at same xz.
+        HolePillar.noteChildFlip(mod, childName);
+
         // 4. 1x1 shaft only. Pause CollectIron so it cannot mine the pillar.
+        // While holding OR on failCool, never hand control back / never re-arm S130.
+        if (HolePillar.holding()) {
+            return new HolePillarTask();
+        }
         boolean walking = childName.contains("GetToBlock") || childName.contains("Wander") || childName.contains("HolePillar");
+        boolean wouldPillar = !wet && !"PORTAL".equals(phase)
+                && !childName.contains("Craft") && !childName.contains("StepOff")
+                && !walking
+                && HolePillar.boxed(mod) && HolePillar.hasPlace(mod)
+                && (flips >= 3 || sameXz > 20 * 2);
+        if (wouldPillar && HolePillar.busy()) {
+            HolePillar.logSuppress(mod, "would-S130 but busy cool=" + HolePillar.failCoolLeft()
+                    + " flips=" + flips + " sameXz=" + sameXz + " child=" + childName);
+        }
         if (!wet && !"PORTAL".equals(phase)
                 && !childName.contains("Craft") && !childName.contains("StepOff")
                 && !walking
-                && !HolePillar.givingUp()
+                && !HolePillar.busy()
                 && HolePillar.boxed(mod) && HolePillar.hasPlace(mod)
-                && (flips >= 3 || sameXz > 20 * 2 || "S130".equals(lastFix))) {
-            act("S130", "pillar-out @" + x + "," + y + "," + z + " ph=" + phase);
+                && (flips >= 3 || sameXz > 20 * 2)) {
+            String trig = flips >= 3 ? ("flips=" + flips) : ("sameXz=" + sameXz);
+            HolePillar.logStart(mod, phase, childName, trig);
+            act("S130", "pillar-out @" + x + "," + y + "," + z + " ph=" + phase + " " + trig);
             cool = 20 * 4;
             cancelPath(mod);
             return new HolePillarTask();
         }
-        if ("S130".equals(lastFix) && cool > 0 && !HolePillar.givingUp() && HolePillar.boxed(mod)) {
+        if ("S130".equals(lastFix) && cool > 0 && HolePillar.holding()) {
             return new HolePillarTask();
         }
 
-        // 5. Jump in place — walk. Do not pillar a tunnel.
+        // 5. Jump in place - walk. Do not pillar a tunnel.
         if (!wet && flips >= 6 && sameXz > 20 * 2 && !"BOOTSTRAP".equals(phase)
                 && !childName.contains("StepOff") && !walking) {
-            if (HolePillar.hasPlace(mod) && HolePillar.boxed(mod) && !HolePillar.givingUp()) {
+            if (HolePillar.hasPlace(mod) && HolePillar.boxed(mod) && !HolePillar.busy()) {
+                HolePillar.logStart(mod, phase, childName, "jump-pit flips=" + flips);
                 act("S130", "jump-pit pillar @" + x + "," + y + "," + z);
                 cool = 20 * 4;
                 cancelPath(mod);
                 return new HolePillarTask();
+            }
+            if (HolePillar.busy()) {
+                HolePillar.logSuppress(mod, "jump-pit-busy child=" + childName);
             }
             act("S100", "stop jump-walk @" + x + "," + z + " ph=" + phase + " child=" + childName);
             adris.altoclef.tasks.speedrun.testrun2.core.T2Input.noJump();

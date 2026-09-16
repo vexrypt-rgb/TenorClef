@@ -888,8 +888,17 @@ public class ModernSpeedrunTask extends Task {
         if (active instanceof UnstickWalkTask && !active.isFinished()) {
             return active;
         }
-        if (active instanceof HolePillarTask && !active.isFinished()) {
+        if (active instanceof HolePillarTask && (HolePillar.holding() || !active.isFinished())) {
             return active;
+        }
+        if (active instanceof HolePillarTask && wanted != null && !(wanted instanceof HolePillarTask)) {
+            AltoClef m = AltoClef.getInstance();
+            T2Log.force("S136", "stick drop pillar -> " + wanted.getClass().getSimpleName()
+                    + " finished=" + active.isFinished()
+                    + " hold=" + HolePillar.holding()
+                    + " cool=" + HolePillar.failCoolLeft()
+                    + " end=" + HolePillar.lastEndReason()
+                    + " " + HolePillar.snap(m));
         }
         if (phase == Phase.IRON && active instanceof GetToBlockTask && !active.isFinished()
                 && !(wanted instanceof EnterNetherPortalTask)
@@ -992,6 +1001,11 @@ public class ModernSpeedrunTask extends Task {
         }
         String cn = active == null ? "" : active.getClass().getSimpleName();
         if (cn.contains("Craft") || cn.contains("StepOff")) {
+            return null;
+        }
+        // Pillar owns this XZ — do not E70-walkaway / reset mid-escape.
+        if (cn.contains("HolePillar") || HolePillar.busy()) {
+            ironStill = 0;
             return null;
         }
         int x = mod.getPlayer().getBlockX();

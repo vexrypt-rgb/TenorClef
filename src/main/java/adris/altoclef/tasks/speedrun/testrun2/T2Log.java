@@ -29,6 +29,17 @@ public final class T2Log {
         once(code, msg, true);
     }
 
+    /** State-change diag: only suppress exact duplicate line (not whole code for 5s). */
+    public static void force(String code, String msg) {
+        String line = "T2 [" + code + "] " + msg;
+        if (line.equals(last)) return;
+        last = line;
+        CODE_AT.put(code, System.currentTimeMillis());
+        Debug.logWarning(line);
+        T2Fault.record(code, msg);
+        T2History.note("FORCE " + code + " " + msg);
+    }
+
     private static void once(String code, String msg, boolean warn) {
         String line = "T2 [" + code + "] " + msg;
         long now = System.currentTimeMillis();

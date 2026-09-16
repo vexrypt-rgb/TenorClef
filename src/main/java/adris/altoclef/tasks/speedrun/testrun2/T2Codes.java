@@ -56,6 +56,14 @@ public final class T2Codes {
     public static final String E108_TABLE_FEET = "E108";
     public static final String E109_NO_TOOL = "E109";
     public static final String E116_HOLE = "E116";
+    public static final String E131_PILLAR_THRASH = "E131";
+    public static final String S130_PILLAR = "S130";
+    public static final String S131_PILLAR_FAIL = "S131";
+    public static final String S132_PILLAR_CLEAR = "S132";
+    public static final String S133_PILLAR_COOL_ARM = "S133";
+    public static final String S134_PILLAR_COOL_END = "S134";
+    public static final String S135_PILLAR_SUPPRESS = "S135";
+    public static final String S136_PILLAR_END = "S136";
 
     private T2Codes() {}
 
@@ -91,6 +99,14 @@ public final class T2Codes {
                 "  E108 table at feet + jumping",
                 "  E109 mining with no pick",
                 "  E116 fell 8+ blocks in overworld",
+                "  E131 HolePillar<->CollectIron thrash at same xz",
+                "SOLVE S130 pillar-out of 1x1 shaft",
+                "SOLVE S131 pillar fail / no rise / no blocks",
+                "SOLVE S132 pillar clear (risen enough)",
+                "SOLVE S133 pillar failCool armed",
+                "SOLVE S134 pillar failCool expired",
+                "SOLVE S135 S130 suppressed (cool/busy)",
+                "SOLVE S136 HolePillarTask finished (reason)",
                 "SOLVE S100 stop jump + walk",
                 "SOLVE S102 swim forward",
                 "SOLVE S103 get bread",

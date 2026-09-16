@@ -6,13 +6,19 @@ import adris.altoclef.tasksystem.Task;
 /** Pause CollectIron so it cannot mine the block we just placed. */
 public class HolePillarTask extends Task {
 
+    private String finishWhy = "-";
+
     @Override
     protected void onStart() {}
 
     @Override
     protected Task onTick() {
         AltoClef mod = AltoClef.getInstance();
-        if (mod == null || HolePillar.givingUp() || !HolePillar.hasPlace(mod) || !HolePillar.boxed(mod)) {
+        if (mod == null || HolePillar.givingUp()) {
+            return null;
+        }
+        // Keep ticking while holding even if boxed flickers for a hop.
+        if (!HolePillar.hasPlace(mod) && !HolePillar.holding()) {
             return null;
         }
         HolePillar.tick(mod);
@@ -21,6 +27,15 @@ public class HolePillarTask extends Task {
 
     @Override
     protected void onStop(Task interruptTask) {
+        AltoClef mod = AltoClef.getInstance();
+        String who = interruptTask == null ? "-" : interruptTask.getClass().getSimpleName();
+        if (mod != null) {
+            T2Log.force("S136", "onStop interrupt=" + who
+                    + " finishWhy=" + finishWhy
+                    + " lastEnd=" + HolePillar.lastEndReason()
+                    + " " + HolePillar.snap(mod));
+        }
+        // reset() clears holding/keys but keeps failCool (post-fail / post-success).
         HolePillar.reset();
     }
 
@@ -28,8 +43,33 @@ public class HolePillarTask extends Task {
     public boolean isFinished() {
         try {
             AltoClef mod = AltoClef.getInstance();
-            return HolePillar.givingUp() || !HolePillar.boxed(mod) || !HolePillar.hasPlace(mod);
+            if (mod == null) {
+                finishWhy = "mod-null";
+                return true;
+            }
+            if (HolePillar.givingUp()) {
+                finishWhy = "givingUp cool=" + HolePillar.failCoolLeft();
+                return true;
+            }
+            if (HolePillar.risenEnough(mod)) {
+                finishWhy = "risenEnough y=" + mod.getPlayer().getBlockY()
+                        + " startY=" + HolePillar.startY();
+                return true;
+            }
+            if (!HolePillar.hasPlace(mod) && !HolePillar.holding()) {
+                finishWhy = "!hasPlace && !holding";
+                return true;
+            }
+            // Actively escaping - do not hand back to CollectIron on a 1-tick !boxed hop.
+            if (HolePillar.holding()) {
+                finishWhy = "holding";
+                return false;
+            }
+            boolean box = HolePillar.boxed(mod);
+            finishWhy = box ? "idle-boxed" : "!boxed && !holding";
+            return !box;
         } catch (Throwable t) {
+            finishWhy = "throw:" + t.getClass().getSimpleName();
             return true;
         }
     }

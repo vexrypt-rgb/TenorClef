@@ -77,15 +77,23 @@ public class T2MenuScreen extends Screen {
     public static void open() {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc == null) return;
-        try {
-            T2MenuScreen screen = new T2MenuScreen();
+        Runnable show = () -> {
             try {
-                mc.getClass().getMethod("openScreen", Screen.class).invoke(mc, screen);
-            } catch (NoSuchMethodException e) {
-                mc.getClass().getMethod("setScreen", Screen.class).invoke(mc, screen);
+                T2MenuScreen screen = new T2MenuScreen();
+                try {
+                    mc.getClass().getMethod("openScreen", Screen.class).invoke(mc, screen);
+                } catch (NoSuchMethodException e) {
+                    mc.getClass().getMethod("setScreen", Screen.class).invoke(mc, screen);
+                }
+                Debug.logMessage("T2MENU opened");
+            } catch (Throwable t) {
+                Debug.logWarning("T2MENU open: " + t.getClass().getSimpleName() + " " + t.getMessage());
             }
+        };
+        try {
+            mc.execute(show);
         } catch (Throwable t) {
-            Debug.logWarning("T2MENU open: " + t.getMessage());
+            show.run();
         }
     }
 
@@ -173,6 +181,50 @@ public class T2MenuScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    /** 1.16+ */
+    public void render(net.minecraft.client.util.math.MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        paint(matrices);
+        try {
+            Screen.class.getMethod("render",
+                    net.minecraft.client.util.math.MatrixStack.class, int.class, int.class, float.class)
+                    .invoke(this, matrices, mouseX, mouseY, delta);
+        } catch (Throwable ignored) {}
+    }
+
+    /** pre-1.16 fallback */
+    public void render(int mouseX, int mouseY, float delta) {
+        paint(null);
+        try {
+            Screen.class.getMethod("render", int.class, int.class, float.class)
+                    .invoke(this, mouseX, mouseY, delta);
+        } catch (Throwable ignored) {}
+    }
+
+    private void paint(Object matrices) {
+        try {
+            if (matrices != null) {
+                Screen.class.getMethod("fill",
+                        net.minecraft.client.util.math.MatrixStack.class,
+                        int.class, int.class, int.class, int.class, int.class)
+                        .invoke(this, matrices, 0, 0, this.width, this.height, 0xC0101010);
+            } else {
+                Screen.class.getMethod("fill", int.class, int.class, int.class, int.class, int.class)
+                        .invoke(this, 0, 0, this.width, this.height, 0xC0101010);
+            }
+        } catch (Throwable ignored) {}
+        try {
+            Object title = titleText();
+            if (matrices != null) {
+                this.textRenderer.getClass()
+                        .getMethod("drawWithShadow",
+                                net.minecraft.client.util.math.MatrixStack.class,
+                                Class.forName("net.minecraft.text.Text"),
+                                float.class, float.class, int.class)
+                        .invoke(this.textRenderer, matrices, title, 16f, 8f, 0xFFFFFF);
+            }
+        } catch (Throwable ignored) {}
     }
 
     private void attach(Object btn) {

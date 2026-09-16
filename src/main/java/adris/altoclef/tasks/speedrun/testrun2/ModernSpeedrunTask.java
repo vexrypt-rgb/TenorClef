@@ -104,6 +104,7 @@ public class ModernSpeedrunTask extends Task {
     private boolean skipIronPick;
     private int e91Count;
     private int recraftPause;
+    private int stepOffAge;
     private int woodStill;
     private int woodPause;
     private int wanderHold;
@@ -209,6 +210,21 @@ public class ModernSpeedrunTask extends Task {
                     + " pick=" + count(mod, Items.IRON_PICKAXE)
                     + " woodpick=" + count(mod, Items.WOODEN_PICKAXE));
         }
+        if (active instanceof StepOffTableTask) {
+            stepOffAge++;
+            if (stepOffAge >= 40) {
+                T2Log.warn("E94", "step-off frozen t=0 — PORTAL with current pick");
+                skipIronPick = true;
+                pickCraftLock = false;
+                recraftPause = 0;
+                stepOffAge = 0;
+                active = null;
+                setPhase(Phase.PORTAL);
+                return stick(portal(mod));
+            }
+            return active;
+        }
+        stepOffAge = 0;
         Task solved = T2Brain.help(mod, phase.name(), active);
         if (adris.altoclef.tasks.speedrun.testrun2.util.QueueWatch.blocked()) return null;
         if (solved != null) {
@@ -229,7 +245,7 @@ public class ModernSpeedrunTask extends Task {
         boolean craftingNow = pickCraftLock
                 || (active != null && active.getClass().getSimpleName().contains("Craft"));
         if (freezeCool > 0) freezeCool--;
-        if (craftingNow && unstickHold > 0) {
+        if (craftingNow && unstickHold > 0 && !(active instanceof StepOffTableTask)) {
             unstickHold = 0;
             McCompat.setMove(false, false);
         }
@@ -507,10 +523,7 @@ public class ModernSpeedrunTask extends Task {
     }
 
     private Task bootstrap(AltoClef mod) {
-        if (recraftPause > 0) {
-            recraftPause--;
-            return new StepOffTableTask();
-        }
+        if (recraftPause > 0) recraftPause--;
         // Do not use TaskCatalogue "log" — on 1.16 that list pads with AIR
         // and Baritone Random-Orientation-spins punching nothing.
         if (woodPause > 0) {
@@ -625,10 +638,15 @@ public class ModernSpeedrunTask extends Task {
             T2History.note("WHY iron: pick done — skip sword/shield table, go PORTAL");
             return null;
         }
-        if (ironN < 8) {
+        int ore = count(mod, Items.IRON_ORE) + countOpt(mod, "DEEPSLATE_IRON_ORE");
+        int want = Math.min(24, Math.max(8, ironN + ore));
+        if (count(mod, Items.IRON_INGOT) < want && count(mod, Items.IRON_PICKAXE) < 1 && ironN + ore >= 8) {
+            // already have 8 metal units — smelt the rest in this furnace, do not start a second trip
+        }
+        if (count(mod, Items.IRON_INGOT) < 8) {
             pickCraftLock = false;
-            T2History.note("WHY iron: smelt 8 (one coal) then pick + extra");
-            return TaskCatalogue.getItemTask(Items.IRON_INGOT, 8);
+            T2History.note("WHY iron: smelt " + want + " in one furnace");
+            return TaskCatalogue.getItemTask(Items.IRON_INGOT, want);
         }
         // Iron pick is 3 ingots + 2 sticks. logs=0 with no sticks = GUI forever.
         if (stickFuel(mod) < 2) {
@@ -637,10 +655,7 @@ public class ModernSpeedrunTask extends Task {
             pickCraftLock = false;
             return collectWood(mod, 1);
         }
-        if (recraftPause > 0) {
-            recraftPause--;
-            return new StepOffTableTask();
-        }
+        if (recraftPause > 0) recraftPause--;
         if (active instanceof SurfaceBailTask && !active.isFinished()) {
             return active;
         }
@@ -1013,26 +1028,29 @@ public class ModernSpeedrunTask extends Task {
             craftZ = z;
         }
         if (!crafting) return null;
-        if (tableAtFeet(mod)) {
-            T2Log.warn("E91", "on table — walk off before craft");
+        boolean jumping = false;
+        try { jumping = !mod.getPlayer().isOnGround(); } catch (Throwable ignored) {}
+        // Jump-click next to the table never finishes the recipe. Do not wait
+        // for tableAtFeet — SNAP stays at one XZ for minutes.
+        boolean wetNow = false;
+        try { wetNow = mod.getPlayer().isTouchingWater(); } catch (Throwable ignored) {}
+        if (tableAtFeet(mod) && jumping && !wetNow && craftStuck >= 20 * 3) {
+            T2Log.warn("E91", "craft stall — step off xz=" + x + "," + z);
             craftStuck = 0;
             McCompat.closeScreen();
+            recraftPause = 20 * 3;
             return stick(new StepOffTableTask());
         }
         boolean dark = SurfaceBailTask.underground(mod);
         int ironN = count(mod, Items.IRON_INGOT) + count(mod, Items.RAW_IRON);
-        // Only IRON pick crafts. Wooden pick in BOOTSTRAP is not "missing iron".
         if (phase == Phase.IRON && !dark && ironN < 3 && count(mod, Items.IRON_PICKAXE) < 1 && craftStuck >= 20 * 6) {
             T2Log.warn("E92", "craft table with 0 iron — mine first");
             T2History.note("WHY E92: close table, collect iron");
             craftStuck = 0;
             forceSurface = false;
+            pickCraftLock = false;
             active = null;
             return stick(TaskCatalogue.getItemTask(Items.IRON_INGOT, 3));
-        }
-        if (pickCraftLock && ironN >= 3) {
-            if (craftStuck == 20 * 20) McCompat.closeScreen();
-            return null;
         }
         if (craftStuck >= 20 * 12) {
             e91Count++;
@@ -1041,7 +1059,7 @@ public class ModernSpeedrunTask extends Task {
             McCompat.closeScreen();
             forceSurface = false;
             active = null;
-            if (e91Count >= 3 && count(mod, Items.WOODEN_PICKAXE) + count(mod, Items.STONE_PICKAXE) >= 1) {
+            if (e91Count >= 2 && count(mod, Items.WOODEN_PICKAXE) + count(mod, Items.STONE_PICKAXE) >= 1) {
                 skipIronPick = true;
                 pickCraftLock = false;
                 T2Log.warn("E94", "abandon iron pick after " + e91Count + " table fails — PORTAL");

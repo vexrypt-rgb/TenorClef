@@ -40,7 +40,7 @@ public final class HolePillar {
     }
 
     public static boolean hasPlace(AltoClef mod) {
-        return slotOf(mod) >= 0;
+        return PlaceBlocks.count(mod) > 0;
     }
 
     /** One tick. Returns true if it took over inputs. */
@@ -59,11 +59,10 @@ public final class HolePillar {
             release();
             return false;
         }
-        int slot = slotOf(mod);
-        if (slot >= 0) {
-            try { mod.getPlayer().inventory.selectedSlot = slot; } catch (Throwable ignored) {
-                try { mod.getPlayer().getInventory().selectedSlot = slot; } catch (Throwable ignored2) {}
-            }
+        int slot = PlaceBlocks.equip(mod);
+        if (slot < 0) {
+            step = 0;
+            return false;
         }
         lookDown();
         MinecraftClient mc = MinecraftClient.getInstance();

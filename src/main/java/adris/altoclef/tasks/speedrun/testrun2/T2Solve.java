@@ -94,12 +94,16 @@ public final class T2Solve {
         }
         guiAge = 0;
 
-        // 2. Table under feet
-        if (tableUnder(mod) && (flips >= 2 || sameXz > 40)) {
+        // Only when jump-stuck ON the table. A standing wooden-pick craft
+        // is same-XZ for >2s on purpose — do not cancel it.
+        if (tableUnder(mod) && flips >= 4 && !wet
+                && !childName.contains("StepOff")) {
             act("S108", "step off table @" + x + "," + y + "," + z);
             McCompat.closeScreen();
+            adris.altoclef.tasks.speedrun.testrun2.core.T2Input.noJump();
             adris.altoclef.tasks.speedrun.testrun2.core.T2Input.walkTurn();
-            return null;
+            cancelPath(mod);
+            return new StepOffTableTask();
         }
 
         // 3. Water still
@@ -112,6 +116,7 @@ public final class T2Solve {
 
         // 4. Boxed hole with blocks — pillar. Do NOT no-jump. Holds off S100.
         if (!wet && !"PORTAL".equals(phase)
+                && !childName.contains("Craft") && !childName.contains("StepOff")
                 && HolePillar.boxed(mod) && HolePillar.hasPlace(mod)
                 && (flips >= 3 || sameXz > 20 * 2 || "S130".equals(lastFix))) {
             act("S130", "pillar-out @" + x + "," + y + "," + z + " ph=" + phase);
@@ -127,7 +132,7 @@ public final class T2Solve {
 
         // 5. Jump in place — including CraftInTable (iron pick / wood pick)
         if (!wet && flips >= 6 && sameXz > 20 * 2 && !"BOOTSTRAP".equals(phase)
-                && !childName.contains("Craft") && !childName.contains("StepOff")) {
+                && !childName.contains("StepOff")) {
             act("S100", "stop jump-walk @" + x + "," + z + " ph=" + phase + " child=" + childName);
             adris.altoclef.tasks.speedrun.testrun2.core.T2Input.noJump();
             flips = 0;

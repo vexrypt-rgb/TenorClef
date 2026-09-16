@@ -23,6 +23,7 @@ public class StepOffTableTask extends Task {
         startYaw = McCompat.playerYaw();
         McCompat.closeScreen();
         try { McCompat.cancelPathing(); } catch (Throwable ignored) {}
+        adris.altoclef.tasks.speedrun.testrun2.core.T2Input.releaseAll();
         adris.altoclef.tasks.speedrun.testrun2.core.T2Input.noJump();
     }
 
@@ -34,9 +35,6 @@ public class StepOffTableTask extends Task {
         McCompat.setMove(true, false);
         if (ticks == 10) McCompat.setYaw(startYaw + 90f);
         if (ticks == 20) McCompat.setYaw(startYaw + 180f);
-        if (ticks >= 12 && !onTable()) {
-            done = true;
-        }
         if (ticks >= 40) done = true;
         return null;
     }

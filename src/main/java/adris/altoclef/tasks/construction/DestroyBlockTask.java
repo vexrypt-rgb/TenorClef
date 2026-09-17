@@ -335,7 +335,22 @@ public class DestroyBlockTask extends Task implements ITaskRequiresGrounded {
             if (!LookHelper.isLookingAt(mod, reach.get())) {
                 LookHelper.lookAt(reach.get());
             }
-            // Tool equip is handled in `PlayerInteractionFixChain`. Oof.
+            // Equip best tool ourselves — PlayerInteractionFixChain can skip hotbar
+            // picks while Baritone is pathing, which led to fist-mining stone.
+            try {
+                java.util.Optional<adris.altoclef.util.slots.Slot> best =
+                        StorageHelper.getBestToolSlot(mod, mod.getWorld().getBlockState(pos));
+                if (best.isPresent()) {
+                    net.minecraft.item.ItemStack bestStack = StorageHelper.getItemStackInSlot(best.get());
+                    net.minecraft.item.ItemStack equipped = StorageHelper.getItemStackInSlot(
+                            adris.altoclef.util.slots.PlayerSlot.getEquipSlot());
+                    if (!bestStack.isEmpty() && bestStack.getItem() != equipped.getItem()) {
+                        mod.getSlotHandler().forceEquipItem(bestStack.getItem());
+                    }
+                }
+            } catch (Throwable t) {
+                Debug.logWarning("DestroyBlock tool equip failed: " + t.getMessage());
+            }
             mod.getClientBaritone().getInputOverrideHandler().setInputForceState(Input.CLICK_LEFT, true);
         } else {
             setDebugState("Getting to block...");

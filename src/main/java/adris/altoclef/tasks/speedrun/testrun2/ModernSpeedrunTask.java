@@ -193,10 +193,18 @@ public class ModernSpeedrunTask extends Task {
         statusTicks++;
         if (statusTicks % 20 == 0) {
             String childDbg = active == null ? "-" : String.valueOf(active);
+            String eq = "-";
+            try {
+                eq = String.valueOf(StorageHelper.getItemStackInSlot(
+                        adris.altoclef.util.slots.PlayerSlot.getEquipSlot()).getItem());
+            } catch (Throwable ignored) {}
             Debug.logMessage("T2 [NOW] t=" + SpeedrunClock.now() + " ph=" + phase
                     + " @" + mod.getPlayer().getBlockX() + "," + mod.getPlayer().getBlockY()
                     + "," + mod.getPlayer().getBlockZ()
                     + " do=" + childDbg
+                    + " eq=" + eq
+                    + " woodpick=" + count(mod, Items.WOODEN_PICKAXE)
+                    + " stonepick=" + count(mod, Items.STONE_PICKAXE)
                     + " pick=" + count(mod, Items.IRON_PICKAXE)
                     + " iron=" + count(mod, Items.IRON_INGOT)
                     + " buck=" + (count(mod, Items.WATER_BUCKET) + count(mod, Items.LAVA_BUCKET)));
@@ -1072,8 +1080,8 @@ public class ModernSpeedrunTask extends Task {
         // for tableAtFeet — SNAP stays at one XZ for minutes.
         boolean wetNow = false;
         try { wetNow = mod.getPlayer().isTouchingWater(); } catch (Throwable ignored) {}
-        if (tableAtFeet(mod) && jumping && !wetNow && craftStuck >= 20 * 3) {
-            T2Log.warn("E91", "craft stall — step off xz=" + x + "," + z);
+        if (tableAtFeet(mod) && jumping && !wetNow && craftStuck >= 20 * 2) {
+            T2Log.warn("E91", "craft jump thrash — step off xz=" + x + "," + z + " stuck=" + craftStuck);
             craftStuck = 0;
             McCompat.closeScreen();
             recraftPause = 20 * 3;
@@ -1107,7 +1115,10 @@ public class ModernSpeedrunTask extends Task {
             }
             recraftPause = 20 * 3;
             unstickHold = 20 * 4;
-            return stick(new UnstickWalkTask(20 * 4));
+            // Prefer step-off over UnstickWalk: UnstickWalk used to jump, which
+            // re-triggered E100 jump thrash and E106 (UnstickWalk-as-child).
+            T2Log.warn("E91", "craft stall 12s — StepOffTable (not UnstickWalk) xz=" + x + "," + z);
+            return stick(new StepOffTableTask());
         }
         return null;
     }

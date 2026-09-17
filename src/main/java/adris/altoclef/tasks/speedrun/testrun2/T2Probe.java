@@ -173,9 +173,26 @@ public final class T2Probe {
         if (childName.contains("CollectIron") || childName.contains("Smelt")
                 || (childName.contains("Mine") && !childName.contains("Log")
                 && phase != null && !"BOOTSTRAP".equals(phase) && !"LOOT".equals(phase))) {
-            if (count(mod, Items.WOODEN_PICKAXE) + count(mod, Items.STONE_PICKAXE)
-                    + count(mod, Items.IRON_PICKAXE) < 1) {
+            int picks = count(mod, Items.WOODEN_PICKAXE) + count(mod, Items.STONE_PICKAXE)
+                    + count(mod, Items.IRON_PICKAXE) + count(mod, Items.DIAMOND_PICKAXE)
+                    + count(mod, Items.NETHERITE_PICKAXE);
+            if (picks < 1) {
                 fire(T2Codes.E109_NO_TOOL, "mine/collect with no pick child=" + childName);
+            } else {
+                try {
+                    net.minecraft.item.Item eq = adris.altoclef.util.helpers.StorageHelper
+                            .getItemStackInSlot(adris.altoclef.util.slots.PlayerSlot.getEquipSlot())
+                            .getItem();
+                    boolean eqPick = eq == Items.WOODEN_PICKAXE || eq == Items.STONE_PICKAXE
+                            || eq == Items.IRON_PICKAXE || eq == Items.GOLDEN_PICKAXE
+                            || eq == Items.DIAMOND_PICKAXE || eq == Items.NETHERITE_PICKAXE;
+                    if (!eqPick) {
+                        fire(T2Codes.E109_FIST_WITH_PICK, "eq=" + eq.getTranslationKey()
+                                + " woodpick=" + count(mod, Items.WOODEN_PICKAXE)
+                                + " stonepick=" + count(mod, Items.STONE_PICKAXE)
+                                + " child=" + childName + " ph=" + phase);
+                    }
+                } catch (Throwable ignored) {}
             }
         }
 

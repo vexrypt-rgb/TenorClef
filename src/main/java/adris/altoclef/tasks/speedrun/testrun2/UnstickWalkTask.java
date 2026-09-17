@@ -4,7 +4,7 @@ import adris.altoclef.AltoClef;
 import adris.altoclef.tasksystem.Task;
 
 /**
- * Walk + jump for a fixed number of ticks. No Baritone.
+ * Walk (no jump) for a fixed number of ticks. No Baritone.
  * isEqual by class so stick() will not restart it every frame.
  */
 public class UnstickWalkTask extends Task {
@@ -30,14 +30,14 @@ public class UnstickWalkTask extends Task {
         McCompat.cancelPathing();
         startYaw = McCompat.playerYaw();
         McCompat.setYaw(startYaw + 90f);
-        McCompat.setMove(true, true);
+        McCompat.setMove(true, false); // walk only — jump made craft thrash worse
     }
 
     @Override
     protected Task onTick() {
         ticks++;
         McCompat.closeScreen();
-        McCompat.setMove(true, ticks % 8 < 5);
+        McCompat.setMove(true, false);
         if (ticks >= duration) {
             done = true;
             McCompat.setMove(false, false);

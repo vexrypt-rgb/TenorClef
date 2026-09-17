@@ -55,6 +55,7 @@ public final class T2Codes {
     public static final String E104_GUI = "E104";
     public static final String E108_TABLE_FEET = "E108";
     public static final String E109_NO_TOOL = "E109";
+    public static final String E109_FIST_WITH_PICK = "E109b";
     public static final String E116_HOLE = "E116";
     public static final String E131_PILLAR_THRASH = "E131";
     public static final String S130_PILLAR = "S130";
@@ -101,6 +102,7 @@ public final class T2Codes {
                 "  E104 inventory/craft GUI open >8s",
                 "  E108 table at feet + jumping",
                 "  E109 mining with no pick",
+                "  E109b pick in bag but fist/wrong tool equipped",
                 "  E116 fell 8+ blocks in overworld",
                 "  E131 HolePillar<->CollectIron thrash at same xz",
                 "  E132 shaft stuck re-cool loop",

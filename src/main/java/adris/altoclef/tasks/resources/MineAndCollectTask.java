@@ -124,22 +124,39 @@ public class MineAndCollectTask extends ResourceTask {
     }
 
     private void makeSureToolIsEquipped(AltoClef mod) {
-        if (_cursorStackTimer.elapsed() && !mod.getFoodChain().needsToEat()) {
-            assert MinecraftClient.getInstance().player != null;
-            ItemStack cursorStack = StorageHelper.getItemStackInCursorSlot();
-            if (cursorStack != null && !cursorStack.isEmpty()) {
-                Item item = cursorStack.getItem();
-                net.minecraft.block.BlockState mining = mod.getWorld().getBlockState(_subtask.miningPos());
-                if (item.getDefaultStack().isSuitableFor(mining)) {
-                    // Compare mining SPEED — no MiningToolItem class needed (deleted in 1.21.11).
-                    ItemStack equipped = StorageHelper.getItemStackInSlot(PlayerSlot.getEquipSlot());
-                    if (item.getDefaultStack().getMiningSpeedMultiplier(mining)
-                            > equipped.getMiningSpeedMultiplier(mining)) {
-                        mod.getSlotHandler().forceEquipSlot(CursorSlot.SLOT);
-                    }
+        if (!_cursorStackTimer.elapsed() || mod.getFoodChain().needsToEat()) {
+            return;
+        }
+        _cursorStackTimer.reset();
+        assert MinecraftClient.getInstance().player != null;
+        if (_subtask.miningPos() == null) return;
+        net.minecraft.block.BlockState mining = mod.getWorld().getBlockState(_subtask.miningPos());
+
+        // Prefer inventory/hotbar pick over fist. Cursor-only equip left fist mining
+        // when the wooden pick sat in the hotbar (PlayerInteractionFixChain defers to
+        // Baritone autoTool for hotbar slots while pathing — often a no-op on 1.16.1).
+        java.util.Optional<adris.altoclef.util.slots.Slot> best =
+                StorageHelper.getBestToolSlot(mod, mining);
+        ItemStack equipped = StorageHelper.getItemStackInSlot(PlayerSlot.getEquipSlot());
+        if (best.isPresent()) {
+            ItemStack bestStack = StorageHelper.getItemStackInSlot(best.get());
+            if (!bestStack.isEmpty() && bestStack.getItem() != equipped.getItem()) {
+                Debug.logMessage("MineAndCollect: equip " + bestStack.getItem().getTranslationKey()
+                        + " for " + mining.getBlock().getTranslationKey());
+                mod.getSlotHandler().forceEquipItem(bestStack.getItem());
+                return;
+            }
+        }
+
+        ItemStack cursorStack = StorageHelper.getItemStackInCursorSlot();
+        if (cursorStack != null && !cursorStack.isEmpty()) {
+            Item item = cursorStack.getItem();
+            if (item.getDefaultStack().isSuitableFor(mining)) {
+                if (item.getDefaultStack().getMiningSpeedMultiplier(mining)
+                        > equipped.getMiningSpeedMultiplier(mining)) {
+                    mod.getSlotHandler().forceEquipSlot(CursorSlot.SLOT);
                 }
             }
-            _cursorStackTimer.reset();
         }
     }
 

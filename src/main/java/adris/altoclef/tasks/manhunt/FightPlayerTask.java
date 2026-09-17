@@ -15,11 +15,11 @@ import net.minecraft.item.Items;
  * This is a practical skeleton that:
  * - Paths into melee range
  * - Equips best available sword
- * - Attacks (via AltoClef’s existing entity attack helpers where possible)
+ * - Attacks (via AltoClefâ€™s existing entity attack helpers where possible)
  *
  * Real competitive PvP (W-tapping, crit chains, shield, potting, crystal)
  * is much more complex and can be layered on later.
- * UnionClef / autoclef have more advanced combat – this is the starting point
+ * UnionClef / autoclef have more advanced combat â€“ this is the starting point
  * for MiranCZ-style Altoclef.
  */
 public class FightPlayerTask extends Task {
@@ -42,7 +42,7 @@ public class FightPlayerTask extends Task {
 
     @Override
     protected Task onTick() {
-        if (target == null || !target.isAlive() || target.isRemoved()) {
+        if (target == null || !target.isAlive() || adris.altoclef.multiversion.entity.EntityVer.isGone(target)) {
             setDebugState("Target dead or gone");
             return null;
         }
@@ -58,7 +58,7 @@ public class FightPlayerTask extends Task {
         equipBestWeapon();
         if (attackCooldown.elapsed()) {
             // Look at target and attack
-            // Real implementation uses mod’s input / attack helpers:
+            // Real implementation uses modâ€™s input / attack helpers:
             // mod.getInputControls().tryPress(Input.CLICK_LEFT);
             // or existing KillEntity-style logic
             attackCooldown.reset();
@@ -98,6 +98,6 @@ public class FightPlayerTask extends Task {
 
     @Override
     public boolean isFinished() {
-        return target == null || !target.isAlive() || target.isRemoved();
+        return target == null || !target.isAlive() || adris.altoclef.multiversion.entity.EntityVer.isGone(target);
     }
 }

@@ -23,7 +23,6 @@ import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.MiningToolItem;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -129,22 +128,14 @@ public class MineAndCollectTask extends ResourceTask {
             assert MinecraftClient.getInstance().player != null;
             ItemStack cursorStack = StorageHelper.getItemStackInCursorSlot();
             if (cursorStack != null && !cursorStack.isEmpty()) {
-                // We have something in our cursor stack
                 Item item = cursorStack.getItem();
-                if (item.getDefaultStack().isSuitableFor(mod.getWorld().getBlockState(_subtask.miningPos()))) {
-                    // Our cursor stack would help us mine our current block
-                    Item currentlyEquipped = StorageHelper.getItemStackInSlot(PlayerSlot.getEquipSlot()).getItem();
-                    if (item instanceof MiningToolItem) {
-                        if (currentlyEquipped instanceof MiningToolItem currentPick) {
-                            MiningToolItem swapPick = (MiningToolItem) item;
-                            if (ToolMaterialVer.getMiningLevel(swapPick) > ToolMaterialVer.getMiningLevel(currentPick)) {
-                                // We can equip a better pickaxe.
-                                mod.getSlotHandler().forceEquipSlot(CursorSlot.SLOT);
-                            }
-                        } else {
-                            // We're not equipped with a pickaxe...
-                            mod.getSlotHandler().forceEquipSlot(CursorSlot.SLOT);
-                        }
+                net.minecraft.block.BlockState mining = mod.getWorld().getBlockState(_subtask.miningPos());
+                if (item.getDefaultStack().isSuitableFor(mining)) {
+                    // Compare mining SPEED — no MiningToolItem class needed (deleted in 1.21.11).
+                    ItemStack equipped = StorageHelper.getItemStackInSlot(PlayerSlot.getEquipSlot());
+                    if (item.getDefaultStack().getMiningSpeedMultiplier(mining)
+                            > equipped.getMiningSpeedMultiplier(mining)) {
+                        mod.getSlotHandler().forceEquipSlot(CursorSlot.SLOT);
                     }
                 }
             }

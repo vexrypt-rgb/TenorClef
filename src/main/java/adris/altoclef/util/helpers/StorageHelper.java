@@ -150,11 +150,19 @@ public class StorageHelper {
             if (!slot.isSlotInPlayerInventory())
                 continue;
             ItemStack stack = getItemStackInSlot(slot);
+            //#if MC < 12111
             if (stack.getItem() instanceof ToolItem) {
+            //#else
+            //$$ if (ItemHelper.isTool(stack.getItem())) {
+            //#endif
                 if (stack.getItem().getDefaultStack().isSuitableFor(state)) {
                     if (shouldSaveStack(mod,  state.getBlock(), stack)) continue;
 
+                    //#if MC < 12111
                     double speed = ToolSet.calculateSpeedVsBlock(stack, state);
+                    //#else
+                    //$$ double speed = stack.getMiningSpeedMultiplier(state);
+                    //#endif
                     if (speed > highestSpeed) {
                         highestSpeed = speed;
                         bestToolSlot = slot;
@@ -227,8 +235,13 @@ public class StorageHelper {
         }
 
         // Try throwing away lower tier tools
+        //#if MC < 12111
         final HashMap<Class, Integer> bestMaterials = new HashMap<>();
         final HashMap<Class, Slot> bestToolSlot = new HashMap<>();
+        //#else
+        //$$ final HashMap<net.minecraft.registry.tag.TagKey<Item>, Double> bestMaterials = new HashMap<>();
+        //$$ final HashMap<net.minecraft.registry.tag.TagKey<Item>, Slot> bestToolSlot = new HashMap<>();
+        //#endif
 
         for (Slot slot : PlayerSlot.getCurrentScreenSlots()) {
             ItemStack stack = StorageHelper.getItemStackInSlot(slot);
@@ -237,6 +250,7 @@ public class StorageHelper {
 
             Item item = stack.getItem();
 
+            //#if MC < 12111
             if (!(item instanceof ToolItem tool)) continue;
 
             Class clazz = tool.getClass();
@@ -256,6 +270,21 @@ public class StorageHelper {
                 // We found something WORSE!
                 return Optional.of(slot);
             }
+            //#else
+            //$$ var family = ItemHelper.toolFamily(item);
+            //$$ if (family == null) continue;
+            //$$ double quality = ItemHelper.toolQuality(item);
+            //$$ double prevBest = bestMaterials.getOrDefault(family, -1.0);
+            //$$ if (quality > prevBest) {
+            //$$     if (bestMaterials.containsKey(family)) {
+            //$$         return Optional.of(bestToolSlot.get(family));
+            //$$     }
+            //$$     bestMaterials.put(family, quality);
+            //$$     bestToolSlot.put(family, slot);
+            //$$ } else if (prevBest >= 0 && quality < prevBest) {
+            //$$     return Optional.of(slot);
+            //$$ }
+            //#endif
         }
 
         // Now we're getting desparate
@@ -290,6 +319,7 @@ public class StorageHelper {
                 return possibleSlots.stream().min((leftSlot, rightSlot) -> {
                     ItemStack left = StorageHelper.getItemStackInSlot(leftSlot),
                             right = StorageHelper.getItemStackInSlot(rightSlot);
+                    //#if MC < 12111
                     boolean leftIsTool = left.getItem() instanceof ToolItem;
                     boolean rightIsTool = right.getItem() instanceof ToolItem;
                     // Prioritize tools over materials.
@@ -307,6 +337,23 @@ public class StorageHelper {
                         // We want less damage.
                         return left.getDamage() - right.getDamage();
                     }
+                    //#else
+                    //$$ boolean leftIsTool = ItemHelper.isTool(left.getItem());
+                    //$$ boolean rightIsTool = ItemHelper.isTool(right.getItem());
+                    //$$ if (rightIsTool && !leftIsTool) {
+                    //$$     return -1;
+                    //$$ } else if (leftIsTool && !rightIsTool) {
+                    //$$     return 1;
+                    //$$ }
+                    //$$ if (rightIsTool) {
+                    //$$     double leftQuality = ItemHelper.toolQuality(left.getItem());
+                    //$$     double rightQuality = ItemHelper.toolQuality(right.getItem());
+                    //$$     if (leftQuality != rightQuality) {
+                    //$$         return Double.compare(leftQuality, rightQuality);
+                    //$$     }
+                    //$$     return left.getDamage() - right.getDamage();
+                    //$$ }
+                    //#endif
 
                     // Prioritize food over other things if we lack food.
                     boolean lacksFood = totalFoodScore < 8;
@@ -417,11 +464,20 @@ public class StorageHelper {
         ClientPlayerEntity player = AltoClef.getInstance().getPlayer();
 
         for (Item item : any) {
+            //#if MC < 12111
             if (item instanceof ArmorItem armor) {
-                ItemStack equippedStack = player.getInventory().getArmorStack(armor.getSlotType().getEntitySlotId());
+                ItemStack equippedStack = player.getEquippedStack(armor.getSlotType());
                 if (equippedStack.getItem().equals(item))
                     return true;
             }
+            //#else
+            //$$ net.minecraft.entity.EquipmentSlot armorSlot = ItemHelper.getArmorSlot(item);
+            //$$ if (armorSlot != null) {
+            //$$     ItemStack equippedStack = player.getEquippedStack(armorSlot);
+            //$$     if (equippedStack.getItem().equals(item))
+            //$$         return true;
+            //$$ }
+            //#endif
             if (item instanceof ShieldItem shield) {
                 ItemStack equippedStack = player.getInventory().getStack(OFF_HAND_SLOT);
                 if (equippedStack.getItem().equals(shield))

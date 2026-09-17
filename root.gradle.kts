@@ -1,21 +1,20 @@
 plugins {
-    id("fabric-loom") version "1.7-SNAPSHOT" apply false
+    id("fabric-loom") version "1.15.5" apply false
     id("com.replaymod.preprocess") version "c2041a34ae"
 }
 
 subprojects {
     repositories {
-        //mavenLocal()
         mavenCentral()
         maven("https://libraries.minecraft.net/")
         maven("https://repo.spongepowered.org/repository/maven-public/")
-        maven("https://github.com/jitsi/jitsi-maven-repository/raw/master/releases/")
         maven("https://maven.fabricmc.net/")
         maven("https://jitpack.io")
     }
 }
 
 preprocess {
+    val mc12111 = createNode("1.21.11", 12111, "yarn")
     val mc12101 = createNode("1.21.1", 12101, "yarn")
     val mc12100 = createNode("1.21", 12100, "yarn")
     val mc12006 = createNode("1.20.6", 12006, "yarn")
@@ -30,6 +29,7 @@ preprocess {
     val mc11605 = createNode("1.16.5", 11605, "yarn")
     val mc11601 = createNode("1.16.1", 11601, "yarn")
 
+    mc12111.link(mc12101)
     mc12101.link(mc12100)
     mc12100.link(mc12006)
     mc12006.link(mc12005)

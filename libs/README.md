@@ -1,5 +1,6 @@
-﻿Place remapped tungsten-fabric jars here. Gradle 1.21/1.21.1 will pick them up.
+﻿Place remapped tungsten-fabric jars here. Gradle 1.21/1.21.1/1.21.11 will pick them up.
 
-Also:
-- baritone-unoptimized-fabric-1.16.1.jar — AltoClef-patched Baritone for MC 1.16.1
-  (1.16.5 AltoClef fork jar with postHandleMultiBlockChange no-op; keeps AltoClefSettings).
+Ostinato Baritone jars (preferred):
+- Prefer ../Ostinato/dist (see docs/OSTINATO_WIRING.md)
+- baritone-unoptimized-fabric-ostinato-1.16.1.jar — Ostinato 1.16.1 (method_30621 no-op + AltoClefSettings)
+- Legacy: baritone-unoptimized-fabric-1.16.1.jar — same lineage; TenorClef also accepts this name pattern

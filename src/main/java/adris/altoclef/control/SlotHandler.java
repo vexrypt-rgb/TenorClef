@@ -124,7 +124,7 @@ public class SlotHandler {
     }
 
     public boolean forceDeequipHitTool() {
-        return forceDeequip(stack -> stack.getItem() instanceof ToolItem);
+        return forceDeequip(stack -> ItemHelper.isTool(stack.getItem()));
     }
 
     public void forceDeequipRightClickableItem() {

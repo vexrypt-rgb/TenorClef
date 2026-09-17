@@ -34,8 +34,6 @@ import net.minecraft.entity.projectile.thrown.PotionEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.MiningToolItem;
-import net.minecraft.item.SwordItem;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -333,7 +331,7 @@ public class MobDefenseChain extends SingleTaskChain {
                 if (damage > 0) {
                     canDealWith = Math.max(canDealWith, 2);
                 } else {
-                    // Fist/fallback â€” still try one zombie rather than infinite flee
+                    // Fist/fallback Ã¢â‚¬â€ still try one zombie rather than infinite flee
                     canDealWith = Math.max(canDealWith, 1);
                 }
                 // Prefer fighting zombies/spiders over fleeing when only melee hostiles
@@ -388,37 +386,24 @@ public class MobDefenseChain extends SingleTaskChain {
         return mod.getItemStorage().hasItem(Items.SHIELD) || mod.getItemStorage().hasItemInOffhand(Items.SHIELD);
     }
 
-    private static SwordItem getBestSword(AltoClef mod) {
-        Item[] SWORDS = new Item[]{Items.NETHERITE_SWORD, Items.DIAMOND_SWORD, Items.IRON_SWORD, Items.GOLDEN_SWORD,
-                Items.STONE_SWORD, Items.WOODEN_SWORD};
-
-        SwordItem bestSword = null;
-        for (Item item : SWORDS) {
-            if (mod.getItemStorage().hasItem(item)) {
-                bestSword = (SwordItem) item;
-                break;
+    private static Item getBestSword(AltoClef mod) {
+        Item best = null;
+        float bestDamage = 0;
+        for (ItemStack stack : mod.getItemStorage().getItemStacksPlayerInventory(true)) {
+            float damage = ItemHelper.meleeDamageOf(stack.getItem());
+            if (damage > bestDamage) {
+                best = stack.getItem();
+                bestDamage = damage;
             }
         }
-        return bestSword;
+        return best;
     }
 
     /** Best melee damage from sword or axe (axe for fight/flee gate only; combat equip prefers sword). */
     private static float getBestMeleeAttackDamage(AltoClef mod) {
-        Item[] WEAPONS = new Item[]{
-                Items.NETHERITE_SWORD, Items.DIAMOND_SWORD, Items.IRON_SWORD, Items.GOLDEN_SWORD,
-                Items.STONE_SWORD, Items.WOODEN_SWORD,
-                Items.NETHERITE_AXE, Items.DIAMOND_AXE, Items.IRON_AXE, Items.GOLDEN_AXE,
-                Items.STONE_AXE, Items.WOODEN_AXE
-        };
         float best = 0;
-        for (Item item : WEAPONS) {
-            if (!mod.getItemStorage().hasItem(item)) continue;
-            float dmg = 1;
-            if (item instanceof SwordItem sword) {
-                dmg = sword.getMaterial().getAttackDamage() + 1;
-            } else if (item instanceof MiningToolItem tool) {
-                dmg = tool.getMaterial().getAttackDamage() + 1;
-            }
+        for (ItemStack stack : mod.getItemStorage().getItemStacksPlayerInventory(true)) {
+            float dmg = ItemHelper.meleeDamageOf(stack.getItem()) + 1;
             if (dmg > best) best = dmg;
         }
         return best;

@@ -7,11 +7,11 @@ import adris.altoclef.commandsystem.args.ListArg;
 import adris.altoclef.commandsystem.exception.CommandException;
 import adris.altoclef.tasks.container.StoreInAnyContainerTask;
 import adris.altoclef.util.ItemTarget;
+import adris.altoclef.util.helpers.ItemHelper;
 import adris.altoclef.util.helpers.StorageHelper;
 import adris.altoclef.util.slots.PlayerSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ToolItem;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.List;
@@ -32,7 +32,7 @@ public class DepositCommand extends Command {
             // Ignore tools
             if (!stack.isEmpty()) {
                 Item item = stack.getItem();
-                return !(item instanceof ToolItem);
+                return !ItemHelper.isTool(item);
             }
             return false;
         });

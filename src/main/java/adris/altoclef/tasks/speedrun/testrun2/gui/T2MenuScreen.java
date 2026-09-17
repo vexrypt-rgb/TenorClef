@@ -221,6 +221,7 @@ public class T2MenuScreen extends Screen {
      * Never Method.invoke Screen.render on this — that virtual-dispatches
      * back into this method and leaves BufferBuilder mid-quad.
      */
+    //#if MC >= 12000
     @Override
     public void render(net.minecraft.client.gui.DrawContext context, int mouseX, int mouseY, float delta) {
         try {
@@ -229,6 +230,14 @@ public class T2MenuScreen extends Screen {
         super.render(context, mouseX, mouseY, delta);
         paintLabels(context);
     }
+    //#else
+    //$$ @Override
+    //$$ public void render(net.minecraft.client.util.math.MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    //$$     this.renderBackground(matrices);
+    //$$     super.render(matrices, mouseX, mouseY, delta);
+    //$$     paintLabels(matrices);
+    //$$ }
+    //#endif
 
     private void paintLabels(Object ctx) {
         drawStr(ctx, "TenorClef", 16, 8, 0xFFFFFF);

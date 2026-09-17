@@ -432,6 +432,117 @@ public class ItemHelper {
         return cookableFoodMap.containsKey(item);
     }
 
+    /** Replaces instanceof ToolItem (deleted in 1.21.11). */
+    public static boolean isTool(net.minecraft.item.Item item) {
+        //#if MC < 12111
+        return item instanceof net.minecraft.item.ToolItem;
+        //#else
+        //$$ return item != null && item.getComponents().contains(net.minecraft.component.DataComponentTypes.TOOL);
+        //#endif
+    }
+
+    /** Attack damage this item adds; works without SwordItem/MiningToolItem on 1.21.11. */
+    public static float meleeDamageOf(net.minecraft.item.Item item) {
+        //#if MC >= 12111
+        //$$ return attributeSum(item, "attack_damage");
+        //#else
+        if (item instanceof net.minecraft.item.SwordItem sword) {
+            return sword.getMaterial().getAttackDamage();
+        }
+        if (item instanceof net.minecraft.item.MiningToolItem tool) {
+            return tool.getMaterial().getAttackDamage();
+        }
+        return 0;
+        //#endif
+    }
+
+    public static float meleeDps(net.minecraft.item.Item item) {
+        //#if MC >= 12111
+        //$$ float damage = 1.0f + attributeSum(item, "attack_damage");
+        //$$ float speed = 4.0f + attributeSum(item, "attack_speed");
+        //$$ if (speed <= 0) return 0;
+        //$$ return damage * speed;
+        //#else
+        float dmg = meleeDamageOf(item);
+        if (dmg <= 0) return 0;
+        // Prefer swords slightly via higher effective rate assumption when class exists.
+        if (item instanceof net.minecraft.item.SwordItem) {
+            return (1.0f + dmg) * 1.6f;
+        }
+        return (1.0f + dmg) * 1.0f;
+        //#endif
+    }
+
+    public static net.minecraft.entity.EquipmentSlot getArmorSlot(net.minecraft.item.Item item) {
+        if (item == null) {
+            return null;
+        }
+        //#if MC >= 12111
+        //$$ var equippable = item.getComponents().get(net.minecraft.component.DataComponentTypes.EQUIPPABLE);
+        //$$ return equippable == null ? null : equippable.slot();
+        //#else
+        return item instanceof net.minecraft.item.ArmorItem armor ? armor.getSlotType() : null;
+        //#endif
+    }
+
+    //#if MC >= 12005
+    public static net.minecraft.registry.tag.TagKey<net.minecraft.item.Item> toolFamily(net.minecraft.item.Item item) {
+        if (item == null) return null;
+        net.minecraft.item.ItemStack stack = new net.minecraft.item.ItemStack(item);
+        if (stack.isIn(net.minecraft.registry.tag.ItemTags.PICKAXES)) return net.minecraft.registry.tag.ItemTags.PICKAXES;
+        if (stack.isIn(net.minecraft.registry.tag.ItemTags.AXES)) return net.minecraft.registry.tag.ItemTags.AXES;
+        if (stack.isIn(net.minecraft.registry.tag.ItemTags.SHOVELS)) return net.minecraft.registry.tag.ItemTags.SHOVELS;
+        if (stack.isIn(net.minecraft.registry.tag.ItemTags.HOES)) return net.minecraft.registry.tag.ItemTags.HOES;
+        if (stack.isIn(net.minecraft.registry.tag.ItemTags.SWORDS)) return net.minecraft.registry.tag.ItemTags.SWORDS;
+        return null;
+    }
+    //#else
+    //$$ public static Object toolFamily(net.minecraft.item.Item item) { return null; }
+    //#endif
+
+    public static double toolQuality(net.minecraft.item.Item item) {
+        //#if MC >= 12111
+        //$$ net.minecraft.item.ItemStack stack = new net.minecraft.item.ItemStack(item);
+        //$$ if (stack.isIn(net.minecraft.registry.tag.ItemTags.SWORDS)) {
+        //$$     return meleeDps(item);
+        //$$ }
+        //$$ net.minecraft.block.BlockState reference;
+        //$$ if (stack.isIn(net.minecraft.registry.tag.ItemTags.PICKAXES)) {
+        //$$     reference = net.minecraft.block.Blocks.STONE.getDefaultState();
+        //$$ } else if (stack.isIn(net.minecraft.registry.tag.ItemTags.AXES)) {
+        //$$     reference = net.minecraft.block.Blocks.OAK_LOG.getDefaultState();
+        //$$ } else if (stack.isIn(net.minecraft.registry.tag.ItemTags.SHOVELS)) {
+        //$$     reference = net.minecraft.block.Blocks.DIRT.getDefaultState();
+        //$$ } else {
+        //$$     reference = net.minecraft.block.Blocks.STONE.getDefaultState();
+        //$$ }
+        //$$ return stack.getMiningSpeedMultiplier(reference);
+        //#else
+        if (item instanceof net.minecraft.item.ToolItem tool) {
+            return adris.altoclef.multiversion.ToolMaterialVer.getMiningLevel(tool);
+        }
+        return 0;
+        //#endif
+    }
+
+    //#if MC >= 12111
+    //$$ private static float attributeSum(net.minecraft.item.Item item, String path) {
+    //$$     if (item == null) return 0;
+    //$$     try {
+    //$$         ItemStack stack = new ItemStack(item);
+    //$$         var comp = stack.get(net.minecraft.component.DataComponentTypes.ATTRIBUTE_MODIFIERS);
+    //$$         if (comp == null) return 0;
+    //$$         float sum = 0;
+    //$$         for (var entry : comp.modifiers()) {
+    //$$             String id = entry.attribute().getKey().map(k -> k.getValue().getPath()).orElse("");
+    //$$             if (path.equals(id)) sum += (float) entry.modifier().value();
+    //$$         }
+    //$$         return sum;
+    //$$     } catch (Throwable t) {
+    //$$         return 0;
+    //$$     }
+    //$$ }
+    //#endif
     public static class ColorfulItems {
         public DyeColor color;
         public String colorName;

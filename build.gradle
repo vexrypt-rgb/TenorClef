@@ -5,14 +5,14 @@ buildscript {
     project.ext.mcVersion = "${major}${minor.padLeft(2, '0')}${(patch ?: '').padLeft(2, '0')}" as int
 
     dependencies {
-        classpath 'fabric-loom:fabric-loom.gradle.plugin:1.0-SNAPSHOT'
+        classpath 'fabric-loom:fabric-loom.gradle.plugin:1.15.5'
     }
 }
 
 
 plugins {
     id "maven-publish"
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'com.gradleup.shadow' version '9.4.0'
     id 'xyz.wagyourtail.jvmdowngrader' version '1.2.2'
 }
 
@@ -23,8 +23,10 @@ preprocess {
     patternAnnotation.set("adris.altoclef.multiversion.Pattern")
 }
 
-sourceCompatibility = JavaVersion.VERSION_21
-targetCompatibility = sourceCompatibility
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
 
 
 
@@ -32,7 +34,9 @@ tasks.withType(JavaCompile).configureEach {
     options.release = 21
 }
 
-archivesBaseName = project.archives_base_name
+base {
+    archivesName = project.archives_base_name
+}
 version = "${project.name}-${project.mod_version}"
 group = project.maven_group
 
@@ -50,6 +54,7 @@ def mappingsVersions = [
         12006: "1.20.6+build.3",
         12100: "1.21+build.9",
         12101: "1.21.1+build.3",
+        12111: "1.21.11+build.3",
 ]
 
 def fabricApiVersions = [
@@ -66,6 +71,15 @@ def fabricApiVersions = [
         12006: "0.100.0+1.20.6",
         12100: "0.100.7+1.21",
         12101: "0.110.0+1.21.1",
+        12111: "0.140.0+1.21.11",
+]
+
+def loaderVersions = [
+        11601: project.loader_version,
+        11605: project.loader_version,
+        12100: project.loader_version,
+        12101: project.loader_version,
+        12111: "0.18.3",
 ]
 
 def getJavaVersion() {
@@ -102,7 +116,7 @@ dependencies {
     //to change the versions see the gradle.properties file
     minecraft("com.mojang:minecraft:${project.name}")
     mappings("net.fabricmc:yarn:${mappingsVersions[mcVersion]}:v2")
-    modImplementation("net.fabricmc:fabric-loader:${project.loader_version}")
+    modImplementation("net.fabricmc:fabric-loader:${loaderVersions.containsKey(mcVersion) ? loaderVersions[mcVersion] : project.loader_version}")
     include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.3.5")))
 
     // Fabric API. This is technically optional, but you probably want it anyway.
@@ -126,33 +140,45 @@ dependencies {
     shadow('com.fasterxml.jackson.core:jackson-databind:2.16.0')
 
     // Thank you georgeagostino for fixing my garbage
-    // 1.16.1 needs AltoClef-patched Baritone: stock mirancz 1.16.1 lacks AltoClefSettings,
-    // and the 1.16.5 jar crashes (ChunkDeltaUpdateS2CPacket.method_30621 / visitUpdates).
-    // libs/baritone-unoptimized-fabric-1.16.1.jar = mirancz 1.16.5 AltoClef jar with
-    // postHandleMultiBlockChange no-op'd for 1.16.1.
-        if (mcVersion == 11601) {
-        // 1.16.1 must keep the AltoClef-patched libs jar (Ostinato is 1.21.11-only).
-        def baritone1161 = file("${rootProject.projectDir}/libs/baritone-unoptimized-fabric-1.16.1.jar")
-        if (!baritone1161.exists()) {
-            throw new GradleException("Missing ${baritone1161.name} in libs/. Need AltoClef-patched Baritone for 1.16.1.")
-        }
-        modImplementation files(baritone1161)
-        include files(baritone1161)
-    } else {
-        // Prefer Ostinato (cabaletta 1.21.11 fork + AltoClefSettings) for modern modules.
-        // Ostinato MC = 1.21.11; TenorClef closest module = 1.21.1 — jar provides AltoClef APIs at compile;
-        // full runtime wants matching MC (see docs/OSTINATO_WIRING.md).
-        def ostinatoJars = []
+    // Baritone/Ostinato: 1.16.1 and 1.21.x prefer Ostinato jars (see docs/OSTINATO_WIRING.md).
         def ostinatoDist = file("${rootProject.projectDir}/../Ostinato/dist")
+        def ostinato1161Dist = file("${rootProject.projectDir}/../Ostinato-1.16.1/dist")
         def ostinatoLibs = file("${rootProject.projectDir}/libs")
+
+        if (mcVersion == 11601) {
+        // Prefer Ostinato 1.16.1 (AltoClef hooks + method_30621 no-op + drops guard).
+        def jars1161 = []
+        [ostinatoDist, ostinato1161Dist, ostinatoLibs].each { dir ->
+            if (dir.exists()) {
+                dir.eachFileMatch(~/baritone-unoptimized-fabric-.*1\.16\.1.*\.jar/) { f -> jars1161 << f }
+                dir.eachFileMatch(~/baritone-unoptimized-fabric-ostinato-1\.16\.1\.jar/) { f -> jars1161 << f }
+            }
+        }
+        jars1161 = jars1161.unique { it.absolutePath }.sort { -it.lastModified() }
+        if (jars1161.isEmpty()) {
+            throw new GradleException("Missing Ostinato 1.16.1 Baritone jar. Build Ostinato branch 1.16.1 or place baritone-unoptimized-fabric-ostinato-1.16.1.jar in ../Ostinato/dist (see docs/OSTINATO_WIRING.md).")
+        }
+        def jar = jars1161[0]
+        println "[altoclef] Ostinato Baritone for ${project.name}: ${jar.name}"
+        modImplementation files(jar)
+        include files(jar)
+    } else {
+        // Prefer Ostinato for 1.21.11 (matching MC) and older 1.21.x modules (see docs/OSTINATO_WIRING.md).
+        def ostinatoJars = []
         if (ostinatoDist.exists()) {
-            ostinatoDist.eachFileMatch(~/baritone-unoptimized-fabric-.*\.jar/) { f -> ostinatoJars << f }
+            ostinatoDist.eachFileMatch(~/baritone-unoptimized-fabric-.*\.jar/) { f ->
+                if (!f.name.contains("1.16.1") && !f.name.contains("ostinato-1.16")) {
+                    ostinatoJars << f
+                }
+            }
             ostinatoJars = ostinatoJars.sort { -it.lastModified() }
         }
         if (ostinatoJars.isEmpty() && ostinatoLibs.exists()) {
-            ostinatoLibs.eachFileMatch(~/baritone-unoptimized-fabric-ostinato.*\.jar/) { f -> ostinatoJars << f }
+            ostinatoLibs.eachFileMatch(~/baritone-unoptimized-fabric-ostinato.*\.jar/) { f ->
+                if (!f.name.contains("1.16.1")) ostinatoJars << f
+            }
         }
-        def useOstinato = (mcVersion == 12101 || mcVersion == 12100) && !ostinatoJars.isEmpty() && !project.hasProperty("altoclef.forceMiranczBaritone")
+        def useOstinato = (mcVersion == 12111 || mcVersion == 12101 || mcVersion == 12100) && !ostinatoJars.isEmpty() && !project.hasProperty("altoclef.forceMiranczBaritone")
         if (useOstinato) {
             def jar = ostinatoJars[0]
             println "[altoclef] Ostinato Baritone for ${project.name}: ${jar.name}"
@@ -174,11 +200,11 @@ dependencies {
     //modImplementation 'baritone-api-fabric:baritone-api-fabric:1.6.3'
     //implementation files('baritone-plus/build/libs/baritone-unoptimized-fabric-1.6.3.jar')
 
-    // Tungsten physics A* (1.21 / 1.21.1 only). Optional: jar may be absent — facade falls back to Baritone.
+    // Tungsten physics A* (1.21 / 1.21.1 / 1.21.11). Optional: jar may be absent — facade falls back to Baritone.
     // Build with:  cd vendor\tungsten && .\gradlew.bat remapJar
     // Then copy build\libs\tungsten-fabric-*-*.jar to libs\  (or leave in vendor build/libs).
     // COMPILE NOTE: do not run altoclef compileJava while runClient is live.
-    if (mcVersion == 12101 || mcVersion == 12100) {
+    if (mcVersion == 12111 || mcVersion == 12101 || mcVersion == 12100) {
         def tungstenJars = []
         def libsDir = file("${rootProject.projectDir}/libs")
         def vendorLibs = file("${rootProject.projectDir}/vendor/tungsten/build/libs")
@@ -225,7 +251,7 @@ downgradeJar {
 
 tasks.register('replaceJar') {
     // do not downgrade java version if we do not need to
-    if (getJavaVersion() == targetCompatibility) {
+    if (getJavaVersion() == java.targetCompatibility) {
         return
     }
 

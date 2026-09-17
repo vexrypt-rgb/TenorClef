@@ -1,4 +1,4 @@
-﻿pluginManagement {
+pluginManagement {
     repositories {
         maven("https://maven.fabricmc.net")
         mavenCentral()
@@ -20,7 +20,9 @@
 rootProject.name = "altoclef"
 rootProject.buildFileName = "root.gradle.kts"
 
+// Full remap chain must be included for preprocess (even if we mostly build 1.16.1 / 1.21.1).
 listOf(
+    "1.21.11",
     "1.21.1",
     "1.21",
     "1.20.6",

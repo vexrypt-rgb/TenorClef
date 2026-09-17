@@ -120,4 +120,15 @@ public class EntityVer {
         //#endif
     }
 
+
+    /** Removed/discarded check that works on 1.16 (field) and 1.17+ (method). */
+    public static boolean isGone(Entity entity) {
+        if (entity == null) return true;
+        //#if MC >= 11700
+        return entity.isRemoved();
+        //#else
+        //$$ return entity.removed;
+        //#endif
+    }
+
 }

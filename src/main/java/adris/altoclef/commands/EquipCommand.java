@@ -10,8 +10,11 @@ import adris.altoclef.commandsystem.exception.RuntimeCommandException;
 import adris.altoclef.tasks.misc.EquipArmorTask;
 import adris.altoclef.util.ItemTarget;
 import adris.altoclef.util.helpers.ItemHelper;
+//#if MC < 12111
 import net.minecraft.item.Equipment;
+//#endif
 import net.minecraft.item.Item;
+import net.minecraft.item.Items;
 
 import java.util.Arrays;
 import java.util.List;
@@ -36,8 +39,8 @@ public class EquipCommand extends Command {
 
         for (ItemTarget target : items) {
             for (Item item : target.getMatches()) {
-                if (!(item instanceof Equipment)) {
-                    throw new RuntimeCommandException("'"+item.toString().toUpperCase() + "' cannot be equipped!");
+                if (!canBeEquipped(item)) {
+                    throw new RuntimeCommandException("'"+ItemHelper.stripItemName(item).toUpperCase() + "' cannot be equipped!");
                 }
             }
         }
@@ -46,6 +49,14 @@ public class EquipCommand extends Command {
     }
 
 
+
+    private static boolean canBeEquipped(Item item) {
+        //#if MC < 12111
+        return item instanceof Equipment;
+        //#else
+        //$$ return item == Items.SHIELD || ItemHelper.getArmorSlot(item) != null;
+        //#endif
+    }
     // this is kinda meh way to do it
     private static class EquipmentItemArg extends CataloguedItemArg {
 
@@ -84,7 +95,7 @@ public class EquipCommand extends Command {
         }
 
         private static boolean isEquipment(String cataloguedItem) {
-            return Arrays.stream(new ItemTarget(cataloguedItem).getMatches()).anyMatch(i -> i instanceof Equipment);
+            return Arrays.stream(new ItemTarget(cataloguedItem).getMatches()).anyMatch(EquipCommand::canBeEquipped);
         }
     }
 

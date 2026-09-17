@@ -31,7 +31,7 @@ public class TungstenFollowTask extends Task {
 
     @Override
     protected Task onTick() {
-        if (entity == null || entity.isRemoved() || !entity.isAlive()) {
+        if (entity == null || adris.altoclef.multiversion.entity.EntityVer.isGone(entity) || !entity.isAlive()) {
             setDebugState("Tungsten follow target gone");
             return null;
         }
@@ -61,7 +61,7 @@ public class TungstenFollowTask extends Task {
 
     @Override
     public boolean isFinished() {
-        return entity == null || entity.isRemoved() || !entity.isAlive();
+        return entity == null || adris.altoclef.multiversion.entity.EntityVer.isGone(entity) || !entity.isAlive();
     }
 
     @Override

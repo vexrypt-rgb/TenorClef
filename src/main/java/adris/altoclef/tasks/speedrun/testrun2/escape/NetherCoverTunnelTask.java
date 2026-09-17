@@ -119,7 +119,11 @@ public class NetherCoverTunnelTask extends Task {
     private static boolean passable(AltoClef mod, BlockPos p) {
         try {
             var s = mod.getWorld().getBlockState(p);
+            //#if MC >= 12000
             return s.isAir() || s.isOf(Blocks.FIRE) || s.isLiquid();
+            //#else
+            //$$ return s.isAir() || s.getBlock() == Blocks.FIRE || s.getMaterial().isLiquid();
+            //#endif
         } catch (Throwable t) {
             try {
                 return mod.getWorld().getBlockState(p).isAir();

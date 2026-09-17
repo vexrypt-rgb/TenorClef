@@ -247,6 +247,32 @@ public class CollectBucketLiquidTask extends ResourceTask {
         return "Collect " + count + " " + liquidName + " buckets";
     }
 
+
+    /**
+     * Prefer a solid footing beside the liquid source so we scoop from shore instead of swimming in.
+     * Returns a stand position (feet) adjacent to {@code liquid}, or null if none looks safe.
+     */
+    private BlockPos shoreStandNear(AltoClef mod, BlockPos liquid) {
+        BlockPos best = null;
+        double bestDist = Double.MAX_VALUE;
+        BlockPos player = mod.getPlayer().getBlockPos();
+        for (Direction dir : Direction.values()) {
+            if (dir.getAxis().isVertical()) continue;
+            BlockPos stand = liquid.offset(dir);
+            // Need solid under feet and air at feet + head.
+            if (!WorldHelper.isSolidBlock(stand.down())) continue;
+            if (!WorldHelper.isAir(stand) || !WorldHelper.isAir(stand.up())) continue;
+            // Don't stand in the liquid column itself.
+            if (mod.getWorld().getBlockState(stand).getBlock() == toCollect) continue;
+            double d = stand.getSquaredDistance(player);
+            if (d < bestDist) {
+                bestDist = d;
+                best = stand;
+            }
+        }
+        return best;
+    }
+
     public static class CollectWaterBucketTask extends CollectBucketLiquidTask {
         public CollectWaterBucketTask(int targetCount) {
             super("water", Items.WATER_BUCKET, targetCount, Blocks.WATER);

@@ -110,6 +110,9 @@ public class ModernSpeedrunTask extends Task {
     private int wanderHold;
     private int woodX = Integer.MIN_VALUE;
     private int woodZ = Integer.MIN_VALUE;
+    /** After mob-defense / blacklist stall, force CollectIron to re-pick. */
+    private boolean ironNeedsKick;
+    private int lastCombatPulse;
     private int deathLock;
     private Dimension deathDim;
     private int unstickHold;
@@ -209,6 +212,7 @@ public class ModernSpeedrunTask extends Task {
                     + " iron=" + count(mod, Items.IRON_INGOT)
                     + " buck=" + (count(mod, Items.WATER_BUCKET) + count(mod, Items.LAVA_BUCKET)));
         }
+        ensureMiningPick(mod);
         phaseTicks++;
         if (phaseTicks % (20 * 10) == 0) {
             Debug.logMessage("T2 [HB] t=" + SpeedrunClock.now() + " ph=" + phase
@@ -414,11 +418,25 @@ public class ModernSpeedrunTask extends Task {
         boolean netherish = phase == Phase.NETHER || phase == Phase.EYES
                 || WorldHelper.getCurrentDimension() == Dimension.NETHER;
         // BlazePeek stole CollectBlazeRods for 20+ min whenever a blaze was within 4 blocks.
-        // Don't start a fight next to a dungeon. Creeper in the face only.
-        // No ranged chase. Only a creeper inside 2.5 blocks.
-        if (!netherish && creeperInFace(mod)) {
-            T2History.note("WHY fight: creeper in face");
+        // Melee hostiles in face (creeper / zombie / baby zombie villager) — own the fight so
+        // stick() can drop back into CollectIron instead of leaving a silent noop after KillAura.
+        // Still no ranged chase (skeletons/witches filtered in closeHostile).
+        if (!netherish && (creeperInFace(mod) || closeHostile(mod))) {
+            lastCombatPulse = phaseTicks;
+            ironNeedsKick = (phase == Phase.IRON);
+            T2History.note("WHY fight: melee hostile in face");
             return stick(FightNearbyTask.hostiles());
+        }
+        // Combat just ended while IRON — clear ore blacklist and force CollectIron to tick.
+        if (phase == Phase.IRON && lastCombatPulse > 0 && phaseTicks - lastCombatPulse < 20 * 3
+                && !(active instanceof adris.altoclef.tasks.speedrun.testrun2.combat.AnyWeaponCombatTask)) {
+            if (ironNeedsKick || (active != null && active.isFinished())) {
+                T2History.note("WHY iron: post-combat resume CollectIron");
+                clearBlockBlacklist(mod);
+                ironNeedsKick = false;
+                lastCombatPulse = 0;
+                active = null;
+            }
         }
 
         Task frozen = portalWatch(mod);
@@ -551,14 +569,25 @@ public class ModernSpeedrunTask extends Task {
             if (x == woodX && z == woodZ) woodStill++;
             else { woodStill = 0; woodX = x; woodZ = z; }
             if (woodStill > 20 * 8) {
-                T2Log.warn("E97", "wood jump-lock — wander not same tree");
+                // Do NOT TimeoutWander for 8s — that skips nearby jungle/etc for a far oak.
+                // Blacklist the stuck tree column and immediately re-pick nearest ANY log type.
+                T2Log.warn("E97", "wood jump-lock — retarget nearest any-type log");
                 woodStill = 0;
-                woodPause = 20 * 8;
+                woodPause = 20 * 2; // brief strafe only
                 McCompat.closeScreen();
                 McCompat.cancelPathing();
+                blacklistNearbyWood(mod);
+                active = null;
+                Task again = collectWood(mod, 2);
+                if (again != null) return again;
                 return new TimeoutWanderTask();
             }
-            if (woodPause > 0) return new TimeoutWanderTask();
+            if (woodPause > 0) {
+                // Strafing, but still accept any reachable log the scanner already sees.
+                Task again = collectWood(mod, 2);
+                if (again != null) return again;
+                return new TimeoutWanderTask();
+            }
             return collectWood(mod, 2);
         }
         if (count(mod, Items.CRAFTING_TABLE) < 1
@@ -1028,11 +1057,30 @@ public class ModernSpeedrunTask extends Task {
         }
         int ironN = count(mod, Items.IRON_INGOT) + count(mod, Items.IRON_ORE);
         boolean cheapPick = count(mod, Items.WOODEN_PICKAXE) + count(mod, Items.STONE_PICKAXE) >= 1;
+        // Soft kick: blacklist/unreachable ore after combat often leaves CollectIron noop.
+        if (ironNeedsKick && ironStill >= 20) {
+            T2Log.warn("E70", "iron post-combat kick @" + x + "," + z + " — clear blacklist + re-pick");
+            clearBlockBlacklist(mod);
+            ironNeedsKick = false;
+            HolePillar.reset();
+            active = null;
+            ironStill = 0;
+            return stick(iron(mod));
+        }
+        if (ironStill == 20 * 6) {
+            T2Log.warn("E70", "iron stall 6s @" + x + "," + z + " — clear blacklist + re-pick ore");
+            clearBlockBlacklist(mod);
+            HolePillar.reset();
+            active = null;
+            ironStill = 0;
+            return stick(iron(mod));
+        }
         if (ironStill == 20 * 12) {
             T2Log.warn("E70", "iron frozen 12s @" + x + "," + z + " — walk");
             McCompat.cancelPathing();
             adris.altoclef.tasks.speedrun.testrun2.core.T2Input.noJump();
             adris.altoclef.tasks.speedrun.testrun2.core.T2Input.walkTurn();
+            clearBlockBlacklist(mod);
             HolePillar.reset();
             active = null;
             return stick(offsetWalk(mod));
@@ -1375,6 +1423,68 @@ public class ModernSpeedrunTask extends Task {
     @Override
     protected String toDebugString() {
         return "testrun2/" + phase + (active != null ? ":" + active : "");
+    }
+
+
+    /** Drop the stuck tree so collectWood picks the nearest other log of any type. */
+    private void blacklistNearbyWood(AltoClef mod) {
+        Block[] logs = new Block[]{
+                Blocks.OAK_LOG, Blocks.BIRCH_LOG, Blocks.SPRUCE_LOG,
+                Blocks.JUNGLE_LOG, Blocks.ACACIA_LOG, Blocks.DARK_OAK_LOG,
+                Blocks.OAK_WOOD, Blocks.BIRCH_WOOD, Blocks.SPRUCE_WOOD,
+                Blocks.JUNGLE_WOOD, Blocks.ACACIA_WOOD, Blocks.DARK_OAK_WOOD
+        };
+        try {
+            BlockPos me = mod.getPlayer().getBlockPos();
+            for (BlockPos pos : BlockPos.iterate(me.add(-3, -3, -3), me.add(3, 6, 3))) {
+                Block b = mod.getWorld().getBlockState(pos).getBlock();
+                for (Block log : logs) {
+                    if (b == log) {
+                        // 0 allowed failures => immediately unreachable this tree column
+                        mod.getBlockScanner().requestBlockUnreachable(pos.toImmutable(), 0);
+                        break;
+                    }
+                }
+            }
+        } catch (Throwable ignored) {}
+    }
+
+    private void clearBlockBlacklist(AltoClef mod) {
+        try {
+            mod.getBlockScanner().clearBlacklist();
+        } catch (Throwable ignored) {}
+    }
+
+    /**
+     * E109b: PlaceBlocks/HolePillar leave dirt in hand; while mining/collecting in
+     * BOOTSTRAP/IRON, keep the best pick equipped so dirt does not stick across mine ticks.
+     */
+    private void ensureMiningPick(AltoClef mod) {
+        if (phase != Phase.IRON && phase != Phase.BOOTSTRAP) return;
+        if (HolePillar.busy() || HolePillar.holding()) return;
+        String cn = active == null ? "" : active.getClass().getSimpleName();
+        boolean mining = cn.contains("Mine") || cn.contains("Collect") || cn.contains("Smelt");
+        if (!mining) return;
+        try {
+            Item eq = StorageHelper.getItemStackInSlot(
+                    adris.altoclef.util.slots.PlayerSlot.getEquipSlot()).getItem();
+            boolean eqPick = eq == Items.WOODEN_PICKAXE || eq == Items.STONE_PICKAXE
+                    || eq == Items.IRON_PICKAXE || eq == Items.GOLDEN_PICKAXE
+                    || eq == Items.DIAMOND_PICKAXE || eq == Items.NETHERITE_PICKAXE;
+            if (eqPick) return;
+            Item[] picks = new Item[]{
+                    Items.NETHERITE_PICKAXE, Items.DIAMOND_PICKAXE, Items.IRON_PICKAXE,
+                    Items.STONE_PICKAXE, Items.GOLDEN_PICKAXE, Items.WOODEN_PICKAXE
+            };
+            for (Item pick : picks) {
+                if (count(mod, pick) >= 1) {
+                    try {
+                        mod.getSlotHandler().forceEquipItem(pick);
+                    } catch (Throwable ignored) {}
+                    return;
+                }
+            }
+        } catch (Throwable ignored) {}
     }
 
     @Override

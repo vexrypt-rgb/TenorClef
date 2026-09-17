@@ -245,6 +245,11 @@ public class BlockScanner {
         }
     }
 
+    /** Drop unreachable cooldowns so mining can re-pick nearby ore/logs after combat or a bad blacklist. */
+    public void clearBlacklist() {
+        blacklist.clear();
+    }
+
     public void reset() {
         trackedBlocks.clear();
         scannedBlocks.clear();

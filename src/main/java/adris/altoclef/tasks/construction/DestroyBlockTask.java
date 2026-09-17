@@ -2,6 +2,7 @@ package adris.altoclef.tasks.construction;
 
 import adris.altoclef.AltoClef;
 import adris.altoclef.Debug;
+import adris.altoclef.tasks.movement.GetOutOfWaterTask;
 import adris.altoclef.tasks.movement.RunAwayFromPositionTask;
 import adris.altoclef.tasks.movement.SafeRandomShimmyTask;
 import adris.altoclef.tasksystem.ITaskRequiresGrounded;
@@ -51,6 +52,9 @@ public class DestroyBlockTask extends Task implements ITaskRequiresGrounded {
     };
     private Task unstuckTask = null;
     private boolean isMining;
+    /** Ticks spent wet without stable footing / lost mine reach (bob thrash). */
+    private int waterBobTicks;
+    private static final int WATER_BOB_ESCAPE_TICKS = 25;
 
     public DestroyBlockTask(BlockPos pos) {
         this.pos = pos;
@@ -322,8 +326,39 @@ public class DestroyBlockTask extends Task implements ITaskRequiresGrounded {
             }
         }
 
+        boolean wet = false;
+        boolean grounded = false;
+        try {
+            wet = mod.getPlayer().isTouchingWater() || mod.getPlayer().isSubmergedInWater();
+            grounded = mod.getPlayer().isOnGround();
+        } catch (Throwable ignored) {}
+
+        // Water bob thrash: crosshair cannot stay on the block while floating.
+        // Prefer shore / solid footing before continuing the break (issue class #2377).
         Optional<Rotation> reach = LookHelper.getReach(pos);
-        if (reach.isPresent() && (mod.getPlayer().isTouchingWater() || mod.getPlayer().isOnGround()) && !mod.getFoodChain().needsToEat() && !WorldHelper.isInNetherPortal() && mod.getClientBaritone().getPathingBehavior().isSafeToCancel()) {
+        if (wet && !grounded) {
+            waterBobTicks++;
+            isMining = false;
+            try {
+                mod.getClientBaritone().getInputOverrideHandler().setInputForceState(Input.CLICK_LEFT, false);
+                mod.getInputControls().release(Input.CLICK_LEFT);
+            } catch (Throwable ignored) {}
+            if (waterBobTicks >= WATER_BOB_ESCAPE_TICKS || !reach.isPresent()) {
+                setDebugState("Escaping water before mine (bobbing, no footing)");
+                waterBobTicks = 0;
+                try {
+                    mod.getClientBaritone().getPathingBehavior().cancelEverything();
+                    mod.getClientBaritone().getCustomGoalProcess().onLostControl();
+                } catch (Throwable ignored) {}
+                return new GetOutOfWaterTask();
+            }
+        } else {
+            waterBobTicks = 0;
+        }
+
+        // Only mine when we have stable footing (or shallow water with ground).
+        // Do not left-click while bobbing even if reach briefly flickers present.
+        if (reach.isPresent() && grounded && !mod.getFoodChain().needsToEat() && !WorldHelper.isInNetherPortal() && mod.getClientBaritone().getPathingBehavior().isSafeToCancel()) {
             setDebugState("Block in range, mining...");
             stuckCheck.reset();
             isMining = true;
@@ -354,17 +389,21 @@ public class DestroyBlockTask extends Task implements ITaskRequiresGrounded {
             mod.getClientBaritone().getInputOverrideHandler().setInputForceState(Input.CLICK_LEFT, true);
         } else {
             setDebugState("Getting to block...");
-            if (isMining && mod.getPlayer().isTouchingWater()) {
-                setDebugState("We are in water... holding break button");
+            if (isMining && wet) {
+                // Previously held break while bobbing — that stalls CollectWaterBucket.
+                setDebugState("In water while mining — escaping for footing");
                 isMining = false;
-                mod.getBlockScanner().requestBlockUnreachable(pos);
-                mod.getInputControls().hold(Input.CLICK_LEFT);
+                try {
+                    mod.getClientBaritone().getInputOverrideHandler().setInputForceState(Input.CLICK_LEFT, false);
+                    mod.getInputControls().release(Input.CLICK_LEFT);
+                } catch (Throwable ignored) {}
+                return new GetOutOfWaterTask();
             } else {
                 isMining = false;
             }
             boolean isCloseToMoveBack = pos.isWithinDistance(mod.getPlayer().getPos(), 2);
             if (isCloseToMoveBack) {
-                if (!mod.getClientBaritone().getPathingBehavior().isPathing() && !mod.getPlayer().isTouchingWater() &&
+                if (!mod.getClientBaritone().getPathingBehavior().isPathing() && !wet &&
                         !mod.getFoodChain().needsToEat()) {
                     mod.getInputControls().hold(Input.MOVE_BACK);
                     mod.getInputControls().hold(Input.SNEAK);

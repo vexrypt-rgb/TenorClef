@@ -8,6 +8,7 @@ import adris.altoclef.tasks.InteractWithBlockTask;
 import adris.altoclef.tasks.ResourceTask;
 import adris.altoclef.tasks.construction.DestroyBlockTask;
 import adris.altoclef.tasks.movement.DefaultGoToDimensionTask;
+import adris.altoclef.tasks.movement.GetOutOfWaterTask;
 import adris.altoclef.tasks.movement.GetCloseToBlockTask;
 import adris.altoclef.tasks.movement.TimeoutWanderTask;
 import adris.altoclef.tasksystem.Task;
@@ -155,9 +156,20 @@ public class CollectBucketLiquidTask extends ResourceTask {
             //Debug.logMessage("TEST: " + RayTraceUtils.fluidHandling);
 
             return new DoToClosestBlockTask(blockPos -> {
+                boolean playerWet = false;
+                boolean playerGround = false;
+                try {
+                    playerWet = mod.getPlayer().isTouchingWater() || mod.getPlayer().isSubmergedInWater();
+                    playerGround = mod.getPlayer().isOnGround();
+                } catch (Throwable ignored) {}
+
                 // Clear above if lava because we can't enter.
                 // but NOT if we're standing right above.
                 if (mod.getWorld().getBlockState(blockPos.up()).isSolid()) {
+                    if (playerWet && !playerGround) {
+                        // Breaking while bobbing never keeps crosshair lock — shore first.
+                        return new GetOutOfWaterTask();
+                    }
                     if (!progressChecker.check(mod)) {
                         mod.getClientBaritone().getPathingBehavior().cancelEverything();
                         mod.getClientBaritone().getPathingBehavior().forceCancel();
@@ -179,19 +191,23 @@ public class CollectBucketLiquidTask extends ResourceTask {
                 }
                 timeoutTimer.reset();
 
-                // We can reach the block.
+                // Prefer scooping from shore/edge: grounded + reach beats swimming into the column.
                 if (LookHelper.getReach(blockPos).isPresent() &&
-                        mod.getClientBaritone().getPathingBehavior().isSafeToCancel()) {
+                        mod.getClientBaritone().getPathingBehavior().isSafeToCancel()
+                        && (!playerWet || playerGround)) {
                     tries++;
                     return new InteractWithBlockTask(new ItemTarget(Items.BUCKET, 1), blockPos, toCollect != Blocks.LAVA, new Vec3i(0, 1, 0));
                 }
-                // Get close enough.
-                // up because if we go below we'll try to move next to the liquid (for lava, not a good move)
+                if (playerWet && !playerGround) {
+                    return new GetOutOfWaterTask();
+                }
+                // Get close enough — stand next to the source on solid when possible (shore).
+                BlockPos shore = shoreStandNear(mod, blockPos);
                 if (this.thisOrChildAreTimedOut() && !wasWandering) {
                     mod.getBlockScanner().requestBlockUnreachable(blockPos.up());
                     wasWandering = true;
                 }
-                return new GetCloseToBlockTask(blockPos.up());
+                return new GetCloseToBlockTask(shore != null ? shore : blockPos.up());
             }, isSafeSourceLiquid, toCollect);
         }
 

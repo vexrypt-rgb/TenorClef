@@ -175,7 +175,14 @@ public class ModernSpeedrunTask extends Task {
             phase = Phase.DONE;
             ResetSignal.fire("ocean spawn");
         }
-        Debug.logMessage("TESRUN2 start mover=baritone eyes=" + SpeedrunOpt.EYES
+        // Mining always Baritone; travel mover may be tungsten when jar present (1.21.x only).
+        String moverLine;
+        try {
+            moverLine = adris.altoclef.movement.TungstenMovement.statusLine();
+        } catch (Throwable t) {
+            moverLine = "mover=baritone (status unavailable)";
+        }
+        Debug.logMessage("TESRUN2 start " + moverLine + " eyes=" + SpeedrunOpt.EYES
                 + " rods=" + SpeedrunOpt.BLAZE_RODS
                 + " skipDiamond=" + SpeedrunOpt.SKIP_DIAMOND_ARMOR);
     }

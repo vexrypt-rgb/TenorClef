@@ -2,6 +2,7 @@ package adris.altoclef.tasks.speedrun.testrun2;
 
 import adris.altoclef.AltoClef;
 import adris.altoclef.TaskCatalogue;
+import adris.altoclef.tasks.movement.GetOutOfWaterTask;
 import adris.altoclef.tasks.movement.TimeoutWanderTask;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.Dimension;
@@ -111,12 +112,17 @@ public final class T2Solve {
             return new StepOffTableTask();
         }
 
-        // 3. Water still
+        // 3. Water still / bob stall — escape to shore before mining resumes.
         double spd = speed(mod);
         if (wet && spd < 0.03 && sameXz > 20 * 3) {
             act("S102", "swim out spd=" + String.format(java.util.Locale.ROOT, "%.3f", spd));
+            cancelPath(mod);
+            try {
+                mod.getClientBaritone().getInputOverrideHandler().setInputForceState(
+                        baritone.api.utils.input.Input.CLICK_LEFT, false);
+            } catch (Throwable ignored) {}
             adris.altoclef.tasks.speedrun.testrun2.core.T2Input.swim();
-            return null;
+            return new GetOutOfWaterTask();
         }
 
         // Thrash detector: CollectIron <-> HolePillar at same xz.

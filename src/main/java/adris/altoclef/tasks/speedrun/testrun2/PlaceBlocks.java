@@ -82,19 +82,13 @@ public final class PlaceBlocks {
 
     private static ItemStack stack(AltoClef mod, int i) {
         try {
-            try {
-                return mod.getPlayer().inventory.getStack(i);
-            } catch (Throwable t) {
-                return mod.getPlayer().getInventory().getStack(i);
-            }
+            return mod.getPlayer().getInventory().getStack(i);
         } catch (Throwable t) {
             return ItemStack.EMPTY;
         }
     }
 
     private static void select(AltoClef mod, int slot) {
-        try { mod.getPlayer().inventory.selectedSlot = slot; } catch (Throwable ignored) {
-            try { mod.getPlayer().getInventory().selectedSlot = slot; } catch (Throwable ignored2) {}
-        }
+        try { mod.getPlayer().getInventory().selectedSlot = slot; } catch (Throwable ignored) {}
     }
 }

@@ -76,8 +76,10 @@ public final class BowLead {
                     .getMethod("isCharged", ItemStack.class)
                     .invoke(null, stack);
         } catch (Throwable t) {
+            // 1.20.5+ dropped getOrCreateTag; fall back to component dump
             try {
-                return stack.getOrCreateTag().getBoolean("Charged");
+                Object comps = stack.getClass().getMethod("getComponents").invoke(stack);
+                return String.valueOf(comps).toLowerCase().contains("charged");
             } catch (Throwable t2) {
                 return false;
             }
@@ -92,7 +94,8 @@ public final class BowLead {
                     .invoke(null, stack, Items.FIREWORK_ROCKET);
         } catch (Throwable t) {
             try {
-                return String.valueOf(stack.getOrCreateTag()).contains("firework");
+                Object comps = stack.getClass().getMethod("getComponents").invoke(stack);
+                return String.valueOf(comps).toLowerCase().contains("firework");
             } catch (Throwable t2) {
                 return false;
             }

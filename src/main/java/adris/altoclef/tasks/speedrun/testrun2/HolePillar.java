@@ -406,11 +406,7 @@ public final class HolePillar {
         try {
             for (int i = 0; i < 9; i++) {
                 ItemStack st;
-                try {
-                    st = mod.getPlayer().inventory.getStack(i);
-                } catch (Throwable t) {
-                    st = mod.getPlayer().getInventory().getStack(i);
-                }
+                st = mod.getPlayer().getInventory().getStack(i);
                 if (st == null || st.isEmpty()) continue;
                 for (Item it : want) {
                     if (st.getItem() == it) return i;
@@ -423,7 +419,7 @@ public final class HolePillar {
     private static boolean solid(AltoClef mod, BlockPos p) {
         try {
             BlockState s = mod.getWorld().getBlockState(p);
-            return s != null && !s.isAir() && s.getMaterial().isSolid();
+            return s != null && !s.isAir() && s.isSolid();
         } catch (Throwable t) {
             try {
                 return !mod.getWorld().getBlockState(p).isAir();
@@ -435,7 +431,7 @@ public final class HolePillar {
 
     private static void lookDown() {
         try {
-            MinecraftClient.getInstance().player.pitch = 90f;
+            MinecraftClient.getInstance().player.setPitch(90f);
         } catch (Throwable ignored) {}
     }
 

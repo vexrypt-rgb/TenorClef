@@ -42,7 +42,7 @@ public class FightPlayerTask extends Task {
 
     @Override
     protected Task onTick() {
-        if (target == null || !target.isAlive() || target.removed) {
+        if (target == null || !target.isAlive() || target.isRemoved()) {
             setDebugState("Target dead or gone");
             return null;
         }
@@ -98,6 +98,6 @@ public class FightPlayerTask extends Task {
 
     @Override
     public boolean isFinished() {
-        return target == null || !target.isAlive() || target.removed;
+        return target == null || !target.isAlive() || target.isRemoved();
     }
 }

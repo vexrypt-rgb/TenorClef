@@ -31,7 +31,7 @@ public class TungstenFollowTask extends Task {
 
     @Override
     protected Task onTick() {
-        if (entity == null || entity.removed || !entity.isAlive()) {
+        if (entity == null || entity.isRemoved() || !entity.isAlive()) {
             setDebugState("Tungsten follow target gone");
             return null;
         }
@@ -61,7 +61,7 @@ public class TungstenFollowTask extends Task {
 
     @Override
     public boolean isFinished() {
-        return entity == null || entity.removed || !entity.isAlive();
+        return entity == null || entity.isRemoved() || !entity.isAlive();
     }
 
     @Override

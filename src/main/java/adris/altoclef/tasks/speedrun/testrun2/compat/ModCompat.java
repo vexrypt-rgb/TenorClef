@@ -95,19 +95,48 @@ public final class ModCompat {
         return null;
     }
 
-    /** Vanilla + most Fabric mods put attack damage on the stack attributes. */
+    /**
+     * Vanilla + most Fabric mods put attack damage on the stack attributes.
+     * Uses reflection so 1.20.5+ (no getAttributeModifiers(EquipmentSlot)) still compiles.
+     */
     private static double probeStack(ItemStack stack) {
         try {
-            var attrs = stack.getAttributeModifiers(
-                    net.minecraft.entity.EquipmentSlot.MAINHAND);
-            for (var e : attrs.entries()) {
-                String key = String.valueOf(e.getKey()).toLowerCase();
-                if (!key.contains("attack_damage") && !key.contains("attackdamage")) continue;
-                Object v = e.getValue();
+            Class<?> slotCl = Class.forName("net.minecraft.entity.EquipmentSlot");
+            Object main = Enum.valueOf((Class<Enum>) (Class<?>) slotCl, "MAINHAND");
+            Object attrs = stack.getClass()
+                    .getMethod("getAttributeModifiers", slotCl)
+                    .invoke(stack, main);
+            if (attrs != null) {
+                Iterable<?> entries;
                 try {
-                    double base = ((Number) v.getClass().getMethod("getValue").invoke(v)).doubleValue();
-                    return 1.0 + base;
-                } catch (Throwable ignored) {}
+                    entries = (Iterable<?>) attrs.getClass().getMethod("entries").invoke(attrs);
+                } catch (Throwable t) {
+                    entries = (Iterable<?>) attrs;
+                }
+                for (Object e : entries) {
+                    Object key;
+                    Object val;
+                    try {
+                        key = e.getClass().getMethod("getKey").invoke(e);
+                        val = e.getClass().getMethod("getValue").invoke(e);
+                    } catch (Throwable t) {
+                        continue;
+                    }
+                    String ks = String.valueOf(key).toLowerCase();
+                    if (!ks.contains("attack_damage") && !ks.contains("attackdamage")) continue;
+                    try {
+                        double base = ((Number) val.getClass().getMethod("getValue").invoke(val)).doubleValue();
+                        return 1.0 + base;
+                    } catch (Throwable ignored) {}
+                }
+            }
+        } catch (Throwable ignored) {}
+        // 1.20.5+ component dump fallback
+        try {
+            Object comps = stack.getClass().getMethod("getComponents").invoke(stack);
+            String s = String.valueOf(comps).toLowerCase();
+            if (s.contains("attack_damage") || s.contains("attackdamage")) {
+                // best-effort: leave default if we cannot parse a number
             }
         } catch (Throwable ignored) {}
         return 1.0;

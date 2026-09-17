@@ -213,8 +213,7 @@ public class T2MenuScreen extends Screen {
         attach(button(this.width / 2 + 10, this.height - 24, 100, 20, "close", null));
     }
 
-    @Override
-    public boolean isPauseScreen() {
+    public boolean shouldPause() {
         return false;
     }
 
@@ -222,63 +221,35 @@ public class T2MenuScreen extends Screen {
      * Never Method.invoke Screen.render on this — that virtual-dispatches
      * back into this method and leaves BufferBuilder mid-quad.
      */
-    //#if MC >= 12001
     @Override
     public void render(net.minecraft.client.gui.DrawContext context, int mouseX, int mouseY, float delta) {
-        try { this.renderBackground(context); } catch (Throwable ignored) {}
-        super.render(context, mouseX, mouseY, delta);
-        paintLabels(context, null);
-    }
-    //#else
-    @Override
-    public void render(net.minecraft.client.util.math.MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        try { this.renderBackground(matrices); } catch (Throwable ignored) {}
         try {
-            com.mojang.blaze3d.systems.RenderSystem.enableTexture();
-            com.mojang.blaze3d.systems.RenderSystem.enableBlend();
+            this.renderBackground(context, mouseX, mouseY, delta);
         } catch (Throwable ignored) {}
-        super.render(matrices, mouseX, mouseY, delta);
-        paintLabels(null, matrices);
-    }
-    //#endif
-
-    private void paintLabels(Object ctx, Object matrices) {
-        drawStr(ctx, matrices, "TenorClef", 16, 8, 0xFFFFFF);
+        super.render(context, mouseX, mouseY, delta);
+        paintLabels(context);
     }
 
-    private void fillSafe(Object ctx, Object matrices, int x1, int y1, int x2, int y2, int color) {
-        if (ctx != null) {
-            try {
-                ctx.getClass().getMethod("fill", int.class, int.class, int.class, int.class, int.class)
-                        .invoke(ctx, x1, y1, x2, y2, color);
-                return;
-            } catch (Throwable ignored) {}
-        }
-        if (matrices != null) {
-            try {
-                fill((net.minecraft.client.util.math.MatrixStack) matrices, x1, y1, x2, y2, color);
-            } catch (Throwable ignored) {}
-        }
+    private void paintLabels(Object ctx) {
+        drawStr(ctx, "TenorClef", 16, 8, 0xFFFFFF);
     }
 
-    private void drawStr(Object ctx, Object matrices, String s, int x, int y, int color) {
-        if (s == null) return;
-        if (ctx != null) {
-            try {
-                ctx.getClass().getMethod("drawText",
-                                net.minecraft.client.font.TextRenderer.class, String.class,
-                                int.class, int.class, int.class, boolean.class)
-                        .invoke(ctx, this.textRenderer, s, x, y, color, true);
-                return;
-            } catch (Throwable ignored) {}
-        }
-        if (matrices != null) {
-            try {
-                this.textRenderer.drawWithShadow(
-                        (net.minecraft.client.util.math.MatrixStack) matrices, s, (float) x, (float) y, color);
-                return;
-            } catch (Throwable ignored) {}
-        }
+    private void fillSafe(Object ctx, int x1, int y1, int x2, int y2, int color) {
+        if (ctx == null) return;
+        try {
+            ctx.getClass().getMethod("fill", int.class, int.class, int.class, int.class, int.class)
+                    .invoke(ctx, x1, y1, x2, y2, color);
+        } catch (Throwable ignored) {}
+    }
+
+    private void drawStr(Object ctx, String s, int x, int y, int color) {
+        if (s == null || ctx == null) return;
+        try {
+            ctx.getClass().getMethod("drawText",
+                            net.minecraft.client.font.TextRenderer.class, String.class,
+                            int.class, int.class, int.class, boolean.class)
+                    .invoke(ctx, this.textRenderer, s, x, y, color, true);
+        } catch (Throwable ignored) {}
     }
 
     @Override

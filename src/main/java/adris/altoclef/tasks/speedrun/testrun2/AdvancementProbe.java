@@ -44,7 +44,7 @@ public final class AdvancementProbe {
     private static Identifier parseId(String id) {
         String path = id;
         if (id.contains(":")) path = id.substring(id.indexOf(':') + 1);
-        return new Identifier("minecraft", path);
+        return Identifier.of("minecraft", path);
     }
 
     private static Object findAdvancement(Object handler, Identifier ident) {

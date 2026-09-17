@@ -105,7 +105,7 @@ public final class DjPlayer {
     }
 
     private static SoundEvent instrument(int id) {
-        return switch (id) {
+        Object ref = switch (id) {
             case 1 -> SoundEvents.BLOCK_NOTE_BLOCK_BASS;
             case 2 -> SoundEvents.BLOCK_NOTE_BLOCK_BASEDRUM;
             case 3 -> SoundEvents.BLOCK_NOTE_BLOCK_SNARE;
@@ -123,5 +123,16 @@ public final class DjPlayer {
             case 15 -> SoundEvents.BLOCK_NOTE_BLOCK_PLING;
             default -> SoundEvents.BLOCK_NOTE_BLOCK_HARP;
         };
+        if (ref instanceof SoundEvent se) return se;
+        try {
+            Object v = ref.getClass().getMethod("value").invoke(ref);
+            if (v instanceof SoundEvent se) return se;
+        } catch (Throwable ignored) {}
+        try {
+            Object v = ref.getClass().getMethod("comp_349").invoke(ref);
+            if (v instanceof SoundEvent se) return se;
+        } catch (Throwable ignored) {}
+        return SoundEvent.of(net.minecraft.util.Identifier.of("minecraft", "block.note_block.harp"));
     }
 }
+

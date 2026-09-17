@@ -130,7 +130,8 @@ dependencies {
     // and the 1.16.5 jar crashes (ChunkDeltaUpdateS2CPacket.method_30621 / visitUpdates).
     // libs/baritone-unoptimized-fabric-1.16.1.jar = mirancz 1.16.5 AltoClef jar with
     // postHandleMultiBlockChange no-op'd for 1.16.1.
-    if (mcVersion == 11601) {
+        if (mcVersion == 11601) {
+        // 1.16.1 must keep the AltoClef-patched libs jar (Ostinato is 1.21.11-only).
         def baritone1161 = file("${rootProject.projectDir}/libs/baritone-unoptimized-fabric-1.16.1.jar")
         if (!baritone1161.exists()) {
             throw new GradleException("Missing ${baritone1161.name} in libs/. Need AltoClef-patched Baritone for 1.16.1.")
@@ -138,16 +139,38 @@ dependencies {
         modImplementation files(baritone1161)
         include files(baritone1161)
     } else {
-        def baritoneMcVersion = project.name
-        if (getProject().hasProperty("altoclef.development")) {
-            // Must run build from baritone-plus once
-            modImplementation "baritone-api-fabric:baritone-unoptimized-fabric-${baritoneMcVersion}"
-            include "baritone-api-fabric:baritone-unoptimized-fabric-${baritoneMcVersion}"
+        // Prefer Ostinato (cabaletta 1.21.11 fork + AltoClefSettings) for modern modules.
+        // Ostinato MC = 1.21.11; TenorClef closest module = 1.21.1 — jar provides AltoClef APIs at compile;
+        // full runtime wants matching MC (see docs/OSTINATO_WIRING.md).
+        def ostinatoJars = []
+        def ostinatoDist = file("${rootProject.projectDir}/../Ostinato/dist")
+        def ostinatoLibs = file("${rootProject.projectDir}/libs")
+        if (ostinatoDist.exists()) {
+            ostinatoDist.eachFileMatch(~/baritone-unoptimized-fabric-.*\.jar/) { f -> ostinatoJars << f }
+            ostinatoJars = ostinatoJars.sort { -it.lastModified() }
+        }
+        if (ostinatoJars.isEmpty() && ostinatoLibs.exists()) {
+            ostinatoLibs.eachFileMatch(~/baritone-unoptimized-fabric-ostinato.*\.jar/) { f -> ostinatoJars << f }
+        }
+        def useOstinato = (mcVersion == 12101 || mcVersion == 12100) && !ostinatoJars.isEmpty() && !project.hasProperty("altoclef.forceMiranczBaritone")
+        if (useOstinato) {
+            def jar = ostinatoJars[0]
+            println "[altoclef] Ostinato Baritone for ${project.name}: ${jar.name}"
+            modImplementation files(jar)
+            include files(jar)
         } else {
-            modImplementation "cabaletta:baritone-unoptimized-fabric:${baritoneMcVersion}"
-            include "cabaletta:baritone-unoptimized-fabric:${baritoneMcVersion}"
+            def baritoneMcVersion = project.name
+            if (getProject().hasProperty("altoclef.development")) {
+                // Must run build from baritone-plus once
+                modImplementation "baritone-api-fabric:baritone-unoptimized-fabric-${baritoneMcVersion}"
+                include "baritone-api-fabric:baritone-unoptimized-fabric-${baritoneMcVersion}"
+            } else {
+                modImplementation "cabaletta:baritone-unoptimized-fabric:${baritoneMcVersion}"
+                include "cabaletta:baritone-unoptimized-fabric:${baritoneMcVersion}"
+            }
         }
     }
+
     //modImplementation 'baritone-api-fabric:baritone-api-fabric:1.6.3'
     //implementation files('baritone-plus/build/libs/baritone-unoptimized-fabric-1.6.3.jar')
 

@@ -1,56 +1,46 @@
-﻿# Ostinato wiring (TenorClef)
+# Ostinato wiring
 
-Playbook reference: [UnionClef](https://github.com/3ndetz/unionclef) — slim active MC modules,
-Loom 1.15.x, `1.21.11` as preferred modern target. TenorClef keeps Ostinato Baritone (UnionClef
-dropped Baritone for Tungsten-only; we still need AltoClef Baritone APIs via Ostinato).
+TenorClef uses Ostinato as its Baritone-compatible movement engine on the primary
+modern target and on the 1.16.1 legacy target. Build matching revisions locally until
+Ostinato is published under a versioned Maven coordinate.
 
-## Preferred paths (MC-aligned)
+## Compatibility
 
-| TenorClef module | Ostinato artifact | Minecraft |
+| TenorClef module | Ostinato source | Status |
 | --- | --- | --- |
-| **`1.21.11`** | `../Ostinato/dist/baritone-unoptimized-fabric-*.jar` (exclude `*1.16.1*`) | **1.21.11** |
-| **`1.16.1`** | `../Ostinato/dist/baritone-unoptimized-fabric-ostinato-1.16.1.jar` (or `../Ostinato-1.16.1/dist/`) | **1.16.1** |
+| `1.21.11` | `main`, Fabric artifact | Primary supported pairing |
+| `1.21.1` / `1.21` | API-compatible modern artifact | Build/test pairing |
+| `1.16.1` | branch `1.16.1`, Fabric artifact | Legacy pairing |
 
-Both use Ostinato. Do **not** keep MiranCZ/libs as the long-term 1.16.1 path.
+## Build the modern pairing
 
-### Active Gradle modules (UnionClef-style)
+1. Clone TenorClef and Ostinato as sibling directories.
+2. In the Ostinato directory, run `gradlew.bat :fabric:build` on Windows or
+   `./gradlew :fabric:build` on macOS/Linux.
+3. Confirm an unoptimized Fabric jar exists in `Ostinato/dist/`.
+4. In the TenorClef directory, run `gradlew.bat :1.21.11:build` or
+   `./gradlew :1.21.11:build`.
 
-`settings.gradle.kts` includes only: `1.21.11`, `1.21.1`, `1.21`, `1.16.5`, `1.16.1`.
-Older `versions/1.17–1.20` trees stay on disk but are not configured (faster Loom).
+TenorClef detects the newest matching jar under `../Ostinato/dist`. Its Gradle output
+prints the selected file as `[altoclef] Ostinato Baritone ...`. Treat that line as the
+source of truth for the build; do not leave several unknown Baritone jars in `libs/`.
 
-### Modern (1.21.11)
+## Legacy 1.16.1
 
-```bat
-cd C:\Users\redfa\Documents\MinecraftDev\Ostinato
-gradlew.bat :fabric:build
-
-cd C:\Users\redfa\Documents\MinecraftDev\altoclef
-gradlew.bat :1.21.11:compileJava
-gradlew.bat :1.21.11:runClient
-```
-
-Expect: `[altoclef] Ostinato Baritone for 1.21.11: baritone-unoptimized-fabric-...jar`
-
-### Legacy (1.16.1)
-
-Ostinato branch `1.16.1` (cabaletta 1.16.5 + AltoClef ports):
-
-- `postHandleMultiBlockChange` no-op (`method_30621`)
-- `BlockOptionalMeta.drops` try/catch (`minecraft:origin` loot)
-
-```bat
-gradlew.bat :1.16.1:compileJava
-gradlew.bat :1.16.1:runClient
-```
-
-Expect: `[altoclef] Ostinato Baritone for 1.16.1: baritone-unoptimized-fabric-ostinato-1.16.1.jar`
-
-## Fallback
-
-`-Paltoclef.forceMiranczBaritone` — modern modules only.
-`1.16.1` requires the Ostinato 1.16.1 jar.
+Check out Ostinato's `1.16.1` branch and build its Fabric artifact first. Place the
+result in `../Ostinato/dist/` (or use a sibling `Ostinato-1.16.1/dist/` directory),
+then run `gradlew.bat :1.16.1:build` from TenorClef.
 
 ## Tungsten
 
-TenorClef still vendors Tungsten under `libs/` / `vendor/tungsten` (unlike UnionClef's
-`include(":tungsten")` subproject). Ostinato `movementBackend` covers travel on 1.21.11.
+Tungsten is optional and only affects travel/custom-goal movement on the modern target.
+Build its Fabric jar from `vendor/tungsten` and place it in TenorClef's `libs/` folder,
+or install it beside TenorClef and Ostinato in the Minecraft instance. If absent,
+Ostinato falls back to Baritone travel.
+
+## Publishing follow-up
+
+The local-jar arrangement is intentionally temporary. Before publishing a stable
+TenorClef release, publish a tagged Ostinato Fabric artifact and replace this file
+lookup with a pinned dependency coordinate. That makes an incorrect pairing fail at
+dependency resolution rather than at runtime.

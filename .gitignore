@@ -10,5 +10,10 @@ versions/*/run/
 run/
 saves/
 .idea/
+.vs/
+*.bak
+*.bak*
+.DS_Store
+*.hprof
 *.iml
 out/

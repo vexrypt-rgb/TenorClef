@@ -140,7 +140,9 @@ dependencies {
     shadow('com.fasterxml.jackson.core:jackson-databind:2.16.0')
 
     // Thank you georgeagostino for fixing my garbage
-    // Baritone/Ostinato: 1.16.1 and 1.21.x prefer Ostinato jars (see docs/OSTINATO_WIRING.md).
+    // Baritone/Ostinato: 1.16.1 requires the matching Ostinato artifact. The
+    // 1.21.11 port can use its matching Ostinato artifact while it is developed;
+    // do not load that artifact into 1.21 / 1.21.1 projects.
         def ostinatoDist = file("${rootProject.projectDir}/../Ostinato/dist")
         def ostinato1161Dist = file("${rootProject.projectDir}/../Ostinato-1.16.1/dist")
         def ostinatoLibs = file("${rootProject.projectDir}/libs")
@@ -163,7 +165,8 @@ dependencies {
         modImplementation files(jar)
         include files(jar)
     } else {
-        // Prefer Ostinato for 1.21.11 (matching MC) and older 1.21.x modules (see docs/OSTINATO_WIRING.md).
+        // Only 1.21.11 can use main's matching Ostinato artifact. 1.21 and 1.21.1
+        // must resolve their matching Baritone artifact instead of a 1.21.11 jar.
         def ostinatoJars = []
         if (ostinatoDist.exists()) {
             ostinatoDist.eachFileMatch(~/baritone-unoptimized-fabric-.*\.jar/) { f ->
@@ -178,7 +181,7 @@ dependencies {
                 if (!f.name.contains("1.16.1")) ostinatoJars << f
             }
         }
-        def useOstinato = (mcVersion == 12111 || mcVersion == 12101 || mcVersion == 12100) && !ostinatoJars.isEmpty() && !project.hasProperty("altoclef.forceMiranczBaritone")
+        def useOstinato = mcVersion == 12111 && !ostinatoJars.isEmpty() && !project.hasProperty("altoclef.forceMiranczBaritone")
         if (useOstinato) {
             def jar = ostinatoJars[0]
             println "[altoclef] Ostinato Baritone for ${project.name}: ${jar.name}"

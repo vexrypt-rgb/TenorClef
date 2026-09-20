@@ -3,4 +3,4 @@ branch=altoclef-compat
 upstream_commit=5cb12ad65c0e045aa5a02d017c98df64eeda6d40
 target=Minecraft 1.16.1 (Yarn 1.16.1+build.21)
 checkout=vendor/tungsten-1.16.1
-note=Parallel to vendor/tungsten (1.21). Keep kaptainwutax.tungsten.* package for TungstenBridge.
+note=Parallel to vendor/tungsten (1.21). Full physics A* port (Agent/PathFinder/Node). Keep kaptainwutax.tungsten.* for TungstenBridge. Slim stub superseded.

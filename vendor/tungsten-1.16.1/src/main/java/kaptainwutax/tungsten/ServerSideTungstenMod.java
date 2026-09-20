@@ -1,8 +1,12 @@
 package kaptainwutax.tungsten;
 
-import net.fabricmc.api.ModInitializer;
+import net.fabricmc.api.DedicatedServerModInitializer;
 
-public class ServerSideTungstenMod implements ModInitializer {
-	@Override
-	public void onInitialize() {}
+// Server-side fakeplayerapi support disabled (requires io.github.hackerokuz:fakeplayerapi)
+public class ServerSideTungstenMod implements DedicatedServerModInitializer {
+
+	public void onInitializeServer() {
+		// no-op: fakeplayerapi not available
+	}
+
 }

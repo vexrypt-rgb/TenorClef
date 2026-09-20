@@ -18,21 +18,29 @@ Why: AltoClef-compat 1.21 fork with Baritone removed. Prefer over stale KaptainW
 
 Local patch: vendor fabric.mod.json minecraft depends set to >=1.21 for 1.21.1.
 
-## 1.16.1 parity
+## 1.16.1 parity (fullport)
 | Field | Value |
 |-------|-------|
 | Checkout | vendor/tungsten-1.16.1 (pin: vendor/TUNGSTEN_1161_PIN.txt) |
 | Target | Yarn 1.16.1+build.21 / Fabric API 0.18.0+build.387-1.16.1 |
-| Jar | libs/tungsten-fabric-*-1.16.1*.jar or vendor/tungsten-1.16.1/build/libs |
+| Jar | libs/tungsten-fabric-*-1.16.1*.jar or vendor/tungsten-1.16.1/build/libs (~245KB, ~103 classes) |
 | Gradle gate | mcVersion == 11601 (same modImplementation+include pattern as tip) |
 
-**Approach:** Loom `migrateMappings` from tip 5cb12ad → 1.16.1 Yarn, then a **slim bridge-compatible** Fabric jar that keeps `kaptainwutax.tungsten.*` so `TungstenBridge` binds unchanged. Slim PathFinder/PathExecutor/FollowEntityTask use deterministic direct-walk steering (not full Agent physics A*).
+**Approach:** Loom `migrateMappings` from tip 5cb12ad → 1.16.1 Yarn, then finish remaining API gaps so **full Agent physics A\*** remaps. Package `kaptainwutax.tungsten.*` unchanged for `TungstenBridge`. The earlier **slim direct-walk stub** (PR #17 era) is **superseded** by this fullport jar.
 
-Full remapped Agent/VoxelWorld sources are retained under `vendor/tungsten-1.16.1/src/main/java-fullport-wip/` for continued port work (TagKey→Tag, Vec3d.offset(Direction), EntityDimensions fields, CollisionView, etc.).
+1.16.1 shims live in `kaptainwutax.tungsten.compat.McCompat` plus vendor-local `VoxelWorld` / `AgentShapeContext` / `AccessorEntity` adaptations. Sources also mirrored under artifacts `tungsten-1161/java-fullport-wip` and `tungsten-1161-fullport/`.
 
 KaptainWutax upstream is 1.19.2 — closer than 1.21 but still not 1.16.1; migrateMappings from tip was preferred to keep FollowEntityTask / PathFinder.find(WorldView,Vec3d,PlayerEntity) API parity with the existing reflection facade.
 
-**Runtime note:** slim jar declares `java: >=17`. Run 1.16.1 client with JDK 17+ (Fabric Loader 0.16.x). Loom configure still wants JDK 21.
+**Runtime note:** jar declares `java: >=17`. Run 1.16.1 client with JDK 17+ (Fabric Loader 0.16.x). Loom configure still wants JDK 21.
+
+### Remaining behavioral gaps vs tip 1.21 Tungsten
+- `FluidHandling.WATER` / `ShapeType.FALLDAMAGE_RESETTING` → closest 1.16.1 enums (`ANY` / `COLLIDER`)
+- `VoxelShape.getPointPositions` protected → `forEachBox` Y sampling (step-height edges may differ slightly)
+- Submerged fluid tags: 1.16.1 Entity holds a **single** `Tag<Fluid>`; Agent still uses a Set and only WATER/LAVA membership
+- `Vec3d.offset(Direction)`, `EntityDimensions.getBoxAt`, `Vec2f.lengthSquared` → McCompat helpers
+- Mixin coverage / render / some command paths less battle-tested on 1.16.1 than tip
+- In-game `@tgoto` / `mover=tungsten` parkour parity not validated on this box (no live 1.16.1 client)
 
 ## What is in this tree
 - TungstenBridge — reflection to kaptainwutax.tungsten.*

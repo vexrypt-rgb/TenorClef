@@ -11,6 +11,8 @@ Phase 6 adds `RecoveryManager` mapping FailureReason → RecoveryDecision (not a
 Phase 7 adds a minimal Goal / Plan / PlanExecutor layer above tasks (not full GOAP).
 Phase 8 adds a thin ThreatAssessor / ThreatMonitor that can pause/fail goals on HIGH/CRITICAL;
 MobDefenseChain / WorldSurvivalChain remain the fallback.
+Phase 9 adds a structured Agent JSON protocol over the existing `@agent` / file channel
+(keep old chat commands).
 
 ## Product intent
 
@@ -218,6 +220,25 @@ Below HIGH → resume if paused.
 
 **Hypothesis confirmed:** ThreatAssessor + monitor pausing GoalManager on HIGH/CRITICAL is enough —
 leave MobDefenseChain / WorldSurvivalChain running as today.
+
+### Phase 9 agent JSON protocol (incremental)
+
+| Type | Package | Role |
+|------|---------|------|
+| `AgentRequest` / `AgentResponse` / `AgentStatus` | `adris.altoclef.agent` | Structured schema |
+| `AgentJson` | same | Hand-rolled JSON codec (offline-testable) |
+| `AgentRuntime` / `AltoClefAgentRuntime` | same | Side effects → GoalManager / snapshot / cancel |
+| `AgentRequestHandler` / `AgentProtocol` | same | Parse + dispatch facade |
+| Transport | `AgentCommand` / `AgentFiles` / `AgentLoopTask` | `@agent json`, inbox JSON lines, `request.json` → `response.json` |
+
+**Supported actions:** `get` / `acquire` / `goal` → Phase 7 `AcquireItemGoal` via GoalManager;
+`status` / `snap` → WorldKnowledge + active goal/task/threat snapshot (partial OK);
+`cancel` → GoalManager.cancel + `cancelUserTask` when safe.
+
+**Hypothesis:** JSON over the existing agent file/command channel is enough — handler routes into
+GoalManager / TaskRunner without new networking. Legacy `@agent` verbs / `@goal` / `@get` unchanged.
+
+See [`AGENT_PROTOCOL.md`](./AGENT_PROTOCOL.md).
 
 ### Multi-version
 

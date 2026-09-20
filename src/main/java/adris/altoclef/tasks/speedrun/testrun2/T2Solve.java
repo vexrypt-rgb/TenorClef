@@ -113,15 +113,22 @@ public final class T2Solve {
         }
 
         // 3. Water still / bob stall — escape to shore before mining resumes.
+        // Critical: if already in GetOutOfWater / WaterBail, do NOT cancelPath or
+        // re-nudge swim. cancelPath every tick kept spd≈0 and thrashed S102 forever.
         double spd = speed(mod);
         if (wet && spd < 0.03 && sameXz > 20 * 3) {
-            act("S102", "swim out spd=" + String.format(java.util.Locale.ROOT, "%.3f", spd));
+            boolean alreadyEscaping = childName.contains("GetOutOfWater")
+                    || childName.contains("WaterBail");
+            if (alreadyEscaping) {
+                return null; // leave escape task running
+            }
+            act("S102", "escape water spd=" + String.format(java.util.Locale.ROOT, "%.3f", spd));
             cancelPath(mod);
             try {
                 mod.getClientBaritone().getInputOverrideHandler().setInputForceState(
                         baritone.api.utils.input.Input.CLICK_LEFT, false);
             } catch (Throwable ignored) {}
-            adris.altoclef.tasks.speedrun.testrun2.core.T2Input.swim();
+            // No T2Input.swim() — fights GetOutOfWater pathing / worsens bob thrash.
             return new GetOutOfWaterTask();
         }
 

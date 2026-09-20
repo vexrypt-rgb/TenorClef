@@ -138,7 +138,7 @@ public final class AltoClefWorldKnowledge implements WorldKnowledge {
         if (entity == null) {
             return KnowledgeFact.unknown();
         }
-        String key = KEY_ENTITY_ALIVE_PREFIX + entity.getId();
+        String key = KEY_ENTITY_ALIVE_PREFIX + adris.altoclef.multiversion.entity.EntityVer.getNetworkId(entity);
         boolean alive = entity.isAlive();
         // Dead is a high-confidence SENSOR observation; alive likewise.
         KnowledgeFact<Boolean> live = KnowledgeFact.of(alive, tick, 1.0, KnowledgeSource.SENSOR);

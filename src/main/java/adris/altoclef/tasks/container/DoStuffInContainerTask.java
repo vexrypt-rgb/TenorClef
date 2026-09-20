@@ -45,7 +45,21 @@ public abstract class DoStuffInContainerTask extends Task {
         this.containerBlocks = containerBlocks;
         this.containerTarget = containerTarget;
 
-        placeTask = new PlaceBlockNearbyTask(this.containerBlocks);
+        // Reject feet / inside-player spots — placing a crafting table under the
+        // bot causes jump-spam while trying to open/use it (S120 craft thrash).
+        placeTask = new PlaceBlockNearbyTask(pos -> {
+            try {
+                AltoClef m = AltoClef.getInstance();
+                if (m == null || m.getPlayer() == null) return true;
+                BlockPos feet = m.getPlayer().getBlockPos();
+                boolean inside = WorldHelper.isInsidePlayer(pos);
+                boolean atFeet = pos.equals(feet);
+                boolean atFeetDown = pos.equals(feet.down());
+                return !adris.altoclef.util.helpers.NearbyPlacePenalty.rejectContainerSpot(inside, atFeet, atFeetDown);
+            } catch (Throwable t) {
+                return !WorldHelper.isInsidePlayer(pos);
+            }
+        }, this.containerBlocks);
     }
 
     public DoStuffInContainerTask(Block containerBlock, ItemTarget containerTarget) {

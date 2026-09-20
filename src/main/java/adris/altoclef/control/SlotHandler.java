@@ -104,8 +104,28 @@ public class SlotHandler {
         // Already equipped
         if (StorageHelper.getItemStackInSlot(PlayerSlot.getEquipSlot()).getItem() == toEquip) return true;
 
-        // Always equip to the second slot. First + last is occupied by baritone.
-        mod.getPlayer().getInventory().selectedSlot = 1;
+        ClientPlayerEntity player = mod.getPlayer();
+        if (player == null) return false;
+
+        // Fast path: item already in hotbar — just select that slot.
+        // Old code always set selectedSlot=1 then SWAP'd into slot 1. After
+        // PlaceBlocks/HolePillar left dirt selected, that equipped dirt/fist
+        // while a wood pick sat in another hotbar slot (E109b fist-mine).
+        String wantId = itemId(toEquip);
+        String[] hotbarIds = new String[9];
+        for (int i = 0; i < 9; i++) {
+            ItemStack st = player.getInventory().getStack(i);
+            hotbarIds[i] = st.isEmpty() ? null : itemId(st.getItem());
+        }
+        int hot = adris.altoclef.util.helpers.HotbarEquipSelector.findHotbarSlot(hotbarIds, wantId);
+        if (hot >= 0) {
+            player.getInventory().selectedSlot = hot;
+            return true;
+        }
+
+        // Not in hotbar — move into hotbar slot 1 and select it.
+        // First + last hotbar slots are often occupied by baritone defaults.
+        player.getInventory().selectedSlot = 1;
 
         // If our item is in our cursor, simply move it to the hotbar.
         boolean inCursor = StorageHelper.getItemStackInSlot(CursorSlot.SLOT).getItem() == toEquip;
@@ -114,13 +134,20 @@ public class SlotHandler {
         if (!itemSlots.isEmpty()) {
             for (Slot ItemSlots : itemSlots) {
                 int hotbar = 1;
-                //_mod.getPlayer().getInventory().swapSlotWithHotbar();
                 clickSlotForce(Objects.requireNonNull(ItemSlots), inCursor ? 0 : hotbar, inCursor ? SlotActionType.PICKUP : SlotActionType.SWAP);
-                //registerSlotAction();
             }
             return true;
         }
         return false;
+    }
+
+    private static String itemId(Item item) {
+        if (item == null) return null;
+        try {
+            return item.getTranslationKey();
+        } catch (Throwable t) {
+            return item.toString();
+        }
     }
 
     public boolean forceDeequipHitTool() {

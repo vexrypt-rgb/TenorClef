@@ -35,7 +35,8 @@ public class MineAndCollectTask extends ResourceTask {
 
     private final MiningRequirement _requirement;
 
-    private final TimerGame _cursorStackTimer = new TimerGame(3);
+    // Was 3s — left fist/dirt equipped for seconds after PlaceBlocks (E109b).
+    private final TimerGame _cursorStackTimer = new TimerGame(0.05);
 
     private final MineOrCollectTask _subtask;
 

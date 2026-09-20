@@ -6,9 +6,14 @@ import adris.altoclef.chains.*;
 import adris.altoclef.trackers.BlockScanner;
 import adris.altoclef.commandsystem.CommandExecutor;
 import adris.altoclef.commandsystem.TabCompleter;
+import adris.altoclef.control.AdapterMovementController;
 import adris.altoclef.control.InputControls;
+import adris.altoclef.control.MovementController;
 import adris.altoclef.control.PlayerExtraController;
 import adris.altoclef.control.SlotHandler;
+import adris.altoclef.core.CoreServices;
+import adris.altoclef.knowledge.AltoClefWorldKnowledge;
+import adris.altoclef.knowledge.WorldKnowledge;
 import adris.altoclef.eventbus.EventBus;
 import adris.altoclef.eventbus.events.ClientRenderEvent;
 import adris.altoclef.eventbus.events.ClientTickEvent;
@@ -45,7 +50,9 @@ import java.util.*;
 import java.util.function.Consumer;
 
 /**
- * Central access point for AltoClef
+ * Central access point for AltoClef (compatibility shim).
+ * Phase 3: prefer {@link #getWorldKnowledge()} / {@link #getMovement()} / {@link #getCoreServices()}
+ * in new code; existing getters remain for ~317 call sites.
  */
 public class AltoClef implements ModInitializer {
 
@@ -82,6 +89,10 @@ public class AltoClef implements ModInitializer {
     private SlotHandler slotHandler;
     // Butler
     private Butler butler;
+    // Phase 3 extracted facades (AltoClef remains compatibility shim)
+    private WorldKnowledge worldKnowledge;
+    private MovementController movementController;
+    private CoreServices coreServices;
     // Pausing
     private boolean paused = false;
     private Task storedTask;
@@ -155,6 +166,11 @@ public class AltoClef implements ModInitializer {
         slotHandler = new SlotHandler(this);
 
         butler = new Butler(this);
+
+        // Phase 3: facades over existing trackers + MovementEngineAdapter
+        worldKnowledge = new AltoClefWorldKnowledge(this);
+        movementController = AdapterMovementController.INSTANCE;
+        coreServices = new CoreServices(worldKnowledge, movementController);
 
         initializeCommands();
 
@@ -329,6 +345,27 @@ public class AltoClef implements ModInitializer {
      */
     public static AltoClef getInstance() {
         return instance;
+    }
+
+    /**
+     * Phase 3 read-only world/tracker facade. Prefer over digging through AltoClef getters in new code.
+     */
+    public WorldKnowledge getWorldKnowledge() {
+        return worldKnowledge;
+    }
+
+    /**
+     * Phase 3 travel controller (wraps MovementEngineAdapter). Prefer for go-to / follow.
+     */
+    public MovementController getMovement() {
+        return movementController;
+    }
+
+    /**
+     * Bundled Phase 3 services for injection-style call sites.
+     */
+    public CoreServices getCoreServices() {
+        return coreServices;
     }
 
     /**

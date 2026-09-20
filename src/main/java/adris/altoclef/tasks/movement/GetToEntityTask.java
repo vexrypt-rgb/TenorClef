@@ -3,7 +3,7 @@ package adris.altoclef.tasks.movement;
 import adris.altoclef.AltoClef;
 import adris.altoclef.tasksystem.ITaskRequiresGrounded;
 import adris.altoclef.tasksystem.Task;
-import adris.altoclef.movement.MovementEngineAdapter;
+import adris.altoclef.control.MovementController;
 import adris.altoclef.util.baritone.GoalFollowEntity;
 import adris.altoclef.util.helpers.WorldHelper;
 import adris.altoclef.util.progresscheck.MovementProgressChecker;
@@ -98,7 +98,7 @@ public class GetToEntityTask extends Task implements ITaskRequiresGrounded {
 
     @Override
     protected void onStart() {
-        MovementEngineAdapter.cancel();
+        AltoClef.getInstance().getMovement().cancel();
         _progress.reset();
         stuckCheck.reset();
         _wanderTask.resetWander();
@@ -151,10 +151,11 @@ public class GetToEntityTask extends Task implements ITaskRequiresGrounded {
             return _wanderTask;
         }
 
-        // Phase 2: prefer Ostinato MovementEngine follow; fall back to CustomGoalProcess.
-        if (!MovementEngineAdapter.isPathingOrActive()) {
-            if (!MovementEngineAdapter.followEntity(_entity, _closeEnoughDistance)) {
-                MovementEngineAdapter.ensureGoalAndPath(new GoalFollowEntity(_entity, _closeEnoughDistance));
+        // Phase 2/3: MovementController (MovementEngineAdapter) follow; fall back to CustomGoalProcess.
+        MovementController movement = mod.getMovement();
+        if (!movement.isPathingOrActive()) {
+            if (!movement.followEntity(_entity, _closeEnoughDistance)) {
+                movement.ensureGoalAndPath(new GoalFollowEntity(_entity, _closeEnoughDistance));
             }
         }
 
@@ -172,7 +173,7 @@ public class GetToEntityTask extends Task implements ITaskRequiresGrounded {
 
     @Override
     protected void onStop(Task interruptTask) {
-        MovementEngineAdapter.cancel();
+        AltoClef.getInstance().getMovement().cancel();
     }
 
     @Override

@@ -42,7 +42,19 @@ Define and ship:
 
 **Status (Phase 2):** Ostinato tip evolves the precursor SPI into `IMovementEngine` /
 `HybridMovementEngine` / `MovementGoal` / `PathResult` (see Ostinato `docs/MOVEMENT_ENGINE.md`).
-TenorClef adapter uses reflection so stock Baritone jars keep working.
+TenorClef adapter uses reflection so stock Baritone jars keep working. **Merged on main.**
+
+## Phase 3 — Core split (this PR)
+
+Vertical slice only — no rewrite, no mass migration:
+
+1. `WorldKnowledge` read-only facade over existing trackers
+2. `MovementController` wrapping `MovementEngineAdapter` (high-value, low-risk)
+3. AltoClef shim + `getWorldKnowledge()` / `getMovement()` / `getCoreServices()`
+4. Migrate GetToBlock / GetToEntity call sites only
+5. Unit-test facade wiring with fakes; `:1.21.1:compileJava`
+
+**Status (Phase 3):** first slice on `feat/phase3-core-split`.
 
 ## Engineering rules
 
@@ -74,8 +86,12 @@ User: "Get me a full set of iron armor and a shield." → goal → plan → Osti
 
 ## Active work
 
-- Phase 0 + Phase 1 merged on `main`
-- **Phase 2 in progress:** Ostinato `feat/movement-engine` + TenorClef `feat/movement-engine-adapter`
-  - Migrated: `GetToBlockTask`, `GetToEntityTask` via `MovementEngineAdapter`
-  - Remaining Phase 2: publish Ostinato jar with engine API for 1.21.x pairing; more travel sites later
+- Phase 0 + Phase 1 + Phase 2 merged on `main`
+- **Phase 3 in progress:** `feat/phase3-core-split`
+  - Extracted: `WorldKnowledge`, `MovementController` (`AdapterMovementController`), `CoreServices`
+  - AltoClef remains compatibility shim (`getInstance()` + legacy getters)
+  - Migrated: GetToBlock / GetToEntity path onto `getMovement()` / `getWorldKnowledge()`
+  - Remaining god-object surface: ~317 `getInstance()` sites (chains, butler, inventory UI, most tasks)
+  - Out of scope here: TaskResult (Phase 4), confidence world model (Phase 5), full planner
+- Follow-up: CI matrix repair for `1.21.11` (Ostinato tip jar staging)
 - Cloud Agents unavailable — local checkouts / executor patches

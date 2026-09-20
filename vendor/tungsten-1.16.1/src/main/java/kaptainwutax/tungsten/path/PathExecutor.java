@@ -1,85 +1,173 @@
 package kaptainwutax.tungsten.path;
 
-import kaptainwutax.tungsten.TungstenModDataContainer;
-import net.minecraft.client.MinecraftClient;
+import kaptainwutax.tungsten.Debug;
+import kaptainwutax.tungsten.TungstenMod;
+import kaptainwutax.tungsten.TungstenModRenderContainer;
+import kaptainwutax.tungsten.helpers.render.RenderHelper;
+import kaptainwutax.tungsten.path.blockSpaceSearchAssist.BlockNode;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.options.GameOptions;
+// import net.minecraft.server.network.ServerPlayerEntity; // server-side disabled
+import kaptainwutax.tungsten.agent.TungstenPlayerInput;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.List;
 
-/**
- * Executes a direct-walk toward a target. Keeps PathExecutor.isRunning()/stop
- * shape expected by TungstenBridge reflection.
- */
 public class PathExecutor {
-	public boolean stop = false;
-	private final AtomicBoolean running = new AtomicBoolean(false);
-	private Vec3d target;
 
-	public PathExecutor() {}
+    protected List<Node> path;
+    protected int tick = 0;
+    protected boolean allowedFlying = false;
+    public boolean stop = false;
+    public Runnable cb = null;
+    public long startTime;
+    public List<BlockNode> blockPath = null;
+    private boolean isClient;
 
-	/** Overloaded ctor kept for tip-compat call sites that pass a boolean. */
-	public PathExecutor(boolean ignored) {}
-
-	public void startGoTo(Vec3d target) {
-		this.target = target;
-		this.stop = false;
-		running.set(true);
-		if (TungstenModDataContainer.PATHFINDER != null) {
-			TungstenModDataContainer.PATHFINDER.active.set(true);
-			TungstenModDataContainer.PATHFINDER.stop.set(false);
+    public PathExecutor(boolean isClient) {
+    	this.isClient = isClient;
+    	try {
+    		this.startTime = System.currentTimeMillis();
+			if (isClient)
+	        	this.allowedFlying = TungstenMod.mc.player.abilities.allowFlying;
+		} catch (Exception e) {
+			this.allowedFlying = true;
 		}
 	}
+
+	public void setPath(List<Node> path) {
+		this.cb = null;
+		this.startTime = System.currentTimeMillis();
+		if (isClient)
+			this.allowedFlying = TungstenMod.mc.player.abilities.allowFlying;
+	    stop = false;
+    	this.path = path;
+    	this.tick = 0;
+    	RenderHelper.renderPathCurrentlyExecuted();
+	}
+	
+	public void addToPath(Node n) {
+		this.path.add(n);
+    	RenderHelper.renderPathCurrentlyExecuted();
+	}
+	
+	public void addPath(List<Node> path) {
+		if (stop) {
+			setPath(path);
+			return;
+		}
+		if (this.path == null) {
+			setPath(path);
+			return;
+		}
+		this.path.addAll(path);
+    	RenderHelper.renderPathCurrentlyExecuted();
+	}
+	
+	public List<Node> getPath() {
+		return this.path;
+	}
+	
+	public Node getCurrentNode() {
+		if (this.path == null) return null;
+		if (this.tick >= this.path.size()) return this.path.get(this.path.size()-1);
+		return this.path.get(this.tick);
+	}
+	
+
+	public int getCurrentTick() {
+		return this.tick;
+	}
+
 
 	public boolean isRunning() {
-		return running.get();
-	}
+        return this.path != null && this.tick <= this.path.size();
+    }
 
-	public void tick(MinecraftClient client) {
-		if (!running.get() || stop) {
-			finish();
-			return;
-		}
-		ClientPlayerEntity player = client.player;
-		if (player == null || target == null) {
-			finish();
-			return;
-		}
-		double dx = target.x - player.getX();
-		double dz = target.z - player.getZ();
-		double dy = target.y - player.getY();
-		double horiz = Math.sqrt(dx * dx + dz * dz);
-		if (horiz < 0.6 && Math.abs(dy) < 1.5) {
-			finish();
-			return;
-		}
-		float yaw = (float) (MathHelper.atan2(dz, dx) * (180.0 / Math.PI)) - 90.0F;
-		player.yaw = yaw;
-		player.headYaw = yaw;
-		player.bodyYaw = yaw;
-		player.input.movementForward = 1.0F;
-		player.input.movementSideways = 0.0F;
-		player.setSprinting(horiz > 2.0);
-		if (dy > 0.6 && player.isOnGround()) {
-			player.jump();
-		}
-		if (TungstenModDataContainer.PATHFINDER != null && TungstenModDataContainer.PATHFINDER.stop.get()) {
-			finish();
-		}
-	}
 
-	private void finish() {
-		running.set(false);
-		stop = false;
-		target = null;
-		MinecraftClient client = MinecraftClient.getInstance();
-		if (client != null && client.player != null && client.player.input != null) {
-			client.player.input.movementForward = 0;
-			client.player.input.movementSideways = 0;
-		}
-		if (TungstenModDataContainer.PATHFINDER != null) {
-			TungstenModDataContainer.PATHFINDER.active.set(false);
-		}
-	}
+    // Server-side tick disabled: requires ServerPlayerEntity.setPlayerInput() (MC 1.21.4+ only)
+    // public void tick(ServerPlayerEntity player) { ... }
+    
+    public void tick(ClientPlayerEntity player, GameOptions options) {
+    	player.abilities.allowFlying = false;
+    	if(TungstenMod.pauseKeyBinding.isPressed() || stop) {
+    		this.tick = this.path.size();
+    		// player.input.playerInput = ... // MC 1.21: Input has no playerInput field
+		    options.keyForward.setPressed(false);
+		    options.keyBack.setPressed(false);
+		    options.keyLeft.setPressed(false);
+		    options.keyRight.setPressed(false);
+		    options.keyJump.setPressed(false);
+		    options.keySneak.setPressed(false);
+		    options.keySprint.setPressed(false);
+		    player.abilities.allowFlying = allowedFlying;
+		    this.path = null;
+		    stop = false;
+		    TungstenModRenderContainer.RUNNING_PATH_RENDERER.clear();
+		    TungstenModRenderContainer.BLOCK_PATH_RENDERER.clear();
+    		return;
+    	}
+    	if(this.tick == this.path.size()) {
+    		long endTime = System.currentTimeMillis();
+    		long elapsedTime = endTime - startTime;
+    		long minutes = (elapsedTime / 1000) / 60;
+            long seconds = (elapsedTime / 1000) % 60;
+            long milliseconds = elapsedTime % 1000;
+            
+            Debug.logMessage("Time taken to execute: " + minutes + " minutes, " + seconds + " seconds, " + milliseconds + " milliseconds");
+    		
+		    options.keyForward.setPressed(false);
+		    options.keyBack.setPressed(false);
+		    options.keyLeft.setPressed(false);
+		    options.keyRight.setPressed(false);
+		    options.keyJump.setPressed(false);
+		    options.keySneak.setPressed(false);
+		    options.keySprint.setPressed(false);
+		    player.abilities.allowFlying = allowedFlying;
+		    this.path = null;
+		    stop = false;
+		    TungstenModRenderContainer.RUNNING_PATH_RENDERER.clear();
+		    TungstenModRenderContainer.BLOCK_PATH_RENDERER.clear();
+			player.setVelocity(0, 0, 0);
+		    if (cb != null) {
+		    	cb.run();
+		    	cb = null;
+		    }
+	    } else {
+		    Node node = this.path.get(this.tick);
+
+		    if(node.input != null) {
+			    player.yaw = (node.input.yaw);
+			    player.pitch = (node.input.pitch);
+			    // player.stopGliding() removed in MC 1.21
+	    		options.keyForward.setPressed(node.input.forward);
+			    options.keyBack.setPressed(node.input.back);
+			    options.keyLeft.setPressed(node.input.left);
+			    options.keyRight.setPressed(node.input.right);
+			    options.keyJump.setPressed(node.input.jump);
+			    options.keySneak.setPressed(node.input.sneak);
+			    options.keySprint.setPressed(node.input.sprint);
+		    }
+//		    if(this.tick != 0 && options != null) {
+//			    this.path.get(this.tick - 1).agent.compare(player, optionsToPlayerInput(options), true);
+//		    }
+		    int idx = TungstenModRenderContainer.RUNNING_PATH_RENDERER.size()-1;
+		    if (!TungstenModRenderContainer.RUNNING_PATH_RENDERER.isEmpty() && this.tick != 0) {
+		    	try {
+			    	TungstenModRenderContainer.RUNNING_PATH_RENDERER.remove(TungstenModRenderContainer.RUNNING_PATH_RENDERER.toArray()[idx]);
+			    	if (TungstenMod.renderPositonBoxes && TungstenModRenderContainer.RUNNING_PATH_RENDERER.size() > 1) {
+			    		TungstenModRenderContainer.RUNNING_PATH_RENDERER.remove(TungstenModRenderContainer.RUNNING_PATH_RENDERER.toArray()[idx-1]);
+			    	}
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
+		    }
+	    }
+	    this.tick++;
+    }
+    
+    
+    public static TungstenPlayerInput optionsToPlayerInput(GameOptions options) {
+    	return new TungstenPlayerInput(options.keyForward.isPressed(), options.keyBack.isPressed(), options.keyLeft.isPressed(), options.keyRight.isPressed(), options.keyJump.isPressed(), options.keySneak.isPressed(), options.keySprint.isPressed());
+    }
+
 }

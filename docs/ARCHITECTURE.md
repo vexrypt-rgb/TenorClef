@@ -3,7 +3,7 @@
 Audit date: 2026-09-19 (America/Phoenix). Repo audited: `vexrypt-rgb/TenorClef` (AltoClef fork).
 On the Windows machine this tree is `C:\Users\redfa\Documents\MinecraftDev\altoclef`.
 
-Phase 0 is **docs + inventory only** — no runtime behavior changes.
+Phase 0 was docs-only. Phase 2 adds MovementEngine adapter for 2 travel tasks.
 
 ## Product intent
 
@@ -85,7 +85,7 @@ TaskRunner.tick()
 
 **Path B — Tungsten travel facade (optional).** `adris.altoclef.movement.TungstenMovement` + reflection `TungstenBridge` → `TungstenGotoTask` / `TungstenFollowTask`. Mining intentionally stays on Baritone (`docs/TUNGSTEN_BACKEND.md`).
 
-**Ostinato precursor (tip / 1.21.x only):** Ostinato `main` already has `baritone.api.movement.IMovementBackend` + `MovementBackends` + setting `movementBackend`. TenorClef tasks **do not** go through that SPI yet; they still call Baritone processes / TenorClef's own Tungsten facade.
+**Ostinato MovementEngine (Phase 2):** Ostinato tip exposes `IMovementEngine` / `HybridMovementEngine` (built on `IMovementBackend`). TenorClef routes **GetToBlockTask** and **GetToEntityTask** through `adris.altoclef.movement.MovementEngineAdapter` (reflection + CustomGoalProcess fallback). Other ~60 Baritone call sites unchanged. Mining/builder stay on Baritone processes.
 
 ### Multi-version
 

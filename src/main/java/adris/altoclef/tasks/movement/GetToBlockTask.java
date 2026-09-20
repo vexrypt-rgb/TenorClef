@@ -40,6 +40,12 @@ public class GetToBlockTask extends CustomBaritoneGoalTask implements ITaskRequi
         this(position, false);
     }
 
+    /** Phase 2: route travel through Ostinato MovementEngine when present. */
+    @Override
+    protected boolean useMovementEngine() {
+        return true;
+    }
+
     /** True once we have been isFinished for >10s while still being ticked (parent stuck). */
     private boolean staleFinished = false;
     private boolean staleFinishedWarned = false;

@@ -7,7 +7,7 @@ import adris.altoclef.multiversion.versionedfields.Blocks;
 import adris.altoclef.tasksystem.ITaskRequiresGrounded;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.helpers.WorldHelper;
-import adris.altoclef.movement.MovementEngineAdapter;
+import adris.altoclef.control.MovementController;
 import adris.altoclef.util.progresscheck.MovementProgressChecker;
 import baritone.api.pathing.goals.Goal;
 import baritone.api.utils.input.Input;
@@ -100,10 +100,11 @@ public abstract class CustomBaritoneGoalTask extends Task implements ITaskRequir
 
     @Override
     protected void onStart() {
+        AltoClef mod = AltoClef.getInstance();
         if (useMovementEngine()) {
-            MovementEngineAdapter.cancel();
+            mod.getMovement().cancel();
         } else {
-            AltoClef.getInstance().getClientBaritone().getPathingBehavior().forceCancel();
+            mod.getClientBaritone().getPathingBehavior().forceCancel();
         }
         checker.reset();
         stuckCheck.reset();
@@ -185,9 +186,10 @@ public abstract class CustomBaritoneGoalTask extends Task implements ITaskRequir
             }
         }
         if (useMovementEngine()) {
-            if (!MovementEngineAdapter.isPathingOrActive()
+            MovementController movement = mod.getMovement();
+            if (!movement.isPathingOrActive()
                     && mod.getClientBaritone().getPathingBehavior().isSafeToCancel()) {
-                MovementEngineAdapter.ensureGoalAndPath(cachedGoal);
+                movement.ensureGoalAndPath(cachedGoal);
             }
         } else if (!mod.getClientBaritone().getCustomGoalProcess().isActive()
                 && mod.getClientBaritone().getPathingBehavior().isSafeToCancel()) {
@@ -199,18 +201,20 @@ public abstract class CustomBaritoneGoalTask extends Task implements ITaskRequir
 
     @Override
     public boolean isFinished() {
+        AltoClef mod = AltoClef.getInstance();
         if (cachedGoal == null) {
-            cachedGoal = newGoal(AltoClef.getInstance());
+            cachedGoal = newGoal(mod);
         }
-        return cachedGoal != null && cachedGoal.isInGoal(AltoClef.getInstance().getPlayer().getBlockPos());
+        return cachedGoal != null && cachedGoal.isInGoal(mod.getWorldKnowledge().getPlayer().getBlockPos());
     }
 
     @Override
     protected void onStop(Task interruptTask) {
+        AltoClef mod = AltoClef.getInstance();
         if (useMovementEngine()) {
-            MovementEngineAdapter.cancel();
+            mod.getMovement().cancel();
         } else {
-            AltoClef.getInstance().getClientBaritone().getPathingBehavior().forceCancel();
+            mod.getClientBaritone().getPathingBehavior().forceCancel();
         }
     }
 

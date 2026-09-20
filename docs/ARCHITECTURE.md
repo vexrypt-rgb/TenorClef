@@ -4,6 +4,7 @@ Audit date: 2026-09-19 (America/Phoenix). Repo audited: `vexrypt-rgb/TenorClef` 
 On the Windows machine this tree is `C:\Users\redfa\Documents\MinecraftDev\altoclef`.
 
 Phase 0 was docs-only. Phase 2 adds MovementEngine adapter for 2 travel tasks.
+Phase 3 extracts `WorldKnowledge` + `MovementController` facades; AltoClef stays a shim.
 
 ## Product intent
 
@@ -86,6 +87,25 @@ TaskRunner.tick()
 **Path B — Tungsten travel facade (optional).** `adris.altoclef.movement.TungstenMovement` + reflection `TungstenBridge` → `TungstenGotoTask` / `TungstenFollowTask`. Mining intentionally stays on Baritone (`docs/TUNGSTEN_BACKEND.md`).
 
 **Ostinato MovementEngine (Phase 2):** Ostinato tip exposes `IMovementEngine` / `HybridMovementEngine` (built on `IMovementBackend`). TenorClef routes **GetToBlockTask** and **GetToEntityTask** through `adris.altoclef.movement.MovementEngineAdapter` (reflection + CustomGoalProcess fallback). Other ~60 Baritone call sites unchanged. Mining/builder stay on Baritone processes.
+
+### Phase 3 core split (incremental)
+
+| Type | Package | Role |
+|------|---------|------|
+| `WorldKnowledge` | `adris.altoclef.knowledge` | Read-only facade over existing trackers + player/world |
+| `AltoClefWorldKnowledge` | same | Live impl backed by AltoClef getters |
+| `MovementController` | `adris.altoclef.control` | Travel ops (go-to / follow / cancel / status) |
+| `AdapterMovementController` | same | Thin wrap of Phase 2 `MovementEngineAdapter` |
+| `CoreServices` | `adris.altoclef.core` | Bundles knowledge + movement for injection |
+
+**Shim:** `AltoClef.getInstance()` and existing getters still work. New accessors:
+`getWorldKnowledge()`, `getMovement()`, `getCoreServices()`.
+
+**Migrated call sites (few):** `CustomBaritoneGoalTask` (GetToBlock path), `GetToEntityTask`,
+and a few `GetToBlockTask` world/scanner reads via `WorldKnowledge`.
+
+**Still on AltoClef god object (~317 `getInstance()` sites):** task runner, chains, butler,
+slot/input controls, Baritone settings bootstrap, food/mob/MLG chains, catalogue, most tasks.
 
 ### Multi-version
 

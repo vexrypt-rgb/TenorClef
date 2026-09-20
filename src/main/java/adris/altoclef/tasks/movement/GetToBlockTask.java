@@ -11,6 +11,7 @@ import adris.altoclef.util.time.TimerGame;
 import baritone.api.pathing.goals.Goal;
 import baritone.api.pathing.goals.GoalBlock;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.BlockPos;
 
 public class GetToBlockTask extends CustomBaritoneGoalTask implements ITaskRequiresGrounded {
@@ -58,10 +59,11 @@ public class GetToBlockTask extends CustomBaritoneGoalTask implements ITaskRequi
     @Override
     protected Task onTick() {
         AltoClef modEarly = AltoClef.getInstance();
+        ClientWorld world = modEarly.getWorldKnowledge().getWorld();
         // Post-death reportal often needs 100+ block walks; default 6s progress checker
         // fails during long Baritone calcs and abandons a live portal via wander.
-        if (!portalPatientInit && modEarly.getWorld() != null
-                && modEarly.getWorld().getBlockState(_position).getBlock() == Blocks.NETHER_PORTAL) {
+        if (!portalPatientInit && world != null
+                && world.getBlockState(_position).getBlock() == Blocks.NETHER_PORTAL) {
             portalPatientInit = true;
             checker = new MovementProgressChecker(40, 0.05, 2.0, 0.001, 5);
         }
@@ -148,8 +150,9 @@ public class GetToBlockTask extends CustomBaritoneGoalTask implements ITaskRequi
     @Override
     protected boolean shouldWanderOnFail(AltoClef mod) {
         // Never wander-abandon a live nether portal goal (post-death reportal).
-        return mod.getWorld() == null
-                || mod.getWorld().getBlockState(_position).getBlock() != Blocks.NETHER_PORTAL;
+        ClientWorld world = mod.getWorldKnowledge().getWorld();
+        return world == null
+                || world.getBlockState(_position).getBlock() != Blocks.NETHER_PORTAL;
     }
 
     @Override
@@ -157,9 +160,10 @@ public class GetToBlockTask extends CustomBaritoneGoalTask implements ITaskRequi
         super.onWander(mod);
         // Never blacklist nether portal blocks — EnterNetherPortalTask goals them, and
         // blacklisting causes post-death GetToBlock thrash (Try 1..4) that abandons a live portal.
-        if (mod.getWorld() != null && mod.getWorld().getBlockState(_position).getBlock() == Blocks.NETHER_PORTAL) {
+        ClientWorld world = mod.getWorldKnowledge().getWorld();
+        if (world != null && world.getBlockState(_position).getBlock() == Blocks.NETHER_PORTAL) {
             return;
         }
-        mod.getBlockScanner().requestBlockUnreachable(_position);
+        mod.getWorldKnowledge().getBlockScanner().requestBlockUnreachable(_position);
     }
 }

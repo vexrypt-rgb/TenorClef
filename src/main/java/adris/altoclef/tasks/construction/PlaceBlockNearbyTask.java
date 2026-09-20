@@ -231,9 +231,10 @@ public class PlaceBlockNearbyTask extends Task {
                 return true;
             }
 
-            //mod.getControllerExtras().mouseClickOverride(1, true);
-            //mod.getClientBaritone().getInputOverrideHandler().setInputForceState(Input.CLICK_RIGHT, true);
-            return true;
+            // Do NOT report success on a failed interact — old `return true` here
+            // held sneak and stalled PlaceBlockNearby into wander/jump loops while
+            // placing crafting tables (S120-style thrash).
+            return false;
         }
         return false;
     }
@@ -267,9 +268,15 @@ public class PlaceBlockNearbyTask extends Task {
                 continue;
             }
             boolean hasBelow = WorldHelper.isSolidBlock(blockPos.down());
+            // Never place inside the player — craft-table / container under feet
+            // causes Baritone jump-click thrash (S120 / E100 / E108).
+            double pen = adris.altoclef.util.helpers.NearbyPlacePenalty.penalty(solid, hasBelow, inside);
+            if (Double.isInfinite(pen)) {
+                continue;
+            }
             double distSq = BlockPosVer.getSquaredDistance(blockPos,mod.getPlayer().getPos());
 
-            double score = distSq + (solid ? 4 : 0) + (hasBelow ? 0 : 10) + (inside ? 3 : 0);
+            double score = distSq + pen;
 
             if (score < smallestScore) {
                 best = blockPos;

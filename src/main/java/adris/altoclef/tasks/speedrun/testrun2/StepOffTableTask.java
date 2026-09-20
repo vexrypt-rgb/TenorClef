@@ -32,10 +32,18 @@ public class StepOffTableTask extends Task {
         ticks++;
         McCompat.closeScreen();
         adris.altoclef.tasks.speedrun.testrun2.core.T2Input.noJump();
+        // Finish as soon as we are off the table — do not keep walking/jumping.
+        if (!onTable()) {
+            done = true;
+            McCompat.setMove(false, false);
+            return null;
+        }
         McCompat.setMove(true, false);
         if (ticks == 10) McCompat.setYaw(startYaw + 90f);
         if (ticks == 20) McCompat.setYaw(startYaw + 180f);
-        if (ticks >= 40) done = true;
+        if (ticks == 40) McCompat.setYaw(startYaw + 270f);
+        // Longer timeout if still standing on the table (was 40 → endless reopen thrash).
+        if (ticks >= 20 * 5) done = true;
         return null;
     }
 

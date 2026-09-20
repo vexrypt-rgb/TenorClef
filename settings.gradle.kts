@@ -1,3 +1,5 @@
+import java.util.Properties
+
 pluginManagement {
     repositories {
         maven("https://maven.fabricmc.net")
@@ -16,11 +18,32 @@ pluginManagement {
     }
 }
 
+// Optional personal overrides (gitignored). Prefer JAVA_HOME for the JDK.
+// org.gradle.java.home in this file is applied as a project property only —
+// for daemon JVM selection put it in ~/.gradle/gradle.properties or set JAVA_HOME.
+val localPropsFile = file("gradle.properties.local")
+if (localPropsFile.exists()) {
+    val localProps = Properties()
+    localPropsFile.reader().use { localProps.load(it) }
+    localProps.forEach { (rawKey, rawValue) ->
+        val key = rawKey.toString()
+        val value = rawValue.toString()
+        extra[key] = value
+        if (key == "org.gradle.java.home") {
+            println(
+                "[tenorclef] gradle.properties.local sets org.gradle.java.home — " +
+                    "Gradle selects the daemon JDK from JAVA_HOME or ~/.gradle/gradle.properties; " +
+                    "export JAVA_HOME=\"$value\" if this pin is required."
+            )
+        }
+    }
+    println("[tenorclef] Loaded ${localProps.size} entries from gradle.properties.local")
+}
 
 rootProject.name = "altoclef"
 rootProject.buildFileName = "root.gradle.kts"
 
-// Full remap chain must be included for preprocess (even if we mostly build 1.16.1 / 1.21.1).
+// Full remap chain must be included for preprocess (even if we mostly build 1.16.1 / 1.21.11).
 listOf(
     "1.21.11",
     "1.21.1",
@@ -37,9 +60,15 @@ listOf(
     "1.16.5",
     "1.16.1"
 ).forEach { version ->
+    // Gradle 9+ refuses include() when projectDir is missing (clean CI / fresh clone).
+    // Preprocess fills sources later; empty dirs are enough to configure.
+    val versionDir = file("versions/$version")
+    if (!versionDir.exists()) {
+        versionDir.mkdirs()
+    }
     include(":$version")
     project(":$version").apply {
-        projectDir = file("versions/$version")
+        projectDir = versionDir
         buildFileName = "../../build.gradle"
         name = version
     }

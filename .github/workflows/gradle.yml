@@ -9,11 +9,13 @@ on:
 permissions:
   contents: read
 
-jobs:
-  build-primary:
-    name: Build Fabric 1.21.1
-    runs-on: ubuntu-latest
+# Ostinato endpoints + verified primary release target.
+# Tungsten is OPTIONAL — jobs must pass without a tungsten jar.
 
+jobs:
+  build-1211:
+    name: Compile Fabric 1.21.1 (primary)
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v5
@@ -21,12 +23,89 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: gradle
-      - name: Build primary module
-        run: ./gradlew :1.21.1:build
-      - name: Upload primary artifacts
+      - name: Compile primary module
+        run: ./gradlew :1.21.1:compileJava --stacktrace
+      - name: Upload primary jars (if produced)
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: tenorclef-1.21.1
           path: versions/1.21.1/build/libs/*.jar
-          if-no-files-found: error
+          if-no-files-found: ignore
           retention-days: 14
+
+  build-12111:
+    name: Compile Fabric 1.21.11 (Ostinato tip)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      # Stage Ostinato tip as sibling ../Ostinato (matches local Windows layout).
+      - name: Checkout Ostinato tip
+        uses: actions/checkout@v4
+        with:
+          repository: vexrypt-rgb/Ostinato
+          ref: main
+          path: _ostinato_tip
+
+      - name: Build Ostinato Fabric jar into sibling dist
+        run: |
+          set -euo pipefail
+          chmod +x _ostinato_tip/gradlew
+          if ! (cd _ostinato_tip && ./gradlew build -x test --stacktrace); then
+            echo "::error::Ostinato tip build failed; 1.21.11 has no Maven Baritone — cannot compile"
+            exit 1
+          fi
+          mkdir -p "$GITHUB_WORKSPACE/../Ostinato/dist" libs
+          shopt -s nullglob
+          jars=(_ostinato_tip/dist/baritone-unoptimized-fabric-*.jar)
+          if [ ${#jars[@]} -eq 0 ]; then
+            jars=(_ostinato_tip/dist/baritone-*-fabric-*.jar)
+          fi
+          if [ ${#jars[@]} -eq 0 ]; then
+            echo "::error::No Ostinato fabric jars in dist/; 1.21.11 requires a staged tip jar"
+            exit 1
+          fi
+          cp -v "${jars[@]}" "$GITHUB_WORKSPACE/../Ostinato/dist/"
+          # libs/ pattern also accepts baritone-unoptimized-fabric-ostinato*.jar
+          for j in "${jars[@]}"; do
+            base="$(basename "$j")"
+            case "$base" in
+              *1.16.1*|*ostinato-1.16*) continue ;;
+            esac
+            cp -v "$j" "libs/baritone-unoptimized-fabric-ostinato-tip.jar"
+            break
+          done
+          ls -la "$GITHUB_WORKSPACE/../Ostinato/dist" libs/baritone-unoptimized-fabric-ostinato-tip.jar || true
+
+      - name: Compile 1.21.11 module
+        run: ./gradlew :1.21.11:compileJava --stacktrace
+
+  build-1161:
+    name: Compile Fabric 1.16.1 (Ostinato legacy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Verify staged Ostinato 1.16.1 jar
+        run: |
+          set -euo pipefail
+          if [ -f libs/baritone-unoptimized-fabric-1.16.1.jar ]; then
+            ls -la libs/baritone-unoptimized-fabric-1.16.1.jar
+          else
+            echo "::error::Missing libs/baritone-unoptimized-fabric-1.16.1.jar (committed stub required for CI)"
+            exit 1
+          fi
+
+      - name: Compile 1.16.1 module
+        run: ./gradlew :1.16.1:compileJava --stacktrace

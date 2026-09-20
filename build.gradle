@@ -145,12 +145,16 @@ dependencies {
     // do not load that artifact into 1.21 / 1.21.1 projects.
         def ostinatoDist = file("${rootProject.projectDir}/../Ostinato/dist")
         def ostinato1161Dist = file("${rootProject.projectDir}/../Ostinato-1.16.1/dist")
+        // In-tree checkouts (CI stages jars here or under libs/).
+        def ostinatoDistInTree = file("${rootProject.projectDir}/Ostinato/dist")
+        def ostinato1161DistInTree = file("${rootProject.projectDir}/Ostinato-1.16.1/dist")
         def ostinatoLibs = file("${rootProject.projectDir}/libs")
+        def ostinatoSearchDirs = [ostinatoDist, ostinato1161Dist, ostinatoDistInTree, ostinato1161DistInTree, ostinatoLibs]
 
         if (mcVersion == 11601) {
         // Prefer Ostinato 1.16.1 (AltoClef hooks + method_30621 no-op + drops guard).
         def jars1161 = []
-        [ostinatoDist, ostinato1161Dist, ostinatoLibs].each { dir ->
+        ostinatoSearchDirs.each { dir ->
             if (dir.exists()) {
                 dir.eachFileMatch(~/baritone-unoptimized-fabric-.*1\.16\.1.*\.jar/) { f -> jars1161 << f }
                 dir.eachFileMatch(~/baritone-unoptimized-fabric-ostinato-1\.16\.1\.jar/) { f -> jars1161 << f }
@@ -168,25 +172,41 @@ dependencies {
         // Only 1.21.11 can use main's matching Ostinato artifact. 1.21 and 1.21.1
         // must resolve their matching Baritone artifact instead of a 1.21.11 jar.
         def ostinatoJars = []
-        if (ostinatoDist.exists()) {
-            ostinatoDist.eachFileMatch(~/baritone-unoptimized-fabric-.*\.jar/) { f ->
-                if (!f.name.contains("1.16.1") && !f.name.contains("ostinato-1.16")) {
-                    ostinatoJars << f
+        [ostinatoDist, ostinatoDistInTree].each { dir ->
+            if (dir.exists()) {
+                dir.eachFileMatch(~/baritone-unoptimized-fabric-.*\.jar/) { f ->
+                    if (!f.name.contains("1.16.1") && !f.name.contains("ostinato-1.16")) {
+                        ostinatoJars << f
+                    }
                 }
             }
-            ostinatoJars = ostinatoJars.sort { -it.lastModified() }
         }
+        ostinatoJars = ostinatoJars.unique { it.absolutePath }.sort { -it.lastModified() }
         if (ostinatoJars.isEmpty() && ostinatoLibs.exists()) {
             ostinatoLibs.eachFileMatch(~/baritone-unoptimized-fabric-ostinato.*\.jar/) { f ->
                 if (!f.name.contains("1.16.1")) ostinatoJars << f
             }
+            // Also accept any non-1.16.1 unoptimized fabric jar staged into libs/ by CI.
+            if (ostinatoJars.isEmpty()) {
+                ostinatoLibs.eachFileMatch(~/baritone-unoptimized-fabric-.*\.jar/) { f ->
+                    if (!f.name.contains("1.16.1") && !f.name.contains("ostinato-1.16")) {
+                        ostinatoJars << f
+                    }
+                }
+            }
         }
-        def useOstinato = mcVersion == 12111 && !ostinatoJars.isEmpty() && !project.hasProperty("altoclef.forceMiranczBaritone")
-        if (useOstinato) {
-            def jar = ostinatoJars[0]
-            println "[altoclef] Ostinato Baritone for ${project.name}: ${jar.name}"
-            modImplementation files(jar)
-            include files(jar)
+        // 1.21.11 has no published cabaletta Baritone coordinate — Ostinato tip jar only.
+        // Without the jar, skip the dep so OTHER modules can still configure/compile on a
+        // clean tree; :1.21.11:compileJava itself will fail until the jar is staged.
+        if (mcVersion == 12111 && !project.hasProperty("altoclef.forceMiranczBaritone")) {
+            if (!ostinatoJars.isEmpty()) {
+                def jar = ostinatoJars[0]
+                println "[altoclef] Ostinato Baritone for ${project.name}: ${jar.name}"
+                modImplementation files(jar)
+                include files(jar)
+            } else {
+                println "[altoclef] Ostinato tip jar not found for ${project.name} — configure continues without Baritone (stage ../Ostinato/dist or libs/; see docs/DEVELOPMENT.md)"
+            }
         } else {
             def baritoneMcVersion = project.name
             if (getProject().hasProperty("altoclef.development")) {
@@ -234,7 +254,7 @@ dependencies {
                 include files(jarFile)
             }
         } else {
-            println "[altoclef] Tungsten jar not found for ${project.name} Ã¢â‚¬â€ Baritone fallback (see docs/TUNGSTEN_BACKEND.md)"
+            println "[altoclef] Tungsten jar not found for ${project.name} — Baritone fallback (see docs/TUNGSTEN_BACKEND.md)"
         }
     }
 }

@@ -14,6 +14,6 @@ public enum RecoveryAction {
     WAIT,
     /** Give up this task; fail upward as non-recoverable. */
     ABORT,
-    /** Fail upward with enriched context for a higher layer (Phase 7 planner later). */
+    /** Fail upward with enriched context for a higher layer (Phase 7 {@code PlanExecutor}). */
     ESCALATE
 }

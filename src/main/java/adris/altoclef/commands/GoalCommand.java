@@ -36,6 +36,11 @@ public class GoalCommand extends Command {
         return activeManager;
     }
 
+    /** Used by Phase 9 AgentProtocol / AltoClefAgentRuntime. */
+    public static void setActiveManager(GoalManager manager) {
+        activeManager = manager;
+    }
+
     @Override
     protected void call(AltoClef mod, ArgParser parser) throws CommandException {
         String item = parser.get(String.class);

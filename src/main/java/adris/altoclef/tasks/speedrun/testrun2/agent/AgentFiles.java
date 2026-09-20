@@ -9,6 +9,17 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 
+/**
+ * File transport for the agent loop (legacy inbox verbs + Phase 9 JSON).
+ * <pre>
+ *   &lt;gameDir&gt;/altoclef/agent/
+ *     snapshot.json   — periodic / snap world snapshot
+ *     inbox.txt       — legacy verb lines OR JSON request lines
+ *     request.json    — optional single JSON request drop (cleared after take)
+ *     response.json   — last structured AgentResponse
+ *     outbox.log      — append-only log
+ * </pre>
+ */
 public final class AgentFiles {
 
     private AgentFiles() {}
@@ -26,6 +37,8 @@ public final class AgentFiles {
     public static Path snapshot() { return dir().resolve("snapshot.json"); }
     public static Path inbox() { return dir().resolve("inbox.txt"); }
     public static Path outbox() { return dir().resolve("outbox.log"); }
+    public static Path request() { return dir().resolve("request.json"); }
+    public static Path response() { return dir().resolve("response.json"); }
 
     public static void ensure() {
         try {
@@ -77,5 +90,38 @@ public final class AgentFiles {
             Files.writeString(outbox(), msg + "\n", StandardCharsets.UTF_8,
                     StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (IOException ignored) {}
+    }
+
+    /**
+     * Read and clear {@code request.json} if present and non-blank.
+     * Prefer this for a single structured drop from an external agent.
+     */
+    public static String takeRequestJson() {
+        ensure();
+        try {
+            Path p = request();
+            if (!Files.exists(p)) return null;
+            String raw = Files.readString(p, StandardCharsets.UTF_8).trim();
+            Files.writeString(p, "", StandardCharsets.UTF_8);
+            if (raw.isEmpty() || raw.startsWith("#")) return null;
+            return raw;
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    public static void writeRequestJson(String json) {
+        ensure();
+        try {
+            Files.writeString(request(), json.trim() + "\n", StandardCharsets.UTF_8);
+        } catch (IOException ignored) {}
+    }
+
+    public static void writeResponse(String json) {
+        ensure();
+        try {
+            Files.writeString(response(), json + "\n", StandardCharsets.UTF_8);
+        } catch (IOException ignored) {}
+        log("RESPONSE " + json);
     }
 }

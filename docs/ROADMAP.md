@@ -108,7 +108,7 @@ Vertical slice — Goal → Plan → catalogue Task; not full GOAP / HTN:
 **Status (Phase 7):** **Merged on main** (PR #8).
 
 
-## Phase 8 — Combat / survival threat unify (this PR)
+## Phase 8 — Combat / survival threat unify
 
 Vertical slice — thin threat layer; do **not** rewrite MobDefense / WorldSurvival:
 
@@ -120,9 +120,20 @@ Vertical slice — thin threat layer; do **not** rewrite MobDefense / WorldSurvi
 6. Unit tests with fake health/hostile inputs; `:1.21.1:compileJava`
 7. Docs: ARCHITECTURE + this ROADMAP
 
-**Status (Phase 8):** in progress on `feat/phase8-threat`.
-Out of scope: full CombatController rewrite, agent JSON (9), benchmarks (10), CI 1.21.11 fix.
-Preserve MobDefenseChain / WorldSurvivalChain as fallback.
+**Status (Phase 8):** **Merged on main** (PR #9).
+
+## Phase 9 — Agent JSON protocol (this PR)
+
+Vertical slice — structured request/response; keep old chat commands:
+
+1. `AgentRequest` / `AgentResponse` / `AgentStatus` (accepted|running|success|failure|blocked|cancelled)
+2. `AgentProtocol` / `AgentRequestHandler` dispatching get/acquire/goal → GoalManager; status/snap → WorldKnowledge snapshot; cancel → safe user/goal cancel
+3. Transport: `@agent json <payload>`, JSON lines in `inbox.txt`, or `request.json` drop (writes `response.json`)
+4. Unit tests for parse + dispatch with fakes; `:1.21.1:compileJava`
+5. Docs: `AGENT_PROTOCOL.md` + ARCHITECTURE + this ROADMAP
+
+**Status (Phase 9):** in progress on `feat/phase9-agent-protocol`.
+Out of scope: full LLM tool-calling loop, telemetry benchmarks (10), breaking `@agent`/`@goal`/`@get`, CI 1.21.11 fix.
 
 ## Engineering rules
 
@@ -154,11 +165,11 @@ User: "Get me a full set of iron armor and a shield." → goal → plan → Osti
 
 ## Active work
 
-- Phase 0–7 merged on `main`
-- **Phase 8 in progress:** `feat/phase8-threat`
-  - Added: `ThreatLevel`, `ThreatAssessment`, `ThreatSignals`, `ThreatAssessor`, `ThreatMonitor`
-  - HIGH pauses `@goal` PlanExecutor; CRITICAL fails with DANGER → ESCALATE
-  - MobDefenseChain / WorldSurvivalChain unchanged (fallback)
-  - Out of scope: CombatController rewrite, agent JSON (9), benchmarks (10)
+- Phase 0–8 merged on `main`
+- **Phase 9 in progress:** `feat/phase9-agent-protocol`
+  - Added: `AgentRequest` / `AgentResponse` / `AgentStatus`, `AgentProtocol`, `AgentRequestHandler`
+  - Transport via `@agent json` + `request.json` / inbox JSON lines (legacy verbs kept)
+  - Dispatch into GoalManager (Phase 7) + WorldKnowledge snapshot + cancel
+  - Out of scope: LLM tool loop, benchmarks (10), CI 1.21.11 fix
 - Follow-up: CI matrix repair for `1.21.11` (Ostinato tip jar staging)
 - Cloud Agents unavailable — local checkouts / executor patches

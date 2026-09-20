@@ -2,18 +2,24 @@ package adris.altoclef.tasks.speedrun.testrun2.agent;
 
 import adris.altoclef.AltoClef;
 import adris.altoclef.Debug;
+import adris.altoclef.agent.AgentJson;
+import adris.altoclef.agent.AgentProtocol;
+import adris.altoclef.agent.AgentResponse;
+import adris.altoclef.agent.AltoClefAgentRuntime;
 import adris.altoclef.tasks.speedrun.testrun2.T2Brain;
 import adris.altoclef.tasks.speedrun.testrun2.core.T2Sticky;
 import adris.altoclef.tasksystem.Task;
 
 /**
- * While this user task runs, snapshot.json is updated and inbox.txt is consumed.
+ * While this user task runs, snapshot.json is updated and inbox.txt /
+ * request.json are consumed (legacy verbs + Phase 9 JSON).
  */
 public class AgentLoopTask extends Task {
 
     private final T2Sticky sticky = new T2Sticky();
     private int ticks;
     private boolean done;
+    private AgentProtocol protocol;
 
     @Override
     protected void onStart() {
@@ -24,7 +30,7 @@ public class AgentLoopTask extends Task {
         AgentFiles.ensure();
         AgentFiles.log("LOOP start");
         Debug.logMessage("AGENT on. dir=" + AgentFiles.dir().toAbsolutePath());
-        Debug.logMessage("AGENT write snapshot.json, append commands to inbox.txt");
+        Debug.logMessage("AGENT write snapshot.json, append commands to inbox.txt or drop request.json");
     }
 
     @Override
@@ -32,6 +38,10 @@ public class AgentLoopTask extends Task {
         AltoClef mod = AltoClef.getInstance();
         if (mod.getPlayer() == null) return null;
         ticks++;
+
+        if (protocol == null) {
+            protocol = AltoClefAgentRuntime.protocolFor(mod);
+        }
 
         Task live = sticky.peek();
         Task fix = T2Brain.help(mod, "AGENT", live);
@@ -47,8 +57,25 @@ public class AgentLoopTask extends Task {
             live = null;
         }
 
+        // Phase 9: prefer request.json drop, then inbox line
+        String jsonDrop = AgentFiles.takeRequestJson();
+        if (jsonDrop != null) {
+            AgentResponse resp = protocol.handleJson(jsonDrop);
+            String out = AgentJson.toJson(resp);
+            AgentFiles.writeResponse(out);
+            Debug.logMessage("AGENT protocol (file) " + out);
+        }
+
         String line = AgentFiles.takeInbox();
         if (line != null) {
+            AgentResponse jsonResp = protocol.tryHandleLine(line);
+            if (jsonResp != null) {
+                String out = AgentJson.toJson(jsonResp);
+                AgentFiles.writeResponse(out);
+                Debug.logMessage("AGENT protocol (inbox) " + out);
+                return live;
+            }
+
             Task next = AgentActions.apply(mod, line);
             if (next instanceof AgentActions.StopSentinel) {
                 done = true;

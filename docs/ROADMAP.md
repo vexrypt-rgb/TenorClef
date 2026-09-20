@@ -68,7 +68,7 @@ Vertical slice — failures as data; do not break the tick loop:
 
 **Status (Phase 4):** **Merged on main** (PR #5).
 
-## Phase 5 — World model / knowledge confidence (this PR)
+## Phase 5 — World model / knowledge confidence
 
 Vertical slice — metadata on top of trackers; do not invent a new tracker subsystem:
 
@@ -81,7 +81,7 @@ Vertical slice — metadata on top of trackers; do not invent a new tracker subs
 
 **Status (Phase 5):** **Merged on main** (PR #6).
 
-## Phase 6 — Recovery / replan (this PR)
+## Phase 6 — Recovery / replan
 
 Vertical slice — structured failures become actionable without a planner:
 
@@ -92,9 +92,21 @@ Vertical slice — structured failures become actionable without a planner:
 5. Unit tests for policy mapping; `:1.21.1:compileJava`
 6. Docs: ARCHITECTURE + this ROADMAP
 
-**Status (Phase 6):** in progress on `feat/phase6-recovery`.
-Out of scope: strategic Goal/Plan planner (7), full combat/survival unify (8), migrating every task.
-CI matrix repair for `1.21.11` — mention only / follow-up.
+**Status (Phase 6):** **Merged on main** (PR #7).
+
+## Phase 7 — Strategic planner (this PR)
+
+Vertical slice — Goal → Plan → catalogue Task; not full GOAP / HTN:
+
+1. `Goal` / `Requirement` / `Plan` / `PlanStep` / `Planner` / `SimplePlanner`
+2. Demo `AcquireItemGoal` (get N of item X) inspecting inventory via `InventoryView`
+3. `PlanExecutor` / `GoalManager`: run current step; on TaskFailure use Phase 6 `RecoveryManager`; on ABORT replan once naively or fail goal
+4. `PlanRunnerTask` + `@goal` debug command (does not break `@get` / UserTaskChain)
+5. Unit tests with fake inventory; `:1.21.1:compileJava`
+6. Docs: ARCHITECTURE + this ROADMAP
+
+**Status (Phase 7):** in progress on `feat/phase7-planner`.
+Out of scope: full GOAP/HTN, combat/survival unify (8), agent JSON (9), migrating all TaskCatalogue entries, CI 1.21.11 fix.
 
 ## Engineering rules
 
@@ -126,13 +138,11 @@ User: "Get me a full set of iron armor and a shield." → goal → plan → Osti
 
 ## Active work
 
-- Phase 0–5 merged on `main`
-- **Phase 6 in progress:** `feat/phase6-recovery`
-  - Added: `RecoveryAction`, `RecoveryDecision`, `RecoveryManager`
-  - Policy: NO_PATH/TIMEOUT → ALTERNATE_PATH/RETRY then ABORT; TARGET_UNAVAILABLE → ABORT;
-    INVENTORY_FULL → WAIT then ABORT; DANGER/PLAYER_DEAD → ESCALATE
-  - Hook: `Task.failWithRecovery` / `absorbChildOutcome`; TaskRunner `recovery=` status
-  - Migrated: CustomBaritoneGoal, GetToEntity, PickupDroppedItem
-  - Out of scope: planner (7), combat unify (8), migrate every task
+- Phase 0–6 merged on `main`
+- **Phase 7 in progress:** `feat/phase7-planner`
+  - Added: `Goal`, `Requirement`, `Plan`, `PlanStep`, `SimplePlanner`, `PlanExecutor` / `GoalManager`
+  - Demo: `AcquireItemGoal` + `@goal <item> [count]` → `PlanRunnerTask` (catalogue-backed)
+  - On step ABORT: naive replan once via SimplePlanner; second ABORT fails goal
+  - Out of scope: full GOAP/HTN, combat unify (8), agent JSON (9), migrate all catalogue entries
 - Follow-up: CI matrix repair for `1.21.11` (Ostinato tip jar staging)
 - Cloud Agents unavailable — local checkouts / executor patches

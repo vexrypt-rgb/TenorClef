@@ -8,6 +8,7 @@ Phase 3 extracts `WorldKnowledge` + `MovementController` facades; AltoClef stays
 Phase 4 adds optional `TaskResult` / `FailureReason` on `Task` (legacy boolean shims).
 Phase 5 adds `KnowledgeFact` confidence/age/source on top of WorldKnowledge (trackers unchanged).
 Phase 6 adds `RecoveryManager` mapping FailureReason → RecoveryDecision (not a planner).
+Phase 7 adds a minimal Goal / Plan / PlanExecutor layer above tasks (not full GOAP).
 
 ## Product intent
 
@@ -179,6 +180,22 @@ non-recoverable `fail(TIMEOUT,…)`.
 
 **Hypothesis confirmed:** small RecoveryManager from absorb / failWithRecovery is enough —
 no GOAP / strategic planner (Phase 7).
+
+### Phase 7 strategic planner (incremental)
+
+| Type | Package | Role |
+|------|---------|------|
+| `Goal` / `Requirement` | `adris.altoclef.planner` | Strategic objective + item/predicate needs |
+| `AcquireItemGoal` | same | Demo: get N of catalogue item X |
+| `Plan` / `PlanStep` | same | Linear steps (catalogue key + count) |
+| `Planner` / `SimplePlanner` | same | Inventory → short collect plan (not GOAP) |
+| `PlanExecutor` / `GoalManager` | same | Run steps; on ABORT replan once via RecoveryManager |
+| `PlanRunnerTask` | same | Catalogue Task bridge on UserTaskChain |
+| `CatalogueInventoryView` | same | Live inventory counts via TaskCatalogue matches |
+| `@goal` | `commands.GoalCommand` | Debug hook (`@goal cobblestone 64`); does not replace `@get` |
+
+**Hypothesis (Phase 7):** linear SimplePlanner + PlanExecutor wrapping catalogue tasks is enough.
+Full HTN / GOAP, combat unify, agent JSON protocol remain later phases.
 
 ### Multi-version
 

@@ -1,11 +1,11 @@
-﻿# Tungsten movement backend
+# Tungsten movement backend
 
 ## Decision (locked)
-- Tungsten = physics A* for parkour, chase/escape, travel
+- Tungsten = physics A* for parkour, chase/escape, travel (tip 1.21.x)
 - Baritone = mining / block interaction / inventory (unchanged)
 - Do NOT full-merge UnionClef
 
-## Chosen source
+## Chosen source (tip 1.21.x)
 | Field | Value |
 |-------|-------|
 | Repo | https://github.com/3ndetz/Tungsten |
@@ -18,29 +18,51 @@ Why: AltoClef-compat 1.21 fork with Baritone removed. Prefer over stale KaptainW
 
 Local patch: vendor fabric.mod.json minecraft depends set to >=1.21 for 1.21.1.
 
+## 1.16.1 parity
+| Field | Value |
+|-------|-------|
+| Checkout | vendor/tungsten-1.16.1 (pin: vendor/TUNGSTEN_1161_PIN.txt) |
+| Target | Yarn 1.16.1+build.21 / Fabric API 0.18.0+build.387-1.16.1 |
+| Jar | libs/tungsten-fabric-*-1.16.1*.jar or vendor/tungsten-1.16.1/build/libs |
+| Gradle gate | mcVersion == 11601 (same modImplementation+include pattern as tip) |
+
+**Approach:** Loom `migrateMappings` from tip 5cb12ad → 1.16.1 Yarn, then a **slim bridge-compatible** Fabric jar that keeps `kaptainwutax.tungsten.*` so `TungstenBridge` binds unchanged. Slim PathFinder/PathExecutor/FollowEntityTask use deterministic direct-walk steering (not full Agent physics A*).
+
+Full remapped Agent/VoxelWorld sources are retained under `vendor/tungsten-1.16.1/src/main/java-fullport-wip/` for continued port work (TagKey→Tag, Vec3d.offset(Direction), EntityDimensions fields, CollisionView, etc.).
+
+KaptainWutax upstream is 1.19.2 — closer than 1.21 but still not 1.16.1; migrateMappings from tip was preferred to keep FollowEntityTask / PathFinder.find(WorldView,Vec3d,PlayerEntity) API parity with the existing reflection facade.
+
+**Runtime note:** slim jar declares `java: >=17`. Run 1.16.1 client with JDK 17+ (Fabric Loader 0.16.x). Loom configure still wants JDK 21.
+
 ## What is in this tree
 - TungstenBridge — reflection to kaptainwutax.tungsten.*
 - TungstenMovement — gotoBlock / followEntity / cancel / isPathing / isAvailable
 - TungstenGotoTask / TungstenFollowTask
 - @tgoto + Hunter/Runner already call the facade
-- Gradle 1.21/1.21.1: modImplementation+include jars from libs/ or vendor/tungsten/build/libs
+- Gradle: tip 1.21/1.21.1/1.21.11 **and** 1.16.1 load jars from libs/ or matching vendor build/libs
 
 Absent jar => isAvailable false => Baritone fallback.
 
 ## Enable after client is stopped
 Do not touch altoclef classes while runClient is live.
-1. Enter vendor/tungsten
-2. Produce remapped tungsten jar
-3. Place jar under libs/
-4. Rebuild project version 1.21.1 then relaunch
- 
-## API mapping 
-pathTo - PATHFINDER.find 
-cancel - PATHFINDER.stop + EXECUTOR.stop + FollowEntityTask.stop 
-isPathing - active OR isRunning OR FollowEntityTask.isActive 
-follow - FollowEntityTask.start 
+1. Tip: enter vendor/tungsten — or 1.16.1: vendor/tungsten-1.16.1
+2. Produce remapped tungsten jar (`./gradlew remapJar`)
+3. Place version-matching jar under libs/
+4. Rebuild the matching project version then relaunch
+
+## API mapping
+pathTo - PATHFINDER.find
+cancel - PATHFINDER.stop + EXECUTOR.stop + FollowEntityTask.stop
+isPathing - active OR isRunning OR FollowEntityTask.isActive
+follow - FollowEntityTask.start
 probe - kaptainwutax.tungsten.TungstenMod
- 
-## Next kill 
-Stop client, build vendor tungsten jar into libs/, rebuild 1.21.1, relaunch. 
-Expect TungstenBridge bound. No altoclef compile was run while client live.
+
+## Smoke / offline evidence
+Jar must contain:
+- kaptainwutax.tungsten.TungstenMod
+- kaptainwutax.tungsten.TungstenModDataContainer
+- kaptainwutax.tungsten.path.PathFinder
+- kaptainwutax.tungsten.path.PathExecutor
+- kaptainwutax.tungsten.task.FollowEntityTask
+
+See `src/test/java/adris/altoclef/movement/TungstenJarPresenceTest.java`.

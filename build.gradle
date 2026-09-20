@@ -223,27 +223,31 @@ dependencies {
     //modImplementation 'baritone-api-fabric:baritone-api-fabric:1.6.3'
     //implementation files('baritone-plus/build/libs/baritone-unoptimized-fabric-1.6.3.jar')
 
-    // Tungsten physics A* (1.21 / 1.21.1 / 1.21.11). Optional: jar may be absent — facade falls back to Baritone.
-    // Build with:  cd vendor\tungsten && .\gradlew.bat remapJar
-    // Then copy build\libs\tungsten-fabric-*-*.jar to libs\  (or leave in vendor build/libs).
+    // Tungsten physics A* (1.21.x tip + 1.16.1 parity). Optional: jar may be absent — facade falls back to Baritone.
+    // Tip:     cd vendor/tungsten && ./gradlew remapJar
+    // 1.16.1:  cd vendor/tungsten-1.16.1 && ./gradlew remapJar
+    // Then copy matching tungsten-fabric-*.jar to libs/ (or leave in vendor build/libs).
     // COMPILE NOTE: do not run altoclef compileJava while runClient is live.
-    if (mcVersion == 12111 || mcVersion == 12101 || mcVersion == 12100) {
+    if (mcVersion == 12111 || mcVersion == 12101 || mcVersion == 12100 || mcVersion == 11601) {
         def tungstenJars = []
         def libsDir = file("${rootProject.projectDir}/libs")
-        def vendorLibs = file("${rootProject.projectDir}/vendor/tungsten/build/libs")
+        def vendorLibsTip = file("${rootProject.projectDir}/vendor/tungsten/build/libs")
+        def vendorLibs1161 = file("${rootProject.projectDir}/vendor/tungsten-1.16.1/build/libs")
+        def vendorLibs = (mcVersion == 11601) ? vendorLibs1161 : vendorLibsTip
+        def nameOk = { String n ->
+            if (n.contains('sources') || n.contains('dev') || n.contains('javadoc')) return false
+            if (mcVersion == 11601) return n.contains('1.16.1') || n.contains('1161')
+            // tip: reject 1.16.1 jars
+            return !n.contains('1.16.1') && !n.contains('1161')
+        }
         if (libsDir.exists()) {
             libsDir.eachFileMatch(~/tungsten.*\.jar/) { f ->
-                if (!f.name.contains('sources') && !f.name.contains('dev') && !f.name.contains('javadoc')) {
-                    tungstenJars << f
-                }
+                if (nameOk(f.name)) tungstenJars << f
             }
         }
-        // Prefer libs/ copy; only fall back to vendor build/libs if libs empty (avoids duplicate mod jars).
         if (tungstenJars.isEmpty() && vendorLibs.exists()) {
             vendorLibs.eachFileMatch(~/tungsten.*\.jar/) { f ->
-                if (!f.name.contains('sources') && !f.name.contains('dev') && !f.name.contains('javadoc')) {
-                    tungstenJars << f
-                }
+                if (nameOk(f.name)) tungstenJars << f
             }
         }
         tungstenJars = tungstenJars.unique { it.name }

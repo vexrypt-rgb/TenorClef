@@ -121,6 +121,19 @@ public class EntityVer {
     }
 
 
+    /**
+     * Network entity id: Yarn renamed getEntityId() → getId() in 1.17.
+     * Call sites must use this helper (do not call entity.getId() directly).
+     */
+    @Pattern
+    public static int getNetworkId(Entity entity) {
+        //#if MC >= 11700
+        return entity.getId();
+        //#else
+        //$$ return entity.getEntityId();
+        //#endif
+    }
+
     /** Removed/discarded check that works on 1.16 (field) and 1.17+ (method). */
     public static boolean isGone(Entity entity) {
         if (entity == null) return true;

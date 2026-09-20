@@ -79,8 +79,22 @@ Vertical slice — metadata on top of trackers; do not invent a new tracker subs
 5. Keep direct tracker getters working (shims)
 6. Unit tests for age/confidence/decay; `:1.21.1:compileJava`
 
-**Status (Phase 5):** in progress on `feat/phase5-knowledge-confidence`.
-Out of scope: full planner (7), full recovery (6), migrating all tracker reads.
+**Status (Phase 5):** **Merged on main** (PR #6).
+
+## Phase 6 — Recovery / replan (this PR)
+
+Vertical slice — structured failures become actionable without a planner:
+
+1. `RecoveryAction` / `RecoveryDecision` (RETRY, ALTERNATE_PATH, ALTERNATE_TARGET, WAIT, ABORT, ESCALATE)
+2. `RecoveryManager` maps `FailureReason` (+ retry count) → decision with limits
+3. Hook: `Task.failWithRecovery` + `absorbChildOutcome` for NO_PATH / TIMEOUT / TARGET_UNAVAILABLE / INVENTORY_FULL
+4. Wire concrete cases: CustomBaritoneGoal / GetToEntity path stalls; GetToEntity target gone; PickupDroppedItem inventory full
+5. Unit tests for policy mapping; `:1.21.1:compileJava`
+6. Docs: ARCHITECTURE + this ROADMAP
+
+**Status (Phase 6):** in progress on `feat/phase6-recovery`.
+Out of scope: strategic Goal/Plan planner (7), full combat/survival unify (8), migrating every task.
+CI matrix repair for `1.21.11` — mention only / follow-up.
 
 ## Engineering rules
 
@@ -112,12 +126,13 @@ User: "Get me a full set of iron armor and a shield." → goal → plan → Osti
 
 ## Active work
 
-- Phase 0 + Phase 1 + Phase 2 + Phase 3 + Phase 4 merged on `main`
-- **Phase 5 in progress:** `feat/phase5-knowledge-confidence`
-  - Added: `KnowledgeSource`, `KnowledgeFact`, `KnowledgeFacts`, `KnowledgeFactCache`
-  - `WorldKnowledge` fact APIs: player pos/health, entityAlive, nearestEntity, blockPresent, lastSeenBlock
-  - Cached signals: `player.pos`, `player.health`, `entity.alive.*`, `entity.nearest.*`, `block.present.*`, `block.lastSeen.*`
-  - Migrated: GetToEntity (stale confidence → TARGET_UNAVAILABLE), GetToBlock portal via `blockPresentFact`
-  - Out of scope: planner (7), full recovery (6), migrate all tracker reads
+- Phase 0–5 merged on `main`
+- **Phase 6 in progress:** `feat/phase6-recovery`
+  - Added: `RecoveryAction`, `RecoveryDecision`, `RecoveryManager`
+  - Policy: NO_PATH/TIMEOUT → ALTERNATE_PATH/RETRY then ABORT; TARGET_UNAVAILABLE → ABORT;
+    INVENTORY_FULL → WAIT then ABORT; DANGER/PLAYER_DEAD → ESCALATE
+  - Hook: `Task.failWithRecovery` / `absorbChildOutcome`; TaskRunner `recovery=` status
+  - Migrated: CustomBaritoneGoal, GetToEntity, PickupDroppedItem
+  - Out of scope: planner (7), combat unify (8), migrate every task
 - Follow-up: CI matrix repair for `1.21.11` (Ostinato tip jar staging)
 - Cloud Agents unavailable — local checkouts / executor patches

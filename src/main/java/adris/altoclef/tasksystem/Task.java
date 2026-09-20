@@ -23,6 +23,9 @@ public abstract class Task {
 
     private TaskFailure lastFailure = null;
 
+    /** Last recovery decision from absorb / failWithRecovery (Phase 6). */
+    private RecoveryDecision lastRecovery = null;
+
     public void tick(TaskChain parentChain) {
         parentChain.addTaskToChain(this);
         if (first) {
@@ -88,6 +91,7 @@ public abstract class Task {
         stopped = false;
         explicitResult = null;
         lastFailure = null;
+        lastRecovery = null;
     }
 
     public void stop() {
@@ -176,6 +180,16 @@ public abstract class Task {
         return lastFailure;
     }
 
+    /** Phase 6: last recovery decision, if any. */
+    public RecoveryDecision getLastRecovery() {
+        return lastRecovery;
+    }
+
+    /** Override to supply a custom policy; default is {@link RecoveryManager#DEFAULT}. */
+    protected RecoveryManager getRecoveryManager() {
+        return RecoveryManager.DEFAULT;
+    }
+
     protected void setResult(TaskResult result) {
         this.explicitResult = result != null ? result : TaskResult.RUNNING;
         if (this.explicitResult == TaskResult.SUCCESS
@@ -208,6 +222,26 @@ public abstract class Task {
         this.explicitResult = failure.toResult();
     }
 
+    /**
+     * Record a failure after consulting {@link RecoveryManager}.
+     * Increments retry count, may flip to ABORT/ESCALATE (non-recoverable FAILURE)
+     * or WAIT ({@link TaskResult#BLOCKED}).
+     *
+     * @return the decision applied (for callers that branch on RETRY vs ABORT)
+     */
+    protected RecoveryDecision failWithRecovery(FailureReason reason, String message) {
+        int prior = 0;
+        if (lastFailure != null && lastFailure.getReason() == reason) {
+            prior = lastFailure.getRetryCount();
+        }
+        TaskFailure seed = new TaskFailure(reason, message, true, prior);
+        RecoveryManager.Applied applied = getRecoveryManager().apply(seed);
+        this.lastRecovery = applied.getDecision();
+        this.lastFailure = applied.getFailure();
+        this.explicitResult = applied.getResult();
+        return applied.getDecision();
+    }
+
     protected void blocked(FailureReason reason, String message) {
         this.lastFailure = new TaskFailure(reason, message, true);
         this.explicitResult = TaskResult.BLOCKED;
@@ -215,7 +249,8 @@ public abstract class Task {
 
     /**
      * Pull FAILURE / RETRY / BLOCKED from a child into this task when we have
-     * no stronger explicit outcome yet.
+     * no stronger explicit outcome yet. Phase 6: re-consult RecoveryManager so
+     * parents get enriched ABORT/ESCALATE after child retry limits.
      */
     protected void absorbChildOutcome(Task child) {
         if (child == null) return;
@@ -225,8 +260,55 @@ public abstract class Task {
         if (!TaskResultMapper.shouldAbsorbChild(explicitResult, childForAbsorb)) {
             return;
         }
+        TaskFailure childFail = child.getLastFailure();
+        // Phase 6: structured failures get RecoveryManager enrichment.
+        // If the child already called failWithRecovery, trust its decision;
+        // otherwise apply policy once here (raw fail() emitters).
+        if (childFail != null && shouldRecoverChildFailure(childFail.getReason())) {
+            RecoveryDecision d = child.getLastRecovery();
+            if (d == null) {
+                RecoveryManager.Applied applied = getRecoveryManager().apply(childFail);
+                lastRecovery = applied.getDecision();
+                lastFailure = applied.getFailure();
+                explicitResult = applied.getResult();
+                return;
+            }
+            lastRecovery = d;
+            if (d.isTerminal()) {
+                if (childFail.isRecoverable()) {
+                    lastFailure = new TaskFailure(
+                            childFail.getReason(),
+                            d.enrichMessage(childFail.getMessage()),
+                            false,
+                            childFail.getRetryCount());
+                } else {
+                    lastFailure = childFail;
+                }
+                explicitResult = TaskResult.FAILURE;
+            } else if (d.getAction() == RecoveryAction.WAIT) {
+                lastFailure = childFail;
+                explicitResult = TaskResult.BLOCKED;
+            } else {
+                lastFailure = childFail;
+                explicitResult = childForAbsorb;
+            }
+            return;
+        }
         explicitResult = childForAbsorb;
-        lastFailure = TaskResultMapper.absorbFailure(lastFailure, child.getLastFailure());
+        lastFailure = TaskResultMapper.absorbFailure(lastFailure, childFail);
+        if (child.getLastRecovery() != null) {
+            lastRecovery = child.getLastRecovery();
+        }
+    }
+
+    /**
+     * Reasons Phase 6 recovers (others pass through unchanged).
+     */
+    protected boolean shouldRecoverChildFailure(FailureReason reason) {
+        return reason == FailureReason.NO_PATH
+                || reason == FailureReason.TIMEOUT
+                || reason == FailureReason.TARGET_UNAVAILABLE
+                || reason == FailureReason.INVENTORY_FULL;
     }
 
     /** Immediate child, if any (for tests / debugging). */

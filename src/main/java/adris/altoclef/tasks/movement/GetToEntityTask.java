@@ -5,6 +5,7 @@ import adris.altoclef.knowledge.KnowledgeFact;
 import adris.altoclef.knowledge.KnowledgeFacts;
 import adris.altoclef.knowledge.WorldKnowledge;
 import adris.altoclef.tasksystem.FailureReason;
+import adris.altoclef.tasksystem.RecoveryDecision;
 import adris.altoclef.tasksystem.ITaskRequiresGrounded;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.control.MovementController;
@@ -122,7 +123,9 @@ public class GetToEntityTask extends Task implements ITaskRequiresGrounded {
                 && KnowledgeFacts.isReliable(aliveFact, now, 40L, 20L, 0.35)
                 && Boolean.TRUE.equals(aliveFact.getValue());
         if (!targetReliable) {
-            fail(FailureReason.TARGET_UNAVAILABLE, "Follow target entity unavailable (stale/low confidence)", false);
+            // Phase 6: TARGET_UNAVAILABLE → ABORT (no easy retarget without planner)
+            failWithRecovery(FailureReason.TARGET_UNAVAILABLE,
+                    "Follow target entity unavailable (stale/low confidence)");
             setDebugState("Target entity unavailable");
             return null;
         }
@@ -183,7 +186,13 @@ public class GetToEntityTask extends Task implements ITaskRequiresGrounded {
         }
 
         if (!_progress.check(mod)) {
-            fail(FailureReason.TIMEOUT, "Failed to make progress toward entity", true);
+            // Phase 6: TIMEOUT → RETRY/ALTERNATE_PATH then ABORT
+            RecoveryDecision d = failWithRecovery(FailureReason.TIMEOUT,
+                    "Failed to make progress toward entity");
+            if (d.isTerminal()) {
+                setDebugState("Entity approach retries exhausted");
+                return null;
+            }
             return _wanderTask;
         }
 

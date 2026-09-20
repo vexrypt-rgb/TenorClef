@@ -379,6 +379,13 @@ public class MobDefenseChain extends SingleTaskChain {
             lockedOnEntity = null;
         }
 
+        // No immediate threat — drop KillEntities / runaway so UserTaskChain
+        // (priority 50) resumes the prior resource/speedrun goal instead of idling.
+        if (mainTask != null) {
+            mainTask.stop();
+            mainTask = null;
+        }
+        runAwayTask = null;
         return 0;
     }
 
@@ -654,7 +661,12 @@ public class MobDefenseChain extends SingleTaskChain {
 
     @Override
     protected void onTaskFinish(AltoClef mod) {
-        // Task is done, so I guess we move on?
+        // Must clear — leaving a finished KillEntitiesTask as mainTask kept the
+        // defense chain "busy" and blocked clean resume of the user/resource task.
+        mainTask = null;
+        lockedOnEntity = null;
+        needsChangeOnAttack = false;
+        runAwayTask = null;
     }
 
     @Override

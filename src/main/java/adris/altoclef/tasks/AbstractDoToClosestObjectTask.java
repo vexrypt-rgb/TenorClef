@@ -3,6 +3,7 @@ package adris.altoclef.tasks;
 import adris.altoclef.AltoClef;
 import adris.altoclef.tasks.movement.TimeoutWanderTask;
 import adris.altoclef.tasksystem.Task;
+import adris.altoclef.util.helpers.NearestBlockSelector;
 import adris.altoclef.util.helpers.WorldHelper;
 import net.minecraft.util.math.Vec3d;
 
@@ -78,32 +79,33 @@ public abstract class AbstractDoToClosestObjectTask<T> extends Task {
                     setDebugState("Moving towards closest...");
                     double currentHeuristic = getCurrentCalculatedHeuristic(mod);
                     double closestDistanceSqr = getPos(mod, currentlyPursuing).squaredDistanceTo(mod.getPlayer().getPos());
+                    double newDistanceSqr = getPos(mod, newClosest).squaredDistanceTo(mod.getPlayer().getPos());
                     int lastTick = WorldHelper.getTicks();
 
-                    if (!heuristicMap.containsKey(currentlyPursuing)) {
-                        heuristicMap.put(currentlyPursuing, new CachedHeuristic());
-                    }
-                    CachedHeuristic h = heuristicMap.get(currentlyPursuing);
-                    h.updateHeuristic(currentHeuristic);
-                    h.updateDistance(closestDistanceSqr);
-                    h.setTickAttempted(lastTick);
-                    if (heuristicMap.containsKey(newClosest)) {
-                        // Our new object has a past potential heuristic calculated, if it's better try it out.
-                        CachedHeuristic maybeReAttempt = heuristicMap.get(newClosest);
-                        double maybeClosestDistance = getPos(mod, newClosest).squaredDistanceTo(mod.getPlayer().getPos());
-                        // Get considerably closer (divide distance by 2)
-                        if (maybeReAttempt.getHeuristicValue() < h.getHeuristicValue() || maybeClosestDistance < maybeReAttempt.getClosestDistanceSqr() / 4) {
-                            setDebugState("Retrying old heuristic!");
-                            // The currently closest previously calculated heuristic is better, move towards it!
-                            currentlyPursuing = newClosest;
-                            // In theory, this next line shouldn't need to be run,
-                            // but it's CRITICAL to making this work for some reason
-                            maybeReAttempt.updateDistance(maybeClosestDistance);
-                        }
-                    } else {
-                        setDebugState("Trying out NEW pursuit");
-                        // Our new object does not have a heuristic, TRY IT OUT!
+                    // Prefer clearly nearer targets regardless of wood/ore type (sticky lock bypass).
+                    if (NearestBlockSelector.shouldRetarget(closestDistanceSqr, newDistanceSqr)) {
+                        setDebugState("Retarget nearer object");
                         currentlyPursuing = newClosest;
+                    } else {
+                        if (!heuristicMap.containsKey(currentlyPursuing)) {
+                            heuristicMap.put(currentlyPursuing, new CachedHeuristic());
+                        }
+                        CachedHeuristic h = heuristicMap.get(currentlyPursuing);
+                        h.updateHeuristic(currentHeuristic);
+                        h.updateDistance(closestDistanceSqr);
+                        h.setTickAttempted(lastTick);
+                        if (heuristicMap.containsKey(newClosest)) {
+                            CachedHeuristic maybeReAttempt = heuristicMap.get(newClosest);
+                            if (maybeReAttempt.getHeuristicValue() < h.getHeuristicValue()
+                                    || newDistanceSqr < maybeReAttempt.getClosestDistanceSqr() / 4) {
+                                setDebugState("Retrying old heuristic!");
+                                currentlyPursuing = newClosest;
+                                maybeReAttempt.updateDistance(newDistanceSqr);
+                            }
+                        } else {
+                            setDebugState("Trying out NEW pursuit");
+                            currentlyPursuing = newClosest;
+                        }
                     }
                 } else {
                     setDebugState("Waiting for move task to kick in...");

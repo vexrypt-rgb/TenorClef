@@ -12,11 +12,12 @@
 | Schematic/builder **mechanics** | What to build and why |
 | Input overrides needed to **follow a path** | Input overrides for **gameplay** (eat, shield, MLG decision) |
 
-## Current violations (expected pre-Phase 2)
+## Boundary progress (Phase 2)
 
-- TenorClef tasks call `getCustomGoalProcess`, `getPathingBehavior`, `getInputOverrideHandler`, etc. directly.
-- TenorClef embeds `TungstenBridge` reflection instead of depending solely on Ostinato's backend SPI.
-- `AltoClef.initializeBaritoneSettings` mutates Ostinato/Baritone settings from the agent layer (some of this may remain as “agent preferences” injected through MovementEngine config later).
+- **Migrated:** `GetToBlockTask` / `GetToEntityTask` → `MovementEngineAdapter` → Ostinato `IMovementEngine` (fallback to CustomGoalProcess).
+- **Still direct:** most other tasks still call `getCustomGoalProcess` / `getPathingBehavior` / `getInputOverrideHandler`.
+- TenorClef still embeds `TungstenBridge` for its own TungstenGoto/Follow tasks; hybrid selection increasingly lives in Ostinato.
+- `AltoClef.initializeBaritoneSettings` still mutates Baritone settings (agent preferences; later via engine config).
 
 ## Phase 2 direction
 

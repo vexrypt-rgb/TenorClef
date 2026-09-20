@@ -40,9 +40,9 @@ Define and ship:
 - Migrate 1–2 representative TenorClef tasks onto the API
 - Unit (+ integration where possible) tests + interface docs
 
-**Note (Phase 0 finding):** Ostinato tip (`main` / MC 1.21.11) already has a precursor SPI —
-`baritone.api.movement.IMovementBackend` + `MovementBackends` + `Settings.movementBackend`.
-Phase 2 should **evolve that surface into MovementEngine**, not invent a parallel API and not rewrite from scratch.
+**Status (Phase 2):** Ostinato tip evolves the precursor SPI into `IMovementEngine` /
+`HybridMovementEngine` / `MovementGoal` / `PathResult` (see Ostinato `docs/MOVEMENT_ENGINE.md`).
+TenorClef adapter uses reflection so stock Baritone jars keep working.
 
 ## Engineering rules
 
@@ -74,6 +74,8 @@ User: "Get me a full set of iron armor and a shield." → goal → plan → Osti
 
 ## Active work
 
-- Phase 0 audit docs (this PR)
-- Cloud Agents unavailable on current plan — use local checkouts / executors
-- Do **not** start Phase 1/2 code until Phase 0 docs land
+- Phase 0 + Phase 1 merged on `main`
+- **Phase 2 in progress:** Ostinato `feat/movement-engine` + TenorClef `feat/movement-engine-adapter`
+  - Migrated: `GetToBlockTask`, `GetToEntityTask` via `MovementEngineAdapter`
+  - Remaining Phase 2: publish Ostinato jar with engine API for 1.21.x pairing; more travel sites later
+- Cloud Agents unavailable — local checkouts / executor patches

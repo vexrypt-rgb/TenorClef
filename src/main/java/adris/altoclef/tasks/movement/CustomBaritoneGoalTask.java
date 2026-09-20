@@ -7,6 +7,7 @@ import adris.altoclef.multiversion.versionedfields.Blocks;
 import adris.altoclef.tasksystem.ITaskRequiresGrounded;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.helpers.WorldHelper;
+import adris.altoclef.movement.MovementEngineAdapter;
 import adris.altoclef.util.progresscheck.MovementProgressChecker;
 import baritone.api.pathing.goals.Goal;
 import baritone.api.utils.input.Input;
@@ -99,7 +100,11 @@ public abstract class CustomBaritoneGoalTask extends Task implements ITaskRequir
 
     @Override
     protected void onStart() {
-        AltoClef.getInstance().getClientBaritone().getPathingBehavior().forceCancel();
+        if (useMovementEngine()) {
+            MovementEngineAdapter.cancel();
+        } else {
+            AltoClef.getInstance().getClientBaritone().getPathingBehavior().forceCancel();
+        }
         checker.reset();
         stuckCheck.reset();
     }
@@ -179,7 +184,12 @@ public abstract class CustomBaritoneGoalTask extends Task implements ITaskRequir
                 }
             }
         }
-        if (!mod.getClientBaritone().getCustomGoalProcess().isActive()
+        if (useMovementEngine()) {
+            if (!MovementEngineAdapter.isPathingOrActive()
+                    && mod.getClientBaritone().getPathingBehavior().isSafeToCancel()) {
+                MovementEngineAdapter.ensureGoalAndPath(cachedGoal);
+            }
+        } else if (!mod.getClientBaritone().getCustomGoalProcess().isActive()
                 && mod.getClientBaritone().getPathingBehavior().isSafeToCancel()) {
             mod.getClientBaritone().getCustomGoalProcess().setGoalAndPath(cachedGoal);
         }
@@ -197,7 +207,16 @@ public abstract class CustomBaritoneGoalTask extends Task implements ITaskRequir
 
     @Override
     protected void onStop(Task interruptTask) {
-        AltoClef.getInstance().getClientBaritone().getPathingBehavior().forceCancel();
+        if (useMovementEngine()) {
+            MovementEngineAdapter.cancel();
+        } else {
+            AltoClef.getInstance().getClientBaritone().getPathingBehavior().forceCancel();
+        }
+    }
+
+    /** Subclasses opt into Ostinato MovementEngine for travel (Phase 2). */
+    protected boolean useMovementEngine() {
+        return false;
     }
 
     protected abstract Goal newGoal(AltoClef mod);

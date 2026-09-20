@@ -13,6 +13,8 @@ Phase 8 adds a thin ThreatAssessor / ThreatMonitor that can pause/fail goals on 
 MobDefenseChain / WorldSurvivalChain remain the fallback.
 Phase 9 adds a structured Agent JSON protocol over the existing `@agent` / file channel
 (keep old chat commands).
+Phase 10 adds an offline Scenario / BenchmarkHarness that records TaskResult / Recovery / Threat counters
+and exports a JSON summary (no live MC client required for mocks).
 
 ## Product intent
 
@@ -239,6 +241,21 @@ leave MobDefenseChain / WorldSurvivalChain running as today.
 GoalManager / TaskRunner without new networking. Legacy `@agent` verbs / `@goal` / `@get` unchanged.
 
 See [`AGENT_PROTOCOL.md`](./AGENT_PROTOCOL.md).
+
+
+### Phase 10 scenarios / benchmarks (incremental)
+
+| Type | Package | Role |
+|------|---------|------|
+| `Scenario` / `ScenarioContext` | `adris.altoclef.benchmark` | Named runnable (offline or future in-game) |
+| `BenchmarkResult` | same | name, success, durationMs, deaths?, replans?, pathFails?, notes |
+| `BenchmarkCounters` | same | TaskResult / Recovery / FailureReason / threat tallies |
+| `BenchmarkHarness` | same | run / aggregate / export |
+| `BenchmarkJson` | same | Hand-rolled JSON summary (no Jackson) |
+| `MockScenarios` | same | Offline acquire / path-fail / threat / death fixtures |
+
+**Hypothesis:** recording TaskResult / Recovery / Threat counters in a mock harness is enough to
+bootstrap metrics without a full Minecraft client; in-game scenarios can plug in later.
 
 ### Multi-version
 

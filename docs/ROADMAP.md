@@ -122,7 +122,7 @@ Vertical slice — thin threat layer; do **not** rewrite MobDefense / WorldSurvi
 
 **Status (Phase 8):** **Merged on main** (PR #9).
 
-## Phase 9 — Agent JSON protocol (this PR)
+## Phase 9 — Agent JSON protocol
 
 Vertical slice — structured request/response; keep old chat commands:
 
@@ -132,8 +132,21 @@ Vertical slice — structured request/response; keep old chat commands:
 4. Unit tests for parse + dispatch with fakes; `:1.21.1:compileJava`
 5. Docs: `AGENT_PROTOCOL.md` + ARCHITECTURE + this ROADMAP
 
-**Status (Phase 9):** in progress on `feat/phase9-agent-protocol`.
-Out of scope: full LLM tool-calling loop, telemetry benchmarks (10), breaking `@agent`/`@goal`/`@get`, CI 1.21.11 fix.
+**Status (Phase 9):** **Merged on main** (PR #10).
+
+## Phase 10 — Testing + benchmarks (this PR)
+
+Incremental harness — offline/mock first; no full Minecraft client required:
+
+1. `Scenario` / `BenchmarkResult` (name, success, durationMs, deaths?, replans?, pathFails?, notes)
+2. `BenchmarkCounters` records TaskResult / RecoveryAction / FailureReason / threat tallies
+3. `BenchmarkHarness` runs scenarios, aggregates, exports JSON summary (`BenchmarkJson`)
+4. `MockScenarios` — acquire success, path-fail→recover, threat-critical abort, death abort
+5. Unit tests for aggregation + JSON export; `:1.21.1:compileJava`
+6. Docs: ARCHITECTURE + this ROADMAP
+
+**Status (Phase 10):** in progress on `feat/phase10-benchmarks`.
+Out of scope: full in-game RSG harness, CI tip port for 1.21.11, LLM eval loops.
 
 ## Engineering rules
 
@@ -165,11 +178,11 @@ User: "Get me a full set of iron armor and a shield." → goal → plan → Osti
 
 ## Active work
 
-- Phase 0–8 merged on `main`
-- **Phase 9 in progress:** `feat/phase9-agent-protocol`
-  - Added: `AgentRequest` / `AgentResponse` / `AgentStatus`, `AgentProtocol`, `AgentRequestHandler`
-  - Transport via `@agent json` + `request.json` / inbox JSON lines (legacy verbs kept)
-  - Dispatch into GoalManager (Phase 7) + WorldKnowledge snapshot + cancel
-  - Out of scope: LLM tool loop, benchmarks (10), CI 1.21.11 fix
-- Follow-up: CI matrix repair for `1.21.11` (Ostinato tip jar staging)
+- Phase 0–9 merged on `main`
+- **Phase 10 in progress:** `feat/phase10-benchmarks`
+  - Added: `Scenario` / `BenchmarkResult` / `BenchmarkCounters` / `BenchmarkHarness` / `BenchmarkJson`
+  - Offline `MockScenarios` recording TaskResult / Recovery / Threat counters
+  - JSON summary export; aggregation unit tests
+  - Out of scope: full in-game RSG harness, LLM eval loops
+- CI: `1.21.11` + Deploy Javadoc made non-blocking (`build/ci-noise-cleanup`); required gates remain `1.21.1` + `1.16.1`
 - Cloud Agents unavailable — local checkouts / executor patches

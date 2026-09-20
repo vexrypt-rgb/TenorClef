@@ -1,5 +1,7 @@
 package adris.altoclef.threat;
 
+import adris.altoclef.benchmark.LiveBenchmarkSession;
+
 import adris.altoclef.planner.GoalManager;
 import adris.altoclef.planner.PlanExecutor;
 
@@ -50,6 +52,10 @@ public class ThreatMonitor {
         latest = evaluator.evaluate(signals);
         if (latest == null) {
             latest = ThreatAssessment.NONE;
+        }
+        // Cheap peak tracking only when a live bench session is active.
+        if (LiveBenchmarkSession.isActive() && latest.getLevel() != null) {
+            LiveBenchmarkSession.noteThreat(latest.getLevel());
         }
         return latest;
     }

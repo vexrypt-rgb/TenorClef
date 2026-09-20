@@ -17,6 +17,7 @@ public class AltoClefCommands {
                 new HelpCommand(),
                 new GetCommand(),
                 new GoalCommand(),
+                new BenchCommand(),
                 new ThreatCommand(),
                 new ListCommand(),
                 new EquipCommand(),

@@ -145,8 +145,19 @@ Incremental harness — offline/mock first; no full Minecraft client required:
 5. Unit tests for aggregation + JSON export; `:1.21.1:compileJava`
 6. Docs: ARCHITECTURE + this ROADMAP
 
-**Status (Phase 10):** in progress on `feat/phase10-benchmarks`.
-Out of scope: full in-game RSG harness, CI tip port for 1.21.11, LLM eval loops.
+**Status (Phase 10):** **Merged on main** (PR #12).
+Out of scope then: full in-game RSG harness, LLM eval loops.
+
+### Post-phase-10 — live benchmark hooks
+
+1. `LiveBenchmarkSession` singleton (null/no-op when inactive)
+2. Cheap hooks: `Task` succeed/fail, `RecoveryManager.apply`, `PlanExecutor` replan/threat, `ThreatMonitor.tick` peak
+3. `@bench start|stop|status|goal` → JSON under `altoclef/bench/`
+4. Unit tests with fake events; `:1.21.1:compileJava`
+5. Docs: `BENCHMARKS.md` + this note
+
+**Status:** in progress on `feat/live-benchmark-hooks`.
+
 
 ## Engineering rules
 
@@ -178,11 +189,10 @@ User: "Get me a full set of iron armor and a shield." → goal → plan → Osti
 
 ## Active work
 
-- Phase 0–9 merged on `main`
-- **Phase 10 in progress:** `feat/phase10-benchmarks`
-  - Added: `Scenario` / `BenchmarkResult` / `BenchmarkCounters` / `BenchmarkHarness` / `BenchmarkJson`
-  - Offline `MockScenarios` recording TaskResult / Recovery / Threat counters
-  - JSON summary export; aggregation unit tests
-  - Out of scope: full in-game RSG harness, LLM eval loops
-- CI: `1.21.11` + Deploy Javadoc made non-blocking (`build/ci-noise-cleanup`); required gates remain `1.21.1` + `1.16.1`
+- Phase 0–10 merged on `main` (Phase 10 = PR #12 mock BenchmarkHarness)
+- **Post-phase-10 live hooks:** `feat/live-benchmark-hooks`
+  - `LiveBenchmarkSession` + `@bench start|stop|status|goal`
+  - Hooks: Task / RecoveryManager / PlanExecutor / ThreatMonitor (null-safe)
+  - JSON under `altoclef/bench/`; see `docs/BENCHMARKS.md`
+- CI: `1.21.11` + Deploy Javadoc non-blocking (`build/ci-noise-cleanup`); required gates `1.21.1` + `1.16.1`
 - Cloud Agents unavailable — local checkouts / executor patches

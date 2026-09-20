@@ -54,6 +54,41 @@ public final class BenchmarkJson {
         return path;
     }
 
+
+    /** Single live-session JSON (post-phase-10). */
+    public static String toLiveJson(LiveBenchmarkSession session) {
+        BenchmarkResult r = session.toResult();
+        StringBuilder sb = new StringBuilder(192);
+        sb.append('{');
+        sb.append("\"type\":\"live\",");
+        sb.append("\"running\":").append(session.isRunning()).append(',');
+        sb.append("\"peakThreat\":").append(quote(session.getPeakThreat().name())).append(',');
+        sb.append("\"threatPauses\":").append(session.getThreatPauses()).append(',');
+        sb.append("\"threatFails\":").append(session.getThreatFails()).append(',');
+        sb.append("\"result\":");
+        writeResult(sb, r);
+        sb.append('}');
+        return sb.toString();
+    }
+
+    public static Path writeLive(Path path, LiveBenchmarkSession session) throws IOException {
+        Path parent = path.toAbsolutePath().getParent();
+        if (parent != null) {
+            Files.createDirectories(parent);
+        }
+        Files.writeString(path, toLiveJson(session), StandardCharsets.UTF_8);
+        return path;
+    }
+
+    public static Path writeResult(Path path, BenchmarkResult result) throws IOException {
+        Path parent = path.toAbsolutePath().getParent();
+        if (parent != null) {
+            Files.createDirectories(parent);
+        }
+        Files.writeString(path, toJson(result), StandardCharsets.UTF_8);
+        return path;
+    }
+
     private static void writeResult(StringBuilder sb, BenchmarkResult r) {
         sb.append('{');
         sb.append("\"name\":").append(quote(r.getName())).append(',');
@@ -83,6 +118,9 @@ public final class BenchmarkJson {
         sb.append("\"pathFails\":").append(c.getPathFails()).append(',');
         sb.append("\"threatHigh\":").append(c.getThreatHigh()).append(',');
         sb.append("\"threatCritical\":").append(c.getThreatCritical()).append(',');
+        sb.append("\"threatPauses\":").append(c.getThreatPauses()).append(',');
+        sb.append("\"threatFails\":").append(c.getThreatFails()).append(',');
+        sb.append("\"threatPeak\":").append(quote(c.getThreatPeak())).append(',');
         sb.append("\"taskResults\":");
         writeEnumIntMap(sb, c.getTaskResults());
         sb.append(',');

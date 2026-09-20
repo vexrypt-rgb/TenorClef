@@ -1,5 +1,7 @@
 package adris.altoclef.planner;
 
+import adris.altoclef.benchmark.LiveBenchmarkSession;
+
 import adris.altoclef.tasksystem.FailureReason;
 import adris.altoclef.tasksystem.RecoveryAction;
 import adris.altoclef.tasksystem.RecoveryDecision;
@@ -200,6 +202,7 @@ public class PlanExecutor {
      */
     public RecoveryDecision replanOnce(String reason) {
         hasReplanned = true;
+        LiveBenchmarkSession.noteReplan();
         lastNote = reason != null ? reason : "replan";
         if (goal == null) {
             status = GoalStatus.FAILED;
@@ -250,14 +253,22 @@ public class PlanExecutor {
         }
         ThreatLevel level = assessment.getLevel();
         if (level == ThreatLevel.CRITICAL) {
-            return failForDanger(assessment.getReason());
+            boolean changed = failForDanger(assessment.getReason());
+            if (changed) {
+                LiveBenchmarkSession.noteThreatFail();
+            } else {
+                LiveBenchmarkSession.noteThreat(level);
+            }
+            return changed;
         }
         if (level == ThreatLevel.HIGH) {
             if (status == GoalStatus.RUNNING) {
                 status = GoalStatus.PAUSED;
                 lastNote = "paused for threat: " + assessment.getReason();
+                LiveBenchmarkSession.noteThreatPause();
                 return true;
             }
+            LiveBenchmarkSession.noteThreat(level);
             return false;
         }
         // Clear enough — resume

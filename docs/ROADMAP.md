@@ -44,7 +44,7 @@ Define and ship:
 `HybridMovementEngine` / `MovementGoal` / `PathResult` (see Ostinato `docs/MOVEMENT_ENGINE.md`).
 TenorClef adapter uses reflection so stock Baritone jars keep working. **Merged on main.**
 
-## Phase 3 — Core split (this PR)
+## Phase 3 — Core split
 
 Vertical slice only — no rewrite, no mass migration:
 
@@ -54,7 +54,20 @@ Vertical slice only — no rewrite, no mass migration:
 4. Migrate GetToBlock / GetToEntity call sites only
 5. Unit-test facade wiring with fakes; `:1.21.1:compileJava`
 
-**Status (Phase 3):** first slice on `feat/phase3-core-split`.
+**Status (Phase 3):** **Merged on main** (PR #4).
+
+## Phase 4 — Task / Failure model (this PR)
+
+Vertical slice — failures as data; do not break the tick loop:
+
+1. `TaskResult`, `FailureReason`, `TaskFailure` (+ `TaskResultMapper` shims)
+2. Optional `lastResult` / `lastFailure` on `Task`; child absorb upward
+3. Migrate few tasks only: GetToBlock / GetToEntity / CustomBaritoneGoal / ResourceTask + PickupDroppedItem
+4. Keep `isFinished()` / boolean behavior for unmigrated tasks
+5. Unit tests for mapping / propagation; `:1.21.1:compileJava`
+
+**Status (Phase 4):** in progress on `feat/phase4-task-result`.
+Out of scope: full planner/recovery (Phases 6–7), migrating every task.
 
 ## Engineering rules
 
@@ -86,12 +99,11 @@ User: "Get me a full set of iron armor and a shield." → goal → plan → Osti
 
 ## Active work
 
-- Phase 0 + Phase 1 + Phase 2 merged on `main`
-- **Phase 3 in progress:** `feat/phase3-core-split`
-  - Extracted: `WorldKnowledge`, `MovementController` (`AdapterMovementController`), `CoreServices`
-  - AltoClef remains compatibility shim (`getInstance()` + legacy getters)
-  - Migrated: GetToBlock / GetToEntity path onto `getMovement()` / `getWorldKnowledge()`
-  - Remaining god-object surface: ~317 `getInstance()` sites (chains, butler, inventory UI, most tasks)
-  - Out of scope here: TaskResult (Phase 4), confidence world model (Phase 5), full planner
+- Phase 0 + Phase 1 + Phase 2 + Phase 3 merged on `main`
+- **Phase 4 in progress:** `feat/phase4-task-result`
+  - Added: `TaskResult`, `FailureReason`, `TaskFailure`, `TaskResultMapper`
+  - `Task` base: optional explicit result + child absorb; legacy `isFinished()` unchanged for chains
+  - Emitters: GetToBlock TIMEOUT (stale), CustomBaritoneGoal TIMEOUT/NO_PATH, GetToEntity TARGET_UNAVAILABLE/TIMEOUT, ResourceTask SUCCESS, PickupDroppedItem INVENTORY_FULL
+  - Out of scope: recovery planner (6–7), migrate all tasks, confidence world model (5)
 - Follow-up: CI matrix repair for `1.21.11` (Ostinato tip jar staging)
 - Cloud Agents unavailable — local checkouts / executor patches

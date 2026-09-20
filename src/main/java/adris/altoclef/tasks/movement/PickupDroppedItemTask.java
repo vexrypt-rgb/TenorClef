@@ -5,6 +5,7 @@ import adris.altoclef.Debug;
 import adris.altoclef.tasks.AbstractDoToClosestObjectTask;
 import adris.altoclef.tasks.resources.SatisfyMiningRequirementTask;
 import adris.altoclef.tasks.slot.EnsureFreeInventorySlotTask;
+import adris.altoclef.tasksystem.FailureReason;
 import adris.altoclef.tasksystem.ITaskRequiresGrounded;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.ItemTarget;
@@ -272,6 +273,8 @@ public class PickupDroppedItemTask extends AbstractDoToClosestObjectTask<ItemEnt
         if (touching) {
             if (_freeInventoryIfFull) {
                 if (_mod.getItemStorage().getSlotsThatCanFitInPlayerInventory(itemEntity.getStack(), false).isEmpty()) {
+                    // Phase 4: structured INVENTORY_FULL (recoverable via free-slot task)
+                    fail(FailureReason.INVENTORY_FULL, "No inventory space for drop", true);
                     return new EnsureFreeInventorySlotTask();
                 }
             }

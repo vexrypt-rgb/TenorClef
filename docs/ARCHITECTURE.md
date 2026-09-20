@@ -5,6 +5,7 @@ On the Windows machine this tree is `C:\Users\redfa\Documents\MinecraftDev\altoc
 
 Phase 0 was docs-only. Phase 2 adds MovementEngine adapter for 2 travel tasks.
 Phase 3 extracts `WorldKnowledge` + `MovementController` facades; AltoClef stays a shim.
+Phase 4 adds optional `TaskResult` / `FailureReason` on `Task` (legacy boolean shims).
 
 ## Product intent
 
@@ -46,7 +47,11 @@ TaskRunner.tick()
 | `Task` | `adris.altoclef.tasksystem.Task` |
 | `SingleTaskChain` | `adris.altoclef.chains.SingleTaskChain` |
 
-**Missing:** `TaskResult` / `FailureReason`. Finish = `isFinished()`; failure is stop/interrupt or a higher-priority chain stealing control.
+**Phase 4 (incremental):** optional `TaskResult` / `FailureReason` / `TaskFailure` on `Task`.
+Finish still = `isFinished()` for the tick loop (unmigrated tasks unchanged). Observers use
+`getLastResult()` / `getLastFailure()`; child FAILURE/RETRY/BLOCKED can absorb upward.
+Migrated emitters: GetToBlock (stale TIMEOUT), CustomBaritoneGoalTask (progress TIMEOUT/NO_PATH),
+GetToEntity (TARGET_UNAVAILABLE / TIMEOUT), ResourceTask SUCCESS shim, PickupDroppedItem (INVENTORY_FULL).
 
 ### Chains (constructed in `AltoClef.onInitializeLoad`)
 
@@ -106,6 +111,19 @@ and a few `GetToBlockTask` world/scanner reads via `WorldKnowledge`.
 
 **Still on AltoClef god object (~317 `getInstance()` sites):** task runner, chains, butler,
 slot/input controls, Baritone settings bootstrap, food/mob/MLG chains, catalogue, most tasks.
+
+
+### Phase 4 task outcomes (incremental)
+
+| Type | Package | Role |
+|------|---------|------|
+| `TaskResult` | `adris.altoclef.tasksystem` | RUNNING / SUCCESS / FAILURE / CANCELLED / BLOCKED / RETRY |
+| `FailureReason` | same | NO_PATH, TIMEOUT, TARGET_UNAVAILABLE, INVENTORY_FULL, … |
+| `TaskFailure` | same | reason + message + recoverable + retryCount |
+| `TaskResultMapper` | same | Pure legacy shim + absorb rules (offline-tested) |
+
+**Hypothesis confirmed:** `Task.onTick` still returns `Task` or null; `lastResult`/`lastFailure`
+live on the base class — subclasses opt in via `fail()` / `succeed()` without a mass migrate.
 
 ### Multi-version
 

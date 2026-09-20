@@ -9,6 +9,7 @@ import adris.altoclef.tasks.movement.PickupDroppedItemTask;
 import adris.altoclef.tasks.resources.MineAndCollectTask;
 import adris.altoclef.tasks.slot.EnsureFreePlayerCraftingGridTask;
 import adris.altoclef.tasks.slot.MoveInaccessibleItemToInventoryTask;
+import adris.altoclef.tasksystem.FailureReason;
 import adris.altoclef.tasksystem.ITaskCanForce;
 import adris.altoclef.tasksystem.ITaskUsesCraftingGrid;
 import adris.altoclef.tasksystem.Task;
@@ -68,7 +69,12 @@ public abstract class ResourceTask extends Task implements ITaskCanForce {
 
     @Override
     public boolean isFinished() {
-        return StorageHelper.itemTargetsMetInventoryNoCursor(itemTargets);
+        boolean done = StorageHelper.itemTargetsMetInventoryNoCursor(itemTargets);
+        // Phase 4: resource complete → SUCCESS (base tick also shims this)
+        if (done) {
+            succeed();
+        }
+        return done;
     }
 
     @Override

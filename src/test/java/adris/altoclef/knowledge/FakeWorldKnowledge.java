@@ -11,6 +11,7 @@ import net.minecraft.client.world.ClientWorld;
 
 /**
  * Nullable stub {@link WorldKnowledge} for wiring tests (Phase 3).
+ * Phase 5 fact APIs use interface defaults (unknown) unless overridden.
  */
 public final class FakeWorldKnowledge implements WorldKnowledge {
 

@@ -6,6 +6,7 @@ On the Windows machine this tree is `C:\Users\redfa\Documents\MinecraftDev\altoc
 Phase 0 was docs-only. Phase 2 adds MovementEngine adapter for 2 travel tasks.
 Phase 3 extracts `WorldKnowledge` + `MovementController` facades; AltoClef stays a shim.
 Phase 4 adds optional `TaskResult` / `FailureReason` on `Task` (legacy boolean shims).
+Phase 5 adds `KnowledgeFact` confidence/age/source on top of WorldKnowledge (trackers unchanged).
 
 ## Product intent
 
@@ -124,6 +125,29 @@ slot/input controls, Baritone settings bootstrap, food/mob/MLG chains, catalogue
 
 **Hypothesis confirmed:** `Task.onTick` still returns `Task` or null; `lastResult`/`lastFailure`
 live on the base class — subclasses opt in via `fail()` / `succeed()` without a mass migrate.
+
+
+### Phase 5 knowledge confidence (incremental)
+
+| Type | Package | Role |
+|------|---------|------|
+| `KnowledgeSource` | `adris.altoclef.knowledge` | SENSOR / SCANNER / MEMORY / INFERRED / USER |
+| `KnowledgeFact<T>` | same | value + observedTick + confidence + source |
+| `KnowledgeFacts` | same | fresh-enough / decay / merge / replace / isReliable |
+| `KnowledgeFactCache` | same | Bounded LRU cache for selected signals (not a DB) |
+
+**Fact APIs on `WorldKnowledge`** (defaults → unknown; `AltoClefWorldKnowledge` live):
+`playerPositionFact`, `playerHealthFact`, `entityAliveFact`, `nearestEntityFact`,
+`blockPresentFact`, `lastSeenBlockFact`, plus `currentTick()`.
+
+**Cached keys:** `player.pos`, `player.health`, `entity.alive.<id>`, `entity.nearest.<types>`,
+`block.present.<pos>`, `block.lastSeen.<blocks>`.
+
+**Hypothesis confirmed:** wrap high-value reads as facts on `AltoClefWorldKnowledge` rather than
+a new tracker subsystem. Direct getters remain shims.
+
+**Migrated call sites:** `GetToEntityTask` (alive fact + stale confidence → TARGET_UNAVAILABLE),
+`GetToBlockTask` portal patient init via `blockPresentFact` (world getter still available).
 
 ### Multi-version
 

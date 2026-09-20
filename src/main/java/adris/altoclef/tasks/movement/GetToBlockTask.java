@@ -1,6 +1,8 @@
 package adris.altoclef.tasks.movement;
 
 import adris.altoclef.AltoClef;
+import adris.altoclef.knowledge.KnowledgeFact;
+import adris.altoclef.knowledge.WorldKnowledge;
 import adris.altoclef.Debug;
 import adris.altoclef.tasksystem.FailureReason;
 import adris.altoclef.tasksystem.ITaskRequiresGrounded;
@@ -60,11 +62,15 @@ public class GetToBlockTask extends CustomBaritoneGoalTask implements ITaskRequi
     @Override
     protected Task onTick() {
         AltoClef modEarly = AltoClef.getInstance();
-        ClientWorld world = modEarly.getWorldKnowledge().getWorld();
+        WorldKnowledge knowledgeEarly = modEarly.getWorldKnowledge();
+        ClientWorld world = knowledgeEarly.getWorld();
+        // Phase 5: portal presence as KnowledgeFact (SENSOR); fall back to direct world read shim.
+        KnowledgeFact<Boolean> portalFact = knowledgeEarly.blockPresentFact(_position, Blocks.NETHER_PORTAL);
+        boolean isPortal = Boolean.TRUE.equals(portalFact.getValue())
+                || (world != null && world.getBlockState(_position).getBlock() == Blocks.NETHER_PORTAL);
         // Post-death reportal often needs 100+ block walks; default 6s progress checker
         // fails during long Baritone calcs and abandons a live portal via wander.
-        if (!portalPatientInit && world != null
-                && world.getBlockState(_position).getBlock() == Blocks.NETHER_PORTAL) {
+        if (!portalPatientInit && isPortal) {
             portalPatientInit = true;
             checker = new MovementProgressChecker(40, 0.05, 2.0, 0.001, 5);
         }

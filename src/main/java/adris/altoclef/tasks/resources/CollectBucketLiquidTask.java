@@ -15,6 +15,7 @@ import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.Dimension;
 import adris.altoclef.util.ItemTarget;
 import adris.altoclef.util.helpers.LookHelper;
+import adris.altoclef.util.helpers.ShoreStandSelector;
 import adris.altoclef.util.helpers.WorldHelper;
 import adris.altoclef.util.progresscheck.MovementProgressChecker;
 import adris.altoclef.util.time.TimerGame;
@@ -45,6 +46,10 @@ public class CollectBucketLiquidTask extends ResourceTask {
     private final MovementProgressChecker progressChecker = new MovementProgressChecker();
 
     private boolean wasWandering = false;
+    /** Sticky escape child so we do not thrash-recreate GetOutOfWater every tick. */
+    private Task escapeWaterTask = null;
+    private int wetBobTicks = 0;
+    private static final int WET_BOB_BLACKLIST_TICKS = 20 * 8;
 
     public CollectBucketLiquidTask(String liquidName, Item filledBucket, int targetCount, Block toCollect) {
         super(filledBucket, targetCount);
@@ -92,14 +97,23 @@ public class CollectBucketLiquidTask extends ResourceTask {
         if (mod.getClientBaritone().getPathingBehavior().isPathing()) {
             progressChecker.reset();
         }
-        // If we're standing inside a liquid, go pick it up.
+        // If we're standing inside a liquid on solid footing, scoop immediately.
+        // Bobbing in the column (wet, !onGround) never keeps aim — escape to shore first.
         if (tryImmediatePickupTimer.elapsed() && !mod.getItemStorage().hasItem(Items.WATER_BUCKET)) {
             Block standingInside = mod.getWorld().getBlockState(mod.getPlayer().getBlockPos()).getBlock();
             if (standingInside == toCollect && WorldHelper.isSourceBlock(mod.getPlayer().getBlockPos(), false)) {
+                boolean wetHere = false;
+                boolean groundHere = false;
+                try {
+                    wetHere = mod.getPlayer().isTouchingWater() || mod.getPlayer().isSubmergedInWater();
+                    groundHere = mod.getPlayer().isOnGround();
+                } catch (Throwable ignored) {}
+                if (ShoreStandSelector.shouldEscapeBeforeInteract(wetHere, groundHere)) {
+                    setDebugState("In liquid column bobbing — shore first");
+                    return stickyEscapeWater();
+                }
                 setDebugState("Trying to collect (we are in it)");
                 mod.getInputControls().forceLook(0, 90);
-                //mod.getClientBaritone().getLookBehavior().updateTarget(new Rotation(0, 90), true);
-                //Debug.logMessage("Looking at " + _toCollect + ", picking up right away.");
                 tryImmediatePickupTimer.reset();
                 if (mod.getSlotHandler().forceEquipItem(Items.BUCKET)) {
                     mod.getInputControls().tryPress(Input.CLICK_RIGHT);
@@ -163,13 +177,26 @@ public class CollectBucketLiquidTask extends ResourceTask {
                     playerGround = mod.getPlayer().isOnGround();
                 } catch (Throwable ignored) {}
 
+                if (ShoreStandSelector.shouldEscapeBeforeInteract(playerWet, playerGround)) {
+                    wetBobTicks++;
+                    // Long bob with no progress: blacklist this source and wander (TIMEOUT recovery path).
+                    if (wetBobTicks >= WET_BOB_BLACKLIST_TICKS) {
+                        Debug.logMessage("CollectBucket: wet-bob timeout, blacklisting " + blockPos);
+                        blacklist.add(blockPos);
+                        mod.getBlockScanner().requestBlockUnreachable(blockPos);
+                        wetBobTicks = 0;
+                        escapeWaterTask = null;
+                        return new TimeoutWanderTask();
+                    }
+                    return stickyEscapeWater();
+                } else {
+                    wetBobTicks = 0;
+                    escapeWaterTask = null;
+                }
+
                 // Clear above if lava because we can't enter.
                 // but NOT if we're standing right above.
                 if (mod.getWorld().getBlockState(blockPos.up()).isSolid()) {
-                    if (playerWet && !playerGround) {
-                        // Breaking while bobbing never keeps crosshair lock — shore first.
-                        return new GetOutOfWaterTask();
-                    }
                     if (!progressChecker.check(mod)) {
                         mod.getClientBaritone().getPathingBehavior().cancelEverything();
                         mod.getClientBaritone().getPathingBehavior().forceCancel();
@@ -194,12 +221,9 @@ public class CollectBucketLiquidTask extends ResourceTask {
                 // Prefer scooping from shore/edge: grounded + reach beats swimming into the column.
                 if (LookHelper.getReach(blockPos).isPresent() &&
                         mod.getClientBaritone().getPathingBehavior().isSafeToCancel()
-                        && (!playerWet || playerGround)) {
+                        && ShoreStandSelector.canScoopFromFooting(playerWet, playerGround)) {
                     tries++;
                     return new InteractWithBlockTask(new ItemTarget(Items.BUCKET, 1), blockPos, toCollect != Blocks.LAVA, new Vec3i(0, 1, 0));
-                }
-                if (playerWet && !playerGround) {
-                    return new GetOutOfWaterTask();
                 }
                 // Get close enough — stand next to the source on solid when possible (shore).
                 BlockPos shore = shoreStandNear(mod, blockPos);
@@ -231,6 +255,8 @@ public class CollectBucketLiquidTask extends ResourceTask {
         mod.getExtraBaritoneSettings().setInteractionPaused(false);
 
         mod.getClientBaritoneSettings().avoidUpdatingFallingBlocks.value = false;
+        escapeWaterTask = null;
+        wetBobTicks = 0;
     }
 
     @Override
@@ -248,29 +274,29 @@ public class CollectBucketLiquidTask extends ResourceTask {
     }
 
 
+    private Task stickyEscapeWater() {
+        setDebugState("Escaping water before scoop (shore footing)");
+        if (escapeWaterTask == null || escapeWaterTask.isFinished()) {
+            escapeWaterTask = new GetOutOfWaterTask();
+        }
+        return escapeWaterTask;
+    }
+
     /**
      * Prefer a solid footing beside the liquid source so we scoop from shore instead of swimming in.
      * Returns a stand position (feet) adjacent to {@code liquid}, or null if none looks safe.
+     * Delegates geometry to {@link ShoreStandSelector} (unit-tested).
      */
     private BlockPos shoreStandNear(AltoClef mod, BlockPos liquid) {
-        BlockPos best = null;
-        double bestDist = Double.MAX_VALUE;
         BlockPos player = mod.getPlayer().getBlockPos();
-        for (Direction dir : Direction.values()) {
-            if (dir.getAxis().isVertical()) continue;
-            BlockPos stand = liquid.offset(dir);
-            // Need solid under feet and air at feet + head.
-            if (!WorldHelper.isSolidBlock(stand.down())) continue;
-            if (!WorldHelper.isAir(stand) || !WorldHelper.isAir(stand.up())) continue;
-            // Don't stand in the liquid column itself.
-            if (mod.getWorld().getBlockState(stand).getBlock() == toCollect) continue;
-            double d = stand.getSquaredDistance(player);
-            if (d < bestDist) {
-                bestDist = d;
-                best = stand;
-            }
-        }
-        return best;
+        return ShoreStandSelector.select(
+                liquid.getX(), liquid.getY(), liquid.getZ(),
+                player.getX(), player.getY(), player.getZ(),
+                stand -> WorldHelper.isSolidBlock(new BlockPos(stand[0], stand[1] - 1, stand[2])),
+                stand -> WorldHelper.isAir(new BlockPos(stand[0], stand[1], stand[2])),
+                stand -> WorldHelper.isAir(new BlockPos(stand[0], stand[1] + 1, stand[2])),
+                stand -> mod.getWorld().getBlockState(new BlockPos(stand[0], stand[1], stand[2])).getBlock() == toCollect
+        ).map(xyz -> new BlockPos(xyz[0], xyz[1], xyz[2])).orElse(null);
     }
 
     public static class CollectWaterBucketTask extends CollectBucketLiquidTask {

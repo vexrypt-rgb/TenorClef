@@ -13,14 +13,22 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
 import net.minecraft.util.math.BlockPos;
 
-public class GetOutOfWaterTask extends CustomBaritoneGoalTask{
+/**
+ * Escape water to dry footing. Critical: {@link #isEqual} must treat all
+ * instances as equal so parents that return {@code new GetOutOfWaterTask()}
+ * every tick do not forceCancel pathing (S102 spd≈0 thrash / water-bob stall).
+ */
+public class GetOutOfWaterTask extends CustomBaritoneGoalTask {
 
     private boolean startedShimmying = false;
     private final TimerGame shimmyTaskTimer = new TimerGame(5);
 
     @Override
     protected void onStart() {
-
+        // Intentionally do not call super.onStart() forceCancel here via a no-op
+        // override of cancel — CustomBaritoneGoalTask.onStart cancels pathing.
+        // With isEqual fixed, onStart runs once per escape attempt, which is correct.
+        super.onStart();
     }
 
     @Override
@@ -61,7 +69,7 @@ public class GetOutOfWaterTask extends CustomBaritoneGoalTask{
 
     @Override
     protected void onStop(Task interruptTask) {
-
+        super.onStop(interruptTask);
     }
 
     @Override
@@ -71,17 +79,21 @@ public class GetOutOfWaterTask extends CustomBaritoneGoalTask{
 
     @Override
     protected boolean isEqual(Task other) {
-        return false;
+        // MUST be true for any GetOutOfWaterTask. Returning false caused
+        // CollectWaterBucket / T2Solve S102 to restart this task every tick,
+        // force-cancelling Baritone so spd stayed ≈0 while bobbing.
+        return other instanceof GetOutOfWaterTask;
     }
 
     @Override
     protected String toDebugString() {
-        return "";
+        return "get out of water";
     }
 
     @Override
     public boolean isFinished() {
-        return !AltoClef.getInstance().getPlayer().isTouchingWater() && AltoClef.getInstance().getPlayer().isOnGround();
+        AltoClef mod = AltoClef.getInstance();
+        return !mod.getPlayer().isTouchingWater() && mod.getPlayer().isOnGround();
     }
 
     private static class EscapeFromWaterGoal implements Goal {
@@ -104,12 +116,13 @@ public class GetOutOfWaterTask extends CustomBaritoneGoalTask{
 
         @Override
         public double heuristic(int x, int y, int z) {
+            // Prefer dry land; mild penalty for water-adjacent so we step inland.
+            // (Previously flat water=1 gave almost no escape gradient.)
             if (isWater(x, y, z)) {
-                return 1;
+                return 8;
             } else if (isWaterAdjacent(x, y, z)) {
-                return 0.5f;
+                return 2;
             }
-
             return 0;
         }
     }

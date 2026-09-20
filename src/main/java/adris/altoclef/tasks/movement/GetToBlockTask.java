@@ -2,6 +2,7 @@ package adris.altoclef.tasks.movement;
 
 import adris.altoclef.AltoClef;
 import adris.altoclef.Debug;
+import adris.altoclef.tasksystem.FailureReason;
 import adris.altoclef.tasksystem.ITaskRequiresGrounded;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.Dimension;
@@ -95,6 +96,8 @@ public class GetToBlockTask extends CustomBaritoneGoalTask implements ITaskRequi
                 Debug.logWarning("GetToBlock was finished for 10 seconds yet is still being called (stale) at "
                         + _position.toShortString() + " - idling; parent must clear/replace");
             }
+            // Phase 4: parent stuck on finished travel — TIMEOUT (not recoverable by this task)
+            fail(FailureReason.TIMEOUT, "Stale finished GetToBlock still ticked at " + _position.toShortString(), false);
             return null;
         }
         if (!wanderTimer.elapsed()) {

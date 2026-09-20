@@ -42,8 +42,24 @@ public class TaskRunner {
         }
         cachedCurrentTaskChain = maxChain;
         if (maxChain != null) {
-            statusReport = "Chain: "+maxChain.getName() + ", priority: "+maxPriority;
             maxChain.tick();
+            String failBit = "";
+            var tasks = maxChain.getTasks();
+            if (!tasks.isEmpty()) {
+                // Prefer deepest (leaf) failure if any
+                TaskFailure leafFail = null;
+                for (int i = tasks.size() - 1; i >= 0; i--) {
+                    TaskFailure f = tasks.get(i).getLastFailure();
+                    if (f != null) {
+                        leafFail = f;
+                        break;
+                    }
+                }
+                if (leafFail != null) {
+                    failBit = ", fail=" + leafFail.getReason();
+                }
+            }
+            statusReport = "Chain: " + maxChain.getName() + ", priority: " + maxPriority + failBit;
         } else {
             statusReport = " (no chain running) ";
         }

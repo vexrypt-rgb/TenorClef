@@ -18,6 +18,11 @@ public abstract class Task {
 
     private boolean active = false;
 
+    /** Explicit Phase 4 outcome; null means "never set — use legacy shim". */
+    private TaskResult explicitResult = null;
+
+    private TaskFailure lastFailure = null;
+
     public void tick(TaskChain parentChain) {
         parentChain.addTaskToChain(this);
         if (first) {
@@ -26,6 +31,10 @@ public abstract class Task {
             onStart();
             first = false;
             stopped = false;
+            // Fresh run starts RUNNING unless subclass set something in onStart
+            if (explicitResult == null) {
+                explicitResult = TaskResult.RUNNING;
+            }
         }
         if (stopped) return;
 
@@ -51,6 +60,7 @@ public abstract class Task {
 
             // Run our child
             sub.tick(parentChain);
+            absorbChildOutcome(sub);
         } else {
             // We are null
             if (sub != null && canBeInterrupted(sub, null)) {
@@ -59,12 +69,25 @@ public abstract class Task {
                 sub = null;
             }
         }
+
+        // Legacy finish → SUCCESS without forcing every subclass to call succeed()
+        if (isFinished()) {
+            TaskResult resolved = TaskResultMapper.resolve(explicitResult, true, stopped, active);
+            if (resolved == TaskResult.SUCCESS
+                    && (explicitResult == null
+                    || explicitResult == TaskResult.RUNNING
+                    || explicitResult == TaskResult.RETRY)) {
+                succeed();
+            }
+        }
     }
 
     public void reset() {
         first = true;
         active = false;
         stopped = false;
+        explicitResult = null;
+        lastFailure = null;
     }
 
     public void stop() {
@@ -88,6 +111,11 @@ public abstract class Task {
         first = true;
         active = false;
         stopped = true;
+        if (explicitResult == null
+                || explicitResult == TaskResult.RUNNING
+                || explicitResult == TaskResult.RETRY) {
+            explicitResult = TaskResult.CANCELLED;
+        }
     }
 
     /**
@@ -128,6 +156,82 @@ public abstract class Task {
 
     public boolean stopped() {
         return stopped;
+    }
+
+    // —— Phase 4 structured outcomes (optional; unmigrated tasks keep boolean API) ——
+
+    /**
+     * Effective result for observers. Shims legacy {@link #isFinished()} / stop.
+     */
+    public TaskResult getLastResult() {
+        return TaskResultMapper.resolve(explicitResult, isFinished(), stopped, active);
+    }
+
+    /** Explicit result only (null if never set by this task). */
+    public TaskResult getExplicitResult() {
+        return explicitResult;
+    }
+
+    public TaskFailure getLastFailure() {
+        return lastFailure;
+    }
+
+    protected void setResult(TaskResult result) {
+        this.explicitResult = result != null ? result : TaskResult.RUNNING;
+        if (this.explicitResult == TaskResult.SUCCESS
+                || this.explicitResult == TaskResult.RUNNING) {
+            // SUCCESS / clear running drops stale failure
+            if (this.explicitResult == TaskResult.SUCCESS) {
+                this.lastFailure = null;
+            }
+        }
+    }
+
+    protected void succeed() {
+        this.explicitResult = TaskResult.SUCCESS;
+        this.lastFailure = null;
+    }
+
+    /**
+     * Record a structured failure. Recoverable → {@link TaskResult#RETRY};
+     * otherwise {@link TaskResult#FAILURE}. Does not stop the tick loop.
+     */
+    protected void fail(FailureReason reason, String message, boolean recoverable) {
+        fail(new TaskFailure(reason, message, recoverable));
+    }
+
+    protected void fail(TaskFailure failure) {
+        if (failure == null) {
+            failure = new TaskFailure(FailureReason.UNKNOWN, "", false);
+        }
+        this.lastFailure = failure;
+        this.explicitResult = failure.toResult();
+    }
+
+    protected void blocked(FailureReason reason, String message) {
+        this.lastFailure = new TaskFailure(reason, message, true);
+        this.explicitResult = TaskResult.BLOCKED;
+    }
+
+    /**
+     * Pull FAILURE / RETRY / BLOCKED from a child into this task when we have
+     * no stronger explicit outcome yet.
+     */
+    protected void absorbChildOutcome(Task child) {
+        if (child == null) return;
+        TaskResult childExplicit = child.getExplicitResult();
+        TaskResult childEffective = child.getLastResult();
+        TaskResult childForAbsorb = childExplicit != null ? childExplicit : childEffective;
+        if (!TaskResultMapper.shouldAbsorbChild(explicitResult, childForAbsorb)) {
+            return;
+        }
+        explicitResult = childForAbsorb;
+        lastFailure = TaskResultMapper.absorbFailure(lastFailure, child.getLastFailure());
+    }
+
+    /** Immediate child, if any (for tests / debugging). */
+    public Task getSub() {
+        return sub;
     }
 
     protected abstract void onStart();

@@ -1,6 +1,7 @@
 package adris.altoclef.tasks.movement;
 
 import adris.altoclef.AltoClef;
+import adris.altoclef.tasksystem.FailureReason;
 import adris.altoclef.tasksystem.ITaskRequiresGrounded;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.control.MovementController;
@@ -108,6 +109,13 @@ public class GetToEntityTask extends Task implements ITaskRequiresGrounded {
     protected Task onTick() {
         AltoClef mod = AltoClef.getInstance();
 
+        // Phase 4: entity despawned / dead → structured TARGET_UNAVAILABLE
+        if (_entity == null || !_entity.isAlive()) {
+            fail(FailureReason.TARGET_UNAVAILABLE, "Follow target entity unavailable", false);
+            setDebugState("Target entity unavailable");
+            return null;
+        }
+
         if (mod.getClientBaritone().getPathingBehavior().isPathing()) {
             _progress.reset();
         }
@@ -164,6 +172,7 @@ public class GetToEntityTask extends Task implements ITaskRequiresGrounded {
         }
 
         if (!_progress.check(mod)) {
+            fail(FailureReason.TIMEOUT, "Failed to make progress toward entity", true);
             return _wanderTask;
         }
 

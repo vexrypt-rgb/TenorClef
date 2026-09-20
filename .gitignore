@@ -17,3 +17,6 @@ saves/
 *.hprof
 *.iml
 out/
+
+# Personal machine overrides (java.home, larger jvmargs, etc.)
+gradle.properties.local

@@ -97,13 +97,12 @@ gradlew.bat :1.16.1:compileJava
 
 ## Blockers
 
-### Phase 1 (CI)
+### Phase 1 (CI) — **done on branch `build/phase1-stabilize-ci`**
 
-- Remove/override `org.gradle.java.home` for Linux runners.
-- Provide Ostinato jars in CI (build sibling checkouts, cache artifacts, or publish).
-- Align `VERSIONS_TO_BUILD` with supported Ostinato endpoints (`1.16.1`, `1.21.11` at minimum).
-- Decide whether Tungsten is required in CI or explicitly optional.
-- `gh` auth was **not** available on the audit agent — pushing/PRs may need human login on Windows.
+- Removed committed `org.gradle.java.home`; CI-friendly `-Xmx2G`; optional `gradle.properties.local`.
+- CI stages Ostinato tip for `1.21.11`; `1.16.1` uses committed `libs/` jar.
+- Matrix: `1.21.1` + `1.21.11` + `1.16.1`. Tungsten explicitly optional.
+- See `docs/DEVELOPMENT.md`.
 
 ### Phase 2 (MovementEngine)
 

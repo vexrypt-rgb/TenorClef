@@ -1,6 +1,6 @@
-# Tech debt (Phase 0)
+# Tech debt (Phase 0 + Phase 1 updates)
 
-Audit date: 2026-09-19 (America/Phoenix). Evidence-based; no invented APIs.
+Audit date: 2026-09-19 (America/Phoenix). Phase 1 CI/Gradle notes updated 2026-09-19 PT. Evidence-based; no invented APIs.
 
 ## AltoClef god object + singleton
 
@@ -36,16 +36,16 @@ Audit date: 2026-09-19 (America/Phoenix). Evidence-based; no invented APIs.
 
 ## Version / build debt
 
-- `org.gradle.java.home` hard-coded to a Windows Adoptium JDK 21 path.
-- CI version matrix ≠ locally preferred Ostinato endpoints (`1.16.1`, `1.21.11`).
-- Dual Ostinato lineages (Gradle 4.9 + JDK8 vs Gradle 8 + JDK21) increase “works on my machine” risk.
-- Tungsten jar often absent from `libs/` — soft fallback is good, but CI never proves the Tungsten path.
+- ~~`org.gradle.java.home` hard-coded to a Windows Adoptium JDK 21 path.~~ **Fixed in Phase 1** — removed; use `JAVA_HOME` / `~/.gradle/gradle.properties` / optional `gradle.properties.local` (see `docs/DEVELOPMENT.md`).
+- ~~CI version matrix ≠ Ostinato endpoints.~~ **Fixed in Phase 1** — CI compiles `1.21.1` (primary), `1.21.11` (Ostinato tip staged), `1.16.1` (committed `libs/` jar).
+- Dual Ostinato lineages (Gradle 4.9 + JDK8 vs Gradle 8 + JDK21) remain; documented in `docs/DEVELOPMENT.md`.
+- Tungsten jar often absent from `libs/` — soft fallback remains; **CI explicitly optional** (jobs must pass without Tungsten). Proving the Tungsten path in CI is still open.
 
 ## Tests / CI gaps
 
 - No `src/test` unit suite for tasksystem / movement facades.
 - “Tests” in-repo are mostly **in-game commands** (`TestCommand`, `TestRunCommand`, `Testrun2Command`, `CycleTestCommand`).
-- CI `build` does not stage Ostinato/Tungsten artifacts → `:1.16.1:compileJava` would fail on a clean runner without extra steps.
+- ~~CI does not stage Ostinato for 1.16.1.~~ **Fixed in Phase 1** — committed `libs/baritone-unoptimized-fabric-1.16.1.jar`; tip Ostinato built in the `1.21.11` job.
 
 ## Water / swim (recent, relevant)
 

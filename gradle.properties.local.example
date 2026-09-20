@@ -1,0 +1,8 @@
+# Copy to gradle.properties.local (gitignored) for personal overrides.
+# Loaded by settings.gradle.kts when present.
+#
+# Windows example:
+# org.gradle.java.home=C:\\Program Files\\Eclipse Adoptium\\jdk-21.0.12.101-hotspot
+#
+# Heavy local builds:
+# org.gradle.jvmargs=-Xmx8192M

@@ -66,6 +66,7 @@ backend details.
 
 ## Project guides
 
+- [Development / CI (Phase 1)](docs/DEVELOPMENT.md)
 - [Ostinato wiring](docs/OSTINATO_WIRING.md)
 - [Usage](usage.md)
 - [Development](develop.md)

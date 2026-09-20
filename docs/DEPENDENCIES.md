@@ -1,6 +1,6 @@
-# Dependencies & build wiring (Phase 0)
+# Dependencies & build wiring (Phase 0 + Phase 1)
 
-Audit date: 2026-09-19 (America/Phoenix).
+Audit date: 2026-09-19 (America/Phoenix). Phase 1 Gradle/CI updates 2026-09-19 PT.
 
 ## Paths (Windows product layout)
 
@@ -19,13 +19,13 @@ This audit used clones of the same GitHub remotes on the agent box.
 - `gradle.properties`: `mod_version=0.19`, `loader_version=0.16.7`, Fabric Loom **1.15.5**.
 - Compile with **JDK 21**; `jvmdowngrader` lowers bytecode for older MC (`getJavaVersion()` → 21 / 17 / 8 by `mcVersion`).
 
-### Machine-specific JDK (blocker for portable CI)
+### Machine-specific JDK — **resolved (Phase 1)**
 
-```properties
-org.gradle.java.home=C:\\Program Files\\Eclipse Adoptium\\jdk-21.0.12.101-hotspot
-```
+Removed `org.gradle.java.home` from committed `gradle.properties`. Use:
 
-Present in `gradle.properties`. Phase 1 must remove this and use toolchains / `JAVA_HOME`.
+- `JAVA_HOME` → JDK 21 for TenorClef / Ostinato tip
+- Optional `~/.gradle/gradle.properties` or gitignored `gradle.properties.local` (see `docs/DEVELOPMENT.md`)
+- Default `org.gradle.jvmargs=-Xmx2G` (CI-friendly); raise locally for heavy builds
 
 ## Ostinato jar wiring (`build.gradle`)
 
@@ -105,11 +105,12 @@ gradlew.bat :1.16.1:runClient
 
 Expect `[altoclef] Ostinato Baritone for <version>: <jar name>` on configure.
 
-## CI today (`.github/workflows/gradle.yml`)
+## CI today (`.github/workflows/gradle.yml`) — **Phase 1**
 
 - JDK 21, `ubuntu-latest`
-- `VERSIONS_TO_BUILD: "1.16.5 1.17.1 1.18.2 1.20.4 1.21"` — **not** the Ostinato-preferred `1.16.1` / `1.21.11` pair
-- Does not fetch/build Ostinato or Tungsten jars → Phase 1 blocker
+- Jobs: `:1.21.1:compileJava` (primary), `:1.21.11:compileJava` (checkout/build Ostinato tip → `../Ostinato/dist`), `:1.16.1:compileJava` (committed `libs/baritone-unoptimized-fabric-1.16.1.jar`)
+- Tungsten **optional** — never required for a green job
+- See `docs/DEVELOPMENT.md` for clean-runner behavior
 
 ## Other libraries
 

@@ -1,6 +1,9 @@
 package adris.altoclef.tasks.movement;
 
 import adris.altoclef.AltoClef;
+import adris.altoclef.knowledge.KnowledgeFact;
+import adris.altoclef.knowledge.KnowledgeFacts;
+import adris.altoclef.knowledge.WorldKnowledge;
 import adris.altoclef.tasksystem.FailureReason;
 import adris.altoclef.tasksystem.ITaskRequiresGrounded;
 import adris.altoclef.tasksystem.Task;
@@ -109,9 +112,17 @@ public class GetToEntityTask extends Task implements ITaskRequiresGrounded {
     protected Task onTick() {
         AltoClef mod = AltoClef.getInstance();
 
-        // Phase 4: entity despawned / dead → structured TARGET_UNAVAILABLE
-        if (_entity == null || !_entity.isAlive()) {
-            fail(FailureReason.TARGET_UNAVAILABLE, "Follow target entity unavailable", false);
+        // Phase 4/5: entity validity via KnowledgeFact (stale/low confidence → TARGET_UNAVAILABLE)
+        WorldKnowledge knowledge = mod.getWorldKnowledge();
+        KnowledgeFact<Boolean> aliveFact = knowledge.entityAliveFact(_entity);
+        long now = knowledge.currentTick();
+        // Fresh SENSOR dead, unknown, or decayed MEMORY below threshold → unavailable.
+        // maxAge 40 ticks (~2s), half-life 20, min confidence 0.35
+        boolean targetReliable = _entity != null
+                && KnowledgeFacts.isReliable(aliveFact, now, 40L, 20L, 0.35)
+                && Boolean.TRUE.equals(aliveFact.getValue());
+        if (!targetReliable) {
+            fail(FailureReason.TARGET_UNAVAILABLE, "Follow target entity unavailable (stale/low confidence)", false);
             setDebugState("Target entity unavailable");
             return null;
         }

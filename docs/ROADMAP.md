@@ -56,7 +56,7 @@ Vertical slice only — no rewrite, no mass migration:
 
 **Status (Phase 3):** **Merged on main** (PR #4).
 
-## Phase 4 — Task / Failure model (this PR)
+## Phase 4 — Task / Failure model
 
 Vertical slice — failures as data; do not break the tick loop:
 
@@ -66,8 +66,21 @@ Vertical slice — failures as data; do not break the tick loop:
 4. Keep `isFinished()` / boolean behavior for unmigrated tasks
 5. Unit tests for mapping / propagation; `:1.21.1:compileJava`
 
-**Status (Phase 4):** in progress on `feat/phase4-task-result`.
-Out of scope: full planner/recovery (Phases 6–7), migrating every task.
+**Status (Phase 4):** **Merged on main** (PR #5).
+
+## Phase 5 — World model / knowledge confidence (this PR)
+
+Vertical slice — metadata on top of trackers; do not invent a new tracker subsystem:
+
+1. `KnowledgeSource`, `KnowledgeFact<T>`, `KnowledgeFacts` helpers (fresh/decay/merge)
+2. Small in-memory `KnowledgeFactCache` for selected signals
+3. Extend `WorldKnowledge` / `AltoClefWorldKnowledge` with fact APIs (position/health/entity/block)
+4. Migrate 1–2 call sites: GetToEntity target validity; GetToBlock portal presence
+5. Keep direct tracker getters working (shims)
+6. Unit tests for age/confidence/decay; `:1.21.1:compileJava`
+
+**Status (Phase 5):** in progress on `feat/phase5-knowledge-confidence`.
+Out of scope: full planner (7), full recovery (6), migrating all tracker reads.
 
 ## Engineering rules
 
@@ -99,11 +112,12 @@ User: "Get me a full set of iron armor and a shield." → goal → plan → Osti
 
 ## Active work
 
-- Phase 0 + Phase 1 + Phase 2 + Phase 3 merged on `main`
-- **Phase 4 in progress:** `feat/phase4-task-result`
-  - Added: `TaskResult`, `FailureReason`, `TaskFailure`, `TaskResultMapper`
-  - `Task` base: optional explicit result + child absorb; legacy `isFinished()` unchanged for chains
-  - Emitters: GetToBlock TIMEOUT (stale), CustomBaritoneGoal TIMEOUT/NO_PATH, GetToEntity TARGET_UNAVAILABLE/TIMEOUT, ResourceTask SUCCESS, PickupDroppedItem INVENTORY_FULL
-  - Out of scope: recovery planner (6–7), migrate all tasks, confidence world model (5)
+- Phase 0 + Phase 1 + Phase 2 + Phase 3 + Phase 4 merged on `main`
+- **Phase 5 in progress:** `feat/phase5-knowledge-confidence`
+  - Added: `KnowledgeSource`, `KnowledgeFact`, `KnowledgeFacts`, `KnowledgeFactCache`
+  - `WorldKnowledge` fact APIs: player pos/health, entityAlive, nearestEntity, blockPresent, lastSeenBlock
+  - Cached signals: `player.pos`, `player.health`, `entity.alive.*`, `entity.nearest.*`, `block.present.*`, `block.lastSeen.*`
+  - Migrated: GetToEntity (stale confidence → TARGET_UNAVAILABLE), GetToBlock portal via `blockPresentFact`
+  - Out of scope: planner (7), full recovery (6), migrate all tracker reads
 - Follow-up: CI matrix repair for `1.21.11` (Ostinato tip jar staging)
 - Cloud Agents unavailable — local checkouts / executor patches

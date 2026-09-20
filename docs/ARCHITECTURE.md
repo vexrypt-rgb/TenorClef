@@ -253,9 +253,14 @@ See [`AGENT_PROTOCOL.md`](./AGENT_PROTOCOL.md).
 | `BenchmarkHarness` | same | run / aggregate / export |
 | `BenchmarkJson` | same | Hand-rolled JSON summary (no Jackson) |
 | `MockScenarios` | same | Offline acquire / path-fail / threat / death fixtures |
+| `LiveBenchmarkSession` | same | Optional live run counters (null = no-op) |
+| `BenchmarkFiles` / `@bench` | same / commands | JSON under `altoclef/bench/` |
 
 **Hypothesis:** recording TaskResult / Recovery / Threat counters in a mock harness is enough to
 bootstrap metrics without a full Minecraft client; in-game scenarios can plug in later.
+
+**Post-phase-10:** `LiveBenchmarkSession` hooks Task / RecoveryManager / PlanExecutor /
+ThreatMonitor. See [`BENCHMARKS.md`](./BENCHMARKS.md).
 
 ### Multi-version
 

@@ -1,5 +1,7 @@
 package adris.altoclef.tasksystem;
 
+import adris.altoclef.benchmark.LiveBenchmarkSession;
+
 import adris.altoclef.Debug;
 import adris.altoclef.tasks.movement.TimeoutWanderTask;
 
@@ -204,6 +206,7 @@ public abstract class Task {
     protected void succeed() {
         this.explicitResult = TaskResult.SUCCESS;
         this.lastFailure = null;
+        LiveBenchmarkSession.noteTaskResult(TaskResult.SUCCESS);
     }
 
     /**
@@ -220,6 +223,8 @@ public abstract class Task {
         }
         this.lastFailure = failure;
         this.explicitResult = failure.toResult();
+        LiveBenchmarkSession.noteFailure(failure.getReason());
+        LiveBenchmarkSession.noteTaskResult(this.explicitResult);
     }
 
     /**

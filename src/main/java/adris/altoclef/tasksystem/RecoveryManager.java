@@ -1,5 +1,7 @@
 package adris.altoclef.tasksystem;
 
+import adris.altoclef.benchmark.LiveBenchmarkSession;
+
 /**
  * Maps {@link FailureReason} (+ retry count) → {@link RecoveryDecision}.
  * Pure Java — no Minecraft dependency. Not a GOAP / strategic planner.
@@ -93,7 +95,7 @@ public class RecoveryManager {
         if (incoming == null) {
             RecoveryDecision d = decide((TaskFailure) null);
             TaskFailure f = new TaskFailure(FailureReason.UNKNOWN, d.enrichMessage(""), false, 0);
-            return new Applied(d, f, TaskResult.FAILURE);
+            return recordBench(new Applied(d, f, TaskResult.FAILURE));
         }
         RecoveryDecision d = decide(incoming);
         int nextCount = Math.max(incoming.getRetryCount() + 1, d.getAttempt());
@@ -102,17 +104,33 @@ public class RecoveryManager {
         // WAIT → BLOCKED + recoverable flag true (condition may clear)
         if (d.getAction() == RecoveryAction.WAIT) {
             TaskFailure f = new TaskFailure(incoming.getReason(), msg, true, nextCount);
-            return new Applied(d, f, TaskResult.BLOCKED);
+            return recordBench(new Applied(d, f, TaskResult.BLOCKED));
         }
         if (d.isTerminal()) {
             TaskFailure f = new TaskFailure(incoming.getReason(), msg, false, nextCount);
-            return new Applied(d, f, TaskResult.FAILURE);
+            return recordBench(new Applied(d, f, TaskResult.FAILURE));
         }
         TaskFailure f = new TaskFailure(incoming.getReason(), msg, true, nextCount);
-        return new Applied(d, f, d.toTaskResult());
+        return recordBench(new Applied(d, f, d.toTaskResult()));
     }
 
-    /** Bundle of decision + failure + result after {@link #apply}. */
+    
+    private static Applied recordBench(Applied applied) {
+        if (applied != null) {
+            if (applied.getDecision() != null) {
+                LiveBenchmarkSession.noteRecovery(applied.getDecision().getAction());
+            }
+            if (applied.getFailure() != null) {
+                LiveBenchmarkSession.noteFailure(applied.getFailure().getReason());
+            }
+            if (applied.getResult() != null) {
+                LiveBenchmarkSession.noteTaskResult(applied.getResult());
+            }
+        }
+        return applied;
+    }
+
+/** Bundle of decision + failure + result after {@link #apply}. */
     public static final class Applied {
         private final RecoveryDecision decision;
         private final TaskFailure failure;

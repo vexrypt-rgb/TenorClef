@@ -22,6 +22,9 @@ public final class BenchmarkCounters {
     private int pathFails;
     private int threatHigh;
     private int threatCritical;
+    private int threatPauses;
+    private int threatFails;
+    private String threatPeak = "NONE";
 
     public void recordTaskResult(TaskResult result) {
         if (result == null) {
@@ -118,6 +121,51 @@ public final class BenchmarkCounters {
         return Collections.unmodifiableMap(new EnumMap<>(failureReasons));
     }
 
+
+    public void recordThreatPause() {
+        threatPauses++;
+    }
+
+    public void recordThreatFail() {
+        threatFails++;
+    }
+
+    /** Update peak threat name if {@code levelName} is higher ordinal-wise than current. */
+    public void observeThreatPeak(String levelName) {
+        if (levelName == null || levelName.isBlank()) {
+            return;
+        }
+        int neu = threatOrdinal(levelName);
+        int cur = threatOrdinal(threatPeak);
+        if (neu >= cur) {
+            threatPeak = levelName;
+        }
+    }
+
+    public int getThreatPauses() {
+        return threatPauses;
+    }
+
+    public int getThreatFails() {
+        return threatFails;
+    }
+
+    public String getThreatPeak() {
+        return threatPeak;
+    }
+
+    private static int threatOrdinal(String name) {
+        // Mirror ThreatLevel order without a hard package cycle in tests.
+        return switch (name) {
+            case "NONE" -> 0;
+            case "LOW" -> 1;
+            case "MEDIUM" -> 2;
+            case "HIGH" -> 3;
+            case "CRITICAL" -> 4;
+            default -> -1;
+        };
+    }
+
     /** Snapshot into a new counters object (shallow copy of tallies). */
     public BenchmarkCounters copy() {
         BenchmarkCounters c = new BenchmarkCounters();
@@ -129,6 +177,9 @@ public final class BenchmarkCounters {
         c.pathFails = pathFails;
         c.threatHigh = threatHigh;
         c.threatCritical = threatCritical;
+        c.threatPauses = threatPauses;
+        c.threatFails = threatFails;
+        c.threatPeak = threatPeak;
         return c;
     }
 }

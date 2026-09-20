@@ -113,8 +113,14 @@ Do not compile while a `runClient` / `@testrun` session is live on the same tree
 
 On push/PR to `main`, `.github/workflows/gradle.yml`:
 
-1. **1.21.1** — JDK 21, `./gradlew :1.21.1:compileJava` (Maven Baritone; no Ostinato checkout).
-2. **1.21.11** — JDK 21, checkout + build `vexrypt-rgb/Ostinato@main`, stage jars to `../Ostinato/dist` (and `libs/`), then `./gradlew :1.21.11:compileJava`. Ostinato tip build **must** succeed (no Maven Baritone for 1.21.11).
-3. **1.16.1** — JDK 21 for TenorClef Gradle, uses committed `libs/baritone-unoptimized-fabric-1.16.1.jar`, `./gradlew :1.16.1:compileJava`.
+1. **1.21.1** (required) — JDK 21, `./gradlew :1.21.1:compileJava` (Maven Baritone; no Ostinato checkout).
+2. **1.21.11** (experimental, `continue-on-error`) — JDK 21, checkout + build `vexrypt-rgb/Ostinato@main`, stage jars to `../Ostinato/dist` (and `libs/`), then `./gradlew :1.21.11:compileJava` **only if** staging succeeded. Tip Ostinato / Item vs ItemStack drift may fail; does **not** block merge.
+3. **1.16.1** (required) — JDK 21 for TenorClef Gradle, uses committed `libs/baritone-unoptimized-fabric-1.16.1.jar`, `./gradlew :1.16.1:compileJava`.
+
+`Deploy Javadoc` (`.github/workflows/javadoc-publish.yml`) is also **non-blocking** (`continue-on-error`) — generation/deploy failures must not red `main`.
 
 Tungsten is never required. No `org.gradle.java.home` pin.
+
+### Related: Ostinato `1.16.1` Tests
+
+Ostinato branch `1.16.1` runs `.github/workflows/run_tests.yml` on JDK 8. That job has been flaky/red independently of TenorClef. Prefer documenting + `continue-on-error` there until a dedicated JDK8/Gradle 4.9 test fix lands; TenorClef's `:1.16.1:compileJava` remains the required legacy gate.

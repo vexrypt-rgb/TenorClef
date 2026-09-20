@@ -1,6 +1,6 @@
 # Tech debt (Phase 0 + Phase 1 updates)
 
-Audit date: 2026-09-19 (America/Phoenix). Phase 1 CI/Gradle notes updated 2026-09-19 PT. Evidence-based; no invented APIs.
+Audit date: 2026-09-19 (America/Phoenix). Phase 1 CI/Gradle notes updated 2026-09-19 PT. CI noise cleanup 2026-09-20 PT. Evidence-based; no invented APIs.
 
 ## AltoClef god object + singleton
 
@@ -38,6 +38,8 @@ Audit date: 2026-09-19 (America/Phoenix). Phase 1 CI/Gradle notes updated 2026-0
 
 - ~~`org.gradle.java.home` hard-coded to a Windows Adoptium JDK 21 path.~~ **Fixed in Phase 1** — removed; use `JAVA_HOME` / `~/.gradle/gradle.properties` / optional `gradle.properties.local` (see `docs/DEVELOPMENT.md`).
 - ~~CI version matrix ≠ Ostinato endpoints.~~ **Fixed in Phase 1** — CI compiles `1.21.1` (primary), `1.21.11` (Ostinato tip staged), `1.16.1` (committed `libs/` jar).
+- **1.21.11 tip job still noisy** (missing symbols / Item vs ItemStack / Ostinato staging git failures). **CI noise cleanup (2026-09-20):** job is `continue-on-error` + soft Ostinato stage; required gates remain `1.21.1` + `1.16.1`. Full tip port deferred.
+- **Deploy Javadoc** workflow often red (Gradle/docs path). Made non-blocking (`continue-on-error`) same cleanup; root-cause fix still open.
 - Dual Ostinato lineages (Gradle 4.9 + JDK8 vs Gradle 8 + JDK21) remain; documented in `docs/DEVELOPMENT.md`.
 - Tungsten jar often absent from `libs/` — soft fallback remains; **CI explicitly optional** (jobs must pass without Tungsten). Proving the Tungsten path in CI is still open.
 
@@ -45,7 +47,8 @@ Audit date: 2026-09-19 (America/Phoenix). Phase 1 CI/Gradle notes updated 2026-0
 
 - No `src/test` unit suite for tasksystem / movement facades.
 - “Tests” in-repo are mostly **in-game commands** (`TestCommand`, `TestRunCommand`, `Testrun2Command`, `CycleTestCommand`).
-- ~~CI does not stage Ostinato for 1.16.1.~~ **Fixed in Phase 1** — committed `libs/baritone-unoptimized-fabric-1.16.1.jar`; tip Ostinato built in the `1.21.11` job.
+- ~~CI does not stage Ostinato for 1.16.1.~~ **Fixed in Phase 1** — committed `libs/baritone-unoptimized-fabric-1.16.1.jar`; tip Ostinato built in the `1.21.11` job (experimental / non-blocking as of CI noise cleanup).
+- **Ostinato `1.16.1` branch Tests job** (JDK 8 / Gradle 4.9) has been failing independently. Not fixed in TenorClef; document + prefer `continue-on-error` on that Ostinato workflow until a quick JDK8 test fix is available.
 
 ## Water / swim (recent, relevant)
 

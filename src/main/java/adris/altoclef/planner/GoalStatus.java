@@ -6,6 +6,8 @@ package adris.altoclef.planner;
 public enum GoalStatus {
     IDLE,
     RUNNING,
+    /** Strategic work paused for HIGH threat; MobDefense/WorldSurvival still run. */
+    PAUSED,
     SUCCESS,
     FAILED,
     CANCELLED;

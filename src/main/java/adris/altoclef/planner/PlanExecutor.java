@@ -1,9 +1,12 @@
 package adris.altoclef.planner;
 
+import adris.altoclef.tasksystem.FailureReason;
 import adris.altoclef.tasksystem.RecoveryAction;
 import adris.altoclef.tasksystem.RecoveryDecision;
 import adris.altoclef.tasksystem.RecoveryManager;
 import adris.altoclef.tasksystem.TaskFailure;
+import adris.altoclef.threat.ThreatAssessment;
+import adris.altoclef.threat.ThreatLevel;
 
 /**
  * Runs a {@link Plan} step-by-step above the task layer (Phase 7).
@@ -227,6 +230,63 @@ public class PlanExecutor {
             plan.setStatus(PlanStatus.SUCCESS);
         }
         lastNote = note != null ? note : "success";
+    }
+
+
+    /**
+     * Phase 8: react to a threat assessment.
+     * <ul>
+     *   <li>CRITICAL → fail current goal via {@link FailureReason#DANGER}
+     *       (RecoveryManager ESCALATEs; no naive replan)</li>
+     *   <li>HIGH → pause ({@link GoalStatus#PAUSED})</li>
+     *   <li>below HIGH → resume if paused</li>
+     * </ul>
+     *
+     * @return true if status changed
+     */
+    public boolean applyThreat(ThreatAssessment assessment) {
+        if (assessment == null || status.isTerminal()) {
+            return false;
+        }
+        ThreatLevel level = assessment.getLevel();
+        if (level == ThreatLevel.CRITICAL) {
+            return failForDanger(assessment.getReason());
+        }
+        if (level == ThreatLevel.HIGH) {
+            if (status == GoalStatus.RUNNING) {
+                status = GoalStatus.PAUSED;
+                lastNote = "paused for threat: " + assessment.getReason();
+                return true;
+            }
+            return false;
+        }
+        // Clear enough — resume
+        if (status == GoalStatus.PAUSED) {
+            status = GoalStatus.RUNNING;
+            lastNote = "resumed (threat " + level + ")";
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Fail the running/paused goal as DANGER. Uses RecoveryManager (ESCALATE);
+     * skips naive replan so survival/combat chains can take over.
+     */
+    public boolean failForDanger(String reason) {
+        if (status.isTerminal()) {
+            return false;
+        }
+        String msg = reason != null && !reason.isEmpty() ? reason : "danger";
+        TaskFailure failure = new TaskFailure(FailureReason.DANGER, msg, false, 0);
+        RecoveryManager.Applied applied = recoveryManager.apply(failure);
+        lastDecision = applied.getDecision();
+        if (plan != null && plan.currentStep() != null) {
+            plan.failCurrent();
+        }
+        status = GoalStatus.FAILED;
+        lastNote = "DANGER: " + msg + " [" + lastDecision.getAction() + "]";
+        return true;
     }
 
     /** Debug / status line. */

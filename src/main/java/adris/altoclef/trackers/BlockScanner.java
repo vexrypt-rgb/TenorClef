@@ -150,16 +150,19 @@ public class BlockScanner {
 
     public Optional<BlockPos> getNearestBlock(Vec3d pos, Predicate<BlockPos> isValidTest, Block... blocks) {
         Optional<BlockPos> closest = Optional.empty();
+        double bestSq = Double.POSITIVE_INFINITY;
 
+        // Squared Euclidean — not GoalBlock heuristic. Y-heavy heuristics skip nearby
+        // elevated jungle/etc for farther flat oak (wood-type agnostic nearest).
         for (Block block : blocks) {
             Optional<BlockPos> p = getNearestBlock(block, isValidTest, pos);
 
             if (p.isPresent()) {
-                if (closest.isEmpty()) closest = p;
-                else {
-                    if (BaritoneHelper.calculateGenericHeuristic(pos, WorldHelper.toVec3d(closest.get())) > BaritoneHelper.calculateGenericHeuristic(pos, WorldHelper.toVec3d(p.get()))) {
-                        closest = p;
-                    }
+                double sq = adris.altoclef.util.helpers.NearestBlockSelector.squaredDistanceBlock(
+                        pos.x, pos.y, pos.z, p.get().getX(), p.get().getY(), p.get().getZ());
+                if (sq < bestSq) {
+                    bestSq = sq;
+                    closest = p;
                 }
             }
         }
@@ -184,7 +187,8 @@ public class BlockScanner {
             if (!mod.getWorld().getBlockState(p).getBlock().equals(block)) continue;
             if (!isValidTest.test(p) || isUnreachable(p)) continue;
 
-            double dist = BaritoneHelper.calculateGenericHeuristic(fromPos, WorldHelper.toVec3d(p));
+            double dist = adris.altoclef.util.helpers.NearestBlockSelector.squaredDistanceBlock(
+                    fromPos.x, fromPos.y, fromPos.z, p.getX(), p.getY(), p.getZ());
 
             if (dist < nearest) {
                 nearest = dist;

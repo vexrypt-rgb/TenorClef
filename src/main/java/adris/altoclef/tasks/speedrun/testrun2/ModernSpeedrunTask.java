@@ -426,19 +426,26 @@ public class ModernSpeedrunTask extends Task {
                 || WorldHelper.getCurrentDimension() == Dimension.NETHER;
         // BlazePeek stole CollectBlazeRods for 20+ min whenever a blaze was within 4 blocks.
         // Melee hostiles in face (creeper / zombie / baby zombie villager) — own the fight so
-        // stick() can drop back into CollectIron instead of leaving a silent noop after KillAura.
+        // stick() can drop back into CollectIron / wood instead of leaving a silent noop after KillAura.
         // Still no ranged chase (skeletons/witches filtered in closeHostile).
         if (!netherish && (creeperInFace(mod) || closeHostile(mod))) {
             lastCombatPulse = phaseTicks;
-            ironNeedsKick = (phase == Phase.IRON);
+            ironNeedsKick = (phase == Phase.IRON || phase == Phase.BOOTSTRAP);
             T2History.note("WHY fight: melee hostile in face");
             return stick(FightNearbyTask.hostiles());
         }
-        // Combat just ended while IRON — clear ore blacklist and force CollectIron to tick.
-        if (phase == Phase.IRON && lastCombatPulse > 0 && phaseTicks - lastCombatPulse < 20 * 3
+        // Drop a finished fight child immediately — leaving it as active made stick() / null-child idle.
+        if (active instanceof adris.altoclef.tasks.speedrun.testrun2.combat.AnyWeaponCombatTask
+                && active.isFinished()) {
+            T2History.note("WHY: drop finished combat child — resume " + phase);
+            active = null;
+            ironNeedsKick = (phase == Phase.IRON || phase == Phase.BOOTSTRAP);
+        }
+        // Combat just ended — clear block blacklist and force resource parent to re-pick.
+        if (lastCombatPulse > 0 && phaseTicks - lastCombatPulse < 20 * 5
                 && !(active instanceof adris.altoclef.tasks.speedrun.testrun2.combat.AnyWeaponCombatTask)) {
-            if (ironNeedsKick || (active != null && active.isFinished())) {
-                T2History.note("WHY iron: post-combat resume CollectIron");
+            if (ironNeedsKick || active == null) {
+                T2History.note("WHY post-combat: resume " + phase + " (clear blacklist)");
                 clearBlockBlacklist(mod);
                 ironNeedsKick = false;
                 lastCombatPulse = 0;
@@ -957,6 +964,11 @@ public class ModernSpeedrunTask extends Task {
                 && !(wanted instanceof EnterNetherPortalTask)) {
             return active;
         }
+        // Finished combat must never sticky-lock — resume the resource child.
+        if (active instanceof adris.altoclef.tasks.speedrun.testrun2.combat.AnyWeaponCombatTask
+                && active.isFinished()) {
+            active = null;
+        }
         if (active != null && wanted != null
                 && active.getClass() == wanted.getClass()
                 && !active.isFinished()) {
@@ -1072,7 +1084,9 @@ public class ModernSpeedrunTask extends Task {
             HolePillar.reset();
             active = null;
             ironStill = 0;
-            return stick(iron(mod));
+            Task again = iron(mod);
+            if (again != null) return stick(again);
+            return null;
         }
         if (ironStill == 20 * 6) {
             T2Log.warn("E70", "iron stall 6s @" + x + "," + z + " — clear blacklist + re-pick ore");

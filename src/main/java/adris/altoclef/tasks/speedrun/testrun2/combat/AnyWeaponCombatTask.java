@@ -316,7 +316,12 @@ public class AnyWeaponCombatTask extends Task {
 
     @Override
     public boolean isFinished() {
-        return done || (target != null && !target.isAlive());
+        if (done) return true;
+        if (target != null && !target.isAlive()) {
+            done = true;
+            return true;
+        }
+        return false;
     }
 
     @Override

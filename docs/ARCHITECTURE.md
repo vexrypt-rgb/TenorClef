@@ -7,6 +7,7 @@ Phase 0 was docs-only. Phase 2 adds MovementEngine adapter for 2 travel tasks.
 Phase 3 extracts `WorldKnowledge` + `MovementController` facades; AltoClef stays a shim.
 Phase 4 adds optional `TaskResult` / `FailureReason` on `Task` (legacy boolean shims).
 Phase 5 adds `KnowledgeFact` confidence/age/source on top of WorldKnowledge (trackers unchanged).
+Phase 6 adds `RecoveryManager` mapping FailureReason → RecoveryDecision (not a planner).
 
 ## Product intent
 
@@ -148,6 +149,36 @@ a new tracker subsystem. Direct getters remain shims.
 
 **Migrated call sites:** `GetToEntityTask` (alive fact + stale confidence → TARGET_UNAVAILABLE),
 `GetToBlockTask` portal patient init via `blockPresentFact` (world getter still available).
+
+### Phase 6 recovery (incremental)
+
+| Type | Package | Role |
+|------|---------|------|
+| `RecoveryAction` | `adris.altoclef.tasksystem` | RETRY / ALTERNATE_PATH / ALTERNATE_TARGET / WAIT / ABORT / ESCALATE |
+| `RecoveryDecision` | same | action + attempt/maxAttempts + note |
+| `RecoveryManager` | same | FailureReason (+ retry count) → decision; `apply()` enriches TaskFailure |
+
+**Policy (defaults: maxPathRetries=3, maxInventoryWaits=2):**
+
+| FailureReason | While under limit | After limit |
+|---------------|-------------------|-------------|
+| NO_PATH / TIMEOUT | ALTERNATE_PATH (1st) then RETRY | ABORT |
+| TARGET_UNAVAILABLE | ABORT | ABORT |
+| INVENTORY_FULL | WAIT | ABORT |
+| DANGER / PLAYER_DEAD | ESCALATE | ESCALATE |
+| other | ESCALATE | ESCALATE |
+
+**Wiring:** `Task.failWithRecovery` / `absorbChildOutcome` consults RecoveryManager for
+NO_PATH / TIMEOUT / TARGET_UNAVAILABLE / INVENTORY_FULL. Unmigrated tasks unchanged.
+`TaskRunner` status may append `, recovery=<Action>`.
+
+**Migrated emitters:** CustomBaritoneGoal / GetToEntity (TIMEOUT path), GetToEntity
+(TARGET_UNAVAILABLE → ABORT), PickupDroppedItem (INVENTORY_FULL → WAIT then ABORT).
+GetToBlock progress stalls inherit CustomBaritoneGoal recovery; stale-finished stays
+non-recoverable `fail(TIMEOUT,…)`.
+
+**Hypothesis confirmed:** small RecoveryManager from absorb / failWithRecovery is enough —
+no GOAP / strategic planner (Phase 7).
 
 ### Multi-version
 

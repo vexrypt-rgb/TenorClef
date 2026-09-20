@@ -5,6 +5,7 @@ import adris.altoclef.Debug;
 import adris.altoclef.control.InputControls;
 import adris.altoclef.multiversion.versionedfields.Blocks;
 import adris.altoclef.tasksystem.FailureReason;
+import adris.altoclef.tasksystem.RecoveryDecision;
 import adris.altoclef.tasksystem.ITaskRequiresGrounded;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.helpers.WorldHelper;
@@ -178,13 +179,24 @@ public abstract class CustomBaritoneGoalTask extends Task implements ITaskRequir
                 if (!checker.check(mod)) {
                     onWander(mod);
                     if (shouldWanderOnFail(mod)) {
-                        // Phase 4: progress stall is structured TIMEOUT (recoverable → RETRY)
-                        fail(FailureReason.TIMEOUT, "Failed to make progress on goal", true);
-                        Debug.logMessage("Failed to make progress on goal, wandering.");
+                        // Phase 6: TIMEOUT → ALTERNATE_PATH/RETRY with limit, then ABORT
+                        RecoveryDecision d = failWithRecovery(FailureReason.TIMEOUT,
+                                "Failed to make progress on goal");
+                        if (d.isTerminal()) {
+                            Debug.logMessage("Progress retries exhausted, aborting goal.");
+                            checker.reset();
+                            return null;
+                        }
+                        Debug.logMessage("Failed to make progress on goal, wandering (" + d + ").");
                         return wanderTask;
                     }
                     // Subclass declined wander (e.g. GetToBlock -> NETHER_PORTAL): keep trying.
-                    fail(FailureReason.NO_PATH, "No progress toward goal; wander declined", true);
+                    RecoveryDecision d = failWithRecovery(FailureReason.NO_PATH,
+                            "No progress toward goal; wander declined");
+                    if (d.isTerminal()) {
+                        Debug.logMessage("NO_PATH retries exhausted for goal.");
+                        return null;
+                    }
                     checker.reset();
                 }
             }

@@ -46,17 +46,23 @@ public class TaskRunner {
             String failBit = "";
             var tasks = maxChain.getTasks();
             if (!tasks.isEmpty()) {
-                // Prefer deepest (leaf) failure if any
+                // Prefer deepest (leaf) failure / recovery if any
                 TaskFailure leafFail = null;
+                RecoveryDecision leafRecovery = null;
                 for (int i = tasks.size() - 1; i >= 0; i--) {
-                    TaskFailure f = tasks.get(i).getLastFailure();
+                    Task t = tasks.get(i);
+                    TaskFailure f = t.getLastFailure();
                     if (f != null) {
                         leafFail = f;
+                        leafRecovery = t.getLastRecovery();
                         break;
                     }
                 }
                 if (leafFail != null) {
                     failBit = ", fail=" + leafFail.getReason();
+                    if (leafRecovery != null) {
+                        failBit += ", recovery=" + leafRecovery.getAction();
+                    }
                 }
             }
             statusReport = "Chain: " + maxChain.getName() + ", priority: " + maxPriority + failBit;

@@ -9,6 +9,8 @@ Phase 4 adds optional `TaskResult` / `FailureReason` on `Task` (legacy boolean s
 Phase 5 adds `KnowledgeFact` confidence/age/source on top of WorldKnowledge (trackers unchanged).
 Phase 6 adds `RecoveryManager` mapping FailureReason → RecoveryDecision (not a planner).
 Phase 7 adds a minimal Goal / Plan / PlanExecutor layer above tasks (not full GOAP).
+Phase 8 adds a thin ThreatAssessor / ThreatMonitor that can pause/fail goals on HIGH/CRITICAL;
+MobDefenseChain / WorldSurvivalChain remain the fallback.
 
 ## Product intent
 
@@ -196,6 +198,26 @@ no GOAP / strategic planner (Phase 7).
 
 **Hypothesis (Phase 7):** linear SimplePlanner + PlanExecutor wrapping catalogue tasks is enough.
 Full HTN / GOAP, combat unify, agent JSON protocol remain later phases.
+
+
+### Phase 8 combat / survival threat (incremental)
+
+| Type | Package | Role |
+|------|---------|------|
+| `ThreatLevel` | `adris.altoclef.threat` | NONE / LOW / MEDIUM / HIGH / CRITICAL |
+| `ThreatAssessment` | same | level + reason + optional timeToDanger + suggested RecoveryAction |
+| `ThreatSignals` | same | Pure input snapshot (health, food, lava/fire/drown, hostiles) |
+| `ThreatEvaluator` / `ThreatAssessor` | same | Signals → assessment (wraps survival/defense priorities) |
+| `ThreatMonitor` | same | Tick hook; latest assessment; apply to PlanExecutor |
+| `ThreatSignalCollector` | same | Live AltoClef / EntityTracker / WorldKnowledge → signals |
+| `@threat` | `commands.ThreatCommand` | Debug status |
+
+**Interrupt policy:** HIGH → `GoalStatus.PAUSED` (PlanRunnerTask idles; MobDefense still runs).
+CRITICAL → fail goal with `FailureReason.DANGER` (RecoveryManager ESCALATEs; no naive replan).
+Below HIGH → resume if paused.
+
+**Hypothesis confirmed:** ThreatAssessor + monitor pausing GoalManager on HIGH/CRITICAL is enough —
+leave MobDefenseChain / WorldSurvivalChain running as today.
 
 ### Multi-version
 

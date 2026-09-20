@@ -14,6 +14,8 @@ import adris.altoclef.control.SlotHandler;
 import adris.altoclef.core.CoreServices;
 import adris.altoclef.knowledge.AltoClefWorldKnowledge;
 import adris.altoclef.knowledge.WorldKnowledge;
+import adris.altoclef.threat.ThreatMonitor;
+import adris.altoclef.threat.ThreatSignalCollector;
 import adris.altoclef.eventbus.EventBus;
 import adris.altoclef.eventbus.events.ClientRenderEvent;
 import adris.altoclef.eventbus.events.ClientTickEvent;
@@ -93,6 +95,8 @@ public class AltoClef implements ModInitializer {
     private WorldKnowledge worldKnowledge;
     private MovementController movementController;
     private CoreServices coreServices;
+    // Phase 8 threat layer (MobDefense/WorldSurvival remain fallback)
+    private ThreatMonitor threatMonitor;
     // Pausing
     private boolean paused = false;
     private Task storedTask;
@@ -171,6 +175,7 @@ public class AltoClef implements ModInitializer {
         worldKnowledge = new AltoClefWorldKnowledge(this);
         movementController = AdapterMovementController.INSTANCE;
         coreServices = new CoreServices(worldKnowledge, movementController);
+        threatMonitor = new ThreatMonitor();
 
         initializeCommands();
 
@@ -250,6 +255,15 @@ public class AltoClef implements ModInitializer {
         miscBlockTracker.tick();
         trackerManager.tick();
         blockScanner.tick();
+        // Phase 8: assess threat from existing signals; may pause/fail @goal PlanExecutor
+        if (threatMonitor != null && inGame()) {
+            threatMonitor.tick(ThreatSignalCollector.collect(this));
+            adris.altoclef.planner.GoalManager gm =
+                    adris.altoclef.commands.GoalCommand.getActiveManager();
+            if (gm != null) {
+                threatMonitor.applyToGoalManager(gm);
+            }
+        }
         taskRunner.tick();
 
         messageSender.tick();
@@ -366,6 +380,13 @@ public class AltoClef implements ModInitializer {
      */
     public CoreServices getCoreServices() {
         return coreServices;
+    }
+
+    /**
+     * Phase 8 threat monitor (latest assessment; interrupts GoalManager on HIGH/CRITICAL).
+     */
+    public ThreatMonitor getThreatMonitor() {
+        return threatMonitor;
     }
 
     /**

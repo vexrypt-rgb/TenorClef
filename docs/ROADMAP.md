@@ -94,7 +94,7 @@ Vertical slice — structured failures become actionable without a planner:
 
 **Status (Phase 6):** **Merged on main** (PR #7).
 
-## Phase 7 — Strategic planner (this PR)
+## Phase 7 — Strategic planner
 
 Vertical slice — Goal → Plan → catalogue Task; not full GOAP / HTN:
 
@@ -105,8 +105,24 @@ Vertical slice — Goal → Plan → catalogue Task; not full GOAP / HTN:
 5. Unit tests with fake inventory; `:1.21.1:compileJava`
 6. Docs: ARCHITECTURE + this ROADMAP
 
-**Status (Phase 7):** in progress on `feat/phase7-planner`.
-Out of scope: full GOAP/HTN, combat/survival unify (8), agent JSON (9), migrating all TaskCatalogue entries, CI 1.21.11 fix.
+**Status (Phase 7):** **Merged on main** (PR #8).
+
+
+## Phase 8 — Combat / survival threat unify (this PR)
+
+Vertical slice — thin threat layer; do **not** rewrite MobDefense / WorldSurvival:
+
+1. `ThreatLevel` / `ThreatAssessment` / `ThreatSignals`
+2. `ThreatEvaluator` / `ThreatAssessor` reading health, food, lava/fire/drown, nearby hostiles
+3. `ThreatMonitor` tick hook from AltoClef; `ThreatSignalCollector` wraps existing trackers
+4. Integration: HIGH → pause GoalManager; CRITICAL → fail with `FailureReason.DANGER` (RecoveryManager ESCALATEs)
+5. Optional `@threat` debug command
+6. Unit tests with fake health/hostile inputs; `:1.21.1:compileJava`
+7. Docs: ARCHITECTURE + this ROADMAP
+
+**Status (Phase 8):** in progress on `feat/phase8-threat`.
+Out of scope: full CombatController rewrite, agent JSON (9), benchmarks (10), CI 1.21.11 fix.
+Preserve MobDefenseChain / WorldSurvivalChain as fallback.
 
 ## Engineering rules
 
@@ -138,11 +154,11 @@ User: "Get me a full set of iron armor and a shield." → goal → plan → Osti
 
 ## Active work
 
-- Phase 0–6 merged on `main`
-- **Phase 7 in progress:** `feat/phase7-planner`
-  - Added: `Goal`, `Requirement`, `Plan`, `PlanStep`, `SimplePlanner`, `PlanExecutor` / `GoalManager`
-  - Demo: `AcquireItemGoal` + `@goal <item> [count]` → `PlanRunnerTask` (catalogue-backed)
-  - On step ABORT: naive replan once via SimplePlanner; second ABORT fails goal
-  - Out of scope: full GOAP/HTN, combat unify (8), agent JSON (9), migrate all catalogue entries
+- Phase 0–7 merged on `main`
+- **Phase 8 in progress:** `feat/phase8-threat`
+  - Added: `ThreatLevel`, `ThreatAssessment`, `ThreatSignals`, `ThreatAssessor`, `ThreatMonitor`
+  - HIGH pauses `@goal` PlanExecutor; CRITICAL fails with DANGER → ESCALATE
+  - MobDefenseChain / WorldSurvivalChain unchanged (fallback)
+  - Out of scope: CombatController rewrite, agent JSON (9), benchmarks (10)
 - Follow-up: CI matrix repair for `1.21.11` (Ostinato tip jar staging)
 - Cloud Agents unavailable — local checkouts / executor patches

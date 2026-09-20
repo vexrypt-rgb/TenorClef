@@ -79,11 +79,24 @@ public class PlanRunnerTask extends Task {
             return null;
         }
         if (st == GoalStatus.FAILED || st == GoalStatus.CANCELLED) {
+            FailureReason reason = FailureReason.RESOURCE_MISSING;
+            if (executor.getLastDecision() != null
+                    && executor.getLastDecision().getAction()
+                    == adris.altoclef.tasksystem.RecoveryAction.ESCALATE
+                    && executor.getLastNote() != null
+                    && executor.getLastNote().startsWith("DANGER")) {
+                reason = FailureReason.DANGER;
+            }
             if (getExplicitResult() != TaskResult.FAILURE) {
-                fail(FailureReason.RESOURCE_MISSING,
-                        "goal " + st + ": " + executor.getLastNote(), false);
+                fail(reason, "goal " + st + ": " + executor.getLastNote(), false);
             }
             setDebugState("goal " + st);
+            return null;
+        }
+        if (st == GoalStatus.PAUSED) {
+            // Leave MobDefense / WorldSurvival chains running; idle this step.
+            setDebugState("paused for threat");
+            setResult(TaskResult.BLOCKED);
             return null;
         }
         if (st != GoalStatus.RUNNING) {

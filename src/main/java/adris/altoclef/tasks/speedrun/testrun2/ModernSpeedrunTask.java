@@ -2781,6 +2781,8 @@ public class ModernSpeedrunTask extends Task {
         String cn = active == null ? "" : active.getClass().getSimpleName();
         boolean mining = cn.contains("Mine") || cn.contains("Collect") || cn.contains("Smelt");
         if (!mining) return;
+        // S195: Baritone is pillaring/placing with a block in hand — do not swap it away.
+        if (McCompat.baritonePlacing(mod)) return;
         try {
             Item eq = StorageHelper.getItemStackInSlot(
                     adris.altoclef.util.slots.PlayerSlot.getEquipSlot()).getItem();

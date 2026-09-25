@@ -252,7 +252,10 @@ public final class T2Solve {
                     || childName.contains("Smelt"))
                 && !childName.contains("Log")) {
             net.minecraft.item.Item held = heldItem();
-            if (!isPick(held)) {
+            // S195: a block in hand while Baritone pillars is correct, not a wrong tool.
+            if (McCompat.baritonePlacing(mod)) {
+                wrongToolHits = 0;
+            } else if (!isPick(held)) {
                 net.minecraft.item.Item pick = anyPick();
                 if (pick != null && ++wrongToolHits >= 6) {
                     act("S109", "equip pick for mining (was holding "

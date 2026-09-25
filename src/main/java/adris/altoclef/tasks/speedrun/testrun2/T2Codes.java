@@ -386,6 +386,16 @@ public final class T2Codes {
      * 3s under a Collect/Mine child.
      */
     public static final String S194_DIG_DOWN_NOT_STUCK = "S194";
+
+    /**
+     * S195 — PICK FORCE-EQUIP VS BARITONE PILLAR. ensureMiningPick() (every tick under a
+     * collector) and T2Solve S109 re-equipped the pickaxe whenever the hand held anything
+     * else. Baritone's MovementPillar selects a throwaway one tick and places after a sneak
+     * tick, so the block never landed. Live run fix6: IRON @236,52,15, jumping with an empty
+     * hand for 2+ min with 27 cobblestone in the hotbar. Both now stand aside while
+     * {@code McCompat.baritonePlacing()} (pillar step or right-click forced).
+     */
+    public static final String S195_PICK_EQUIP_VS_PILLAR = "S195";
     public static final String E132_SHAFT_STUCK = "E132";
     public static final String E133_PILLAR_PINGPONG = "E133";
     public static final String S139_PILLAR_RISE_HOLD = "S139";

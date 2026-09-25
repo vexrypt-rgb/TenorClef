@@ -1861,9 +1861,12 @@ public class ModernSpeedrunTask extends Task {
         // never ate (deepgate: hun=2 for 8+ min, 161x E103, bread branch 0x). Food first.
         int hun = 20;
         try { hun = mod.getPlayer().getHungerManager().getFoodLevel(); } catch (Throwable ignored) {}
-        if (hun <= 6 && food(mod) < 1 && !starveHunt) {
+        // S227: hun<18 blocks regen, so half hunger + half HP with no food never healed (rangedgate).
+        float hp = 20;
+        try { hp = mod.getPlayer().getHealth(); } catch (Throwable ignored) {}
+        if ((hun <= 6 || (hun < 18 && hp <= 12)) && food(mod) < 1 && !starveHunt) {
             starveHunt = true;
-            T2Log.force("S218", "hun=" + hun + " no food - hunting before portal");
+            T2Log.force("S218", "hun=" + hun + " hp=" + hp + " no food - hunting before portal");
         }
         if (starveHunt && food(mod) >= 10) starveHunt = false;
         if (starveHunt) return new adris.altoclef.tasks.resources.CollectFoodTask(10);

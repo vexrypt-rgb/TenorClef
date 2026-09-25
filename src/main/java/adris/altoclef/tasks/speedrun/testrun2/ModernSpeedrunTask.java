@@ -81,6 +81,7 @@ public class ModernSpeedrunTask extends Task {
      * and the bot walked into a fortress bare-headed — E110 at 9:51 in the last run.
      */
     private int goldHelmTicks;
+    private int helmGoldHuntTicks;
     private boolean helmLatched;
     /** S193 nether climb hysteresis: stall counter, best Y reached, and give-up cooldown. */
     private int netherClimbStallTicks;
@@ -458,6 +459,7 @@ public class ModernSpeedrunTask extends Task {
         portalAttempts = 0;
         goldHelmTicks = 0;
         helmLatched = false;
+        helmGoldHuntTicks = 0;
         lastIronN = -1;
         woodForSticksTicks = 0;
         woodForSticks = null;
@@ -1939,6 +1941,13 @@ public class ModernSpeedrunTask extends Task {
                 } catch (Throwable t) {
                     T2Log.warn("E96", "equip ctor failed");
                 }
+            }
+            if (gold < 5 && ++helmGoldHuntTicks > 20 * 240) {
+                // S215: latchfix spent 26 min hunting helm gold (2 ore mined, rest pillar/explore
+                // loops) and starved. After 4 min of total hunt, go on without the helm.
+                helmLatched = true;
+                T2Log.force("S215", "helm gold hunt over 240s, proceeding without helm");
+                return null;
             }
             if (gold < 5) {
                 T2Log.warn("E96", "need 5 gold for helm");

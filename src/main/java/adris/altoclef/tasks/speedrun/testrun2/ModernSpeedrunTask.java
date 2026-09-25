@@ -772,11 +772,11 @@ public class ModernSpeedrunTask extends Task {
                     + "," + mod.getPlayer().getBlockZ()
                     + " do=" + childDbg
                     + " eq=" + eq
-                    + " woodpick=" + count(mod, Items.WOODEN_PICKAXE)
-                    + " stonepick=" + count(mod, Items.STONE_PICKAXE)
-                    + " pick=" + count(mod, Items.IRON_PICKAXE)
-                    + " iron=" + count(mod, Items.IRON_INGOT)
-                    + " buck=" + (count(mod, Items.WATER_BUCKET) + count(mod, Items.LAVA_BUCKET)));
+                    + " woodpick=" + mod.getItemStorage().getItemCount(Items.WOODEN_PICKAXE)
+                    + " stonepick=" + mod.getItemStorage().getItemCount(Items.STONE_PICKAXE)
+                    + " pick=" + mod.getItemStorage().getItemCount(Items.IRON_PICKAXE)
+                    + " iron=" + mod.getItemStorage().getItemCount(Items.IRON_INGOT)
+                    + " buck=" + (mod.getItemStorage().getItemCount(Items.WATER_BUCKET) + mod.getItemStorage().getItemCount(Items.LAVA_BUCKET)));
         }
         // Spawn gate (S159). Deliberately NOT at tick 1 — see the SPAWN_GATE_TICKS comment.
         // Probed every 5s, not every tick: SpawnScout.scan() reads ~3000 blocks and running
@@ -815,8 +815,8 @@ public class ModernSpeedrunTask extends Task {
                     + " y=" + mod.getPlayer().getBlockY()
                     + " child=" + (active == null ? "-" : active.getClass().getSimpleName())
                     + " logs=" + totalLogs(mod)
-                    + " pick=" + count(mod, Items.IRON_PICKAXE)
-                    + " woodpick=" + count(mod, Items.WOODEN_PICKAXE));
+                    + " pick=" + mod.getItemStorage().getItemCount(Items.IRON_PICKAXE)
+                    + " woodpick=" + mod.getItemStorage().getItemCount(Items.WOODEN_PICKAXE));
         }
         if (active instanceof StepOffTableTask) {
             stepOffAge++;
@@ -889,11 +889,11 @@ public class ModernSpeedrunTask extends Task {
             }
             // keep the same child — overlay only, do not return null
         }
-        int progress = totalLogs(mod) + totalPlanks(mod) + count(mod, Items.IRON_INGOT) * 3
-                + count(mod, Items.WOODEN_PICKAXE) * 11 + count(mod, Items.STONE_PICKAXE) * 13
-                + count(mod, Items.IRON_PICKAXE) * 17 + count(mod, Items.FLINT) * 19
-                + count(mod, Items.WATER_BUCKET) * 23 + count(mod, Items.LAVA_BUCKET) * 29
-                + count(mod, Items.FLINT_AND_STEEL) * 31;
+        int progress = totalLogs(mod) + totalPlanks(mod) + mod.getItemStorage().getItemCount(Items.IRON_INGOT) * 3
+                + mod.getItemStorage().getItemCount(Items.WOODEN_PICKAXE) * 11 + mod.getItemStorage().getItemCount(Items.STONE_PICKAXE) * 13
+                + mod.getItemStorage().getItemCount(Items.IRON_PICKAXE) * 17 + mod.getItemStorage().getItemCount(Items.FLINT) * 19
+                + mod.getItemStorage().getItemCount(Items.WATER_BUCKET) * 23 + mod.getItemStorage().getItemCount(Items.LAVA_BUCKET) * 29
+                + mod.getItemStorage().getItemCount(Items.FLINT_AND_STEEL) * 31;
         if (progress != lastProgressHash) {
             lastProgressHash = progress;
             freezeStill = 0;
@@ -948,7 +948,7 @@ public class ModernSpeedrunTask extends Task {
         }
         lastHp = hp;
         // Do NOT treat portal inventory flicker as death. Only HP hitting 0.
-        if (count(mod, Items.IRON_PICKAXE) >= 1) hadKit = true;
+        if (mod.getItemStorage().getItemCount(Items.IRON_PICKAXE) >= 1) hadKit = true;
         if (recycleArmed && hp > 0 && phase != Phase.END) {
             recycleArmed = false;
             deathLock = 20 * 25;
@@ -1060,7 +1060,7 @@ public class ModernSpeedrunTask extends Task {
         // Naked walk-in is a ruined-portal suicide after death. Need a pick.
         if (WorldHelper.getCurrentDimension() == Dimension.OVERWORLD
                 && portalNearby(mod)
-                && count(mod, Items.IRON_PICKAXE) >= 1) {
+                && mod.getItemStorage().getItemCount(Items.IRON_PICKAXE) >= 1) {
             usedCloser = false;
             closer = null;
             if (phase != Phase.PORTAL && phaseTicks >= 40) setPhase(Phase.PORTAL);
@@ -1255,12 +1255,12 @@ public class ModernSpeedrunTask extends Task {
 
         Dimension dim = WorldHelper.getCurrentDimension();
 
-        if (count(mod, Items.ENDER_EYE) >= SpeedrunOpt.EYES && dim == Dimension.OVERWORLD) {
+        if (mod.getItemStorage().getItemCount(Items.ENDER_EYE) >= SpeedrunOpt.EYES && dim == Dimension.OVERWORLD) {
             return Phase.STRONGHOLD;
         }
         if (dim == Dimension.NETHER) {
-            if (count(mod, Items.BLAZE_ROD) >= SpeedrunOpt.BLAZE_RODS
-                    && count(mod, Items.ENDER_PEARL) >= SpeedrunOpt.PEARLS) {
+            if (mod.getItemStorage().getItemCount(Items.BLAZE_ROD) >= SpeedrunOpt.BLAZE_RODS
+                    && mod.getItemStorage().getItemCount(Items.ENDER_PEARL) >= SpeedrunOpt.PEARLS) {
                 return Phase.EYES;
             }
             return Phase.NETHER;
@@ -1269,7 +1269,7 @@ public class ModernSpeedrunTask extends Task {
         // Pick is enough to leave IRON. Sword/shield table crafts walk
         // back into the hole we just climbed out of.
         // skipIronPick only skips the iron pick craft — still need wooden+ before PORTAL
-        if (count(mod, Items.IRON_PICKAXE) >= 1 || (skipIronPick && hasMiningPick(mod))) {
+        if (mod.getItemStorage().getItemCount(Items.IRON_PICKAXE) >= 1 || (skipIronPick && hasMiningPick(mod))) {
             return Phase.PORTAL;
         }
         // Naked + a portal in range is a death respawn, not a speedrun route.
@@ -1278,24 +1278,30 @@ public class ModernSpeedrunTask extends Task {
         // pick=0 — the same illegal phase skip the E94 step-off gate blocks. A nearby
         // portal is only actionable with an actual mining pick in inventory.
         boolean naked = !hasMiningPick(mod)
-                && count(mod, Items.IRON_INGOT) + count(mod, Items.RAW_IRON) < 1;
-        if (portalNearby(mod) && !naked && hasMiningPick(mod)) {
+                && mod.getItemStorage().getItemCount(Items.IRON_INGOT) + mod.getItemStorage().getItemCount(Items.RAW_IRON) < 1;
+        // S209: a wooden pick is not "geared". Run portalfix: after each death the bot crafted a
+        // wooden pick, walked back into the existing portal with nothing else, and was shot by
+        // piglins within 20s, three times in a row. Require a stone pick AND a sword so a respawn
+        // at least re-arms; otherwise fall through to IRON like a fresh start.
+        boolean rearmed = mod.getItemStorage().getItemCount(Items.STONE_PICKAXE) + mod.getItemStorage().getItemCount(Items.IRON_PICKAXE) >= 1
+                && mod.getItemStorage().getItemCount(Items.STONE_SWORD) + mod.getItemStorage().getItemCount(Items.IRON_SWORD) >= 1;
+        if (portalNearby(mod) && !naked && rearmed) {
             return Phase.PORTAL;
         }
-        boolean empty = count(mod, Items.IRON_PICKAXE) < 1
-                && count(mod, Items.WOODEN_PICKAXE) < 1
-                && count(mod, Items.STONE_PICKAXE) < 1
-                && count(mod, Items.IRON_INGOT) + count(mod, Items.RAW_IRON) < 1;
+        boolean empty = mod.getItemStorage().getItemCount(Items.IRON_PICKAXE) < 1
+                && mod.getItemStorage().getItemCount(Items.WOODEN_PICKAXE) < 1
+                && mod.getItemStorage().getItemCount(Items.STONE_PICKAXE) < 1
+                && mod.getItemStorage().getItemCount(Items.IRON_INGOT) + mod.getItemStorage().getItemCount(Items.RAW_IRON) < 1;
         if (empty) {
             return Phase.BOOTSTRAP;
         }
         if (lootGaveUp
-                || count(mod, Items.IRON_PICKAXE) >= 1
-                || count(mod, Items.IRON_INGOT) + count(mod, Items.RAW_IRON) >= SpeedrunOpt.IRON) {
+                || mod.getItemStorage().getItemCount(Items.IRON_PICKAXE) >= 1
+                || mod.getItemStorage().getItemCount(Items.IRON_INGOT) + mod.getItemStorage().getItemCount(Items.RAW_IRON) >= SpeedrunOpt.IRON) {
             return Phase.IRON;
         }
         Phase next;
-        if (count(mod, Items.WOODEN_PICKAXE) >= 1 || count(mod, Items.STONE_PICKAXE) >= 1) {
+        if (mod.getItemStorage().getItemCount(Items.WOODEN_PICKAXE) >= 1 || mod.getItemStorage().getItemCount(Items.STONE_PICKAXE) >= 1) {
             next = Phase.IRON;
         } else {
             next = Phase.BOOTSTRAP;
@@ -1338,9 +1344,9 @@ public class ModernSpeedrunTask extends Task {
             McCompat.setMove(true, woodPause % 8 < 4);
             if (woodPause <= 0) McCompat.setMove(false, false);
         }
-        boolean hasTable = count(mod, Items.CRAFTING_TABLE) >= 1;
+        boolean hasTable = mod.getItemStorage().getItemCount(Items.CRAFTING_TABLE) >= 1;
         try { hasTable = hasTable || mod.getBlockScanner().anyFound(Blocks.CRAFTING_TABLE); } catch (Throwable ignored) {}
-        if (hasTable && count(mod, Items.WOODEN_PICKAXE) < 1 && count(mod, Items.STONE_PICKAXE) < 1) {
+        if (hasTable && mod.getItemStorage().getItemCount(Items.WOODEN_PICKAXE) < 1 && mod.getItemStorage().getItemCount(Items.STONE_PICKAXE) < 1) {
             T2History.note("WHY bootstrap: table exists — wooden pick, not more logs");
             return TaskCatalogue.getItemTask(Items.WOODEN_PICKAXE, 1);
         }
@@ -1437,20 +1443,20 @@ public class ModernSpeedrunTask extends Task {
             }
             return collectWood(mod, 2);
         }
-        if (count(mod, Items.CRAFTING_TABLE) < 1
+        if (mod.getItemStorage().getItemCount(Items.CRAFTING_TABLE) < 1
                 && !mod.getBlockScanner().anyFound(Blocks.CRAFTING_TABLE)) {
             return TaskCatalogue.getItemTask(Items.CRAFTING_TABLE, 1);
         }
-        if (count(mod, Items.WOODEN_PICKAXE) < 1 && count(mod, Items.STONE_PICKAXE) < 1) {
+        if (mod.getItemStorage().getItemCount(Items.WOODEN_PICKAXE) < 1 && mod.getItemStorage().getItemCount(Items.STONE_PICKAXE) < 1) {
             return TaskCatalogue.getItemTask(Items.WOODEN_PICKAXE, 1);
         }
-        if (count(mod, Items.STONE_PICKAXE) < 1) {
+        if (mod.getItemStorage().getItemCount(Items.STONE_PICKAXE) < 1) {
             return TaskCatalogue.getItemTask(Items.STONE_PICKAXE, 1);
         }
         // S201: a stone sword (5 damage vs 1 bare-handed) is 2 cobble + 1 stick, made right
         // after the stone pickaxe while the table is still next to the bot. WeaponPicker
         // already prefers it; the bot just never crafted one.
-        if (count(mod, Items.STONE_SWORD) < 1 && count(mod, Items.IRON_SWORD) < 1) {
+        if (mod.getItemStorage().getItemCount(Items.STONE_SWORD) < 1 && mod.getItemStorage().getItemCount(Items.IRON_SWORD) < 1) {
             return TaskCatalogue.getItemTask(Items.STONE_SWORD, 1);
         }
         return null;
@@ -1519,25 +1525,25 @@ public class ModernSpeedrunTask extends Task {
         // `ironN` = total metal stock: ingots PLUS unmelted ore (RAW_IRON preprocesses to
         // IRON_ORE on 1.16.1). This is deliberately NOT the same thing as the `iron=` field
         // in the logs, which is ingots only — see trap 9 in the project memory.
-        int ironN = count(mod, Items.IRON_INGOT) + count(mod, Items.RAW_IRON);
+        int ironN = mod.getItemStorage().getItemCount(Items.IRON_INGOT) + mod.getItemStorage().getItemCount(Items.RAW_IRON);
         // Only block the first pick craft in a real hole. After a pick
         // exists, sword/buckets may craft under leaves.
         int sky = 15;
         try {
             sky = mod.getWorld().getLightLevel(net.minecraft.world.LightType.SKY, mod.getPlayer().getBlockPos());
         } catch (Throwable ignored) {}
-        if (count(mod, Items.IRON_PICKAXE) >= 1 || (skipIronPick && hasMiningPick(mod))) {
+        if (mod.getItemStorage().getItemCount(Items.IRON_PICKAXE) >= 1 || (skipIronPick && hasMiningPick(mod))) {
             pickCraftLock = false;
             T2History.note("WHY iron: pick done — skip sword/shield table, go PORTAL");
             return null;
         }
         // S201: phase leaves BOOTSTRAP once any pick exists, so the sword check lives here too.
-        if (count(mod, Items.STONE_PICKAXE) >= 1 && count(mod, Items.STONE_SWORD) < 1
-                && count(mod, Items.IRON_SWORD) < 1 && count(mod, Items.COBBLESTONE) >= 2) {
+        if (mod.getItemStorage().getItemCount(Items.STONE_PICKAXE) >= 1 && mod.getItemStorage().getItemCount(Items.STONE_SWORD) < 1
+                && mod.getItemStorage().getItemCount(Items.IRON_SWORD) < 1 && mod.getItemStorage().getItemCount(Items.COBBLESTONE) >= 2) {
             T2Log.force("S201", "craft stone sword");
             return TaskCatalogue.getItemTask(Items.STONE_SWORD, 1);
         }
-        int ore = count(mod, Items.IRON_ORE) + countOpt(mod, "DEEPSLATE_IRON_ORE");
+        int ore = mod.getItemStorage().getItemCount(Items.IRON_ORE) + countOpt(mod, "DEEPSLATE_IRON_ORE");
         // IRON TARGET MUST BE STABLE.
         //
         // This used to be `want = min(24, max(8, ironN + ore))` recomputed every tick.
@@ -1569,7 +1575,7 @@ public class ModernSpeedrunTask extends Task {
             // a 9-ingot trip into a 24-ingot one for no reason.
             ironWant = (ironN >= SpeedrunOpt.IRON) ? 24 : SpeedrunOpt.IRON;
             T2Log.force("S146", "iron target locked want=" + ironWant
-                    + " at ingot=" + count(mod, Items.IRON_INGOT)
+                    + " at ingot=" + mod.getItemStorage().getItemCount(Items.IRON_INGOT)
                     + " ore=" + ore + " metal=" + ironN);
         }
         int want = ironWant;
@@ -1582,7 +1588,7 @@ public class ModernSpeedrunTask extends Task {
         // `want`, but once 8 ingots exist the pick craft may proceed — 8 is the useful
         // floor, 24 is only a preference.
         int need = SpeedrunOpt.IRON;
-        if (count(mod, Items.IRON_INGOT) < need) {
+        if (mod.getItemStorage().getItemCount(Items.IRON_INGOT) < need) {
             pickCraftLock = false;
             T2History.note("WHY iron: smelt " + want + " in one furnace");
             return TaskCatalogue.getItemTask(Items.IRON_INGOT, want);
@@ -1666,19 +1672,19 @@ public class ModernSpeedrunTask extends Task {
 
     private Task maybeGoldHat(AltoClef mod) {
         if (!SpeedrunOpt.GOLD_PIGLIN_HEAD) return null;
-        if (count(mod, Items.GOLDEN_HELMET) + count(mod, Items.GOLDEN_CHESTPLATE)
-                + count(mod, Items.GOLDEN_LEGGINGS) + count(mod, Items.GOLDEN_BOOTS) >= 1) {
+        if (mod.getItemStorage().getItemCount(Items.GOLDEN_HELMET) + mod.getItemStorage().getItemCount(Items.GOLDEN_CHESTPLATE)
+                + mod.getItemStorage().getItemCount(Items.GOLDEN_LEGGINGS) + mod.getItemStorage().getItemCount(Items.GOLDEN_BOOTS) >= 1) {
             return null;
         }
-        int gold = count(mod, Items.GOLD_INGOT) + count(mod, Items.GOLD_BLOCK) * 9;
+        int gold = mod.getItemStorage().getItemCount(Items.GOLD_INGOT) + mod.getItemStorage().getItemCount(Items.GOLD_BLOCK) * 9;
         // Helmet is 5 gold. Keep 8 for piglin trades unless pearls are already done.
         if (gold < 5) return null;
         return TaskCatalogue.getItemTask(Items.GOLDEN_HELMET, 1);
     }
 
     private int boatCount(AltoClef mod) {
-        int n = count(mod, Items.OAK_BOAT) + count(mod, Items.BIRCH_BOAT) + count(mod, Items.SPRUCE_BOAT)
-                + count(mod, Items.JUNGLE_BOAT) + count(mod, Items.ACACIA_BOAT) + count(mod, Items.DARK_OAK_BOAT);
+        int n = mod.getItemStorage().getItemCount(Items.OAK_BOAT) + mod.getItemStorage().getItemCount(Items.BIRCH_BOAT) + mod.getItemStorage().getItemCount(Items.SPRUCE_BOAT)
+                + mod.getItemStorage().getItemCount(Items.JUNGLE_BOAT) + mod.getItemStorage().getItemCount(Items.ACACIA_BOAT) + mod.getItemStorage().getItemCount(Items.DARK_OAK_BOAT);
         n += countOpt(mod, "MANGROVE_BOAT") + countOpt(mod, "CHERRY_BOAT") + countOpt(mod, "OAK_CHEST_BOAT");
         return n;
     }
@@ -1686,14 +1692,14 @@ public class ModernSpeedrunTask extends Task {
     /** S204: shield before the Nether (blocks blaze fireballs via MobDefenseChain). Never digs deep for it. */
     private Task maybeShield(AltoClef mod) {
         if (!SpeedrunOpt.GET_SHIELD_EARLY) return null;
-        if (count(mod, Items.SHIELD) >= 1) return null;
-        int iron = count(mod, Items.IRON_INGOT) + count(mod, Items.RAW_IRON)
-                + count(mod, Items.IRON_NUGGET) / 9;
+        if (mod.getItemStorage().getItemCount(Items.SHIELD) >= 1) return null;
+        int iron = mod.getItemStorage().getItemCount(Items.IRON_INGOT) + mod.getItemStorage().getItemCount(Items.RAW_IRON)
+                + mod.getItemStorage().getItemCount(Items.IRON_NUGGET) / 9;
         boolean oreNear = false;
         try { oreNear = mod.getBlockScanner().anyFoundWithinDistance(24, Blocks.IRON_ORE); } catch (Throwable ignored) {}
         // fix21: the shield ate 1 of 3 iron saved for the 2nd portal bucket, which sent the
         // bot after unreachable ore while standing in water. Buckets come first.
-        int buckets = count(mod, Items.BUCKET) + count(mod, Items.WATER_BUCKET) + count(mod, Items.LAVA_BUCKET);
+        int buckets = mod.getItemStorage().getItemCount(Items.BUCKET) + mod.getItemStorage().getItemCount(Items.WATER_BUCKET) + mod.getItemStorage().getItemCount(Items.LAVA_BUCKET);
         int reserve = Math.max(0, 2 - buckets) * 3;
         if (reserve > 0 && iron < reserve + 1) return null;
         if (iron < 1 && !oreNear) return null;
@@ -1861,11 +1867,11 @@ public class ModernSpeedrunTask extends Task {
         // S177: a ruined portal is a usable frame, not decoration. Prefer it over digging.
         Task ruined = ruinedPortal(mod);
         if (ruined != null) return ruined;
-        int water = count(mod, Items.WATER_BUCKET);
-        int lava = count(mod, Items.LAVA_BUCKET);
-        int empty = count(mod, Items.BUCKET);
-        int food = count(mod, Items.BREAD) + count(mod, Items.COOKED_BEEF) + count(mod, Items.COOKED_PORKCHOP)
-                + count(mod, Items.COOKED_CHICKEN) + count(mod, Items.APPLE);
+        int water = mod.getItemStorage().getItemCount(Items.WATER_BUCKET);
+        int lava = mod.getItemStorage().getItemCount(Items.LAVA_BUCKET);
+        int empty = mod.getItemStorage().getItemCount(Items.BUCKET);
+        int food = mod.getItemStorage().getItemCount(Items.BREAD) + mod.getItemStorage().getItemCount(Items.COOKED_BEEF) + mod.getItemStorage().getItemCount(Items.COOKED_PORKCHOP)
+                + mod.getItemStorage().getItemCount(Items.COOKED_CHICKEN) + mod.getItemStorage().getItemCount(Items.APPLE);
         int hunger = 20;
         try { hunger = mod.getPlayer().getHungerManager().getFoodLevel(); } catch (Throwable ignored) {}
         if (hunger <= 6 && food < 1) {
@@ -1880,14 +1886,14 @@ public class ModernSpeedrunTask extends Task {
             T2History.note("WHY portal: have lava — get water to cast");
             return TaskCatalogue.getItemTask(Items.WATER_BUCKET, 1);
         }
-        int place = count(mod, Items.COBBLESTONE) + count(mod, Items.DIRT)
-                + count(mod, Items.NETHERRACK) + count(mod, Items.STONE);
+        int place = mod.getItemStorage().getItemCount(Items.COBBLESTONE) + mod.getItemStorage().getItemCount(Items.DIRT)
+                + mod.getItemStorage().getItemCount(Items.NETHERRACK) + mod.getItemStorage().getItemCount(Items.STONE);
         if (place < 8) {
             T2History.note("WHY portal: need 8 place blocks have=" + place);
             return TaskCatalogue.getItemTask(Items.COBBLESTONE, 16);
         }
-        if (count(mod, Items.FLINT_AND_STEEL) < 1) {
-            if (count(mod, Items.FLINT) >= 1) {
+        if (mod.getItemStorage().getItemCount(Items.FLINT_AND_STEEL) < 1) {
+            if (mod.getItemStorage().getItemCount(Items.FLINT) >= 1) {
                 T2History.note("WHY portal: craft flint and steel");
                 return TaskCatalogue.getItemTask(Items.FLINT_AND_STEEL, 1);
             }
@@ -1904,23 +1910,23 @@ public class ModernSpeedrunTask extends Task {
     }
 
     private Task nether(AltoClef mod) {
-        int rods = count(mod, Items.BLAZE_ROD);
-        int pearls = count(mod, Items.ENDER_PEARL);
-        int gold = count(mod, Items.GOLD_INGOT) + count(mod, Items.GOLD_BLOCK) * 9
-                + count(mod, Items.GOLD_NUGGET) / 9;
+        int rods = mod.getItemStorage().getItemCount(Items.BLAZE_ROD);
+        int pearls = mod.getItemStorage().getItemCount(Items.ENDER_PEARL);
+        int gold = mod.getItemStorage().getItemCount(Items.GOLD_INGOT) + mod.getItemStorage().getItemCount(Items.GOLD_BLOCK) * 9
+                + mod.getItemStorage().getItemCount(Items.GOLD_NUGGET) / 9;
         // Never time out the helm. 40s skip was sending us to a fortress
         // unarmored, then mining gold over lava.
         if (!wearingGold(mod)) {
             goldHelmTicks++;
             T2History.note("WHY nether: gold helm on head before fortress");
-            if (count(mod, Items.GOLDEN_HELMET) >= 1 && goldHelmTicks > 20 * 6) {
+            if (mod.getItemStorage().getItemCount(Items.GOLDEN_HELMET) >= 1 && goldHelmTicks > 20 * 6) {
                 // S207: helm in hand but equip never "registers" -- it was on the head in fix20.
                 // Latch as worn so we stop looping EquipArmorTask.
                 helmLatched = true;
                 T2Log.force("S207", "helm: equip unconfirmed after 6s, latching as worn");
                 goldHelmTicks = 0;
                 return null;
-            } else if (count(mod, Items.GOLDEN_HELMET) >= 1) {
+            } else if (mod.getItemStorage().getItemCount(Items.GOLDEN_HELMET) >= 1) {
                 // S206. fix20: EquipArmorTask sat 40s on "Equipping armor" after a
                 // table craft. Every 2s, close any screen and shift-click the helm on.
                 if (goldHelmTicks % 40 == 20) {
@@ -2004,7 +2010,7 @@ public class ModernSpeedrunTask extends Task {
                 goldHelmTicks = 0;
                 // Ask for the table itself so TaskCatalogue places one where we stand
                 // instead of pathing to a remembered-but-unreachable one.
-                int tables = count(mod, Items.CRAFTING_TABLE);
+                int tables = mod.getItemStorage().getItemCount(Items.CRAFTING_TABLE);
                 if (tables >= 1) {
                     // We already carry a table: getting the helmet re-runs the craft
                     // with a placeable table now in inventory, which usually unblocks it.
@@ -2014,10 +2020,10 @@ public class ModernSpeedrunTask extends Task {
                 // No table in inventory. Before giving up on the craft, try to make a
                 // table here — planks are almost always on hand in the Nether, and a
                 // table is what the recipe search is missing.
-                int planks = count(mod, Items.OAK_PLANKS) + count(mod, Items.BIRCH_PLANKS)
-                        + count(mod, Items.SPRUCE_PLANKS) + count(mod, Items.JUNGLE_PLANKS)
-                        + count(mod, Items.ACACIA_PLANKS) + count(mod, Items.DARK_OAK_PLANKS)
-                        + count(mod, Items.CRIMSON_PLANKS) + count(mod, Items.WARPED_PLANKS);
+                int planks = mod.getItemStorage().getItemCount(Items.OAK_PLANKS) + mod.getItemStorage().getItemCount(Items.BIRCH_PLANKS)
+                        + mod.getItemStorage().getItemCount(Items.SPRUCE_PLANKS) + mod.getItemStorage().getItemCount(Items.JUNGLE_PLANKS)
+                        + mod.getItemStorage().getItemCount(Items.ACACIA_PLANKS) + mod.getItemStorage().getItemCount(Items.DARK_OAK_PLANKS)
+                        + mod.getItemStorage().getItemCount(Items.CRIMSON_PLANKS) + mod.getItemStorage().getItemCount(Items.WARPED_PLANKS);
                 boolean anyTable = false;
                 try { anyTable = mod.getBlockScanner().anyFound(Blocks.CRAFTING_TABLE); } catch (Throwable ignored) {}
                 if (planks >= 4 && !anyTable) {
@@ -2064,7 +2070,7 @@ public class ModernSpeedrunTask extends Task {
     }
 
     private Task eyes(AltoClef mod) {
-        if (count(mod, Items.ENDER_EYE) < SpeedrunOpt.EYES) {
+        if (mod.getItemStorage().getItemCount(Items.ENDER_EYE) < SpeedrunOpt.EYES) {
             return TaskCatalogue.getItemTask(Items.ENDER_EYE, SpeedrunOpt.EYES);
         }
         if (WorldHelper.getCurrentDimension() != Dimension.OVERWORLD) {
@@ -2074,7 +2080,7 @@ public class ModernSpeedrunTask extends Task {
     }
 
     private Task stronghold(AltoClef mod) {
-        if (count(mod, Items.ENDER_EYE) < SpeedrunOpt.EYES) {
+        if (mod.getItemStorage().getItemCount(Items.ENDER_EYE) < SpeedrunOpt.EYES) {
             return TaskCatalogue.getItemTask(Items.ENDER_EYE, SpeedrunOpt.EYES);
         }
         // Only craft beds if wool is already in the bag. Never start a sheep hunt here.
@@ -2393,7 +2399,7 @@ public class ModernSpeedrunTask extends Task {
             closer = null;
             usedCloser = false;
             stillTicks = 0;
-            if (count(mod, Items.WATER_BUCKET) < 1 && count(mod, Items.LAVA_BUCKET) >= 1) {
+            if (mod.getItemStorage().getItemCount(Items.WATER_BUCKET) < 1 && mod.getItemStorage().getItemCount(Items.LAVA_BUCKET) >= 1) {
                 T2History.note("WHY E60: have lava, fetch water");
                 return stick(TaskCatalogue.getItemTask(Items.WATER_BUCKET, 1));
             }
@@ -2421,14 +2427,14 @@ public class ModernSpeedrunTask extends Task {
         //   2. no iron ingot at all  -> we cannot make steel; fall back to LavaBucketPortal
         //      which casts a portal from lava+water and needs no ignition item
         //   3. otherwise -> force a wander so we re-scan for a ruined portal
-        if (count(mod, Items.FLINT_AND_STEEL) < 1 && count(mod, Items.FLINT) < 1
+        if (mod.getItemStorage().getItemCount(Items.FLINT_AND_STEEL) < 1 && mod.getItemStorage().getItemCount(Items.FLINT) < 1
                 && phaseTicks > 20 * 20 && phaseTicks % (20 * 20) == 0) {
-            boolean haveIron = count(mod, Items.IRON_INGOT) >= 1;
+            boolean haveIron = mod.getItemStorage().getItemCount(Items.IRON_INGOT) >= 1;
             String cn = active == null ? "" : active.getClass().getSimpleName();
             T2Log.warn("E107", "solver: no flint t=" + (phaseTicks / 20) + "s"
-                    + " iron=" + count(mod, Items.IRON_INGOT)
-                    + " water=" + count(mod, Items.WATER_BUCKET)
-                    + " lava=" + count(mod, Items.LAVA_BUCKET)
+                    + " iron=" + mod.getItemStorage().getItemCount(Items.IRON_INGOT)
+                    + " water=" + mod.getItemStorage().getItemCount(Items.WATER_BUCKET)
+                    + " lava=" + mod.getItemStorage().getItemCount(Items.LAVA_BUCKET)
                     + " child=" + cn);
             // Only intervene when we are actually wedged on the water/gravel hunt;
             // leaving a healthy child alone avoids thrashing the task tree.
@@ -2447,7 +2453,7 @@ public class ModernSpeedrunTask extends Task {
                     usedCloser = false;
                     return stick(TaskCatalogue.getItemTask(Items.FLINT, 1));
                 }
-                if (count(mod, Items.LAVA_BUCKET) >= 1 || count(mod, Items.BUCKET) >= 1) {
+                if (mod.getItemStorage().getItemCount(Items.LAVA_BUCKET) >= 1 || mod.getItemStorage().getItemCount(Items.BUCKET) >= 1) {
                     T2History.note("WHY E107: no iron — lava cast needs no ignition");
                     active = null;
                     closer = null;
@@ -2491,8 +2497,8 @@ public class ModernSpeedrunTask extends Task {
             lastIronX = gx;
             lastIronZ = gz;
         }
-        int ironN = count(mod, Items.IRON_INGOT) + count(mod, Items.IRON_ORE);
-        boolean cheapPick = count(mod, Items.WOODEN_PICKAXE) + count(mod, Items.STONE_PICKAXE) >= 1;
+        int ironN = mod.getItemStorage().getItemCount(Items.IRON_INGOT) + mod.getItemStorage().getItemCount(Items.IRON_ORE);
+        boolean cheapPick = mod.getItemStorage().getItemCount(Items.WOODEN_PICKAXE) + mod.getItemStorage().getItemCount(Items.STONE_PICKAXE) >= 1;
         // Standing still is NOT the same as being stuck.
         //
         // Smelting happens on the spot at a furnace, and the bot legitimately holds
@@ -2597,8 +2603,8 @@ public class ModernSpeedrunTask extends Task {
             return stick(new StepOffTableTask());
         }
         boolean dark = SurfaceBailTask.underground(mod);
-        int ironN = count(mod, Items.IRON_INGOT) + count(mod, Items.RAW_IRON);
-        if (phase == Phase.IRON && !dark && ironN < 3 && count(mod, Items.IRON_PICKAXE) < 1 && craftStuck >= 20 * 6) {
+        int ironN = mod.getItemStorage().getItemCount(Items.IRON_INGOT) + mod.getItemStorage().getItemCount(Items.RAW_IRON);
+        if (phase == Phase.IRON && !dark && ironN < 3 && mod.getItemStorage().getItemCount(Items.IRON_PICKAXE) < 1 && craftStuck >= 20 * 6) {
             T2Log.warn("E92", "craft table with 0 iron — mine first");
             T2History.note("WHY E92: close table, collect iron");
             craftStuck = 0;
@@ -2615,7 +2621,7 @@ public class ModernSpeedrunTask extends Task {
             forceSurface = false;
             active = null;
             if (e91Count >= 2 && hasMiningPick(mod)
-                    && count(mod, Items.WOODEN_PICKAXE) + count(mod, Items.STONE_PICKAXE) >= 1) {
+                    && mod.getItemStorage().getItemCount(Items.WOODEN_PICKAXE) + mod.getItemStorage().getItemCount(Items.STONE_PICKAXE) >= 1) {
                 skipIronPick = true;
                 pickCraftLock = false;
                 T2Log.warn("E94", "abandon iron pick after " + e91Count + " table fails — PORTAL");
@@ -2662,12 +2668,12 @@ public class ModernSpeedrunTask extends Task {
     }
 
     private int invHash(AltoClef mod) {
-        return count(mod, Items.IRON_PICKAXE) * 3
-                + count(mod, Items.IRON_INGOT) * 5
-                + count(mod, Items.ENDER_EYE) * 7
-                + count(mod, Items.BLAZE_ROD) * 11
-                + count(mod, Items.ENDER_PEARL) * 13
-                + count(mod, Items.FLINT_AND_STEEL) * 17
+        return mod.getItemStorage().getItemCount(Items.IRON_PICKAXE) * 3
+                + mod.getItemStorage().getItemCount(Items.IRON_INGOT) * 5
+                + mod.getItemStorage().getItemCount(Items.ENDER_EYE) * 7
+                + mod.getItemStorage().getItemCount(Items.BLAZE_ROD) * 11
+                + mod.getItemStorage().getItemCount(Items.ENDER_PEARL) * 13
+                + mod.getItemStorage().getItemCount(Items.FLINT_AND_STEEL) * 17
                 + (WorldHelper.getCurrentDimension() == null ? 0 : WorldHelper.getCurrentDimension().ordinal() * 19);
     }
 
@@ -2712,10 +2718,10 @@ public class ModernSpeedrunTask extends Task {
     }
 
     private boolean hasPortalKit(AltoClef mod) {
-        return count(mod, Items.FLINT_AND_STEEL) >= 1
-                || count(mod, Items.FIRE_CHARGE) >= 1
+        return mod.getItemStorage().getItemCount(Items.FLINT_AND_STEEL) >= 1
+                || mod.getItemStorage().getItemCount(Items.FIRE_CHARGE) >= 1
                 || mod.getBlockScanner().anyFound(Blocks.NETHER_PORTAL)
-                || count(mod, Items.OBSIDIAN) >= 10;
+                || mod.getItemStorage().getItemCount(Items.OBSIDIAN) >= 10;
     }
 
     private boolean blazeInFace(AltoClef mod) {
@@ -2810,9 +2816,9 @@ public class ModernSpeedrunTask extends Task {
     }
 
     private int totalPlanks(AltoClef mod) {
-        return count(mod, Items.OAK_PLANKS) + count(mod, Items.BIRCH_PLANKS)
-                + count(mod, Items.SPRUCE_PLANKS) + count(mod, Items.JUNGLE_PLANKS)
-                + count(mod, Items.ACACIA_PLANKS) + count(mod, Items.DARK_OAK_PLANKS);
+        return mod.getItemStorage().getItemCount(Items.OAK_PLANKS) + mod.getItemStorage().getItemCount(Items.BIRCH_PLANKS)
+                + mod.getItemStorage().getItemCount(Items.SPRUCE_PLANKS) + mod.getItemStorage().getItemCount(Items.JUNGLE_PLANKS)
+                + mod.getItemStorage().getItemCount(Items.ACACIA_PLANKS) + mod.getItemStorage().getItemCount(Items.DARK_OAK_PLANKS);
     }
 
     private int woodUnits(AltoClef mod) {
@@ -2821,10 +2827,10 @@ public class ModernSpeedrunTask extends Task {
 
     /** Sticks available if we convert planks/logs. Iron pick needs 2. */
     private int stickFuel(AltoClef mod) {
-        int sticks = count(mod, Items.STICK);
-        int planks = count(mod, Items.OAK_PLANKS) + count(mod, Items.BIRCH_PLANKS)
-                + count(mod, Items.SPRUCE_PLANKS) + count(mod, Items.JUNGLE_PLANKS)
-                + count(mod, Items.ACACIA_PLANKS) + count(mod, Items.DARK_OAK_PLANKS);
+        int sticks = mod.getItemStorage().getItemCount(Items.STICK);
+        int planks = mod.getItemStorage().getItemCount(Items.OAK_PLANKS) + mod.getItemStorage().getItemCount(Items.BIRCH_PLANKS)
+                + mod.getItemStorage().getItemCount(Items.SPRUCE_PLANKS) + mod.getItemStorage().getItemCount(Items.JUNGLE_PLANKS)
+                + mod.getItemStorage().getItemCount(Items.ACACIA_PLANKS) + mod.getItemStorage().getItemCount(Items.DARK_OAK_PLANKS);
         return sticks + planks * 2 + totalLogs(mod) * 8;
     }
 
@@ -2973,12 +2979,12 @@ public class ModernSpeedrunTask extends Task {
 
     /** Wooden pickaxe or better — required before BOOTSTRAP may advance to PORTAL/IRON. */
     private boolean hasMiningPick(AltoClef mod) {
-        return count(mod, Items.WOODEN_PICKAXE) >= 1
-                || count(mod, Items.STONE_PICKAXE) >= 1
-                || count(mod, Items.IRON_PICKAXE) >= 1
-                || count(mod, Items.GOLDEN_PICKAXE) >= 1
-                || count(mod, Items.DIAMOND_PICKAXE) >= 1
-                || count(mod, Items.NETHERITE_PICKAXE) >= 1;
+        return mod.getItemStorage().getItemCount(Items.WOODEN_PICKAXE) >= 1
+                || mod.getItemStorage().getItemCount(Items.STONE_PICKAXE) >= 1
+                || mod.getItemStorage().getItemCount(Items.IRON_PICKAXE) >= 1
+                || mod.getItemStorage().getItemCount(Items.GOLDEN_PICKAXE) >= 1
+                || mod.getItemStorage().getItemCount(Items.DIAMOND_PICKAXE) >= 1
+                || mod.getItemStorage().getItemCount(Items.NETHERITE_PICKAXE) >= 1;
     }
 
     /**

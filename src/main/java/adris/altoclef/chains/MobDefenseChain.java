@@ -296,7 +296,7 @@ public class MobDefenseChain extends SingleTaskChain {
         doForceField(mod);
 
         // Dodge projectiles
-        if (mod.getPlayer().getHealth() <= 10 && !hasShield(mod)) {
+        if (mod.getPlayer().getHealth() <= 10 && !hasShield(mod) && mod.getModSettings().isDodgeProjectiles() && isProjectileClose(mod)) { // S223: only dodge when something is actually incoming
 
             if (StorageHelper.getNumberOfThrowawayBlocks(mod) > 0 && !mod.getFoodChain().needsToEat()
                     && mod.getModSettings().isDodgeProjectiles() && isProjectileClose(mod)) {

@@ -416,6 +416,8 @@ public final class T2Codes {
     public static final String S199_STICKY_POCKET = "S199";
     /** S200 — task-agnostic watchdog: 45s without moving 4 blocks or an inventory change forces an escape. */
     public static final String S200_NO_PROGRESS = "S200";
+    /** S202 — nether gold-dig <-> GetToY(52) flip: 3 climb restarts in 60s suspends the climb for 90s. */
+    public static final String S202_NETHER_CLIMB_FLIP = "S202";
     /** S201 — bootstrap crafts a stone sword right after the stone pickaxe. */
     public static final String S201_STONE_SWORD = "S201";
     public static final String E132_SHAFT_STUCK = "E132";

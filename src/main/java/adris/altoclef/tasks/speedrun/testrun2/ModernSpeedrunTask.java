@@ -83,6 +83,8 @@ public class ModernSpeedrunTask extends Task {
     private int netherClimbStallTicks;
     private int netherClimbBestY = Integer.MIN_VALUE;
     private int netherClimbCooldown;
+    private long netherClimbWindowStart;
+    private int netherClimbStarts;
     private int lastInvHash;
     private final Set<BlockPos> looted = new HashSet<>();
     private boolean usedCloser;
@@ -1862,6 +1864,22 @@ public class ModernSpeedrunTask extends Task {
                 boolean climbing = active instanceof adris.altoclef.tasks.movement.GetToYTask
                         && !active.isFinished();
                 if (netherClimbCooldown <= 0 && (ny < 48 || (climbing && ny < 52))) {
+                    // S202: gold dig <-> climb flip. Each climb makes height so S193 never
+                    // fires (fix16 flipped y=47 <-> 52 every 5s). 3 fresh climbs in 60s -> mine.
+                    if (!climbing) {
+                        long now = System.currentTimeMillis();
+                        if (now - netherClimbWindowStart > 60_000) {
+                            netherClimbWindowStart = now;
+                            netherClimbStarts = 0;
+                        }
+                        if (++netherClimbStarts > 3) {
+                            T2Log.warn("S202", "nether climb/gold flip x" + netherClimbStarts
+                                    + " in 60s at y=" + ny + " - mining gold here for 90s");
+                            netherClimbCooldown = 20 * 90;
+                            netherClimbStarts = 0;
+                            return TaskCatalogue.getItemTask(Items.GOLD_INGOT, 5);
+                        }
+                    }
                     if (ny > netherClimbBestY) {
                         netherClimbBestY = ny;
                         netherClimbStallTicks = 0;

@@ -396,6 +396,18 @@ public final class T2Codes {
      * {@code McCompat.baritonePlacing()} (pillar step or right-click forced).
      */
     public static final String S195_PICK_EQUIP_VS_PILLAR = "S195";
+
+    /**
+     * S196 — AIR AS A THROWAWAY BLOCK. The 1.17+ blocks in Settings.throwawayItems
+     * (DRIPSTONE_BLOCK, ROOTED_DIRT, TUFF, COBBLED_DEEPSLATE) are UNSUPPORTED = AIR on 1.16.1;
+     * the run settings held "air" four times and AltoClef copied it into Baritone's
+     * acceptableThrowawayItems. Baritone's throwaway() then matched the first EMPTY hotbar slot,
+     * selected it and reported success, and MovementPillar right-clicked with an empty hand
+     * forever (live runs fix6/fix7, with real blocks protected or absent). It also made every
+     * path calculation believe it had blocks. AIR is filtered in getThrowawayItems() and removed
+     * from Baritone's list; Ostinato-1.16.1 InventoryBehavior skips empty stacks too.
+     */
+    public static final String S196_AIR_THROWAWAY = "S196";
     public static final String E132_SHAFT_STUCK = "E132";
     public static final String E133_PILLAR_PINGPONG = "E133";
     public static final String S139_PILLAR_RISE_HOLD = "S139";

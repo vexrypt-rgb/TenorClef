@@ -689,7 +689,8 @@ public class Settings implements IFailableConfigFile {
     }
 
     public boolean isThrowaway(Item item) {
-        return throwawayItems.contains(item);
+        // S196: see getThrowawayItems — AIR is never a throwaway.
+        return item != net.minecraft.item.Items.AIR && throwawayItems.contains(item);
     }
 
     public boolean isImportant(Item item) {
@@ -717,7 +718,13 @@ public class Settings implements IFailableConfigFile {
     }
 
     public Item[] getThrowawayItems(boolean includeProtected) {
-        return throwawayItems.stream().filter(item -> includeProtected || !AltoClef.getInstance().getBehaviour().isProtected(item)).toArray(Item[]::new);
+        // S196: blocks that do not exist on this version map to UNSUPPORTED (= AIR) and are
+        // saved to the JSON as "air". AIR is never a throwaway: Baritone treated every empty
+        // hotbar slot as a placeable block and pillared with an empty hand forever.
+        return throwawayItems.stream()
+                .filter(item -> item != null && item != net.minecraft.item.Items.AIR)
+                .filter(item -> includeProtected || !AltoClef.getInstance().getBehaviour().isProtected(item))
+                .toArray(Item[]::new);
     }
 
     public Item[] getThrowawayItems(AltoClef mod) {

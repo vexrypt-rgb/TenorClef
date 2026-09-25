@@ -187,6 +187,10 @@ public class AltoClef implements ModInitializer {
                     .filter(item -> item != Items.SOUL_SAND && item != Items.MAGMA_BLOCK && item != Items.SAND && item
                             != Items.GRAVEL).toList();
             getClientBaritoneSettings().acceptableThrowawayItems.value.addAll(baritoneCanPlace);
+            // S196: never let AIR in (earlier loads may already have added it); Baritone's
+            // throwaway search matches an empty hotbar slot against AIR and "places" nothing.
+            getClientBaritoneSettings().acceptableThrowawayItems.value
+                    .removeIf(item -> item == null || item == net.minecraft.item.Items.AIR);
             // If we should run an idle command...
             if ((!getUserTaskChain().isActive() || getUserTaskChain().isRunningIdleTask()) && getModSettings().shouldRunIdleCommandWhenNotActive()) {
                 getUserTaskChain().signalNextTaskToBeIdleTask();

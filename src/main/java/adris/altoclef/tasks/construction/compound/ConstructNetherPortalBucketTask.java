@@ -95,6 +95,10 @@ public class ConstructNetherPortalBucketTask extends Task {
     private boolean bucketAcquireTiming = false;
     private final TimerGame noFluidProgressTimer = new TimerGame(90);
     private final TimerGame secondBucketIronLogTimer = new TimerGame(15);
+    // S208: 2nd-bucket iron stall (fix21: stood in 1-deep water 30s+ at unreachable ore at y-12).
+    private final TimerGame secondBucketIronStallTimer = new TimerGame(25);
+    private int secondBucketIronLast = -1;
+    private Task secondBucketRelocate;
     /** Set when Construct gives up so EarlyOverworld can tear down goToNether and re-acquire. */
     public boolean abortedForReacquire = false;
     private BlockPos portalOrigin = null;
@@ -237,6 +241,18 @@ public class ConstructNetherPortalBucketTask extends Task {
             int iron = mod.getItemStorage().getItemCount(Items.IRON_INGOT);
             if (iron < 3) {
                 setDebugState("Mining iron for 2nd bucket at lava");
+                if (secondBucketRelocate != null && secondBucketRelocate.isActive() && !secondBucketRelocate.isFinished()) {
+                    return secondBucketRelocate;
+                }
+                if (iron != secondBucketIronLast) {
+                    secondBucketIronLast = iron;
+                    secondBucketIronStallTimer.reset();
+                } else if (secondBucketIronStallTimer.elapsed()) {
+                    secondBucketIronStallTimer.reset();
+                    Debug.logWarning("[S208] 2nd-bucket iron stalled 25s at iron=" + iron + " - relocating");
+                    secondBucketRelocate = new TimeoutWanderTask(12);
+                    return secondBucketRelocate;
+                }
                 progressChecker.reset();
                 if (secondBucketIronLogTimer.elapsed()) {
                     Debug.logMessage("Construct: need iron for 2nd bucket (iron=" + iron + " empty=" + emptyBuckets

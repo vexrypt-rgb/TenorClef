@@ -121,6 +121,7 @@ public final class T2Fault {
             case "S205" -> "in the nether phase portal blocks are pathing walls so gold mining cannot walk back to the overworld";
             case "S206" -> "gold helm equip stalled; closing screens and shift-clicking the helm into the head slot";
             case "S207" -> "helm equip never confirmed after 6s (it was actually on); latched as worn to stop the loop";
+            case "S208" -> "2nd-bucket iron mining stalled 25s (ore unreachable, stuck in water); wander 12s to relocate and retry";
             case "S202" -> "nether climb restarted 3x in 60s (gold dig keeps dropping below 48): climb off for 90s, gold mined in place";
             case "S194" -> "dig-down in progress: a collector is mining straight down (Y fell in the last 3s), so pillar-out/jump nudges stand aside instead of pillaring back up with the cobble it just mined";
             case "E109b", "S109" -> "mining with a block in hand: force-equip the pick (S109 does this)";

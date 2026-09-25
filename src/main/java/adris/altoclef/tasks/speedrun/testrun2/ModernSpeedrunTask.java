@@ -1691,6 +1691,11 @@ public class ModernSpeedrunTask extends Task {
                 + count(mod, Items.IRON_NUGGET) / 9;
         boolean oreNear = false;
         try { oreNear = mod.getBlockScanner().anyFoundWithinDistance(24, Blocks.IRON_ORE); } catch (Throwable ignored) {}
+        // fix21: the shield ate 1 of 3 iron saved for the 2nd portal bucket, which sent the
+        // bot after unreachable ore while standing in water. Buckets come first.
+        int buckets = count(mod, Items.BUCKET) + count(mod, Items.WATER_BUCKET) + count(mod, Items.LAVA_BUCKET);
+        int reserve = Math.max(0, 2 - buckets) * 3;
+        if (reserve > 0 && iron < reserve + 1) return null;
         if (iron < 1 && !oreNear) return null;
         T2Log.force("S204", "shield before nether iron=" + iron + " oreNear=" + oreNear);
         return TaskCatalogue.getItemTask(Items.SHIELD, 1);

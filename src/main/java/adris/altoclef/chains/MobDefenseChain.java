@@ -163,6 +163,8 @@ public class MobDefenseChain extends SingleTaskChain {
             T2Log.warn("S222", "mob-defense held priority " + (now - holdStartMs) / 1000 + "s pri=" + pri
                     + " task=" + (mainTask == null ? "-" : mainTask.getClass().getSimpleName())
                     + " target=" + (lockedOnEntity == null ? "-" : lockedOnEntity.getType().getTranslationKey())
+                    + " hp=" + (int) mod.getPlayer().getHealth() + " food=" + mod.getPlayer().getHungerManager().getFoodLevel()
+                    + " danger=" + getUniversallyDangerousMob(mod).map(e -> e.getType().getTranslationKey()).orElse("-")
                     + " - forcing hand-back");
             holdStartMs = 0;
             holdCooldownUntilMs = now + HOLD_COOLDOWN_MS;

@@ -6,13 +6,17 @@ import adris.altoclef.tasks.construction.compound.ConstructNetherPortalBucketTas
 import adris.altoclef.tasks.construction.compound.ConstructNetherPortalObsidianTask;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.Dimension;
+import adris.altoclef.util.helpers.LookHelper;
 import adris.altoclef.util.helpers.WorldHelper;
 import adris.altoclef.util.time.TimerGame;
 import baritone.api.utils.input.Input;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public class EnterNetherPortalTask extends Task {
@@ -28,6 +32,10 @@ public class EnterNetherPortalTask extends Task {
 
     /** Stick to one portal cell so adjacent NETHER_PORTAL blocks don't flip GetToBlock every tick. */
     private BlockPos lockedPortal = null;
+    // The lock used to release only when the cell stopped being a portal, so an
+    // unreachable cell (baritone paths next to it, gives up, wanders, repeats) held us forever.
+    private final TimerGame lockTimer = new TimerGame(30);
+    private final Set<BlockPos> rejected = new HashSet<>();
 
     public EnterNetherPortalTask(Task getPortalTask, Dimension targetDimension, Predicate<BlockPos> goodPortal) {
         if (targetDimension == Dimension.END)
@@ -53,6 +61,8 @@ public class EnterNetherPortalTask extends Task {
     protected void onStart() {
         leftPortal = false;
         lockedPortal = null;
+        rejected.clear();
+        lockTimer.reset();
         portalTimeout.reset();
         wanderTask.resetWander();
     }
@@ -96,6 +106,7 @@ public class EnterNetherPortalTask extends Task {
         }
 
         Predicate<BlockPos> standablePortal = blockPos -> {
+            if (rejected.contains(blockPos)) return false;
             if (mod.getWorld().getBlockState(blockPos).getBlock() == Blocks.NETHER_PORTAL) {
                 return goodPortal.test(blockPos);
             }
@@ -111,17 +122,40 @@ public class EnterNetherPortalTask extends Task {
 
         if (mod.getBlockScanner().anyFound(standablePortal, Blocks.NETHER_PORTAL)) {
             // Lock onto one portal cell; adjacent portal blocks used to flip GetToBlock and forceCancel pathing.
+            if (lockedPortal != null && lockTimer.elapsed()) {
+                rejected.add(lockedPortal);
+                lockedPortal = null;
+            }
             if (lockedPortal == null || !standablePortal.test(lockedPortal)
                     || mod.getWorld().getBlockState(lockedPortal).getBlock() != Blocks.NETHER_PORTAL) {
+                lockTimer.reset();
                 lockedPortal = mod.getBlockScanner().getNearestBlock(standablePortal, Blocks.NETHER_PORTAL)
                         .map(BlockPos::toImmutable).orElse(null);
             }
             if (lockedPortal != null) {
                 setDebugState("Going to locked portal " + lockedPortal.toShortString());
+                // Baritone often stalls one block short (frame corner, diagonal). Step in by hand.
+                Vec3d c = Vec3d.ofBottomCenter(lockedPortal);
+                Vec3d p = mod.getPlayer().getPos();
+                double dx = c.x - p.x, dz = c.z - p.z;
+                if (dx * dx + dz * dz < 2.5 * 2.5 && Math.abs(p.y - lockedPortal.getY()) < 1.2
+                        && !mod.getClientBaritone().getPathingBehavior().isPathing()) {
+                    setDebugState("Stepping into locked portal " + lockedPortal.toShortString());
+                    LookHelper.lookAt(mod, c.add(0, 0.5, 0));
+                    mod.getInputControls().hold(Input.MOVE_FORWARD);
+                    return null;
+                }
+                mod.getInputControls().release(Input.MOVE_FORWARD);
                 return new GetToBlockTask(lockedPortal, false);
             }
             setDebugState("Going to found portal");
             return new DoToClosestBlockTask(blockPos -> new GetToBlockTask(blockPos, false), standablePortal, Blocks.NETHER_PORTAL);
+        }
+
+        if (!rejected.isEmpty() && mod.getBlockScanner().anyFound(Blocks.NETHER_PORTAL)) {
+            // Every nearby cell rejected once: retry them rather than build a second portal.
+            rejected.clear();
+            return null;
         }
 
         //this probably isn't needed here, the check should fail everytime

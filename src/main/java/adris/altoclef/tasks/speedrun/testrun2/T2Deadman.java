@@ -262,8 +262,15 @@ public final class T2Deadman {
      * <p>Dumps once per tick (keyed on the tick's start instant), so a tick that stays stuck
      * for minutes produces one stack, not one per 125ms poll.
      */
+    /**
+     * Stack capture threshold, lower than the 8s fault: live runs fix4 and fix8 had 5s client
+     * freezes mid-play (fix8's ended in a creeper death the bot never reacted to) and left no
+     * stack, because capture only ran past 8s. One dump per stuck tick, so this is cheap.
+     */
+    private static final long STACK_DUMP_MS = 3_000L;
+
     private static void maybeDumpSlowTick(long sinceProgress) {
-        if (sinceProgress < SLOW_TICK_FAULT_MS) return;
+        if (sinceProgress < STACK_DUMP_MS) return;
         long began = currentTickBeganAt;
         if (dumpedForTickAt == began) return;
         dumpedForTickAt = began;

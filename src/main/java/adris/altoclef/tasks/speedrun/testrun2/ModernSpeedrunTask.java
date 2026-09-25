@@ -1004,6 +1004,16 @@ public class ModernSpeedrunTask extends Task {
         if (phase == Phase.BOOTSTRAP && SurfaceBailTask.underground(mod)
                 && !SurfaceBailTask.cooling()) {
             T2Log.warn("E90", "bootstrap in dark — surface");
+            // S197: a crafting table left in the dark pulls CraftInTableTask straight back
+            // underground after every bail (fix8: E90 loop every ~4s at 17,62,-87). Blacklist
+            // dark tables so the craft places a fresh one on the surface.
+            for (BlockPos t : mod.getBlockScanner().getKnownLocations(Blocks.CRAFTING_TABLE)) {
+                if (!mod.getBlockScanner().isUnreachable(t)
+                        && mod.getWorld().getLightLevel(net.minecraft.world.LightType.SKY, t.up()) <= 0) {
+                    mod.getBlockScanner().requestBlockUnreachable(t, 0);
+                    T2Log.force("S197", "blacklist dark table " + t);
+                }
+            }
             return stick(new SurfaceBailTask());
         }
         int skyNow = 15;

@@ -52,6 +52,10 @@ public class SurfaceBailTask extends Task {
     private boolean done;
     private int lastY = Integer.MIN_VALUE;
     private int noClimb;
+    /** S199: current air-pocket target and the last one reached (see findSky). */
+    private BlockPos stickyPocket;
+    private BlockPos lastReachedPocket;
+    private int stickyAt;
     /**
      * S168: total ticks with NO vertical movement at all, independent of noClimb.
      *
@@ -285,8 +289,21 @@ public class SurfaceBailTask extends Task {
         // Search instead for ANY standable air pocket - a cave, tunnel or ledge. Reaching
         // one gives the bot somewhere to stand and mine out from, which is strictly better
         // than the TimeoutWanderTask that a null result produces.
-        BlockPos pocket = findAirPocket(mod, from);
+        // S199: keep the previous pocket until it is reached or gone. Re-picking the nearest
+        // pocket every retarget made run fix10 ping-pong between two pockets 2 blocks apart
+        // (each became "nearest" once the bot stood at the other).
+        if (stickyPocket != null && stickyPocket.isWithinDistance(from, 1.5)) lastReachedPocket = stickyPocket;
+        if (stickyPocket != null && standableAir(mod, stickyPocket)
+                && !stickyPocket.isWithinDistance(from, 1.5) && ticks - stickyAt < 20 * 30) {
+            return stickyPocket;
+        }
+        BlockPos pocket = findAirPocket(mod, from, lastReachedPocket);
         if (pocket != null) {
+            if (!pocket.equals(stickyPocket)) {
+                stickyPocket = pocket;
+                stickyAt = ticks;
+                T2Log.force("S199", "sticky air-pocket " + pocket);
+            }
             Debug.logMessage("TESRUN2 surface-bail S151 air-pocket dest=" + pocket + " from=" + from);
             return pocket;
         }
@@ -297,7 +314,7 @@ public class SurfaceBailTask extends Task {
      * S151: any air block with something solid underneath, i.e. somewhere the bot could
      * actually stand. Deliberately does NOT require sky light - see findSky().
      */
-    private BlockPos findAirPocket(AltoClef mod, BlockPos from) {
+    private BlockPos findAirPocket(AltoClef mod, BlockPos from, BlockPos exclude) {
         BlockPos best = null;
         int bestScore = Integer.MAX_VALUE;
         for (int r = 0; r <= 16; r += 2) {
@@ -307,8 +324,9 @@ public class SurfaceBailTask extends Task {
                     for (int dy = 24; dy >= -32; dy -= 2) {
                         if (dx == 0 && dz == 0 && dy == 0) continue;   // our own feet
                         BlockPos p = new BlockPos(from.getX() + dx, from.getY() + dy, from.getZ() + dz);
-                        if (!standableAir(mod, p)) continue;
-                        int score = Math.abs(dx) + Math.abs(dz) + Math.abs(dy);
+                        if (!standableAir(mod, p) || p.equals(exclude)) continue;
+                        // S199: descending is the wrong way out, so weight it double.
+                        int score = Math.abs(dx) + Math.abs(dz) + (dy < 0 ? -2 * dy : dy);
                         if (score < bestScore) {
                             bestScore = score;
                             best = p;

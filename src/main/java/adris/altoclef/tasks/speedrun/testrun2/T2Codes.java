@@ -412,6 +412,8 @@ public final class T2Codes {
     public static final String S197_DARK_TABLE = "S197";
     /** S198 — S163/S166 deep bail uses SurfaceBailTask when not in a 1x1 shaft; HolePillarTask no-ops there. */
     public static final String S198_DEEP_BAIL_OPEN = "S198";
+    /** S199 — SurfaceBailTask S151 air-pocket target is sticky and never the pocket just reached. */
+    public static final String S199_STICKY_POCKET = "S199";
     public static final String E132_SHAFT_STUCK = "E132";
     public static final String E133_PILLAR_PINGPONG = "E133";
     public static final String S139_PILLAR_RISE_HOLD = "S139";

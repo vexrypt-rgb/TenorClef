@@ -1,0 +1,872 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.4.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+[tenorclef] gradle.properties.local sets org.gradle.java.home — Gradle selects the daemon JDK from JAVA_HOME or ~/.gradle/gradle.properties; export JAVA_HOME="C:/Program Files/Eclipse Adoptium/jdk-21.0.12.101-hotspot" if this pin is required.
+[tenorclef] Loaded 1 entries from gradle.properties.local
+
+> Configure project :1.16.1
+Fabric Loom: 1.15.5
+
+> Configure project :1.21.1
+Fabric Loom: 1.15.5
+[altoclef] Tungsten jars for 1.21.1: [tungsten-fabric-ALPHA-1.6.0-1.21compat-SNAPSHOT.jar]
+Build file 'C:\Users\redfa\Documents\MinecraftDev\altoclef\build.gradle': line 313
+Properties should be assigned using the 'propName = value' syntax. Setting a property via the Gradle-generated 'propName value' or 'propName(value)' syntax in Groovy DSL has been deprecated. This is scheduled to be removed in Gradle 10. Use assignment ('duplicatesStrategy = <value>') instead. Consult the upgrading guide for further information: https://docs.gradle.org/9.4.1/userguide/upgrading_version_8.html#groovy_space_assignment_syntax
+	at build_dsk7s0l5lw6a69ogktr7fgsy9$_run_closure13$_closure39.doCall$original(C:\Users\redfa\Documents\MinecraftDev\altoclef\build.gradle:313)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+	at build_dsk7s0l5lw6a69ogktr7fgsy9$_run_closure13.doCall$original(C:\Users\redfa\Documents\MinecraftDev\altoclef\build.gradle:312)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.16.5
+Fabric Loom: 1.15.5
+
+> Configure project :1.21
+Fabric Loom: 1.15.5
+[altoclef] Tungsten jars for 1.21: [tungsten-fabric-ALPHA-1.6.0-1.21compat-SNAPSHOT.jar]
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.17.1
+Fabric Loom: 1.15.5
+
+> Configure project :1.20.6
+Fabric Loom: 1.15.5
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.18
+Fabric Loom: 1.15.5
+
+> Configure project :1.20.5
+Fabric Loom: 1.15.5
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.18.2
+Fabric Loom: 1.15.5
+
+> Configure project :1.20.4
+Fabric Loom: 1.15.5
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.19.4
+Fabric Loom: 1.15.5
+
+> Configure project :1.20.2
+Fabric Loom: 1.15.5
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.20.1
+Fabric Loom: 1.15.5
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.19.4
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.18.2
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.18
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.17.1
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.16.5
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.16.1
+[altoclef] Ostinato Baritone for 1.16.1: baritone-unoptimized-fabric-1.16.1.jar
+[altoclef] Tungsten jars for 1.16.1: [tungsten-fabric-ALPHA-1.6.0-1.16.1-SNAPSHOT.jar]
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.21.11
+Fabric Loom: 1.15.5
+[altoclef] Ostinato Baritone for 1.21.11: baritone-unoptimized-fabric-1.17.0-7-g9bb1b309-dirty.jar
+[altoclef] Tungsten jars for 1.21.11: [tungsten-fabric-ALPHA-1.6.0-1.21compat-SNAPSHOT.jar]
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Task :1.16.1:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.16.1:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.16.5:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.16.5:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.17.1:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.17.1:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.18:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.18:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.18.2:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.18.2:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.19.4:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.19.4:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.1:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.1:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.2:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.2:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.4:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.4:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.5:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.5:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.6:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.6:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.21:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.21:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.21:preprocessCode UP-TO-DATE
+> Task :1.20.6:preprocessCode UP-TO-DATE
+> Task :1.20.5:preprocessCode UP-TO-DATE
+> Task :1.20.4:preprocessCode UP-TO-DATE
+> Task :1.20.2:preprocessCode UP-TO-DATE
+> Task :1.20.1:preprocessCode UP-TO-DATE
+> Task :1.19.4:preprocessCode UP-TO-DATE
+> Task :1.18.2:preprocessCode UP-TO-DATE
+> Task :1.18:preprocessCode UP-TO-DATE
+> Task :1.17.1:preprocessCode UP-TO-DATE
+> Task :1.16.5:preprocessCode UP-TO-DATE
+> Task :1.16.1:preprocessCode UP-TO-DATE
+> Task :1.16.1:compileJava UP-TO-DATE
+> Task :1.21:preprocessResources UP-TO-DATE
+> Task :1.20.6:preprocessResources UP-TO-DATE
+> Task :1.20.5:preprocessResources UP-TO-DATE
+> Task :1.20.4:preprocessResources UP-TO-DATE
+> Task :1.20.2:preprocessResources UP-TO-DATE
+> Task :1.20.1:preprocessResources UP-TO-DATE
+> Task :1.19.4:preprocessResources UP-TO-DATE
+> Task :1.18.2:preprocessResources UP-TO-DATE
+> Task :1.18:preprocessResources UP-TO-DATE
+> Task :1.17.1:preprocessResources UP-TO-DATE
+> Task :1.16.5:preprocessResources UP-TO-DATE
+> Task :1.16.1:preprocessResources UP-TO-DATE
+> Task :1.16.1:processResources UP-TO-DATE
+> Task :1.16.1:classes UP-TO-DATE
+> Task :1.16.1:generateLog4jConfig UP-TO-DATE
+> Task :1.16.1:generateRemapClasspath UP-TO-DATE
+> Task :1.16.1:generateDLIConfig UP-TO-DATE
+> Task :1.16.1:configureLaunch UP-TO-DATE
+> Task :1.16.1:downloadAssets UP-TO-DATE
+> Task :1.16.1:extractNatives UP-TO-DATE
+> Task :1.16.1:configureClientLaunch UP-TO-DATE
+
+> Task :1.16.1:runClient
+2026-09-20 15:34:10,214 main ERROR Error processing element Queue ([Appenders: null]): CLASS_NOT_FOUND
+2026-09-20 15:34:10,890 main ERROR Unable to locate appender "ServerGuiConsole" for logger config "root"
+[34m[15:34:11][m [32m[main/INFO][m [36m(FabricLoader/GameProvider)[m [0mLoading Minecraft 1.16.1 with Fabric Loader 0.16.7
+[m[34m[15:34:11][m [33m[ForkJoinPool-1-worker-1/WARN][m [36m(FabricLoader/Metadata)[m [0mMod tungsten uses the version ALPHA-1.6.0-1.16.1-SNAPSHOT which isn't compatible with Loader's extended semantic version format (Could not parse version number component 'ALPHA'!), SemVer is recommended for reliably evaluating dependencies and prioritizing newer version
+[m[34m[15:34:11][m [32m[main/INFO][m [36m(FabricLoader)[m [0mLoading 46 mods:
+	- altoclef 1.16.1-0.19
+	- baritone 1.16.1-ostinato
+	- fabric 0.18.0+build.387-1.16.1
+	- fabric-api-base 0.1.3+12a8474c02
+	- fabric-biomes-v1 0.2.7+059ea86602
+	- fabric-blockrenderlayer-v1 1.1.4+c6a8ea8902
+	- fabric-command-api-v1 1.0.8+5ce5339802
+	- fabric-commands-v0 0.2.0+52d3083602
+	- fabric-containers-v0 0.1.8+045df74f02
+	- fabric-content-registries-v0 0.1.9+059ea86602
+	- fabric-crash-report-info-v1 0.1.2+b7f9825d02
+	- fabric-dimensions-v1 1.0.0+a71b305302
+	- fabric-events-interaction-v0 0.4.0+e540c58402
+	- fabric-events-lifecycle-v0 0.2.0+16acbe5b02
+	- fabric-game-rule-api-v1 1.0.0+fe81e12502
+	- fabric-item-api-v1 1.0.0+16acbe5b02
+	- fabric-item-groups-v0 0.2.0+438f963602
+	- fabric-key-binding-api-v1 1.0.1+f404f3be02
+	- fabric-keybindings-v0 0.2.0+3fa9f7c502
+	- fabric-lifecycle-events-v1 1.2.0+e83e061c02
+	- fabric-loot-tables-v1 1.0.0+386eb69e02
+	- fabric-mining-levels-v0 0.1.2+b764ce9902
+	- fabric-models-v0 0.1.0+dfdb52d602
+	- fabric-networking-blockentity-v0 0.2.5+b50ffc7b02
+	- fabric-networking-v0 0.1.10+e00ecb5f02
+	- fabric-object-builder-api-v1 1.5.7+2242e77202
+	- fabric-object-builders-v0 0.6.1+a2d21ddd02
+	- fabric-particles-v1 0.2.1+0a6f2a7002
+	- fabric-registry-sync-v0 0.3.8+7dba2d6c02
+	- fabric-renderer-api-v1 0.2.13+eae12eb802
+	- fabric-renderer-indigo 0.3.4+34d6c87102
+	- fabric-renderer-registries-v1 2.1.0+be551d3c02
+	- fabric-rendering-data-attachment-v1 0.1.3+b7f9825d02
+	- fabric-rendering-fluids-v1 0.1.8+b7084faa02
+	- fabric-rendering-v0 1.1.0+5341049002
+	- fabric-rendering-v1 1.1.2+346247d702
+	- fabric-resource-loader-v0 0.2.6+f41e209802
+	- fabric-screen-handler-api-v1 1.1.0+97324d1102
+	- fabric-tag-extensions-v0 0.2.7+a4c57d8e02
+	- fabric-textures-v0 1.0.4+eae12eb802
+	- fabric-tool-attribute-api-v1 1.2.1+91fca5cd02
+	- fabricloader 0.16.7
+	- java 21
+	- minecraft 1.16.1
+	- mixinextras 0.4.1
+	- tungsten ALPHA-1.6.0-1.16.1-SNAPSHOT
+[m[34m[15:34:11][m [32m[main/INFO][m [36m(FabricLoader/Mixin)[m [0mSpongePowered MIXIN Subsystem Version=0.8.7 Source=file:/C:/Users/redfa/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.3+mixin.0.8.7/51ee0a44ab05f6fddd66b09e66b3a16904f9c55d/sponge-mixin-0.15.3+mixin.0.8.7.jar Service=Knot/Fabric Env=CLIENT
+[m[34m[15:34:11][m [32m[main/INFO][m [36m(FabricLoader/Mixin)[m [0mLoaded Fabric development mappings for mixin remapper!
+[m[34m[15:34:11][m [32m[main/INFO][m [36m(FabricLoader/Mixin)[m [0mCompatibility level set to JAVA_17
+[m[34m[15:34:11][m [33m[main/WARN][m [36m(FabricLoader/Mixin)[m [0mError loading class: me/jellysquid/mods/sodium/client/world/SodiumChunkManager (java.lang.ClassNotFoundException: me/jellysquid/mods/sodium/client/world/SodiumChunkManager)
+[m[34m[15:34:11][m [33m[main/WARN][m [36m(FabricLoader/Mixin)[m [0mError loading class: me/jellysquid/mods/sodium/client/util/collections/FixedLongHashTable (java.lang.ClassNotFoundException: me/jellysquid/mods/sodium/client/util/collections/FixedLongHashTable)
+[m[34m[15:34:12][m [32m[main/INFO][m [36m(FabricLoader/MixinExtras|Service)[m [0mInitializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.4.1).
+[m[34m[15:34:15][m [32m[main/INFO][m [36m(FabricLoader/Mixin)[m [0maltoclef.mixins.json:AxeItemAccessor from mod altoclef->@Accessor[FIELD_GETTER]::getEffectiveMaterials()Ljava/util/Set; should be static as its target is
+[m[34m[15:34:17][m [32m[main/INFO][m [36m(Minecraft)[m [0mEnvironment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', name='PROD'
+[m[34m[15:34:17][m [32m[main/INFO][m [36m(Minecraft)[m [0mSetting user: Player267
+[m[34m[15:34:17][m [32m[main/INFO][m [36m(Indigo)[m [0m[Indigo] Registering Indigo renderer!
+[m[34m[15:34:17][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDERR]: [LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[m[34m[15:34:17][m [32m[main/INFO][m [36m(Minecraft)[m [0mBackend library: LWJGL version 3.3.2-snapshot
+[m[34m[15:34:20][m [32m[main/INFO][m [36m(Minecraft)[m [0mNarrator library for x64 successfully loaded
+[m[34m[15:34:20][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: TENORCLEF: Global Init
+[m[34m[15:34:21][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] [Baritone] Baritone settings file not found, resetting.
+[m[34m[15:34:24][m [32m[main/INFO][m [36m(Minecraft)[m [0mReloading ResourceManager: Default, Fabric Loot Tables (v1), Fabric Rendering Data Attachment (v1), Alto Clef, Fabric Registry Sync (v0), Fabric Rendering (v0), Fabric Object Builders (v0), Fabric Containers (v0), Fabric Networking (v0), Fabric Rendering (v1), Fabric Screen Handler API (v1), Fabric Tag Extensions (v0), Fabric Item Groups (v0), Fabric Item API (v1), Fabric Crash Report Info (v1), Fabric Lifecycle Events (v1), Fabric API, Fabric Key Binding API (v1), Fabric Networking Block Entity (v0), Fabric Renderer - Indigo, Fabric Textures (v0), Fabric Resource Loader (v0), Fabric Loader, Fabric Biomes (v1), Fabric Events Lifecycle (v0), Fabric Key Bindings (v0), Fabric Object Builder API (v1), Fabric BlockRenderLayer Registration (v1), Fabric Renderer API (v1), Fabric Content Registries (v0), Fabric Rendering Fluids (v1), Tungsten, Fabric API Base, Fabric Models (v0), Fabric Events Interaction (v0), Fabric Game Rule API (v1), Fabric Tool Attribute API (v1), Fabric Mining Levels (v0), Fabric Renderer Registries (v1)
+[m[34m[15:34:28][m [33m[main/WARN][m [36m(Minecraft)[m [0mAmbiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[m[34m[15:34:28][m [33m[main/WARN][m [36m(Minecraft)[m [0mAmbiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[m[34m[15:34:28][m [33m[main/WARN][m [36m(Minecraft)[m [0mAmbiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[m[34m[15:34:28][m [33m[main/WARN][m [36m(Minecraft)[m [0mAmbiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[m[34m[15:34:28][m [33m[main/WARN][m [36m(Minecraft)[m [0mAmbiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[m[34m[15:34:28][m [32m[main/INFO][m [36m(Minecraft)[m [0mReloading ResourceManager: Default, Fabric Loot Tables (v1), Fabric Rendering Data Attachment (v1), Alto Clef, Fabric Registry Sync (v0), Fabric Rendering (v0), Fabric Object Builders (v0), Fabric Containers (v0), Fabric Networking (v0), Fabric Rendering (v1), Fabric Screen Handler API (v1), Fabric Tag Extensions (v0), Fabric Item Groups (v0), Fabric Item API (v1), Fabric Crash Report Info (v1), Fabric Lifecycle Events (v1), Fabric API, Fabric Key Binding API (v1), Fabric Networking Block Entity (v0), Fabric Renderer - Indigo, Fabric Textures (v0), Fabric Resource Loader (v0), Fabric Loader, Fabric Biomes (v1), Fabric Events Lifecycle (v0), Fabric Key Bindings (v0), Fabric Object Builder API (v1), Fabric BlockRenderLayer Registration (v1), Fabric Renderer API (v1), Fabric Content Registries (v0), Fabric Rendering Fluids (v1), Tungsten, Fabric API Base, Fabric Models (v0), Fabric Events Interaction (v0), Fabric Game Rule API (v1), Fabric Tool Attribute API (v1), Fabric Mining Levels (v0), Fabric Renderer Registries (v1), Fabric Tool Attribute API (v1)
+[m[34m[15:34:30][m [32m[main/INFO][m [36m(Minecraft)[m [0mLoaded 7 recipes
+[m[34m[15:34:30][m [32m[main/INFO][m [36m(Minecraft)[m [0mLoaded 927 advancements
+[m[34m[15:34:31][m [32m[main/INFO][m [36m(Minecraft)[m [0mEnvironment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', name='PROD'
+[m[34m[15:34:31][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mStarting integrated minecraft server version 1.16.1
+[m[34m[15:34:31][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mGenerating keypair
+[m[34m[15:34:36][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mPreparing start region for dimension minecraft:overworld
+[m[34m[15:34:36][m [32m[main/INFO][m [36m(Minecraft)[m [0mPreparing spawn area: 0%
+[m[34m[15:34:37][m [32m[main/INFO][m [36m(Minecraft)[m [0mPreparing spawn area: 0%
+[m[34m[15:34:37][m [32m[main/INFO][m [36m(Minecraft)[m [0mPreparing spawn area: 3%
+[m[34m[15:34:38][m [32m[main/INFO][m [36m(Minecraft)[m [0mPreparing spawn area: 6%
+[m[34m[15:34:38][m [32m[main/INFO][m [36m(Minecraft)[m [0mPreparing spawn area: 11%
+[m[34m[15:34:39][m [32m[main/INFO][m [36m(Minecraft)[m [0mPreparing spawn area: 17%
+[m[34m[15:34:39][m [32m[main/INFO][m [36m(Minecraft)[m [0mPreparing spawn area: 22%
+[m[34m[15:34:40][m [32m[main/INFO][m [36m(Minecraft)[m [0mPreparing spawn area: 27%
+[m[34m[15:34:40][m [32m[main/INFO][m [36m(Minecraft)[m [0mPreparing spawn area: 31%
+[m[34m[15:34:41][m [32m[main/INFO][m [36m(Minecraft)[m [0mPreparing spawn area: 38%
+[m[34m[15:34:41][m [32m[main/INFO][m [36m(Minecraft)[m [0mPreparing spawn area: 38%
+[m[34m[15:34:42][m [32m[main/INFO][m [36m(Minecraft)[m [0mPreparing spawn area: 47%
+[m[34m[15:34:42][m [32m[main/INFO][m [36m(Minecraft)[m [0mPreparing spawn area: 51%
+[m[34m[15:34:43][m [32m[main/INFO][m [36m(Minecraft)[m [0mPreparing spawn area: 55%
+[m[34m[15:34:43][m [32m[main/INFO][m [36m(Minecraft)[m [0mPreparing spawn area: 55%
+[m[34m[15:34:44][m [32m[main/INFO][m [36m(Minecraft)[m [0mPreparing spawn area: 68%
+[m[34m[15:34:44][m [32m[main/INFO][m [36m(Minecraft)[m [0mPreparing spawn area: 76%
+[m[34m[15:34:45][m [32m[main/INFO][m [36m(Minecraft)[m [0mPreparing spawn area: 83%
+[m[34m[15:34:46][m [32m[main/INFO][m [36m(Minecraft)[m [0mPreparing spawn area: 84%
+[m[34m[15:34:46][m [32m[main/INFO][m [36m(Minecraft)[m [0mPreparing spawn area: 84%
+[m[34m[15:34:46][m [32m[main/INFO][m [36m(Minecraft)[m [0mPreparing spawn area: 96%
+[m[34m[15:34:47][m [32m[main/INFO][m [36m(Minecraft)[m [0mTime elapsed: 10263 ms
+[m[34m[15:34:47][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mChanging view distance to 11, from 10
+[m[34m[15:34:47][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mPlayer267[local:E:505af717] logged in with entity id 321 at (-58.5, 67.0, 119.5)
+[m[34m[15:34:47][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mPlayer267 joined the game
+[m[34m[15:34:48][m [32m[main/INFO][m [36m(Minecraft)[m [0mOpenAL initialized.
+[m[34m[15:34:48][m [32m[main/INFO][m [36m(Minecraft)[m [0mSound engine started
+[m[34m[15:34:48][m [32m[main/INFO][m [36m(Minecraft)[m [0mCreated: 1024x1024x4 minecraft:textures/atlas/blocks.png-atlas
+[m[34m[15:34:49][m [32m[main/INFO][m [36m(Minecraft)[m [0mCreated: 256x128x4 minecraft:textures/atlas/signs.png-atlas
+[m[34m[15:34:49][m [32m[main/INFO][m [36m(Minecraft)[m [0mCreated: 1024x512x4 minecraft:textures/atlas/banner_patterns.png-atlas
+[m[34m[15:34:49][m [32m[main/INFO][m [36m(Minecraft)[m [0mCreated: 1024x512x4 minecraft:textures/atlas/shield_patterns.png-atlas
+[m[34m[15:34:49][m [32m[main/INFO][m [36m(Minecraft)[m [0mCreated: 256x256x4 minecraft:textures/atlas/chest.png-atlas
+[m[34m[15:34:49][m [32m[main/INFO][m [36m(Minecraft)[m [0mCreated: 512x256x4 minecraft:textures/atlas/beds.png-atlas
+[m[34m[15:34:49][m [32m[main/INFO][m [36m(Minecraft)[m [0mCreated: 512x256x4 minecraft:textures/atlas/shulker_boxes.png-atlas
+[m[34m[15:34:50][m [32m[main/INFO][m [36m(Minecraft)[m [0mCreated: 256x256x0 minecraft:textures/atlas/particles.png-atlas
+[m[34m[15:34:50][m [32m[main/INFO][m [36m(Minecraft)[m [0mCreated: 256x256x0 minecraft:textures/atlas/paintings.png-atlas
+[m[34m[15:34:50][m [32m[main/INFO][m [36m(Minecraft)[m [0mCreated: 256x128x0 minecraft:textures/atlas/mob_effects.png-atlas
+[m[34m[15:34:50][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: Baritone world data dir: C:\Users\redfa\Documents\MinecraftDev\altoclef\versions\1.16.1\run\saves\AutoRun_20260920_153427\.\baritone
+[m[34m[15:34:50][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: Cached world directory: C:\Users\redfa\Documents\MinecraftDev\altoclef\versions\1.16.1\run\saves\AutoRun_20260920_153427\.\baritone\cache
+[m[34m[15:34:50][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: Would save waypoints to C:\Users\redfa\Documents\MinecraftDev\altoclef\versions\1.16.1\run\saves\AutoRun_20260920_153427\.\baritone\waypoints
+[m[34m[15:34:50][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mSaving and pausing game...
+[m[34m[15:34:50][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mSaving chunks for level 'ServerLevel[AutoRun_20260920_153427]'/minecraft:overworld
+[m[34m[15:34:50][m [32m[main/INFO][m [36m(Minecraft)[m [0mLoaded 0 advancements
+[m[34m[15:34:51][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mSaving chunks for level 'ServerLevel[AutoRun_20260920_153427]'/minecraft:the_nether
+[m[34m[15:34:51][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mSaving chunks for level 'ServerLevel[AutoRun_20260920_153427]'/minecraft:the_end
+[m[34m[15:34:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rAUTORUN: executing 'testrun2'
+[m[34m[15:34:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rTESRUN2 start — @stop to cancel
+[m[34m[15:34:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rUser Task Set: <testrun2/BOOTSTRAP> 
+[m[34m[15:34:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rTESRUN2 clock 0:00.0
+[m[34m[15:34:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rTESRUN2 spawn biome=PlainsBiome trees~=0 villageHint=true rpHint=true surfaceLava=0  playable
+[m[34m[15:34:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rTungstenBridge: kaptainwutax.tungsten bound
+[m[34m[15:34:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rTESRUN2 start Tungsten backend: AVAILABLE (kaptainwutax.tungsten bound; mover=BARITONE) eyes=12 rods=6 skipDiamond=true
+[m[34m[15:34:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:00.0 PHASE  -> BOOTSTRAP
+[m[34m[15:34:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:00.0 DIM  -> OVERWORLD at -59,67,119
+[m[34m[15:34:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:00.1 CHILD  -> - ph=BOOTSTRAP @-59,67,119 sky=15 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0
+[m[34m[15:34:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [E111] ph=BOOTSTRAP
+[m[34m[15:34:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [E111] ph=BOOTSTRAP§r
+[m[34m[15:34:56][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:00.2 [E111] ph=BOOTSTRAP
+[m[34m[15:34:56][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:00.2 WHY wood: mine 1.16 logs only (no air)
+[m[34m[15:34:56][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:00.2 CHILD - -> MineAndCollectTask ph=BOOTSTRAP @-59,67,119 sky=15 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0
+[m[34m[15:34:56][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:00.9 ph=BOOTSTRAP @-59,67,122 do=<Mine And Collect: [[oak_log,birch_log,spruce_log,jungle_log,acacia_log,dark_oak_log] x 2]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:34:57][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:01.8 ph=BOOTSTRAP @-59,67,127 do=<Mine And Collect: [[oak_log,birch_log,spruce_log,jungle_log,acacia_log,dark_oak_log] x 2]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:34:58][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:02.3 SNAP ph=BOOTSTRAP @-59,68,128 sky=15 wet=false ground=false pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=MineAndCollectTask dbg=<Mine And Collect: [[oak_log,birch_log,spruce_log,jungle_log,acacia_log,dark_oak_log] x 2]>  mobs=none
+[m[34m[15:34:58][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:02.8 ph=BOOTSTRAP @-58,68,130 do=<Mine And Collect: [[oak_log,birch_log,spruce_log,jungle_log,acacia_log,dark_oak_log] x 2]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:34:59][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:03.8 ph=BOOTSTRAP @-58,69,136 do=<Mine And Collect: [[oak_log,birch_log,spruce_log,jungle_log,acacia_log,dark_oak_log] x 2]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:00][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:04.8 ph=BOOTSTRAP @-59,69,142 do=<Mine And Collect: [[oak_log,birch_log,spruce_log,jungle_log,acacia_log,dark_oak_log] x 2]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:00][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:04.8 SNAP ph=BOOTSTRAP @-59,69,142 sky=15 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=MineAndCollectTask dbg=<Mine And Collect: [[oak_log,birch_log,spruce_log,jungle_log,acacia_log,dark_oak_log] x 2]>  mobs=none
+[m[34m[15:35:01][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:05.8 ph=BOOTSTRAP @-59,69,147 do=<Mine And Collect: [[oak_log,birch_log,spruce_log,jungle_log,acacia_log,dark_oak_log] x 2]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:02][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:06.8 ph=BOOTSTRAP @-60,69,153 do=<Mine And Collect: [[oak_log,birch_log,spruce_log,jungle_log,acacia_log,dark_oak_log] x 2]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:03][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:07.3 SNAP ph=BOOTSTRAP @-61,69,154 sky=15 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=MineAndCollectTask dbg=<Mine And Collect: [[oak_log,birch_log,spruce_log,jungle_log,acacia_log,dark_oak_log] x 2]>  mobs=none
+[m[34m[15:35:03][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:07.8 ph=BOOTSTRAP @-63,69,156 do=<Mine And Collect: [[oak_log,birch_log,spruce_log,jungle_log,acacia_log,dark_oak_log] x 2]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:04][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:08.8 ph=BOOTSTRAP @-65,69,161 do=<Mine And Collect: [[oak_log,birch_log,spruce_log,jungle_log,acacia_log,dark_oak_log] x 2]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:05][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:09.8 ph=BOOTSTRAP @-66,69,166 do=<Mine And Collect: [[oak_log,birch_log,spruce_log,jungle_log,acacia_log,dark_oak_log] x 2]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:05][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:09.8 SNAP ph=BOOTSTRAP @-66,69,166 sky=15 wet=false ground=false pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=MineAndCollectTask dbg=<Mine And Collect: [[oak_log,birch_log,spruce_log,jungle_log,acacia_log,dark_oak_log] x 2]>  mobs=none
+[m[34m[15:35:06][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:10.8 ph=BOOTSTRAP @-68,70,170 do=<Mine And Collect: [[oak_log,birch_log,spruce_log,jungle_log,acacia_log,dark_oak_log] x 2]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:07][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:11.8 ph=BOOTSTRAP @-71,71,173 do=<Mine And Collect: [[oak_log,birch_log,spruce_log,jungle_log,acacia_log,dark_oak_log] x 2]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:08][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:12.3 SNAP ph=BOOTSTRAP @-72,71,175 sky=15 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=MineAndCollectTask dbg=<Mine And Collect: [[oak_log,birch_log,spruce_log,jungle_log,acacia_log,dark_oak_log] x 2]>  mobs=none
+[m[34m[15:35:08][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:12.8 ph=BOOTSTRAP @-73,71,177 do=<Mine And Collect: [[oak_log,birch_log,spruce_log,jungle_log,acacia_log,dark_oak_log] x 2]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:09][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:13.8 ph=BOOTSTRAP @-74,71,182 do=<Mine And Collect: [[oak_log,birch_log,spruce_log,jungle_log,acacia_log,dark_oak_log] x 2]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:10][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:14.8 ph=BOOTSTRAP @-78,71,186 do=<Mine And Collect: [[oak_log,birch_log,spruce_log,jungle_log,acacia_log,dark_oak_log] x 2]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:10][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:14.8 SNAP ph=BOOTSTRAP @-78,71,186 sky=15 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=MineAndCollectTask dbg=<Mine And Collect: [[oak_log,birch_log,spruce_log,jungle_log,acacia_log,dark_oak_log] x 2]>  mobs=none
+[m[34m[15:35:11][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:15.8 ph=BOOTSTRAP @-79,72,189 do=<Mine And Collect: [[oak_log,birch_log,spruce_log,jungle_log,acacia_log,dark_oak_log] x 2]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:12][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:16.8 ph=BOOTSTRAP @-79,72,189 do=<Mine And Collect: [[oak_log,birch_log,spruce_log,jungle_log,acacia_log,dark_oak_log] x 2]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:13][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:17.3 SNAP ph=BOOTSTRAP @-79,72,189 sky=15 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=MineAndCollectTask dbg=<Mine And Collect: [[oak_log,birch_log,spruce_log,jungle_log,acacia_log,dark_oak_log] x 2]>  mobs=none
+[m[34m[15:35:13][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:17.8 ph=BOOTSTRAP @-79,72,189 do=<Mine And Collect: [[oak_log,birch_log,spruce_log,jungle_log,acacia_log,dark_oak_log] x 2]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:14][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:18.8 ph=BOOTSTRAP @-79,72,189 do=<Mine And Collect: [[oak_log,birch_log,spruce_log,jungle_log,acacia_log,dark_oak_log] x 2]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:15][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:19.7 CHILD MineAndCollectTask -> CraftInInventoryTask ph=BOOTSTRAP @-79,72,191 sky=14 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0
+[m[34m[15:35:15][m [32m[main/INFO][m [36m(Minecraft)[m [0mLoaded 4 advancements
+[m[34m[15:35:15][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:19.8 ph=BOOTSTRAP @-79,72,191 do=<Craft 2x2 Task Recipe{crafting_table}: [[crafting_table]]> Collecting materials eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:15][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:19.8 SNAP ph=BOOTSTRAP @-79,72,191 sky=14 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=CraftInInventoryTask dbg=<Craft 2x2 Task Recipe{crafting_table}: [[crafting_table]]> Collecting materials mobs=none
+[m[34m[15:35:15][m [32m[main/INFO][m [36m(Minecraft)[m [0mLoaded 16 advancements
+[m[34m[15:35:16][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:20.5 WHY bootstrap: table exists — wooden pick, not more logs
+[m[34m[15:35:16][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:20.5 CHILD CraftInInventoryTask -> CraftInTableTask ph=BOOTSTRAP @-79,72,191 sky=14 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0
+[m[34m[15:35:16][m [32m[main/INFO][m [36m(Minecraft)[m [0mLoaded 19 advancements
+[m[34m[15:35:16][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:20.8 ph=BOOTSTRAP @-79,72,191 do=<Doing stuff in crafting_table container: [[wooden_pickaxe]]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:17][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:21.8 ph=BOOTSTRAP @-79,72,191 do=<Doing stuff in crafting_table container: [[wooden_pickaxe]]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:18][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:22.3 SNAP ph=BOOTSTRAP @-79,72,191 sky=14 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=CraftInTableTask dbg=<Doing stuff in crafting_table container: [[wooden_pickaxe]]>  mobs=none
+[m[34m[15:35:18][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:22.8 ph=BOOTSTRAP @-79,72,191 do=<Doing stuff in crafting_table container: [[wooden_pickaxe]]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:19][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:23.8 ph=BOOTSTRAP @-79,72,191 do=<Doing stuff in crafting_table container: [[wooden_pickaxe]]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:20][m [32m[pool-5-thread-2/INFO][m [36m(Minecraft)[m [0m[STDOUT]: Saving region -1,0 to disk C:\Users\redfa\Documents\MinecraftDev\altoclef\versions\1.16.1\run\saves\AutoRun_20260920_153427\.\baritone\cache
+[m[34m[15:35:20][m [32m[ForkJoinPool.commonPool-worker-1/INFO][m [36m(Minecraft)[m [0m[STDOUT]: Saving region 0,-1 to disk C:\Users\redfa\Documents\MinecraftDev\altoclef\versions\1.16.1\run\saves\AutoRun_20260920_153427\.\baritone\cache
+[m[34m[15:35:20][m [32m[ForkJoinPool.commonPool-worker-2/INFO][m [36m(Minecraft)[m [0m[STDOUT]: Saving region 0,0 to disk C:\Users\redfa\Documents\MinecraftDev\altoclef\versions\1.16.1\run\saves\AutoRun_20260920_153427\.\baritone\cache
+[m[34m[15:35:20][m [32m[ForkJoinPool.commonPool-worker-3/INFO][m [36m(Minecraft)[m [0m[STDOUT]: Saving region -1,-1 to disk C:\Users\redfa\Documents\MinecraftDev\altoclef\versions\1.16.1\run\saves\AutoRun_20260920_153427\.\baritone\cache
+[m[34m[15:35:20][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:24.8 ph=BOOTSTRAP @-79,72,191 do=<Doing stuff in crafting_table container: [[wooden_pickaxe]]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:20][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:24.8 SNAP ph=BOOTSTRAP @-79,72,191 sky=14 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=CraftInTableTask dbg=<Doing stuff in crafting_table container: [[wooden_pickaxe]]>  mobs=none
+[m[34m[15:35:20][m [32m[ForkJoinPool.commonPool-worker-1/INFO][m [36m(Minecraft)[m [0m[STDOUT]: Saved region successfully
+[m[34m[15:35:20][m [32m[ForkJoinPool.commonPool-worker-3/INFO][m [36m(Minecraft)[m [0m[STDOUT]: Saved region successfully
+[m[34m[15:35:20][m [32m[ForkJoinPool.commonPool-worker-2/INFO][m [36m(Minecraft)[m [0m[STDOUT]: Saved region successfully
+[m[34m[15:35:20][m [32m[pool-5-thread-2/INFO][m [36m(Minecraft)[m [0m[STDOUT]: Saved region successfully
+[m[34m[15:35:20][m [32m[pool-5-thread-2/INFO][m [36m(Minecraft)[m [0m[STDOUT]: World save took 222ms
+[m[34m[15:35:21][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:25.8 ph=BOOTSTRAP @-79,72,191 do=<Doing stuff in crafting_table container: [[wooden_pickaxe]]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:22][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:26.8 ph=BOOTSTRAP @-79,72,191 do=<Doing stuff in crafting_table container: [[wooden_pickaxe]]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:23][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:27.3 SNAP ph=BOOTSTRAP @-79,72,191 sky=14 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=CraftInTableTask dbg=<Doing stuff in crafting_table container: [[wooden_pickaxe]]>  mobs=none
+[m[34m[15:35:23][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rRefreshed inventory...
+[m[34m[15:35:23][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:27.8 ph=BOOTSTRAP @-79,72,191 do=<Doing stuff in crafting_table container: [[wooden_pickaxe]]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:24][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:28.8 ph=BOOTSTRAP @-79,72,192 do=<Doing stuff in crafting_table container: [[wooden_pickaxe]]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:25][m [32m[main/INFO][m [36m(Minecraft)[m [0mLoaded 28 advancements
+[m[34m[15:35:25][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:29.8 ph=BOOTSTRAP @-79,72,192 do=<Doing stuff in crafting_table container: [[wooden_pickaxe]]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:25][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:29.8 SNAP ph=BOOTSTRAP @-79,72,192 sky=13 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=CraftInTableTask dbg=<Doing stuff in crafting_table container: [[wooden_pickaxe]]>  mobs=none
+[m[34m[15:35:26][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:30.8 ph=BOOTSTRAP @-79,72,193 do=<Doing stuff in crafting_table container: [[wooden_pickaxe]]>  eq=air woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [I01] BOOTSTRAP -> IRON t=0:31.6
+[m[34m[15:35:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rTESRUN2 split IRON  0:31.6
+[m[34m[15:35:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:31.7 WHY iron: smelt 8 in one furnace
+[m[34m[15:35:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:31.7 PHASE BOOTSTRAP -> IRON
+[m[34m[15:35:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:31.7 CHILD CraftInTableTask -> CollectIronIngotTask ph=IRON @-79,72,193 sky=12 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0
+[m[34m[15:35:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [E109b] eq=block.minecraft.air woodpick=1 stonepick=0 child=CollectIronIngotTask ph=IRON
+[m[34m[15:35:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [E109b] eq=block.minecraft.air woodpick=1 stonepick=0 child=CollectIronIngotTask ph=IRON§r
+[m[34m[15:35:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:31.7 [E109b] eq=block.minecraft.air woodpick=1 stonepick=0 child=CollectIronIngotTask ph=IRON
+[m[34m[15:35:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:31.8 ph=IRON @-79,72,193 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=air woodpick=1 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [E109] mine/collect with no pick child=CollectIronIngotTask
+[m[34m[15:35:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [E109] mine/collect with no pick child=CollectIronIngotTask§r
+[m[34m[15:35:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:31.8 [E109] mine/collect with no pick child=CollectIronIngotTask
+[m[34m[15:35:28][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:32.3 SNAP ph=IRON @-79,72,193 sky=12 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=CollectIronIngotTask dbg=<Collecting 8 iron.: [[iron_ingot] x 8]>  mobs=none
+[m[34m[15:35:28][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rTESRUN2 split BOOTSTRAP  0:32.6
+[m[34m[15:35:28][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:32.6 WHY bootstrap: table exists — wooden pick, not more logs
+[m[34m[15:35:28][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:32.6 PHASE IRON -> BOOTSTRAP
+[m[34m[15:35:28][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:32.6 CHILD CollectIronIngotTask -> CraftInTableTask ph=BOOTSTRAP @-79,72,193 sky=12 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0
+[m[34m[15:35:28][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [E112] ph IRON->BOOTSTRAP in 949ms
+[m[34m[15:35:28][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [E112] ph IRON->BOOTSTRAP in 949ms§r
+[m[34m[15:35:28][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:32.7 [E112] ph IRON->BOOTSTRAP in 949ms
+[m[34m[15:35:28][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:32.8 ph=BOOTSTRAP @-79,72,193 do=<Doing stuff in crafting_table container: [[wooden_pickaxe]]> Picking up eq=stick woodpick=0 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:29][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:33.8 ph=BOOTSTRAP @-79,72,193 do=<Doing stuff in crafting_table container: [[wooden_pickaxe]]> Picking up eq=stick woodpick=1 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:29][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rTESRUN2 split IRON  0:33.8
+[m[34m[15:35:29][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:33.8 PHASE BOOTSTRAP -> IRON
+[m[34m[15:35:29][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:33.8 CHILD CraftInTableTask -> CollectIronIngotTask ph=IRON @-79,72,193 sky=12 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0
+[m[34m[15:35:29][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:33.9 [E112] ph BOOTSTRAP->IRON in 1202ms
+[m[34m[15:35:30][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:34.8 ph=IRON @-79,72,193 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=wooden_pickaxe woodpick=1 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:30][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:34.8 SNAP ph=IRON @-79,72,193 sky=12 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=CollectIronIngotTask dbg=<Collecting 8 iron.: [[iron_ingot] x 8]>  mobs=none
+[m[34m[15:35:31][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:35.7 WHY iron: smelt 8 in one furnace
+[m[34m[15:35:31][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:35.8 ph=IRON @-79,71,193 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=oak_planks woodpick=1 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:32][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:36.8 ph=IRON @-79,70,193 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=oak_planks woodpick=1 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:32][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S130] START trigger=flips=5 ph=IRON prev=CollectIronIngotTask pos=-79,69,193 walls=4/4/4 sky=10 place=5 boxed=true hold=false cool=0 ban=0 startY=- step=0
+[m[34m[15:35:32][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S130] START trigger=flips=5 ph=IRON prev=CollectIronIngotTask pos=-79,69,193 walls=4/4/4 sky=10 place=5 boxed=true hold=false cool=0 ban=0 startY=- step=0§r
+[m[34m[15:35:32][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:37.1 FORCE S130 START trigger=flips=5 ph=IRON prev=CollectIronIngotTask pos=-79,69,193 walls=4/4/4 sky=10 place=5 boxed=true hold=false cool=0 ban=0 startY=- step=0
+[m[34m[15:35:32][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:37.1 PILLAR START flips=5 prev=CollectIronIngotTask
+[m[34m[15:35:32][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:37.1 SOLVE S130 pillar-out @-79,69,193 ph=IRON flips=5
+[m[34m[15:35:32][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:37.1 CHILD CollectIronIngotTask -> HolePillarTask ph=IRON @-79,69,193 sky=10 wet=false ground=false pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0
+[m[34m[15:35:32][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S130] HOLD begin pos=-79,69,193 walls=4/4/4 sky=10 place=5 boxed=true hold=false cool=0 ban=0 startY=69 step=0
+[m[34m[15:35:32][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S130] HOLD begin pos=-79,69,193 walls=4/4/4 sky=10 place=5 boxed=true hold=false cool=0 ban=0 startY=69 step=0§r
+[m[34m[15:35:32][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:37.1 FORCE S130 HOLD begin pos=-79,69,193 walls=4/4/4 sky=10 place=5 boxed=true hold=false cool=0 ban=0 startY=69 step=0
+[m[34m[15:35:32][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S130] tick y=69 slot=0 air=true pos=-79,69,193 walls=4/4/4 sky=10 place=5 boxed=true hold=true cool=0 ban=0 startY=69 step=1
+[m[34m[15:35:32][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S130] tick y=69 slot=0 air=true pos=-79,69,193 walls=4/4/4 sky=10 place=5 boxed=true hold=true cool=0 ban=0 startY=69 step=1§r
+[m[34m[15:35:32][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:37.1 FORCE S130 tick y=69 slot=0 air=true pos=-79,69,193 walls=4/4/4 sky=10 place=5 boxed=true hold=true cool=0 ban=0 startY=69 step=1
+[m[34m[15:35:33][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [E100] jumps=6 @-79,69,193 ph=IRON child=HolePillarTask
+[m[34m[15:35:33][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [E100] jumps=6 @-79,69,193 ph=IRON child=HolePillarTask§r
+[m[34m[15:35:33][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:37.3 [E100] jumps=6 @-79,69,193 ph=IRON child=HolePillarTask
+[m[34m[15:35:33][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:37.6 SNAP ph=IRON @-79,70,193 sky=11 wet=false ground=false pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=HolePillarTask dbg=<T2 pillar-out>  mobs=none
+[m[34m[15:35:33][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:37.8 ph=IRON @-79,70,193 do=<T2 pillar-out>  eq=oak_planks woodpick=1 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:33][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S130] tick y=71 slot=0 air=true pos=-79,71,193 walls=2/0/4 sky=12 place=4 boxed=false hold=true cool=0 ban=0 startY=69 step=21
+[m[34m[15:35:33][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S130] tick y=71 slot=0 air=true pos=-79,71,193 walls=2/0/4 sky=12 place=4 boxed=false hold=true cool=0 ban=0 startY=69 step=21§r
+[m[34m[15:35:33][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:38.1 FORCE S130 tick y=71 slot=0 air=true pos=-79,71,193 walls=2/0/4 sky=12 place=4 boxed=false hold=true cool=0 ban=0 startY=69 step=21
+[m[34m[15:35:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S133] cool arm ticks=200 reason=risen y=72 startY=69 ban=-79,193 pos=-79,72,193 walls=0/3/2 sky=12 place=4 boxed=false hold=true cool=200 ban=200 startY=69 step=27
+[m[34m[15:35:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S133] cool arm ticks=200 reason=risen y=72 startY=69 ban=-79,193 pos=-79,72,193 walls=0/3/2 sky=12 place=4 boxed=false hold=true cool=200 ban=200 startY=69 step=27§r
+[m[34m[15:35:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:38.4 FORCE S133 cool arm ticks=200 reason=risen y=72 startY=69 ban=-79,193 pos=-79,72,193 walls=0/3/2 sky=12 place=4 boxed=false hold=true cool=200 ban=200 startY=69 step=27
+[m[34m[15:35:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S136] END reason=risen y=72 startY=69 risen=true giveUp=true pos=-79,72,193 walls=0/3/2 sky=12 place=4 boxed=false hold=true cool=200 ban=200 startY=69 step=27
+[m[34m[15:35:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S136] END reason=risen y=72 startY=69 risen=true giveUp=true pos=-79,72,193 walls=0/3/2 sky=12 place=4 boxed=false hold=true cool=200 ban=200 startY=69 step=27§r
+[m[34m[15:35:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:38.5 FORCE S136 END reason=risen y=72 startY=69 risen=true giveUp=true pos=-79,72,193 walls=0/3/2 sky=12 place=4 boxed=false hold=true cool=200 ban=200 startY=69 step=27
+[m[34m[15:35:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:38.5 PILLAR END risen y=72 startY=69
+[m[34m[15:35:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S136] stick drop pillar -> CollectIronIngotTask finished=true hold=false cool=199 end=risen y=72 startY=69 pos=-79,72,193 walls=0/3/2 sky=12 place=4 boxed=false hold=false cool=199 ban=199 startY=- step=0
+[m[34m[15:35:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S136] stick drop pillar -> CollectIronIngotTask finished=true hold=false cool=199 end=risen y=72 startY=69 pos=-79,72,193 walls=0/3/2 sky=12 place=4 boxed=false hold=false cool=199 ban=199 startY=- step=0§r
+[m[34m[15:35:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:38.5 FORCE S136 stick drop pillar -> CollectIronIngotTask finished=true hold=false cool=199 end=risen y=72 startY=69 pos=-79,72,193 walls=0/3/2 sky=12 place=4 boxed=false hold=false cool=199 ban=199 startY=- step=0
+[m[34m[15:35:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:38.5 CHILD HolePillarTask -> CollectIronIngotTask ph=IRON @-79,72,193 sky=12 wet=false ground=false pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0
+[m[34m[15:35:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S136] onStop interrupt=CollectIronIngotTask finishWhy=givingUp cool=199 lastEnd=risen y=72 startY=69 pos=-79,72,193 walls=0/3/2 sky=12 place=4 boxed=false hold=false cool=199 ban=199 startY=- step=0
+[m[34m[15:35:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S136] onStop interrupt=CollectIronIngotTask finishWhy=givingUp cool=199 lastEnd=risen y=72 startY=69 pos=-79,72,193 walls=0/3/2 sky=12 place=4 boxed=false hold=false cool=199 ban=199 startY=- step=0§r
+[m[34m[15:35:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:38.5 FORCE S136 onStop interrupt=CollectIronIngotTask finishWhy=givingUp cool=199 lastEnd=risen y=72 startY=69 pos=-79,72,193 walls=0/3/2 sky=12 place=4 boxed=false hold=false cool=199 ban=199 startY=- step=0
+[m[34m[15:35:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [E109b] eq=block.minecraft.oak_planks woodpick=1 stonepick=0 child=CollectIronIngotTask ph=IRON
+[m[34m[15:35:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [E109b] eq=block.minecraft.oak_planks woodpick=1 stonepick=0 child=CollectIronIngotTask ph=IRON§r
+[m[34m[15:35:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:38.5 [E109b] eq=block.minecraft.oak_planks woodpick=1 stonepick=0 child=CollectIronIngotTask ph=IRON
+[m[34m[15:35:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:38.8 ph=IRON @-79,71,193 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=wooden_pickaxe woodpick=1 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:38.9 [E100] jumps=6 @-79,71,193 ph=IRON child=CollectIronIngotTask
+[m[34m[15:35:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:35][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:35][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:35][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:35][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HB] t=0:39.5 ph=IRON y=71 child=CollectIronIngotTask logs=0 pick=0 woodpick=1
+[m[34m[15:35:35][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:35][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:35][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:35][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:39.8 WHY iron: smelt 8 in one furnace
+[m[34m[15:35:35][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:39.8 ph=IRON @-79,71,194 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=oak_planks woodpick=1 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:35][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:35][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:35][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:35][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:35][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:35][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:36][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:36][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:36][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:36][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:40.5 SNAP ph=IRON @-79,70,194 sky=12 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=CollectIronIngotTask dbg=<Collecting 8 iron.: [[iron_ingot] x 8]>  mobs=none
+[m[34m[15:35:36][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:36][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:36][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:36][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:40.8 ph=IRON @-79,70,194 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=oak_planks woodpick=1 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:36][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:36][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:36][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:36][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:36][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S135] S130 suppressed why=would-S130 but busy cool=145 flips=3 sameXz=44 child=CollectIronIngotTask cool=145 ban=145 hold=false pos=-79,69,194 walls=4/4/4 sky=11 place=5 boxed=true hold=false cool=145 ban=145 startY=- step=0
+[m[34m[15:35:36][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S135] S130 suppressed why=would-S130 but busy cool=145 flips=3 sameXz=44 child=CollectIronIngotTask cool=145 ban=145 hold=false pos=-79,69,194 walls=4/4/4 sky=11 place=5 boxed=true hold=false cool=145 ban=145 startY=- step=0§r
+[m[34m[15:35:36][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:41.2 FORCE S135 S130 suppressed why=would-S130 but busy cool=145 flips=3 sameXz=44 child=CollectIronIngotTask cool=145 ban=145 hold=false pos=-79,69,194 walls=4/4/4 sky=11 place=5 boxed=true hold=false cool=145 ban=145 startY=- step=0
+[m[34m[15:35:36][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:37][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:37][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:37][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:37][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:37][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:37][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:37][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:41.8 ph=IRON @-79,69,194 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=oak_planks woodpick=1 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:37][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:37][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:37][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:37][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:37][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:37][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:38][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:38][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S100] stop jump-walk @-79,194 ph=IRON child=CollectIronIngotTask
+[m[34m[15:35:38][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S100] stop jump-walk @-79,194 ph=IRON child=CollectIronIngotTask§r
+[m[34m[15:35:38][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:42.4 SOLVE S100 stop jump-walk @-79,194 ph=IRON child=CollectIronIngotTask
+[m[34m[15:35:38][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:38][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:42.6 [E109b] eq=block.minecraft.oak_planks woodpick=1 stonepick=0 child=CollectIronIngotTask ph=IRON
+[m[34m[15:35:38][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:38][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:38][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:38][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:42.8 ph=IRON @-79,68,194 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=oak_planks woodpick=1 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:38][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:38][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:38][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:38][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:43.0 SNAP ph=IRON @-79,68,194 sky=10 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=CollectIronIngotTask dbg=<Collecting 8 iron.: [[iron_ingot] x 8]>  mobs=none
+[m[34m[15:35:38][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [E100] jumps=6 @-79,68,194 ph=IRON child=CollectIronIngotTask
+[m[34m[15:35:38][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [E100] jumps=6 @-79,68,194 ph=IRON child=CollectIronIngotTask§r
+[m[34m[15:35:38][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:43.0 [E100] jumps=6 @-79,68,194 ph=IRON child=CollectIronIngotTask
+[m[34m[15:35:38][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:38][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S135] S130 suppressed why=would-S130 but busy cool=105 flips=0 sameXz=84 child=CollectIronIngotTask cool=105 ban=105 hold=false pos=-79,68,194 walls=4/4/4 sky=10 place=7 boxed=true hold=false cool=105 ban=105 startY=- step=0
+[m[34m[15:35:38][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S135] S130 suppressed why=would-S130 but busy cool=105 flips=0 sameXz=84 child=CollectIronIngotTask cool=105 ban=105 hold=false pos=-79,68,194 walls=4/4/4 sky=10 place=7 boxed=true hold=false cool=105 ban=105 startY=- step=0§r
+[m[34m[15:35:38][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:43.2 FORCE S135 S130 suppressed why=would-S130 but busy cool=105 flips=0 sameXz=84 child=CollectIronIngotTask cool=105 ban=105 hold=false pos=-79,68,194 walls=4/4/4 sky=10 place=7 boxed=true hold=false cool=105 ban=105 startY=- step=0
+[m[34m[15:35:38][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:38][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:39][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.wooden_pickaxe for block.minecraft.stone
+[m[34m[15:35:39][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:43.8 WHY iron: smelt 8 in one furnace
+[m[34m[15:35:39][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:43.8 ph=IRON @-79,67,194 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=wooden_pickaxe woodpick=1 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:40][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HB] t=0:44.5 ph=IRON y=67 child=CollectIronIngotTask logs=0 pick=0 woodpick=1
+[m[34m[15:35:40][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:44.8 ph=IRON @-79,67,194 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=wooden_pickaxe woodpick=1 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:40][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S135] S130 suppressed why=would-S130 but busy cool=65 flips=4 sameXz=124 child=CollectIronIngotTask cool=65 ban=65 hold=false pos=-79,66,194 walls=4/4/4 sky=8 place=8 boxed=true hold=false cool=65 ban=65 startY=- step=0
+[m[34m[15:35:40][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S135] S130 suppressed why=would-S130 but busy cool=65 flips=4 sameXz=124 child=CollectIronIngotTask cool=65 ban=65 hold=false pos=-79,66,194 walls=4/4/4 sky=8 place=8 boxed=true hold=false cool=65 ban=65 startY=- step=0§r
+[m[34m[15:35:40][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:45.2 FORCE S135 S130 suppressed why=would-S130 but busy cool=65 flips=4 sameXz=124 child=CollectIronIngotTask cool=65 ban=65 hold=false pos=-79,66,194 walls=4/4/4 sky=8 place=8 boxed=true hold=false cool=65 ban=65 startY=- step=0
+[m[34m[15:35:41][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mPlayer267 has made the advancement [Stone Age]
+[m[34m[15:35:41][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] Player267 has made the advancement [Stone Age]
+[m[34m[15:35:41][m [32m[main/INFO][m [36m(Minecraft)[m [0mLoaded 43 advancements
+[m[34m[15:35:41][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:45.5 SNAP ph=IRON @-79,66,194 sky=8 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=CollectIronIngotTask dbg=<Collecting 8 iron.: [[iron_ingot] x 8]>  mobs=none
+[m[34m[15:35:41][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:45.8 ph=IRON @-79,66,194 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=wooden_pickaxe woodpick=1 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:42][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:46.8 ph=IRON @-79,65,194 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=wooden_pickaxe woodpick=1 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:42][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:47.0 [E100] jumps=6 @-79,65,194 ph=IRON child=CollectIronIngotTask
+[m[34m[15:35:42][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S135] S130 suppressed why=would-S130 but busy cool=24 flips=0 sameXz=165 child=CollectIronIngotTask cool=24 ban=24 hold=false pos=-79,65,194 walls=4/4/4 sky=7 place=9 boxed=true hold=false cool=24 ban=24 startY=- step=0
+[m[34m[15:35:42][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S135] S130 suppressed why=would-S130 but busy cool=24 flips=0 sameXz=165 child=CollectIronIngotTask cool=24 ban=24 hold=false pos=-79,65,194 walls=4/4/4 sky=7 place=9 boxed=true hold=false cool=24 ban=24 startY=- step=0§r
+[m[34m[15:35:42][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:47.2 FORCE S135 S130 suppressed why=would-S130 but busy cool=24 flips=0 sameXz=165 child=CollectIronIngotTask cool=24 ban=24 hold=false pos=-79,65,194 walls=4/4/4 sky=7 place=9 boxed=true hold=false cool=24 ban=24 startY=- step=0
+[m[34m[15:35:43][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:47.8 WHY iron: smelt 8 in one furnace
+[m[34m[15:35:43][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:47.8 ph=IRON @-79,65,194 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=wooden_pickaxe woodpick=1 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:43][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:48.0 SNAP ph=IRON @-79,65,194 sky=7 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=CollectIronIngotTask dbg=<Collecting 8 iron.: [[iron_ingot] x 8]>  mobs=none
+[m[34m[15:35:44][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S134] pillar cool expire after flips=5 end=risen y=72 startY=69
+[m[34m[15:35:44][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S134] pillar cool expire after flips=5 end=risen y=72 startY=69§r
+[m[34m[15:35:44][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:48.4 FORCE S134 pillar cool expire after flips=5 end=risen y=72 startY=69
+[m[34m[15:35:44][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:48.8 ph=IRON @-79,64,194 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=wooden_pickaxe woodpick=1 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:45][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [E109b] eq=block.minecraft.dirt woodpick=1 stonepick=0 child=CollectIronIngotTask ph=IRON
+[m[34m[15:35:45][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [E109b] eq=block.minecraft.dirt woodpick=1 stonepick=0 child=CollectIronIngotTask ph=IRON§r
+[m[34m[15:35:45][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:49.3 [E109b] eq=block.minecraft.dirt woodpick=1 stonepick=0 child=CollectIronIngotTask ph=IRON
+[m[34m[15:35:45][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S135] S130 suppressed why=would-S130 but busy cool=0 flips=3 sameXz=22 child=CollectIronIngotTask cool=0 ban=39 hold=false pos=-79,64,194 walls=4/4/3 sky=6 place=11 boxed=true hold=false cool=0 ban=39 startY=- step=0
+[m[34m[15:35:45][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S135] S130 suppressed why=would-S130 but busy cool=0 flips=3 sameXz=22 child=CollectIronIngotTask cool=0 ban=39 hold=false pos=-79,64,194 walls=4/4/3 sky=6 place=11 boxed=true hold=false cool=0 ban=39 startY=- step=0§r
+[m[34m[15:35:45][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:49.5 FORCE S135 S130 suppressed why=would-S130 but busy cool=0 flips=3 sameXz=22 child=CollectIronIngotTask cool=0 ban=39 hold=false pos=-79,64,194 walls=4/4/3 sky=6 place=11 boxed=true hold=false cool=0 ban=39 startY=- step=0
+[m[34m[15:35:45][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HB] t=0:49.5 ph=IRON y=64 child=CollectIronIngotTask logs=0 pick=0 woodpick=1
+[m[34m[15:35:45][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:49.8 ph=IRON @-79,65,194 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=dirt woodpick=1 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:46][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [E100] jumps=6 @-79,66,194 ph=IRON child=CollectIronIngotTask
+[m[34m[15:35:46][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [E100] jumps=6 @-79,66,194 ph=IRON child=CollectIronIngotTask§r
+[m[34m[15:35:46][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:50.3 [E100] jumps=6 @-79,66,194 ph=IRON child=CollectIronIngotTask
+[m[34m[15:35:46][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S100] stop jump-walk @-79,194 ph=IRON child=CollectIronIngotTask
+[m[34m[15:35:46][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S100] stop jump-walk @-79,194 ph=IRON child=CollectIronIngotTask§r
+[m[34m[15:35:46][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:50.4 SOLVE S100 stop jump-walk @-79,194 ph=IRON child=CollectIronIngotTask
+[m[34m[15:35:46][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:50.5 SNAP ph=IRON @-79,67,194 sky=9 wet=false ground=false pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=CollectIronIngotTask dbg=<Collecting 8 iron.: [[iron_ingot] x 8]>  mobs=none
+[m[34m[15:35:46][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:50.8 ph=IRON @-79,67,194 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=dirt woodpick=1 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:47][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S130] START trigger=flips=4 ph=IRON prev=CollectIronIngotTask pos=-79,69,194 walls=4/4/4 sky=11 place=7 boxed=true hold=false cool=0 ban=0 startY=- step=0
+[m[34m[15:35:47][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S130] START trigger=flips=4 ph=IRON prev=CollectIronIngotTask pos=-79,69,194 walls=4/4/4 sky=11 place=7 boxed=true hold=false cool=0 ban=0 startY=- step=0§r
+[m[34m[15:35:47][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:51.4 FORCE S130 START trigger=flips=4 ph=IRON prev=CollectIronIngotTask pos=-79,69,194 walls=4/4/4 sky=11 place=7 boxed=true hold=false cool=0 ban=0 startY=- step=0
+[m[34m[15:35:47][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:51.4 PILLAR START flips=4 prev=CollectIronIngotTask
+[m[34m[15:35:47][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:51.4 SOLVE S130 pillar-out @-79,69,194 ph=IRON flips=4
+[m[34m[15:35:47][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:51.4 CHILD CollectIronIngotTask -> HolePillarTask ph=IRON @-79,69,194 sky=11 wet=false ground=false pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0
+[m[34m[15:35:47][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S130] HOLD begin pos=-79,69,194 walls=4/4/4 sky=11 place=7 boxed=true hold=false cool=0 ban=0 startY=69 step=0
+[m[34m[15:35:47][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S130] HOLD begin pos=-79,69,194 walls=4/4/4 sky=11 place=7 boxed=true hold=false cool=0 ban=0 startY=69 step=0§r
+[m[34m[15:35:47][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:51.4 FORCE S130 HOLD begin pos=-79,69,194 walls=4/4/4 sky=11 place=7 boxed=true hold=false cool=0 ban=0 startY=69 step=0
+[m[34m[15:35:47][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S130] tick y=69 slot=0 air=true pos=-79,69,194 walls=4/4/4 sky=11 place=7 boxed=true hold=true cool=0 ban=0 startY=69 step=1
+[m[34m[15:35:47][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S130] tick y=69 slot=0 air=true pos=-79,69,194 walls=4/4/4 sky=11 place=7 boxed=true hold=true cool=0 ban=0 startY=69 step=1§r
+[m[34m[15:35:47][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:51.4 FORCE S130 tick y=69 slot=0 air=true pos=-79,69,194 walls=4/4/4 sky=11 place=7 boxed=true hold=true cool=0 ban=0 startY=69 step=1
+[m[34m[15:35:47][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:51.7 [E100] jumps=6 @-79,69,194 ph=IRON child=HolePillarTask
+[m[34m[15:35:47][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:51.8 ph=IRON @-79,70,194 do=<T2 pillar-out>  eq=dirt woodpick=1 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:48][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S130] tick y=71 slot=3 air=true pos=-79,71,194 walls=0/0/4 sky=13 place=5 boxed=false hold=true cool=0 ban=0 startY=69 step=21
+[m[34m[15:35:48][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S130] tick y=71 slot=3 air=true pos=-79,71,194 walls=0/0/4 sky=13 place=5 boxed=false hold=true cool=0 ban=0 startY=69 step=21§r
+[m[34m[15:35:48][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:52.4 FORCE S130 tick y=71 slot=3 air=true pos=-79,71,194 walls=0/0/4 sky=13 place=5 boxed=false hold=true cool=0 ban=0 startY=69 step=21
+[m[34m[15:35:48][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:52.8 ph=IRON @-79,71,194 do=<T2 pillar-out>  eq=dirt woodpick=1 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:48][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:52.8 [E100] jumps=6 @-79,71,194 ph=IRON child=HolePillarTask
+[m[34m[15:35:49][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S130] tick y=71 slot=3 air=false pos=-79,71,194 walls=0/0/4 sky=13 place=4 boxed=false hold=true cool=0 ban=0 startY=69 step=41
+[m[34m[15:35:49][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S130] tick y=71 slot=3 air=false pos=-79,71,194 walls=0/0/4 sky=13 place=4 boxed=false hold=true cool=0 ban=0 startY=69 step=41§r
+[m[34m[15:35:49][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:53.4 FORCE S130 tick y=71 slot=3 air=false pos=-79,71,194 walls=0/0/4 sky=13 place=4 boxed=false hold=true cool=0 ban=0 startY=69 step=41
+[m[34m[15:35:49][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:53.8 ph=IRON @-79,71,194 do=<T2 pillar-out>  eq=dirt woodpick=1 stonepick=0 pick=0 iron=0 buck=0
+[m[34m[15:35:49][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S133] cool arm ticks=240 reason=stuck-low step=50 y=71 startY=69 ban=-79,194 pos=-79,71,194 walls=0/0/4 sky=13 place=4 boxed=false hold=true cool=240 ban=240 startY=69 step=50
+[m[34m[15:35:49][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S133] cool arm ticks=240 reason=stuck-low step=50 y=71 startY=69 ban=-79,194 pos=-79,71,194 walls=0/0/4 sky=13 place=4 boxed=false hold=true cool=240 ban=240 startY=69 step=50§r
+[m[34m[15:35:49][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:53.9 FORCE S133 cool arm ticks=240 reason=stuck-low step=50 y=71 startY=69 ban=-79,194 pos=-79,71,194 walls=0/0/4 sky=13 place=4 boxed=false hold=true cool=240 ban=240 startY=69 step=50
+[m[34m[15:35:49][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S136] END reason=stuck-low step=50 y=71 startY=69 risen=false giveUp=true pos=-79,71,194 walls=0/0/4 sky=13 place=4 boxed=false hold=true cool=240 ban=240 startY=69 step=50
+[m[34m[15:35:49][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S136] END reason=stuck-low step=50 y=71 startY=69 risen=false giveUp=true pos=-79,71,194 walls=0/0/4 sky=13 place=4 boxed=false hold=true cool=240 ban=240 startY=69 step=50§r
+[m[34m[15:35:49][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:53.9 FORCE S136 END reason=stuck-low step=50 y=71 startY=69 risen=false giveUp=true pos=-79,71,194 walls=0/0/4 sky=13 place=4 boxed=false hold=true cool=240 ban=240 startY=69 step=50
+[m[34m[15:35:49][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:53.9 PILLAR END stuck-low step=50 y=71 startY=69
+[m[34m[15:35:49][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:54.0 WHY iron: smelt 8 in one furnace
+[m[34m[15:35:49][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S136] stick drop pillar -> CollectIronIngotTask finished=true hold=false cool=239 end=stuck-low step=50 y=71 startY=69 pos=-79,71,194 walls=0/0/4 sky=13 place=4 boxed=false hold=false cool=239 ban=239 startY=- step=0
+[m[34m[15:35:49][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S136] stick drop pillar -> CollectIronIngotTask finished=true hold=false cool=239 end=stuck-low step=50 y=71 startY=69 pos=-79,71,194 walls=0/0/4 sky=13 place=4 boxed=false hold=false cool=239 ban=239 startY=- step=0§r
+[m[34m[15:35:49][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:54.0 FORCE S136 stick drop pillar -> CollectIronIngotTask finished=true hold=false cool=239 end=stuck-low step=50 y=71 startY=69 pos=-79,71,194 walls=0/0/4 sky=13 place=4 boxed=false hold=false cool=239 ban=239 startY=- step=0
+[m[34m[15:35:49][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:54.0 CHILD HolePillarTask -> CollectIronIngotTask ph=IRON @-79,71,194 sky=13 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0
+[m[34m[15:35:49][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S136] onStop interrupt=CollectIronIngotTask finishWhy=givingUp cool=239 lastEnd=stuck-low step=50 y=71 startY=69 pos=-79,71,194 walls=0/0/4 sky=13 place=4 boxed=false hold=false cool=239 ban=239 startY=- step=0
+[m[34m[15:35:49][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S136] onStop interrupt=CollectIronIngotTask finishWhy=givingUp cool=239 lastEnd=stuck-low step=50 y=71 startY=69 pos=-79,71,194 walls=0/0/4 sky=13 place=4 boxed=false hold=false cool=239 ban=239 startY=- step=0§r
+[m[34m[15:35:49][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:54.0 FORCE S136 onStop interrupt=CollectIronIngotTask finishWhy=givingUp cool=239 lastEnd=stuck-low step=50 y=71 startY=69 pos=-79,71,194 walls=0/0/4 sky=13 place=4 boxed=false hold=false cool=239 ban=239 startY=- step=0
+[m[34m[15:35:49][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:54.0 [E109b] eq=block.minecraft.dirt woodpick=1 stonepick=0 child=CollectIronIngotTask ph=IRON
+[m[34m[15:35:50][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:54.3 SNAP ph=IRON @-79,71,194 sky=13 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=CollectIronIngotTask dbg=<Collecting 8 iron.: [[iron_ingot] x 8]>  mobs=none
+[m[34m[15:35:50][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [E109b] eq=block.minecraft.dirt woodpick=1 stonepick=0 child=CollectIronIngotTask ph=IRON
+[m[34m[15:35:50][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [E109b] eq=block.minecraft.dirt woodpick=1 stonepick=0 child=CollectIronIngotTask ph=IRON§r
+[m[34m[15:35:50][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:54.4 [E109b] eq=block.minecraft.dirt woodpick=1 stonepick=1 child=CollectIronIngotTask ph=IRON
+[m[34m[15:35:50][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:50][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mPlayer267 has made the advancement [Getting an Upgrade]
+[m[34m[15:35:50][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] Player267 has made the advancement [Getting an Upgrade]
+[m[34m[15:35:50][m [32m[main/INFO][m [36m(Minecraft)[m [0mLoaded 47 advancements
+[m[34m[15:35:50][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:54.8 ph=IRON @-79,71,194 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:35:51][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S138] shaft ban clear left-xz ban=-79,194 now=-79,192 manh=2 left=210
+[m[34m[15:35:51][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S138] shaft ban clear left-xz ban=-79,194 now=-79,192 manh=2 left=210§r
+[m[34m[15:35:51][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:55.5 FORCE S138 shaft ban clear left-xz ban=-79,194 now=-79,192 manh=2 left=210
+[m[34m[15:35:51][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:55.8 ph=IRON @-79,72,191 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:35:51][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:56.1 [E109b] eq=block.minecraft.air woodpick=1 stonepick=1 child=CollectIronIngotTask ph=IRON
+[m[34m[15:35:51][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:51][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:51][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:52][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:52][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:52][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:52][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:52][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:52][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:52][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:56.8 SNAP ph=IRON @-80,72,190 sky=15 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=CollectIronIngotTask dbg=<Collecting 8 iron.: [[iron_ingot] x 8]>  mobs=none
+[m[34m[15:35:52][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:56.8 ph=IRON @-80,72,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=air woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:35:52][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:52][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:52][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:52][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:52][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:52][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:53][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:53][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:53][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:53][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:53][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:53][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:53][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:57.8 ph=IRON @-80,71,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=air woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:35:53][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:53][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:53][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:58.0 WHY iron: smelt 8 in one furnace
+[m[34m[15:35:53][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:53][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:53][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:53][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:54][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S135] S130 suppressed why=would-S130 but busy cool=153 flips=3 sameXz=45 child=CollectIronIngotTask cool=153 ban=0 hold=false pos=-80,70,190 walls=4/4/4 sky=15 place=2 boxed=true hold=false cool=153 ban=0 startY=- step=0
+[m[34m[15:35:54][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S135] S130 suppressed why=would-S130 but busy cool=153 flips=3 sameXz=45 child=CollectIronIngotTask cool=153 ban=0 hold=false pos=-80,70,190 walls=4/4/4 sky=15 place=2 boxed=true hold=false cool=153 ban=0 startY=- step=0§r
+[m[34m[15:35:54][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:58.3 FORCE S135 S130 suppressed why=would-S130 but busy cool=153 flips=3 sameXz=45 child=CollectIronIngotTask cool=153 ban=0 hold=false pos=-80,70,190 walls=4/4/4 sky=15 place=2 boxed=true hold=false cool=153 ban=0 startY=- step=0
+[m[34m[15:35:54][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:54][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:54][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:54][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:54][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:54][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:54][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:58.8 ph=IRON @-80,70,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=air woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:35:54][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:54][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:54][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:54][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:54][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:54][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:59.3 SNAP ph=IRON @-80,70,190 sky=15 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=CollectIronIngotTask dbg=<Collecting 8 iron.: [[iron_ingot] x 8]>  mobs=none
+[m[34m[15:35:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [E109b] eq=block.minecraft.air woodpick=1 stonepick=1 child=CollectIronIngotTask ph=IRON
+[m[34m[15:35:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [E109b] eq=block.minecraft.air woodpick=1 stonepick=1 child=CollectIronIngotTask ph=IRON§r
+[m[34m[15:35:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S100] stop jump-walk @-80,190 ph=IRON child=CollectIronIngotTask
+[m[34m[15:35:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S100] stop jump-walk @-80,190 ph=IRON child=CollectIronIngotTask§r
+[m[34m[15:35:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:59.5 SOLVE S100 stop jump-walk @-80,190 ph=IRON child=CollectIronIngotTask
+[m[34m[15:35:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:59.8 ph=IRON @-80,69,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=air woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:35:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [E100] jumps=6 @-80,69,190 ph=IRON child=CollectIronIngotTask
+[m[34m[15:35:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [E100] jumps=6 @-80,69,190 ph=IRON child=CollectIronIngotTask§r
+[m[34m[15:35:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:00.1 [E100] jumps=6 @-80,69,190 ph=IRON child=CollectIronIngotTask
+[m[34m[15:35:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:00.1 [E109b] eq=block.minecraft.air woodpick=1 stonepick=1 child=CollectIronIngotTask ph=IRON
+[m[34m[15:35:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:55][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:56][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S135] S130 suppressed why=would-S130 but busy cool=113 flips=0 sameXz=85 child=CollectIronIngotTask cool=113 ban=0 hold=false pos=-80,69,190 walls=4/4/4 sky=15 place=4 boxed=true hold=false cool=113 ban=0 startY=- step=0
+[m[34m[15:35:56][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S135] S130 suppressed why=would-S130 but busy cool=113 flips=0 sameXz=85 child=CollectIronIngotTask cool=113 ban=0 hold=false pos=-80,69,190 walls=4/4/4 sky=15 place=4 boxed=true hold=false cool=113 ban=0 startY=- step=0§r
+[m[34m[15:35:56][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:00.3 FORCE S135 S130 suppressed why=would-S130 but busy cool=113 flips=0 sameXz=85 child=CollectIronIngotTask cool=113 ban=0 hold=false pos=-80,69,190 walls=4/4/4 sky=15 place=4 boxed=true hold=false cool=113 ban=0 startY=- step=0
+[m[34m[15:35:56][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:56][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:56][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:56][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:56][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:56][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:56][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:00.8 ph=IRON @-80,68,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=air woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:35:56][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:56][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:56][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:56][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:56][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:57][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:57][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:57][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:57][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:35:57][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:01.8 SNAP ph=IRON @-80,67,190 sky=15 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=CollectIronIngotTask dbg=<Collecting 8 iron.: [[iron_ingot] x 8]>  mobs=none
+[m[34m[15:35:57][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:01.8 ph=IRON @-80,67,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:35:57][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:02.0 WHY iron: smelt 8 in one furnace
+[m[34m[15:35:58][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S135] S130 suppressed why=would-S130 but busy cool=73 flips=4 sameXz=125 child=CollectIronIngotTask cool=73 ban=0 hold=false pos=-80,67,190 walls=4/4/4 sky=15 place=6 boxed=true hold=false cool=73 ban=0 startY=- step=0
+[m[34m[15:35:58][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S135] S130 suppressed why=would-S130 but busy cool=73 flips=4 sameXz=125 child=CollectIronIngotTask cool=73 ban=0 hold=false pos=-80,67,190 walls=4/4/4 sky=15 place=6 boxed=true hold=false cool=73 ban=0 startY=- step=0§r
+[m[34m[15:35:58][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:02.3 FORCE S135 S130 suppressed why=would-S130 but busy cool=73 flips=4 sameXz=125 child=CollectIronIngotTask cool=73 ban=0 hold=false pos=-80,67,190 walls=4/4/4 sky=15 place=6 boxed=true hold=false cool=73 ban=0 startY=- step=0
+[m[34m[15:35:58][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:02.6 [E100] jumps=6 @-80,66,190 ph=IRON child=CollectIronIngotTask
+[m[34m[15:35:58][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:02.8 ph=IRON @-80,66,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:35:59][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:03.8 ph=IRON @-80,65,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:00][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:04.3 SNAP ph=IRON @-80,64,190 sky=15 wet=false ground=false pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=CollectIronIngotTask dbg=<Collecting 8 iron.: [[iron_ingot] x 8]>  mobs=none
+[m[34m[15:36:00][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S135] S130 suppressed why=would-S130 but busy cool=32 flips=3 sameXz=166 child=CollectIronIngotTask cool=32 ban=0 hold=false pos=-80,64,190 walls=4/4/4 sky=15 place=8 boxed=true hold=false cool=32 ban=0 startY=- step=0
+[m[34m[15:36:00][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S135] S130 suppressed why=would-S130 but busy cool=32 flips=3 sameXz=166 child=CollectIronIngotTask cool=32 ban=0 hold=false pos=-80,64,190 walls=4/4/4 sky=15 place=8 boxed=true hold=false cool=32 ban=0 startY=- step=0§r
+[m[34m[15:36:00][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:04.4 FORCE S135 S130 suppressed why=would-S130 but busy cool=32 flips=3 sameXz=166 child=CollectIronIngotTask cool=32 ban=0 hold=false pos=-80,64,190 walls=4/4/4 sky=15 place=8 boxed=true hold=false cool=32 ban=0 startY=- step=0
+[m[34m[15:36:00][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:04.8 ph=IRON @-80,64,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:01][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [E100] jumps=6 @-80,63,190 ph=IRON child=CollectIronIngotTask
+[m[34m[15:36:01][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [E100] jumps=6 @-80,63,190 ph=IRON child=CollectIronIngotTask§r
+[m[34m[15:36:01][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:05.4 [E100] jumps=6 @-80,63,190 ph=IRON child=CollectIronIngotTask
+[m[34m[15:36:01][m [32m[main/INFO][m [36m(Minecraft)[m [0mLoaded 57 advancements
+[m[34m[15:36:01][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:05.8 ph=IRON @-80,63,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:01][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S134] pillar cool expire after flips=4 end=stuck-low step=50 y=71 startY=69
+[m[34m[15:36:01][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S134] pillar cool expire after flips=4 end=stuck-low step=50 y=71 startY=69§r
+[m[34m[15:36:01][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:05.9 FORCE S134 pillar cool expire after flips=4 end=stuck-low step=50 y=71 startY=69
+[m[34m[15:36:01][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S138] shaft ban clear left-xz ban=-79,194 now=-80,190 manh=5 left=60
+[m[34m[15:36:01][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S138] shaft ban clear left-xz ban=-79,194 now=-80,190 manh=5 left=60§r
+[m[34m[15:36:01][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:06.0 FORCE S138 shaft ban clear left-xz ban=-79,194 now=-80,190 manh=5 left=60
+[m[34m[15:36:01][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:06.0 WHY iron: smelt 8 in one furnace
+[m[34m[15:36:01][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rRefreshed inventory...
+[m[34m[15:36:02][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:06.8 SNAP ph=IRON @-80,62,190 sky=15 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=CollectIronIngotTask dbg=<Collecting 8 iron.: [[iron_ingot] x 8]>  mobs=none
+[m[34m[15:36:02][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:06.8 ph=IRON @-80,62,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:02][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S130] START trigger=flips=3 ph=IRON prev=CollectIronIngotTask pos=-80,61,190 walls=4/4/4 sky=15 place=11 boxed=true hold=false cool=0 ban=0 startY=- step=0
+[m[34m[15:36:02][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S130] START trigger=flips=3 ph=IRON prev=CollectIronIngotTask pos=-80,61,190 walls=4/4/4 sky=15 place=11 boxed=true hold=false cool=0 ban=0 startY=- step=0§r
+[m[34m[15:36:02][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:07.1 FORCE S130 START trigger=flips=3 ph=IRON prev=CollectIronIngotTask pos=-80,61,190 walls=4/4/4 sky=15 place=11 boxed=true hold=false cool=0 ban=0 startY=- step=0
+[m[34m[15:36:02][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:07.1 PILLAR START flips=3 prev=CollectIronIngotTask
+[m[34m[15:36:02][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:07.1 SOLVE S130 pillar-out @-80,61,190 ph=IRON flips=3
+[m[34m[15:36:02][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:07.1 CHILD CollectIronIngotTask -> HolePillarTask ph=IRON @-80,61,190 sky=15 wet=false ground=false pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0
+[m[34m[15:36:02][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S130] HOLD begin pos=-80,61,190 walls=4/4/4 sky=15 place=11 boxed=true hold=false cool=0 ban=0 startY=61 step=0
+[m[34m[15:36:02][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S130] HOLD begin pos=-80,61,190 walls=4/4/4 sky=15 place=11 boxed=true hold=false cool=0 ban=0 startY=61 step=0§r
+[m[34m[15:36:02][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:07.1 FORCE S130 HOLD begin pos=-80,61,190 walls=4/4/4 sky=15 place=11 boxed=true hold=false cool=0 ban=0 startY=61 step=0
+[m[34m[15:36:02][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S130] tick y=61 slot=0 air=true pos=-80,61,190 walls=4/4/4 sky=15 place=11 boxed=true hold=true cool=0 ban=0 startY=61 step=1
+[m[34m[15:36:02][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S130] tick y=61 slot=0 air=true pos=-80,61,190 walls=4/4/4 sky=15 place=11 boxed=true hold=true cool=0 ban=0 startY=61 step=1§r
+[m[34m[15:36:02][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:07.1 FORCE S130 tick y=61 slot=0 air=true pos=-80,61,190 walls=4/4/4 sky=15 place=11 boxed=true hold=true cool=0 ban=0 startY=61 step=1
+[m[34m[15:36:03][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:07.7 [E100] jumps=6 @-80,62,190 ph=IRON child=HolePillarTask
+[m[34m[15:36:03][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:07.8 ph=IRON @-80,62,190 do=<T2 pillar-out>  eq=cobblestone woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:03][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S130] tick y=63 slot=0 air=true pos=-80,63,190 walls=4/4/4 sky=15 place=10 boxed=true hold=true cool=0 ban=0 startY=61 step=21
+[m[34m[15:36:03][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S130] tick y=63 slot=0 air=true pos=-80,63,190 walls=4/4/4 sky=15 place=10 boxed=true hold=true cool=0 ban=0 startY=61 step=21§r
+[m[34m[15:36:03][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:08.1 FORCE S130 tick y=63 slot=0 air=true pos=-80,63,190 walls=4/4/4 sky=15 place=10 boxed=true hold=true cool=0 ban=0 startY=61 step=21
+[m[34m[15:36:04][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:08.8 ph=IRON @-80,64,190 do=<T2 pillar-out>  eq=cobblestone woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:04][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S133] cool arm ticks=80 reason=risen y=65 startY=61 ban=-80,190 pos=-80,65,190 walls=4/4/4 sky=15 place=9 boxed=true hold=true cool=80 ban=80 startY=61 step=37
+[m[34m[15:36:04][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S133] cool arm ticks=80 reason=risen y=65 startY=61 ban=-80,190 pos=-80,65,190 walls=4/4/4 sky=15 place=9 boxed=true hold=true cool=80 ban=80 startY=61 step=37§r
+[m[34m[15:36:04][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:08.9 FORCE S133 cool arm ticks=80 reason=risen y=65 startY=61 ban=-80,190 pos=-80,65,190 walls=4/4/4 sky=15 place=9 boxed=true hold=true cool=80 ban=80 startY=61 step=37
+[m[34m[15:36:04][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S136] END reason=risen y=65 startY=61 risen=true giveUp=true pos=-80,65,190 walls=4/4/4 sky=15 place=9 boxed=true hold=true cool=80 ban=80 startY=61 step=37
+[m[34m[15:36:04][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S136] END reason=risen y=65 startY=61 risen=true giveUp=true pos=-80,65,190 walls=4/4/4 sky=15 place=9 boxed=true hold=true cool=80 ban=80 startY=61 step=37§r
+[m[34m[15:36:04][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:08.9 FORCE S136 END reason=risen y=65 startY=61 risen=true giveUp=true pos=-80,65,190 walls=4/4/4 sky=15 place=9 boxed=true hold=true cool=80 ban=80 startY=61 step=37
+[m[34m[15:36:04][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:08.9 PILLAR END risen y=65 startY=61
+[m[34m[15:36:04][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S136] stick drop pillar -> CollectIronIngotTask finished=true hold=false cool=79 end=risen y=65 startY=61 pos=-80,65,190 walls=4/4/4 sky=15 place=9 boxed=true hold=false cool=79 ban=79 startY=- step=0
+[m[34m[15:36:04][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S136] stick drop pillar -> CollectIronIngotTask finished=true hold=false cool=79 end=risen y=65 startY=61 pos=-80,65,190 walls=4/4/4 sky=15 place=9 boxed=true hold=false cool=79 ban=79 startY=- step=0§r
+[m[34m[15:36:04][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:09.0 FORCE S136 stick drop pillar -> CollectIronIngotTask finished=true hold=false cool=79 end=risen y=65 startY=61 pos=-80,65,190 walls=4/4/4 sky=15 place=9 boxed=true hold=false cool=79 ban=79 startY=- step=0
+[m[34m[15:36:04][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:09.0 CHILD HolePillarTask -> CollectIronIngotTask ph=IRON @-80,65,190 sky=15 wet=false ground=false pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0
+[m[34m[15:36:04][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S136] onStop interrupt=CollectIronIngotTask finishWhy=givingUp cool=79 lastEnd=risen y=65 startY=61 pos=-80,65,190 walls=4/4/4 sky=15 place=9 boxed=true hold=false cool=79 ban=79 startY=- step=0
+[m[34m[15:36:04][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S136] onStop interrupt=CollectIronIngotTask finishWhy=givingUp cool=79 lastEnd=risen y=65 startY=61 pos=-80,65,190 walls=4/4/4 sky=15 place=9 boxed=true hold=false cool=79 ban=79 startY=- step=0§r
+[m[34m[15:36:04][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:09.0 FORCE S136 onStop interrupt=CollectIronIngotTask finishWhy=givingUp cool=79 lastEnd=risen y=65 startY=61 pos=-80,65,190 walls=4/4/4 sky=15 place=9 boxed=true hold=false cool=79 ban=79 startY=- step=0
+[m[34m[15:36:04][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [E109b] eq=block.minecraft.cobblestone woodpick=1 stonepick=1 child=CollectIronIngotTask ph=IRON
+[m[34m[15:36:04][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [E109b] eq=block.minecraft.cobblestone woodpick=1 stonepick=1 child=CollectIronIngotTask ph=IRON§r
+[m[34m[15:36:04][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:09.0 [E109b] eq=block.minecraft.cobblestone woodpick=1 stonepick=1 child=CollectIronIngotTask ph=IRON
+[m[34m[15:36:04][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:36:05][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:09.4 [E100] jumps=6 @-80,64,190 ph=IRON child=CollectIronIngotTask
+[m[34m[15:36:05][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:09.8 ph=IRON @-80,64,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:05][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:10.0 WHY iron: smelt 8 in one furnace
+[m[34m[15:36:05][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:10.2 SNAP ph=IRON @-80,63,190 sky=15 wet=false ground=false pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=CollectIronIngotTask dbg=<Collecting 8 iron.: [[iron_ingot] x 8]>  mobs=none
+[m[34m[15:36:06][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S135] S130 suppressed why=would-S130 but busy cool=52 flips=3 sameXz=28 child=CollectIronIngotTask cool=52 ban=52 hold=false pos=-80,63,190 walls=4/4/4 sky=15 place=9 boxed=true hold=false cool=52 ban=52 startY=- step=0
+[m[34m[15:36:06][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S135] S130 suppressed why=would-S130 but busy cool=52 flips=3 sameXz=28 child=CollectIronIngotTask cool=52 ban=52 hold=false pos=-80,63,190 walls=4/4/4 sky=15 place=9 boxed=true hold=false cool=52 ban=52 startY=- step=0§r
+[m[34m[15:36:06][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:10.3 FORCE S135 S130 suppressed why=would-S130 but busy cool=52 flips=3 sameXz=28 child=CollectIronIngotTask cool=52 ban=52 hold=false pos=-80,63,190 walls=4/4/4 sky=15 place=9 boxed=true hold=false cool=52 ban=52 startY=- step=0
+[m[34m[15:36:06][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:10.8 ph=IRON @-80,63,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:07][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:11.8 ph=IRON @-80,62,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:07][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S100] stop jump-walk @-80,190 ph=IRON child=CollectIronIngotTask
+[m[34m[15:36:07][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S100] stop jump-walk @-80,190 ph=IRON child=CollectIronIngotTask§r
+[m[34m[15:36:07][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:12.2 SOLVE S100 stop jump-walk @-80,190 ph=IRON child=CollectIronIngotTask
+[m[34m[15:36:08][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S135] S130 suppressed why=would-S130 but busy cool=11 flips=0 sameXz=69 child=CollectIronIngotTask cool=11 ban=11 hold=false pos=-80,61,190 walls=4/4/4 sky=15 place=11 boxed=true hold=false cool=11 ban=11 startY=- step=0
+[m[34m[15:36:08][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S135] S130 suppressed why=would-S130 but busy cool=11 flips=0 sameXz=69 child=CollectIronIngotTask cool=11 ban=11 hold=false pos=-80,61,190 walls=4/4/4 sky=15 place=11 boxed=true hold=false cool=11 ban=11 startY=- step=0§r
+[m[34m[15:36:08][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:12.4 FORCE S135 S130 suppressed why=would-S130 but busy cool=11 flips=0 sameXz=69 child=CollectIronIngotTask cool=11 ban=11 hold=false pos=-80,61,190 walls=4/4/4 sky=15 place=11 boxed=true hold=false cool=11 ban=11 startY=- step=0
+[m[34m[15:36:08][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [E100] jumps=6 @-80,61,190 ph=IRON child=CollectIronIngotTask
+[m[34m[15:36:08][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [E100] jumps=6 @-80,61,190 ph=IRON child=CollectIronIngotTask§r
+[m[34m[15:36:08][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:12.4 [E100] jumps=6 @-80,61,190 ph=IRON child=CollectIronIngotTask
+[m[34m[15:36:08][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:12.7 SNAP ph=IRON @-80,61,190 sky=15 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=CollectIronIngotTask dbg=<Collecting 8 iron.: [[iron_ingot] x 8]>  mobs=none
+[m[34m[15:36:08][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:12.8 ph=IRON @-80,61,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:08][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S134] pillar cool expire after flips=3 end=risen y=65 startY=61
+[m[34m[15:36:08][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S134] pillar cool expire after flips=3 end=risen y=65 startY=61§r
+[m[34m[15:36:08][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:12.9 FORCE S134 pillar cool expire after flips=3 end=risen y=65 startY=61
+[m[34m[15:36:08][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S137] re-cool still-boxed@-80,190 n=1 ticks=160 end=risen y=65 startY=61 pos=-80,61,190 walls=4/4/4 sky=15 place=12 boxed=true hold=false cool=160 ban=160 startY=- step=0
+[m[34m[15:36:08][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S137] re-cool still-boxed@-80,190 n=1 ticks=160 end=risen y=65 startY=61 pos=-80,61,190 walls=4/4/4 sky=15 place=12 boxed=true hold=false cool=160 ban=160 startY=- step=0§r
+[m[34m[15:36:08][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:12.9 FORCE S137 re-cool still-boxed@-80,190 n=1 ticks=160 end=risen y=65 startY=61 pos=-80,61,190 walls=4/4/4 sky=15 place=12 boxed=true hold=false cool=160 ban=160 startY=- step=0
+[m[34m[15:36:09][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:13.8 ph=IRON @-80,60,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:09][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:14.1 WHY iron: smelt 8 in one furnace
+[m[34m[15:36:10][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S135] S130 suppressed why=would-S130 but busy cool=130 flips=4 sameXz=31 child=CollectIronIngotTask cool=130 ban=130 hold=false pos=-80,59,190 walls=4/4/4 sky=15 place=13 boxed=true hold=false cool=130 ban=130 startY=- step=0
+[m[34m[15:36:10][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S135] S130 suppressed why=would-S130 but busy cool=130 flips=4 sameXz=31 child=CollectIronIngotTask cool=130 ban=130 hold=false pos=-80,59,190 walls=4/4/4 sky=15 place=13 boxed=true hold=false cool=130 ban=130 startY=- step=0§r
+[m[34m[15:36:10][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:14.4 FORCE S135 S130 suppressed why=would-S130 but busy cool=130 flips=4 sameXz=31 child=CollectIronIngotTask cool=130 ban=130 hold=false pos=-80,59,190 walls=4/4/4 sky=15 place=13 boxed=true hold=false cool=130 ban=130 startY=- step=0
+[m[34m[15:36:10][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:14.8 ph=IRON @-80,59,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:10][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:15.2 SNAP ph=IRON @-80,59,190 sky=15 wet=false ground=true pick=0 buck=0 iron=0 rods=0 pearls=0 eyes=0 child=CollectIronIngotTask dbg=<Collecting 8 iron.: [[iron_ingot] x 8]>  mobs=none
+[m[34m[15:36:11][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:15.8 ph=IRON @-80,58,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:11][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:15.8 [E100] jumps=6 @-80,58,190 ph=IRON child=CollectIronIngotTask
+[m[34m[15:36:11][m [32m[main/INFO][m [36m(Minecraft)[m [0mLoaded 59 advancements
+[m[34m[15:36:12][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S135] S130 suppressed why=would-S130 but busy cool=90 flips=0 sameXz=71 child=CollectIronIngotTask cool=90 ban=90 hold=false pos=-80,58,190 walls=4/4/4 sky=15 place=14 boxed=true hold=false cool=90 ban=90 startY=- step=0
+[m[34m[15:36:12][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S135] S130 suppressed why=would-S130 but busy cool=90 flips=0 sameXz=71 child=CollectIronIngotTask cool=90 ban=90 hold=false pos=-80,58,190 walls=4/4/4 sky=15 place=14 boxed=true hold=false cool=90 ban=90 startY=- step=0§r
+[m[34m[15:36:12][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:16.4 FORCE S135 S130 suppressed why=would-S130 but busy cool=90 flips=0 sameXz=71 child=CollectIronIngotTask cool=90 ban=90 hold=false pos=-80,58,190 walls=4/4/4 sky=15 place=14 boxed=true hold=false cool=90 ban=90 startY=- step=0
+[m[34m[15:36:12][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:16.8 ph=IRON @-80,58,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:13][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:17.7 SNAP ph=IRON @-80,57,190 sky=15 wet=false ground=true pick=0 buck=0 iron=1 rods=0 pearls=0 eyes=0 child=CollectIronIngotTask dbg=<Collecting 8 iron.: [[iron_ingot] x 8]>  mobs=none
+[m[34m[15:36:13][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:17.8 ph=IRON @-80,57,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:13][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:18.1 WHY iron: smelt 8 in one furnace
+[m[34m[15:36:14][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S135] S130 suppressed why=would-S130 but busy cool=49 flips=2 sameXz=112 child=CollectIronIngotTask cool=49 ban=49 hold=false pos=-80,57,190 walls=4/4/4 sky=15 place=14 boxed=true hold=false cool=49 ban=49 startY=- step=0
+[m[34m[15:36:14][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S135] S130 suppressed why=would-S130 but busy cool=49 flips=2 sameXz=112 child=CollectIronIngotTask cool=49 ban=49 hold=false pos=-80,57,190 walls=4/4/4 sky=15 place=14 boxed=true hold=false cool=49 ban=49 startY=- step=0§r
+[m[34m[15:36:14][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:18.5 FORCE S135 S130 suppressed why=would-S130 but busy cool=49 flips=2 sameXz=112 child=CollectIronIngotTask cool=49 ban=49 hold=false pos=-80,57,190 walls=4/4/4 sky=15 place=14 boxed=true hold=false cool=49 ban=49 startY=- step=0
+[m[34m[15:36:14][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:18.8 ph=IRON @-80,57,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:15][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:19.8 ph=IRON @-80,57,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:15][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:20.2 SNAP ph=IRON @-80,57,190 sky=15 wet=false ground=true pick=0 buck=0 iron=3 rods=0 pearls=0 eyes=0 child=CollectIronIngotTask dbg=<Collecting 8 iron.: [[iron_ingot] x 8]>  mobs=none
+[m[34m[15:36:16][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:20.8 ph=IRON @-80,57,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:16][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S134] pillar cool expire after flips=3 end=risen y=65 startY=61
+[m[34m[15:36:16][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S134] pillar cool expire after flips=3 end=risen y=65 startY=61§r
+[m[34m[15:36:16][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:20.9 FORCE S134 pillar cool expire after flips=3 end=risen y=65 startY=61
+[m[34m[15:36:17][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:21.8 ph=IRON @-80,57,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:17][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:22.1 WHY iron: smelt 8 in one furnace
+[m[34m[15:36:18][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:22.7 SNAP ph=IRON @-80,57,190 sky=15 wet=false ground=true pick=0 buck=0 iron=4 rods=0 pearls=0 eyes=0 child=CollectIronIngotTask dbg=<Collecting 8 iron.: [[iron_ingot] x 8]>  mobs=none
+[m[34m[15:36:18][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:22.8 ph=IRON @-80,57,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:19][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:23.7 WHY iron: smelt 10 in one furnace
+[m[34m[15:36:19][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:23.8 ph=IRON @-80,57,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:20][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:24.8 ph=IRON @-80,57,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:20][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:25.1 WHY iron: smelt 12 in one furnace
+[m[34m[15:36:20][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:25.2 SNAP ph=IRON @-80,57,190 sky=15 wet=false ground=true pick=0 buck=0 iron=6 rods=0 pearls=0 eyes=0 child=CollectIronIngotTask dbg=<Collecting 8 iron.: [[iron_ingot] x 8]>  mobs=none
+[m[34m[15:36:21][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:25.8 ph=IRON @-80,57,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:22][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:26.8 ph=IRON @-80,57,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:23][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:27.7 SNAP ph=IRON @-80,57,190 sky=15 wet=false ground=true pick=0 buck=0 iron=6 rods=0 pearls=0 eyes=0 child=CollectIronIngotTask dbg=<Collecting 8 iron.: [[iron_ingot] x 8]>  mobs=none
+[m[34m[15:36:23][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:27.8 ph=IRON @-80,57,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:24][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:28.8 ph=IRON @-80,57,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:24][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:29.1 WHY iron: smelt 16 in one furnace
+[m[34m[15:36:25][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:29.8 ph=IRON @-81,57,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:25][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:30.2 SNAP ph=IRON @-81,57,190 sky=14 wet=false ground=true pick=0 buck=0 iron=8 rods=0 pearls=0 eyes=0 child=CollectIronIngotTask dbg=<Collecting 8 iron.: [[iron_ingot] x 8]>  mobs=none
+[m[34m[15:36:26][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:30.8 ph=IRON @-81,57,190 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:31.8 ph=IRON @-81,57,191 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:28][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:32.7 SNAP ph=IRON @-81,57,191 sky=13 wet=false ground=true pick=0 buck=0 iron=8 rods=0 pearls=0 eyes=0 child=CollectIronIngotTask dbg=<Collecting 8 iron.: [[iron_ingot] x 8]>  mobs=none
+[m[34m[15:36:28][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:32.8 ph=IRON @-81,57,191 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:29][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:33.8 ph=IRON @-81,54,192 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:30][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:34.8 ph=IRON @-87,55,192 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:30][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:35.2 SNAP ph=IRON @-88,55,192 sky=3 wet=false ground=true pick=0 buck=0 iron=8 rods=0 pearls=0 eyes=0 child=CollectIronIngotTask dbg=<Collecting 8 iron.: [[iron_ingot] x 8]>  mobs=none
+[m[34m[15:36:31][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:35.8 ph=IRON @-88,55,192 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=cobblestone woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:32][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:36.8 ph=IRON @-88,54,192 do=<Collecting 8 iron.: [[iron_ingot] x 8]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:33][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S130] START trigger=flips=3 ph=IRON prev=CollectIronIngotTask pos=-88,53,192 walls=4/4/4 sky=1 place=19 boxed=true hold=false cool=0 ban=0 startY=- step=0
+[m[34m[15:36:33][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S130] START trigger=flips=3 ph=IRON prev=CollectIronIngotTask pos=-88,53,192 walls=4/4/4 sky=1 place=19 boxed=true hold=false cool=0 ban=0 startY=- step=0§r
+[m[34m[15:36:33][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:37.6 FORCE S130 START trigger=flips=3 ph=IRON prev=CollectIronIngotTask pos=-88,53,192 walls=4/4/4 sky=1 place=19 boxed=true hold=false cool=0 ban=0 startY=- step=0
+[m[34m[15:36:33][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:37.6 PILLAR START flips=3 prev=CollectIronIngotTask
+[m[34m[15:36:33][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:37.6 SOLVE S130 pillar-out @-88,53,192 ph=IRON flips=3
+[m[34m[15:36:33][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:37.6 CHILD CollectIronIngotTask -> HolePillarTask ph=IRON @-88,53,192 sky=1 wet=false ground=false pick=0 buck=0 iron=8 rods=0 pearls=0 eyes=0
+[m[34m[15:36:33][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S130] HOLD begin pos=-88,53,192 walls=4/4/4 sky=1 place=19 boxed=true hold=false cool=0 ban=0 startY=53 step=0
+[m[34m[15:36:33][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S130] HOLD begin pos=-88,53,192 walls=4/4/4 sky=1 place=19 boxed=true hold=false cool=0 ban=0 startY=53 step=0§r
+[m[34m[15:36:33][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:37.6 FORCE S130 HOLD begin pos=-88,53,192 walls=4/4/4 sky=1 place=19 boxed=true hold=false cool=0 ban=0 startY=53 step=0
+[m[34m[15:36:33][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S130] tick y=53 slot=0 air=true pos=-88,53,192 walls=4/4/4 sky=1 place=19 boxed=true hold=true cool=0 ban=0 startY=53 step=1
+[m[34m[15:36:33][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S130] tick y=53 slot=0 air=true pos=-88,53,192 walls=4/4/4 sky=1 place=19 boxed=true hold=true cool=0 ban=0 startY=53 step=1§r
+[m[34m[15:36:33][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:37.6 FORCE S130 tick y=53 slot=0 air=true pos=-88,53,192 walls=4/4/4 sky=1 place=19 boxed=true hold=true cool=0 ban=0 startY=53 step=1
+[m[34m[15:36:33][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:37.7 SNAP ph=IRON @-88,53,192 sky=1 wet=false ground=false pick=0 buck=0 iron=8 rods=0 pearls=0 eyes=0 child=HolePillarTask dbg=<T2 pillar-out>  mobs=none
+[m[34m[15:36:33][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:37.8 ph=IRON @-88,53,192 do=<T2 pillar-out>  eq=cobblestone woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:34][m [32m[main/INFO][m [36m(Minecraft)[m [0mLoaded 60 advancements
+[m[34m[15:36:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S130] tick y=55 slot=0 air=true pos=-88,55,192 walls=0/0/4 sky=3 place=17 boxed=false hold=true cool=0 ban=0 startY=53 step=21
+[m[34m[15:36:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S130] tick y=55 slot=0 air=true pos=-88,55,192 walls=0/0/4 sky=3 place=17 boxed=false hold=true cool=0 ban=0 startY=53 step=21§r
+[m[34m[15:36:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:38.6 FORCE S130 tick y=55 slot=0 air=true pos=-88,55,192 walls=0/0/4 sky=3 place=17 boxed=false hold=true cool=0 ban=0 startY=53 step=21
+[m[34m[15:36:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=1:38.8 ph=IRON @-88,55,192 do=<T2 pillar-out>  eq=cobblestone woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:36:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S133] cool arm ticks=200 reason=risen y=56 startY=53 ban=-88,192 pos=-88,56,192 walls=0/0/0 sky=4 place=17 boxed=false hold=true cool=200 ban=200 startY=53 step=27
+[m[34m[15:36:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S133] cool arm ticks=200 reason=risen y=56 startY=53 ban=-88,192 pos=-88,56,192 walls=0/0/0 sky=4 place=17 boxed=false hold=true cool=200 ban=200 startY=53 step=27§r
+[m[34m[15:36:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:39.0 FORCE S133 cool arm ticks=200 reason=risen y=56 startY=53 ban=-88,192 pos=-88,56,192 walls=0/0/0 sky=4 place=17 boxed=false hold=true cool=200 ban=200 startY=53 step=27
+[m[34m[15:36:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S136] END reason=risen y=56 startY=53 risen=true giveUp=true pos=-88,56,192 walls=0/0/0 sky=4 place=17 boxed=false hold=true cool=200 ban=200 startY=53 step=27
+[m[34m[15:36:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S136] END reason=risen y=56 startY=53 risen=true giveUp=true pos=-88,56,192 walls=0/0/0 sky=4 place=17 boxed=false hold=true cool=200 ban=200 startY=53 step=27§r
+[m[34m[15:36:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:39.0 FORCE S136 END reason=risen y=56 startY=53 risen=true giveUp=true pos=-88,56,192 walls=0/0/0 sky=4 place=17 boxed=false hold=true cool=200 ban=200 startY=53 step=27
+[m[34m[15:36:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:39.0 PILLAR END risen y=56 startY=53
+[m[34m[15:36:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [E100] jumps=9 @-88,56,192 ph=IRON child=HolePillarTask
+[m[34m[15:36:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [E100] jumps=9 @-88,56,192 ph=IRON child=HolePillarTask§r
+[m[34m[15:36:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:39.0 [E100] jumps=9 @-88,56,192 ph=IRON child=HolePillarTask
+[m[34m[15:36:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:39.0 WHY iron: smelt 16 in one furnace
+[m[34m[15:36:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S136] stick drop pillar -> CollectIronIngotTask finished=true hold=false cool=199 end=risen y=56 startY=53 pos=-88,56,192 walls=0/0/0 sky=4 place=17 boxed=false hold=false cool=199 ban=199 startY=- step=0
+[m[34m[15:36:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S136] stick drop pillar -> CollectIronIngotTask finished=true hold=false cool=199 end=risen y=56 startY=53 pos=-88,56,192 walls=0/0/0 sky=4 place=17 boxed=false hold=false cool=199 ban=199 startY=- step=0§r
+[m[34m[15:36:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:39.0 FORCE S136 stick drop pillar -> CollectIronIngotTask finished=true hold=false cool=199 end=risen y=56 startY=53 pos=-88,56,192 walls=0/0/0 sky=4 place=17 boxed=false hold=false cool=199 ban=199 startY=- step=0
+[m[34m[15:36:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:39.0 CHILD HolePillarTask -> CollectIronIngotTask ph=IRON @-88,56,192 sky=4 wet=false ground=false pick=0 buck=0 iron=8 rods=0 pearls=0 eyes=0
+[m[34m[15:36:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S136] onStop interrupt=CollectIronIngotTask finishWhy=givingUp cool=199 lastEnd=risen y=56 startY=53 pos=-88,56,192 walls=0/0/0 sky=4 place=17 boxed=false hold=false cool=199 ban=199 startY=- step=0
+[m[34m[15:36:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S136] onStop interrupt=CollectIronIngotTask finishWhy=givingUp cool=199 lastEnd=risen y=56 startY=53 pos=-88,56,192 walls=0/0/0 sky=4 place=17 boxed=false hold=false cool=199 ban=199 startY=- step=0§r
+[m[34m[15:36:34][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 1:39.0 FORCE S136 onStop interrupt=CollectIronIngotTask finishWhy=givingUp cool=199 lastEnd=risen y=56 startY=53 pos=-88,56,192 walls=0/0/0 sky=4 place=17 boxed=false hold=false cool=199 ban=199 startY=- step=0
+[m[34m[15:37:02][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mPlayer267 has made the advancement [Monster Hunter]
+[m[34m[15:37:02][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] Player267 has made the advancement [Monster Hunter]
+[m[34m[15:37:02][m [32m[main/INFO][m [36m(Minecraft)[m [0mLoaded 77 advancements
+[m[34m[15:37:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 2:31.4 onStart resume IRON — pick in inv
+[m[34m[15:37:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rTESRUN2 clock 0:00.0
+[m[34m[15:37:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rTESRUN2 spawn biome=PlainsBiome trees~=0 villageHint=true rpHint=true surfaceLava=0  playable
+[m[34m[15:37:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rTESRUN2 start Tungsten backend: AVAILABLE (kaptainwutax.tungsten bound; mover=BARITONE) eyes=12 rods=6 skipDiamond=true
+[m[34m[15:37:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:00.0 PHASE  -> IRON
+[m[34m[15:37:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:00.0 DIM  -> OVERWORLD at -71,54,195
+[m[34m[15:37:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:00.0 CHILD  -> - ph=IRON @-71,54,195 sky=0 wet=false ground=true pick=0 buck=0 iron=8 rods=0 pearls=0 eyes=0
+[m[34m[15:37:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [E111] ph=IRON
+[m[34m[15:37:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [E111] ph=IRON§r
+[m[34m[15:37:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:00.0 [E111] ph=IRON
+[m[34m[15:37:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: ALTO CLEF: WARNING: T2 [S138] shaft ban clear left-xz ban=-88,192 now=-71,195 manh=20 left=199
+[m[34m[15:37:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §cT2 [S138] shaft ban clear left-xz ban=-88,192 now=-71,195 manh=20 left=199§r
+[m[34m[15:37:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:00.0 FORCE S138 shaft ban clear left-xz ban=-88,192 now=-71,195 manh=20 left=199
+[m[34m[15:37:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:00.0 WHY iron: smelt 16 in one furnace
+[m[34m[15:37:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:00.0 CHILD - -> CollectIronIngotTask ph=IRON @-71,54,195 sky=0 wet=false ground=true pick=0 buck=0 iron=8 rods=0 pearls=0 eyes=0
+[m[34m[15:37:27][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rMineAndCollect: equip item.minecraft.stone_pickaxe for block.minecraft.iron_ore
+[m[34m[15:37:27][m [32m[main/INFO][m [36m(Minecraft)[m [0mLoaded 77 advancements
+[m[34m[15:37:28][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:00.9 ph=IRON @-68,53,195 do=<Collecting 16 iron.: [[iron_ingot] x 16]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:37:29][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [NOW] t=0:01.9 ph=IRON @-68,53,195 do=<Collecting 16 iron.: [[iron_ingot] x 16]>  eq=stone_pickaxe woodpick=1 stonepick=1 pick=0 iron=0 buck=0
+[m[34m[15:37:29][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:02.4 SNAP ph=IRON @-67,53,195 sky=0 wet=false ground=true pick=0 buck=0 iron=8 rods=0 pearls=0 eyes=0 child=CollectIronIngotTask dbg=<Collecting 16 iron.: [[iron_ingot] x 16]>  mobs=none
+[m

@@ -1,0 +1,73 @@
+C:\Users\redfa\Documents\MinecraftDev\altoclef\_tc_stage\HolePillar.java:906: error: cannot find symbol
+        try { mc.options.jumpKey.setPressed(true); } catch (Throwable ignored) {}
+                        ^
+  symbol:   variable jumpKey
+  location: variable options of type GameOptions
+C:\Users\redfa\Documents\MinecraftDev\altoclef\_tc_stage\HolePillar.java:911: error: cannot find symbol
+        try { mc.options.useKey.setPressed(air && (step % 2 == 0)); } catch (Throwable ignored) {}
+                        ^
+  symbol:   variable useKey
+  location: variable options of type GameOptions
+C:\Users\redfa\Documents\MinecraftDev\altoclef\_tc_stage\HolePillar.java:926: error: cannot find symbol
+                st = mod.getPlayer().getInventory().getStack(i);
+                                    ^
+  symbol:   method getInventory()
+  location: class ClientPlayerEntity
+C:\Users\redfa\Documents\MinecraftDev\altoclef\_tc_stage\HolePillar.java:939: error: cannot find symbol
+            return s != null && !s.isAir() && s.isSolid();
+                                               ^
+  symbol:   method isSolid()
+  location: variable s of type BlockState
+C:\Users\redfa\Documents\MinecraftDev\altoclef\_tc_stage\HolePillar.java:951: error: cannot find symbol
+            MinecraftClient.getInstance().player.setPitch(90f);
+                                                ^
+  symbol:   method setPitch(float)
+  location: variable player of type ClientPlayerEntity
+C:\Users\redfa\Documents\MinecraftDev\altoclef\_tc_stage\HolePillar.java:958: error: cannot find symbol
+            opt.jumpKey.setPressed(false);
+               ^
+  symbol:   variable jumpKey
+  location: variable opt of type GameOptions
+C:\Users\redfa\Documents\MinecraftDev\altoclef\_tc_stage\HolePillar.java:959: error: cannot find symbol
+            opt.useKey.setPressed(false);
+               ^
+  symbol:   variable useKey
+  location: variable opt of type GameOptions
+C:\Users\redfa\Documents\MinecraftDev\altoclef\_tc_stage\ModernSpeedrunTask.java:1124: error: cannot find symbol
+                && count(mod, Items.IRON_INGOT) + count(mod, Items.RAW_IRON) < 1;
+                                                                  ^
+  symbol:   variable RAW_IRON
+  location: class Items
+C:\Users\redfa\Documents\MinecraftDev\altoclef\_tc_stage\ModernSpeedrunTask.java:1131: error: cannot find symbol
+                && count(mod, Items.IRON_INGOT) + count(mod, Items.RAW_IRON) < 1;
+                                                                  ^
+  symbol:   variable RAW_IRON
+  location: class Items
+C:\Users\redfa\Documents\MinecraftDev\altoclef\_tc_stage\ModernSpeedrunTask.java:1137: error: cannot find symbol
+                || count(mod, Items.IRON_INGOT) + count(mod, Items.RAW_IRON) >= SpeedrunOpt.IRON) {
+                                                                  ^
+  symbol:   variable RAW_IRON
+  location: class Items
+C:\Users\redfa\Documents\MinecraftDev\altoclef\_tc_stage\ModernSpeedrunTask.java:1359: error: cannot find symbol
+        int ironN = count(mod, Items.IRON_INGOT) + count(mod, Items.RAW_IRON);
+                                                                   ^
+  symbol:   variable RAW_IRON
+  location: class Items
+C:\Users\redfa\Documents\MinecraftDev\altoclef\_tc_stage\ModernSpeedrunTask.java:1521: error: cannot find symbol
+        int iron = count(mod, Items.IRON_INGOT) + count(mod, Items.RAW_IRON)
+                                                                  ^
+  symbol:   variable RAW_IRON
+  location: class Items
+C:\Users\redfa\Documents\MinecraftDev\altoclef\_tc_stage\ModernSpeedrunTask.java:2362: error: cannot find symbol
+        int ironN = count(mod, Items.IRON_INGOT) + count(mod, Items.RAW_IRON);
+                                                                   ^
+  symbol:   variable RAW_IRON
+  location: class Items
+C:\Users\redfa\Documents\MinecraftDev\altoclef\_tc_stage\T2Solve.java:202: error: package baritone.api.utils.input does not exist
+                        baritone.api.utils.input.Input.CLICK_LEFT, false);
+                                                ^
+C:\Users\redfa\Documents\MinecraftDev\altoclef\_tc_stage\T2Solve.java:201: error: cannot access Baritone
+                mod.getClientBaritone().getInputOverrideHandler().setInputForceState(
+                                     ^
+  class file for baritone.Baritone not found
+15 errors

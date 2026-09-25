@@ -198,6 +198,9 @@ public class AltoClef implements ModInitializer {
             getExtraBaritoneSettings().getForceSaveToolPredicates().add((state, item) -> StorageHelper.shouldSaveStack(this, state.getBlock(), item));
         });
 
+        // Headless SIM: if autoLoadWorld is on, the mixin path (AutoWorldLoadMixin) drives
+        // the title screen into the newest save. Nothing else is needed here.
+
         // Receive + cancel chat
         EventBus.subscribe(SendChatEvent.class, evt -> {
             String line = evt.message;
@@ -264,11 +267,72 @@ public class AltoClef implements ModInitializer {
                 threatMonitor.applyToGoalManager(gm);
             }
         }
+        maybeFireAutoRunCommand();
         taskRunner.tick();
 
         messageSender.tick();
 
         inputControls.onTickPost();
+    }
+
+    /**
+     * Headless SIM: fire {@code autoRunCommand} once after the bot is actually in a world.
+     * Kept deliberately small and guarded so it is inert for normal play.
+     */
+    private int autoRunDelay = -1;
+    private boolean autoRunFired = false;
+
+    /** Reroll count and world the auto-run last fired in (S192). */
+    private int autoRunReroll = -1;
+    private Object autoRunWorld = null;
+
+    private void maybeFireAutoRunCommand() {
+        // S192: re-arm once per rerolled world. A reroll (ResetSignal) ends the old task with
+        // phase DONE and creates a fresh world, but the command used to fire only once per
+        // client launch: live run fix3 sat idle in the new world until DEADMAN exited with 87.
+        // Requiring a different world object keeps it from re-firing in the old world during
+        // the tick before the queued disconnect runs; respawns/portals keep the reroll count.
+        if (autoRunFired && inGame()
+                && adris.altoclef.util.AutoWorldState.rerollCount() != autoRunReroll
+                && getWorld() != autoRunWorld) {
+            autoRunFired = false;
+            autoRunDelay = -1;
+            Debug.logHarness("AUTORUN: re-armed for rerolled world (reroll #"
+                    + adris.altoclef.util.AutoWorldState.rerollCount() + ")");
+        }
+        if (autoRunFired || !inGame()) {
+            return;
+        }
+        // Fully qualified: this file imports baritone.api.Settings, which shadows
+        // adris.altoclef.Settings (see getModSettings() declaring the full name too).
+        adris.altoclef.Settings s = getModSettings();
+        if (s == null) {
+            return;
+        }
+        String cmd = s.getAutoRunCommand();
+        if (cmd == null || cmd.isEmpty()) {
+            return;
+        }
+        if (autoRunDelay < 0) {
+            // Give trackers/scanner a moment to populate before the task starts.
+            autoRunDelay = 20 * 5;
+            // logInternal (not logMessage): logMessage routes to the in-game chat HUD
+            // once a player exists, so harness greps of latest.log would miss it.
+            Debug.logHarness("AUTORUN: armed '" + cmd + "' (firing in 5s)");
+        }
+        if (--autoRunDelay > 0) {
+            return;
+        }
+        autoRunFired = true;
+        autoRunReroll = adris.altoclef.util.AutoWorldState.rerollCount();
+        autoRunWorld = getWorld();
+        Debug.logHarness("AUTORUN: executing '" + cmd + "'");
+        Debug.logMessage("AUTORUN: executing '" + cmd + "'");
+        try {
+            getCommandExecutor().executeWithPrefix(cmd);
+        } catch (Throwable t) {
+            Debug.logWarning("AUTORUN failed: " + t.getMessage());
+        }
     }
 
     public void stopTasks() {

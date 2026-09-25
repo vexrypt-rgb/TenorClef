@@ -52,7 +52,7 @@ public class AgentInput {
 				this.agent.keyRight,
 				this.agent.keyJump,
 				this.agent.keySneak,
-				this.agent.sprinting
+				this.agent.keySprint
 		);
 		float f = getMovementMultiplier(this.playerInput.forward(), this.playerInput.backward());
 		float g = getMovementMultiplier(this.playerInput.left(), this.playerInput.right());
@@ -71,3 +71,4 @@ public class AgentInput {
 		return new Vec2f(x / len, y / len);
 	}
 }
+

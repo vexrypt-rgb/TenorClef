@@ -26,10 +26,13 @@ import java.util.List;
  */
 public class InventorySubTracker extends Tracker {
 
-    private final HashMap<Item, List<Slot>> itemToSlotPlayer = new HashMap<>();
-    private final HashMap<Item, List<Slot>> itemToSlotContainer = new HashMap<>();
-    private final HashMap<Item, Integer> itemCountsPlayer = new HashMap<>();
-    private final HashMap<Item, Integer> itemCountsContainer = new HashMap<>();
+    // NOT final and NOT cleared-in-place: updateState() builds fresh maps and swaps them
+    // in, so a reader never sees a half-built inventory. See updateState() for the crash
+    // this fixes. volatile for safe publication to readers that do not take the lock.
+    private volatile HashMap<Item, List<Slot>> itemToSlotPlayer = new HashMap<>();
+    private volatile HashMap<Item, List<Slot>> itemToSlotContainer = new HashMap<>();
+    private volatile HashMap<Item, Integer> itemCountsPlayer = new HashMap<>();
+    private volatile HashMap<Item, Integer> itemCountsContainer = new HashMap<>();
 
     private ScreenHandler _prevScreenHandler;
 
@@ -163,7 +166,16 @@ public class InventorySubTracker extends Tracker {
         return hasItem(playerInventoryOnly, Items.AIR);
     }
 
-    private void registerItem(ItemStack stack, Slot slot, boolean isSlotPlayerInventory) {
+    /**
+     * Fills the four maps passed in. It deliberately touches NO shared state: the caller
+     * owns these maps until it publishes them, so two concurrent scans can never end up
+     * adding into the same list.
+     */
+    private static void registerItem(ItemStack stack, Slot slot, boolean isSlotPlayerInventory,
+                                     HashMap<Item, List<Slot>> itemToSlotPlayer,
+                                     HashMap<Item, List<Slot>> itemToSlotContainer,
+                                     HashMap<Item, Integer> itemCountsPlayer,
+                                     HashMap<Item, Integer> itemCountsContainer) {
         Item item = stack.getItem();
         int count = stack.getCount();
         if (stack.isEmpty()) {
@@ -190,34 +202,59 @@ public class InventorySubTracker extends Tracker {
     protected void updateState() {
         _prevScreenHandler = MinecraftClient.getInstance().player != null ? MinecraftClient.getInstance().player.currentScreenHandler : null;
 
-        itemToSlotPlayer.clear();
-        itemToSlotContainer.clear();
-        itemCountsPlayer.clear();
-        itemCountsContainer.clear();
-        if (MinecraftClient.getInstance().player == null)
-            return;
-        ScreenHandler handler = MinecraftClient.getInstance().player.currentScreenHandler;
-        if (handler == null)
-            return;
-        for (Slot slot : Slot.getCurrentScreenSlots()) {
-            // Ignore cursor slot, that's handled separately.
-            if (slot.equals(CursorSlot.SLOT))
-                continue;
-            ItemStack stack = StorageHelper.getItemStackInSlot(slot);
-            // Add separately if we're in a container vs player inventory.
+        // Build into FRESH maps and publish them by swapping the field references at the
+        // very end. The old code cleared the shared maps in place and refilled them, which
+        // is a data race on two counts:
+        //
+        //   1. A concurrent reader could observe a half-built inventory (maps cleared,
+        //      only some slots re-added) and decide the bot has no pickaxe.
+        //   2. Two concurrent updateState() calls could add into the SAME ArrayList —
+        //      thread B's put(item, new ArrayList<>()) replaces the list thread A is
+        //      currently filling, and A's next get(item) returns B's. Both then call
+        //      add() on it, which corrupts the backing array. That is exactly the crash
+        //      that ended run O at 16:33:
+        //        ArrayIndexOutOfBoundsException: Index 1 out of bounds for length 0
+        //          at java.util.ArrayList.add(ArrayList.java:484)
+        //      (size advanced to 1 while elementData was still the shared EMPTY array).
+        //
+        // Swapping removes both: a scan never mutates published state, and readers always
+        // see one complete snapshot.
+        HashMap<Item, List<Slot>> slotsPlayer = new HashMap<>();
+        HashMap<Item, List<Slot>> slotsContainer = new HashMap<>();
+        HashMap<Item, Integer> countsPlayer = new HashMap<>();
+        HashMap<Item, Integer> countsContainer = new HashMap<>();
 
-            if (!shouldIgnoreSlotForContainer(slot)) {
-                registerItem(stack, slot, slot.isSlotInPlayerInventory());
+        ScreenHandler handler = null;
+        if (MinecraftClient.getInstance().player != null) {
+            handler = MinecraftClient.getInstance().player.currentScreenHandler;
+        }
+        if (handler != null) {
+            for (Slot slot : Slot.getCurrentScreenSlots()) {
+                // Ignore cursor slot, that's handled separately.
+                if (slot.equals(CursorSlot.SLOT))
+                    continue;
+                ItemStack stack = StorageHelper.getItemStackInSlot(slot);
+                // Add separately if we're in a container vs player inventory.
+                if (!shouldIgnoreSlotForContainer(slot)) {
+                    registerItem(stack, slot, slot.isSlotInPlayerInventory(),
+                            slotsPlayer, slotsContainer, countsPlayer, countsContainer);
+                }
             }
         }
+
+        itemToSlotPlayer = slotsPlayer;
+        itemToSlotContainer = slotsContainer;
+        itemCountsPlayer = countsPlayer;
+        itemCountsContainer = countsContainer;
     }
 
     @Override
     protected void reset() {
-        itemToSlotPlayer.clear();
-        itemToSlotContainer.clear();
-        itemCountsPlayer.clear();
-        itemCountsContainer.clear();
+        // Swap, don't clear in place — same reasoning as updateState().
+        itemToSlotPlayer = new HashMap<>();
+        itemToSlotContainer = new HashMap<>();
+        itemCountsPlayer = new HashMap<>();
+        itemCountsContainer = new HashMap<>();
     }
 
     @Override

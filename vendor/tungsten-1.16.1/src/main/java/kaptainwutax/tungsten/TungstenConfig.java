@@ -24,11 +24,11 @@ public class TungstenConfig {
     // ---- settings (edit defaults here) ----
 
     /** If true: on position mismatch > driftThreshold, setPosition() to simulation value.
-     *  If false: stop executor and let path recalculate from real position. */
+     *  If false: ignore drift (open-loop) unless above threshold for logging only. */
     public boolean driftCorrectionEnabled = false;
 
     /** Blocks of drift before triggering correction or executor stop. */
-    public double driftThreshold = 0.5;
+    public double driftThreshold = 8.0;
 
     /** If true: log verbose tick/drift/position messages to console.
      *  Keep false in normal use to reduce noise. */

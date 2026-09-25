@@ -13,6 +13,11 @@ subprojects {
     }
 }
 
+// The preprocess chain is a LINKED LIST and must stay complete.
+// PreprocessPlugin.apply() calls parent.extensions.getByType<RootPreprocessExtension>()
+// for every non-root project, so each version module requires its PARENT to have run
+// this block. Trimming the chain to speed up a 1.16.1-only build throws
+// NullPointerException at PreprocessPlugin.apply(PreprocessPlugin.kt:60) — verified.
 preprocess {
     val mc12111 = createNode("1.21.11", 12111, "yarn")
     val mc12101 = createNode("1.21.1", 12101, "yarn")

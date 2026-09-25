@@ -30,7 +30,8 @@ public class SprintJumpMove {
         // Run forward to the node
 //		TungstenMod.RENDERERS.clear();
 		desiredYaw = (float) DirectionHelper.calcYawFromVec3d(newNode.agent.getPos(), nextBlockNode.getPos(true));
-		if (distance < 0.8) return newNode;
+		// Do not return a yaw-only zero-disp stub for close nodes; continue into forward ticks.
+		// if (distance < 0.8) return newNode;
 		while (distance > 0.95 && limit < 500 && !newNode.agent.horizontalCollision && !newNode.agent.isInLava() || (distance <= 0.3 && !newNode.agent.onGround)) {
 //        	RenderHelper.renderNode(newNode);
 //        	try {

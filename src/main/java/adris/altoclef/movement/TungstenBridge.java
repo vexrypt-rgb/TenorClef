@@ -97,6 +97,7 @@ final class TungstenBridge {
             Vec3d target = new Vec3d(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
             Field targetField = Class.forName(MOD).getField("TARGET");
             targetField.set(null, target);
+            try { dataClass.getField("world").set(null, mc.world); dataClass.getField("player").set(null, mc.player); } catch (Throwable ignored) {}
             pathfinderFind.invoke(pathfinder, mc.world, target, mc.player);
             return true;
         } catch (Throwable t) {

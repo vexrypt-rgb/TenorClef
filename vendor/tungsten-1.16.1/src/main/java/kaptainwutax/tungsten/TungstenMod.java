@@ -114,6 +114,11 @@ public class TungstenMod implements ClientModInitializer {
         ScheduledFuture<?> handle = scheduler.scheduleAtFixedRate(toRun, 1, 15, TimeUnit.SECONDS);
     
         ClientTickEvents.START_CLIENT_TICK.register((a) -> {
+        	if (mc != null) {
+        		TungstenModDataContainer.player = mc.player;
+        		TungstenModDataContainer.world = mc.world;
+        		TungstenModDataContainer.gameRenderer = mc.gameRenderer;
+        	}
         	
         	boolean isRunning = TungstenModDataContainer.PATHFINDER.active.get() || TungstenModDataContainer.EXECUTOR.isRunning();
         	if (!isRunning) {

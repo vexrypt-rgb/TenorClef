@@ -21,6 +21,25 @@ public class Debug {
         logInternal(String.format(format, args));
     }
 
+    /**
+     * Unconditional stdout marker for the headless SIM harness.
+     * <p>
+     * {@link #logInternal} is gated by the {@code logLevel} setting: under the default
+     * {@code NORMAL}, {@code canLog(DEBUG_LOG_LEVEL)} is FALSE, so every
+     * {@code logInternal} call vanishes once {@code AltoClef} exists (i.e. exactly when
+     * the harness needs it most). Markers the harness greps from {@code latest.log}
+     * must therefore never be gated.
+     * <p>
+     * Prefix is {@code HARNESS:} so a run can be reconstructed with one grep.
+     */
+    public static void logHarness(String message) {
+        System.out.println("TENORCLEF: HARNESS: " + message);
+    }
+
+    public static void logHarness(String format, Object... args) {
+        logHarness(String.format(format, args));
+    }
+
     private static String getLogPrefix() {
         AltoClef altoClef = AltoClef.getInstance();
         if (altoClef != null) {

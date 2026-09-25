@@ -3,6 +3,7 @@ package adris.altoclef.chains;
 import adris.altoclef.AltoClef;
 import adris.altoclef.TaskCatalogue;
 import adris.altoclef.tasks.movement.MLGBucketTask;
+import adris.altoclef.tasks.speedrun.testrun2.T2Log;
 import adris.altoclef.tasksystem.ITaskOverridesGrounded;
 import adris.altoclef.tasksystem.TaskRunner;
 import adris.altoclef.util.helpers.LookHelper;
@@ -43,8 +44,22 @@ public class MLGBucketFallChain extends SingleTaskChain implements ITaskOverride
         AltoClef mod = AltoClef.getInstance();
 
         if (isFalling(mod)) {
+            // S154. With nothing to clutch with, MLGBucketTask can only log "No clutch item"
+            // and return null, so hijacking the user task buys nothing. On run G it still
+            // did: a brand-new MLGBucketTask was constructed every tick (each logging
+            // "NEW clutch target" because movingTorwards starts null), which interrupted
+            // ModernSpeedrunTask -> onStop -> sessionLive=false -> onStart. One real death
+            // turned into 87 sessions, 57 of them back in BOOTSTRAP.
+            if (!MLGBucketTask.canClutch(mod)) {
+                T2Log.warn("S154", "falling with no clutch item - MLG chain stays inactive");
+                return Float.NEGATIVE_INFINITY;
+            }
             tryCollectWaterTimer.reset();
-            setTask(new MLGBucketTask());
+            // Reuse the live task. Building a new one every tick is what produced the
+            // per-tick "NEW clutch target" churn in the first place.
+            if (!(mainTask instanceof MLGBucketTask)) {
+                setTask(new MLGBucketTask());
+            }
             lastMLG = (MLGBucketTask) mainTask;
             return 100;
         } else if (!tryCollectWaterTimer.elapsed()) { // Why -0.5? Cause it's slower than -0.7.

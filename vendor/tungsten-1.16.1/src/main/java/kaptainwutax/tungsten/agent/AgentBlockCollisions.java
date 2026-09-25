@@ -2,13 +2,9 @@ package kaptainwutax.tungsten.agent;
 
 import com.google.common.collect.AbstractIterator;
 
-import kaptainwutax.tungsten.TungstenMod;
-import kaptainwutax.tungsten.render.Cube;
-import kaptainwutax.tungsten.render.Cuboid;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ShapeContext;
-import net.minecraft.entity.boss.BossBar.Color;
 import net.minecraft.util.CuboidBlockIterator;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.math.*;
@@ -27,8 +23,6 @@ public class AgentBlockCollisions extends AbstractIterator<VoxelShape> {
     private final VoxelShape boxShape;
     private final CollisionView world;
     private final boolean forEntity;
-    private BlockView chunk;
-    private long chunkPos;
     public int scannedBlocks;
 
     public AgentBlockCollisions(CollisionView world, Agent agent, Box box) {
@@ -51,104 +45,40 @@ public class AgentBlockCollisions extends AbstractIterator<VoxelShape> {
         this.blockIterator = new CuboidBlockIterator(i, k, m, j, l, n);
     }
 
-    @Nullable
-    private BlockView getChunk(int x, int z) {
-        int i = ChunkSectionPos.getSectionCoord(x);
-        int j = ChunkSectionPos.getSectionCoord(z);
-        long l = ChunkPos.toLong(i, j);
-
-        if(this.chunk != null && this.chunkPos == l) {
-            return this.chunk;
-        } else {
-            BlockView blockView = this.world.getExistingChunk(i, j);
-            this.chunk = blockView;
-            this.chunkPos = l;
-            return blockView;
-        }
-    }
-
     protected VoxelShape computeNext() {
-//        while(true) {
-//            if (this.blockIterator.step()) {
-//                int i = this.blockIterator.getX();
-//                int j = this.blockIterator.getY();
-//                int k = this.blockIterator.getZ();
-//                int l = this.blockIterator.getEdgeCoordinatesCount();
-//
-//                if(l == 3) {
-//                    continue;
-//                }
-//
-//                /*
-//                BlockView blockView = this.getChunk(i, k);
-//
-//                if(blockView == null) {
-//                    continue;
-//                }*/
-//
-//                BlockView blockView = this.world;
-//
-//                this.pos.set(i, j, k);
-//                BlockState blockState = blockView.getBlockState(this.pos);
-//                this.scannedBlocks++;
-//
-//                if(this.forEntity && !blockState.shouldSuffocate(blockView, this.pos) || l == 1 && !blockState.exceedsCube()
-//                    || l == 2 && !blockState.isOf(Blocks.MOVING_PISTON)) {
-//                    continue;
-//                }
-//
-//                VoxelShape voxelShape = blockState.getCollisionShape(this.world, this.pos, this.context);
-//
-//                if(voxelShape == VoxelShapes.fullCube()) {
-//                    if(!this.box.intersects((double)i, (double)j, (double)k, (double)i + 1.0D, (double)j + 1.0D, (double)k + 1.0D)) {
-//                        continue;
-//                    }
-//
-//                    return voxelShape.offset((double)i, (double)j, (double)k);
-//                }
-//
-//                VoxelShape voxelShape2 = voxelShape.offset((double)i, (double)j, (double)k);
-//
-//                if(!VoxelShapes.matchesAnywhere(voxelShape2, this.boxShape, BooleanBiFunction.AND)) {
-//                    continue;
-//                }
-//
-//                return voxelShape2;
-//            }
-//
-//            return this.endOfData();
-//        }
-    	while (this.blockIterator.step()) {
-			int i = this.blockIterator.getX();
-			int j = this.blockIterator.getY();
-			int k = this.blockIterator.getZ();
-			int l = this.blockIterator.getEdgeCoordinatesCount();
-			if (l != 3) {
-				BlockView blockView = this.getChunk(i, k);
-				if (blockView != null) {
-					this.pos.set(i, j, k);
-					BlockState blockState = blockView.getBlockState(this.pos);
-					if ((!this.forEntity || blockState.shouldSuffocate(blockView, this.pos))
-						&& (l != 1 || blockState.exceedsCube())
-						&& (l != 2 || blockState.isOf(Blocks.MOVING_PISTON))) {
-						VoxelShape voxelShape = blockState.getCollisionShape(this.world, this.pos, this.context);
-						if (voxelShape == VoxelShapes.fullCube()) {
-							if (this.box.intersects((double)i, (double)j, (double)k, (double)i + 1.0, (double)j + 1.0, (double)k + 1.0)) {
-								return voxelShape.offset((double)i, (double)j, (double)k);
-							}
-						} else {
-							VoxelShape voxelShape2 = voxelShape.offset((double)i, (double)j, (double)k);
-							if (!voxelShape2.isEmpty() && VoxelShapes.matchesAnywhere(voxelShape2, this.boxShape, BooleanBiFunction.AND)) {
-								return voxelShape2;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		return this.endOfData();
+        // Always read via world as BlockView. On 1.16.1 ClientWorld, getChunk/getExistingChunk
+        // often returns null (or EmptyChunk) when PathFinder ticks Agent off-thread, which
+        // produced zero collisions / zero displacement and Baritone fallback.
+        while (this.blockIterator.step()) {
+            int i = this.blockIterator.getX();
+            int j = this.blockIterator.getY();
+            int k = this.blockIterator.getZ();
+            int l = this.blockIterator.getEdgeCoordinatesCount();
+            if (l == 3) {
+                continue;
+            }
+            this.pos.set(i, j, k);
+            BlockState blockState = this.world.getBlockState(this.pos);
+            this.scannedBlocks++;
+            if (this.forEntity && !blockState.shouldSuffocate(this.world, this.pos)
+                    || l == 1 && !blockState.exceedsCube()
+                    || l == 2 && !blockState.isOf(Blocks.MOVING_PISTON)) {
+                continue;
+            }
+            VoxelShape voxelShape = blockState.getCollisionShape(this.world, this.pos, this.context);
+            if (voxelShape == VoxelShapes.fullCube()) {
+                if (!this.box.intersects((double) i, (double) j, (double) k, (double) i + 1.0D, (double) j + 1.0D, (double) k + 1.0D)) {
+                    continue;
+                }
+                return voxelShape.offset((double) i, (double) j, (double) k);
+            }
+            VoxelShape voxelShape2 = voxelShape.offset((double) i, (double) j, (double) k);
+            if (voxelShape2.isEmpty() || !VoxelShapes.matchesAnywhere(voxelShape2, this.boxShape, BooleanBiFunction.AND)) {
+                continue;
+            }
+            return voxelShape2;
+        }
+        return this.endOfData();
     }
 
 }
-

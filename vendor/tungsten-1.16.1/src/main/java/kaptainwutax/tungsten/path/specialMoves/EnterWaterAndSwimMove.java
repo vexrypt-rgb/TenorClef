@@ -1,5 +1,7 @@
 package kaptainwutax.tungsten.path.specialMoves;
 
+import kaptainwutax.tungsten.TungstenModDataContainer;
+
 import kaptainwutax.tungsten.Debug;
 import kaptainwutax.tungsten.helpers.render.RenderHelper;
 import kaptainwutax.tungsten.path.Node;
@@ -16,7 +18,7 @@ public class EnterWaterAndSwimMove {
 		    		return swimmingMove;
 		    	}
 			} else {
-		    	Node walkMove = WalkToNode.generateMove(parent, nextBlockNode);
+		    	Node walkMove = WalkToNode.generateMove(parent, TungstenModDataContainer.world, nextBlockNode);
 		    	if (walkMove.agent.touchingWater) {
 		    		Node swimmingMove = SwimmingMove.generateMove(walkMove, nextBlockNode);
 		    		RenderHelper.renderPathSoFar(swimmingMove);

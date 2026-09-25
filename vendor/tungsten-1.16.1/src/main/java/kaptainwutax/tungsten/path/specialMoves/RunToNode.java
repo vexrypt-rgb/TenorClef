@@ -1,5 +1,7 @@
 package kaptainwutax.tungsten.path.specialMoves;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import kaptainwutax.tungsten.Debug;
 import kaptainwutax.tungsten.TungstenMod;
 import kaptainwutax.tungsten.TungstenModDataContainer;
@@ -16,10 +18,21 @@ import kaptainwutax.tungsten.render.Color;
 import net.minecraft.world.WorldView;
 
 public class RunToNode {
+	private static final AtomicBoolean LOGGED_ZERO_DISP = new AtomicBoolean(false);
 
 
 	public static Node generateMove(Node parent, BlockNode nextBlockNode) {
-		WorldView world = TungstenModDataContainer.world;
+		return generateMove(parent, TungstenModDataContainer.world, nextBlockNode);
+	}
+
+	public static Node generateMove(Node parent, WorldView world, BlockNode nextBlockNode) {
+		if (world == null) {
+			world = TungstenModDataContainer.world;
+		}
+		if (world == null) {
+			Debug.logMessage("[RunToNode] world null â€” cannot simulate move");
+			return parent;
+		}
 		Agent agent = parent.agent;
 
 		float desiredYaw = (float) (DirectionHelper.calcYawFromVec3d(agent.getPos(), nextBlockNode.getPos(true)));
@@ -88,6 +101,12 @@ public class RunToNode {
 
         }
         
+        // High-signal: if we barely moved, physics/collision sim likely failed.
+        double disp = parent.agent.getPos().distanceTo(newNode.agent.getPos());
+        if (disp < 1.0E-4 && LOGGED_ZERO_DISP.compareAndSet(false, true)) {
+            Debug.logMessage("[RunToNode] near-zero disp once: disp=" + disp + " keyFwd=" + parent.agent.keyForward + " fwdSpeed=" + parent.agent.forwardSpeed + " moveSpeed=" + parent.agent.movementSpeed + " onGround=" + parent.agent.onGround + " parent=" + parent.agent.getPos());
+        }
         return newNode;
 	}
 }
+

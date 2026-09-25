@@ -28,6 +28,10 @@ jobs:
           cache: gradle
       - name: Compile primary module
         run: ./gradlew :1.21.1:compileJava --stacktrace
+      # Unit tests are pure Java (no Minecraft client) and run against the main project.
+      # :1.16.1:test is not usable here: it compiles every preprocess ancestor up to 1.21.1.
+      - name: Unit tests (primary module)
+        run: ./gradlew :1.21.1:test --stacktrace
       - name: Upload primary jars (if produced)
         if: success()
         uses: actions/upload-artifact@v4

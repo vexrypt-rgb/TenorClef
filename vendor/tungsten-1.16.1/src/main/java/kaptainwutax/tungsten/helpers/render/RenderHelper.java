@@ -73,6 +73,7 @@ public class RenderHelper {
 	}
 	
 	public static void renderPathSoFar(BlockNode n) {
+		if (TungstenModDataContainer.world == null) return;
 		TungstenModRenderContainer.RENDERERS.clear();
 		Vec3d currentPos = n.getPos(true);
 		TungstenModRenderContainer.RENDERERS.add(new Cuboid(currentPos.subtract(0.1, 0, 0.1), new Vec3d(0.2D, 0.2D, 0.2D), Color.RED));

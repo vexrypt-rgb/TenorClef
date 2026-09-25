@@ -18,9 +18,9 @@ import net.minecraft.util.math.BlockPos;
  * - Baritone = mining / block interaction / inventory (unchanged)
  *
  * Travel mover preference ({@link #setTravelMover}):
- * - AUTO (default): Tungsten if bound, else Baritone
+ * - AUTO: Tungsten if bound, else Baritone
  * - TUNGSTEN: prefer Tungsten when available (falls back to Baritone if missing)
- * - BARITONE: force Baritone travel tasks
+ * - BARITONE (default): force Baritone travel tasks
  *
  * Preference only affects {@link #gotoBlock} / {@link #followEntity} travel helpers.
  * Mining and block-break pathing stay on Baritone regardless.
@@ -38,7 +38,7 @@ public final class TungstenMovement {
         BARITONE
     }
 
-    private static volatile TravelMover travelMover = TravelMover.AUTO;
+    private static volatile TravelMover travelMover = TravelMover.BARITONE;
 
     private TungstenMovement() {}
 

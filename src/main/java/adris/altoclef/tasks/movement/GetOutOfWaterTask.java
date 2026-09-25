@@ -1,6 +1,7 @@
 package adris.altoclef.tasks.movement;
 
 import adris.altoclef.AltoClef;
+import adris.altoclef.Debug;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.helpers.LookHelper;
 import adris.altoclef.util.helpers.StorageHelper;
@@ -90,10 +91,45 @@ public class GetOutOfWaterTask extends CustomBaritoneGoalTask {
         return "get out of water";
     }
 
+    /**
+     * S183 — the escape must not end while the bot is merely BOBBING.
+     *
+     * <p>The original test was {@code !isTouchingWater() && isOnGround()}, sampled once. A bot
+     * bobbing in water clears the surface for a tick at a time, so that instantaneous sample
+     * reports "escaped" on every bob — while the bot is still standing in the water. The
+     * parent then resumes, the bot sinks, and S102 rebuilds the escape. Run AD/AE:
+     * {@code S102 escape water spd=0.000} at one fixed position for 40+ seconds.
+     *
+     * <p>Require the dry state to HOLD. Measured by wall clock rather than a tick counter so
+     * the check is idempotent — {@code isFinished()} is polled more than once per tick by the
+     * task chain, and a counter would advance 2–3× faster than real time (the same trap
+     * documented on {@code HolePillar.risenEnough}).
+     */
+    private static long drySinceMs;
+
+    /** How long the bot must be continuously dry-and-grounded before the escape counts. */
+    private static final long DRY_CONFIRM_MS = 750L;
+
     @Override
     public boolean isFinished() {
         AltoClef mod = AltoClef.getInstance();
-        return !mod.getPlayer().isTouchingWater() && mod.getPlayer().isOnGround();
+        if (mod.getPlayer() == null) return true;
+        boolean dry = !mod.getPlayer().isTouchingWater() && mod.getPlayer().isOnGround();
+        if (!dry) {
+            drySinceMs = 0;
+            return false;
+        }
+        long now = System.currentTimeMillis();
+        if (drySinceMs == 0) drySinceMs = now;
+        long dryFor = now - drySinceMs;
+        if (dryFor < DRY_CONFIRM_MS) return false;
+        // Observable: a fix with no log line is an unvalidatable fix. This fires ONCE per
+        // escape (the task is then finished), so it cannot flood.
+        Debug.logMessage("TESRUN2 S183 water escape confirmed dry for " + dryFor
+                + "ms at " + mod.getPlayer().getBlockX() + ","
+                + mod.getPlayer().getBlockY() + "," + mod.getPlayer().getBlockZ());
+        drySinceMs = 0;
+        return true;
     }
 
     private static class EscapeFromWaterGoal implements Goal {

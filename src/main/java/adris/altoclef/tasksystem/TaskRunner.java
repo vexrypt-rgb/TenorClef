@@ -98,6 +98,10 @@ public class TaskRunner {
         return active;
     }
 
+    public java.util.List<TaskChain> getChains() {
+        return java.util.Collections.unmodifiableList(chains);
+    }
+
     public TaskChain getCurrentTaskChain() {
         return cachedCurrentTaskChain;
     }

@@ -2179,7 +2179,10 @@ public class ModernSpeedrunTask extends Task {
             if (active instanceof TimeoutWanderTask && !active.isFinished()) {
                 return active;
             }
-            return new TimeoutWanderTask();
+            // S210: store it. An unstored wander was re-created every tick with active=null
+            // (CHILD Construct<->- flicker + S111 after the S200 escape in run ironregate).
+            active = new TimeoutWanderTask();
+            return active;
         }
 
         // S164 — pair-agnostic ping-pong throttle (see the SWAP_WINDOW_TICKS field comment).

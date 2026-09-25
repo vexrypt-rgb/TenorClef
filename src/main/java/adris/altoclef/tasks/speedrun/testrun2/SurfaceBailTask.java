@@ -106,8 +106,6 @@ public class SurfaceBailTask extends Task {
         noClimb = 0;
         deadTicks = 0;
         lastY = Integer.MIN_VALUE;
-        giveUpCool = 0;
-        giveUps = 0;
         retarget(AltoClef.getInstance());
     }
 
@@ -162,6 +160,12 @@ public class SurfaceBailTask extends Task {
         } catch (Throwable t) {
             return false;
         }
+    }
+
+    private static boolean hasPick(AltoClef mod) {
+        var inv = mod.getItemStorage();
+        return inv.getItemCount(net.minecraft.item.Items.WOODEN_PICKAXE) + inv.getItemCount(net.minecraft.item.Items.STONE_PICKAXE)
+                + inv.getItemCount(net.minecraft.item.Items.IRON_PICKAXE) + inv.getItemCount(net.minecraft.item.Items.DIAMOND_PICKAXE) > 0;
     }
 
     /** Anything the bot could pillar with, or at least dig by hand and re-place. */
@@ -245,6 +249,13 @@ public class SurfaceBailTask extends Task {
 
     private void retarget(AltoClef mod) {
         BlockPos dest = findSky(mod);
+        // S217: with no open sky in reach, hopping between air pockets never gains height
+        // (helmcap: 30 min at y=8-13 after a deep-lava portal). Dig up with baritone instead.
+        if ((dest == null || !openSky(mod, dest)) && hasPick(mod)) {
+            inner = new adris.altoclef.tasks.movement.GetToYTask(Math.max(66, mod.getPlayer().getBlockY() + 1));
+            T2Log.force("S217", "surface-bail dig up from y=" + mod.getPlayer().getBlockY());
+            return;
+        }
         if (dest != null && dest.getY() != mod.getPlayer().getBlockY()) {
             inner = new GetToBlockTask(dest);
             Debug.logMessage("TESRUN2 surface-bail dest=" + dest);

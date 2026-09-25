@@ -2467,7 +2467,7 @@ public class ModernSpeedrunTask extends Task {
             // Only intervene when we are actually wedged on the water/gravel hunt;
             // leaving a healthy child alone avoids thrashing the task tree.
             boolean wedged = cn.contains("Water") || cn.contains("Flint") || cn.contains("Gravel")
-                    || cn.contains("Collect") || stillTicks > 20 * 15;
+                    || cn.contains("Collect") || cn.contains("EnterNetherPortal") || stillTicks > 20 * 15; // S224: a lit portal enters in seconds; 20s+ with no ignition item means it is unlit
             if (wedged) {
                 // NOTE: stick() deliberately swallows non-portal requests while a
                 // ConstructNetherPortalBucketTask is running (line ~934). That is exactly

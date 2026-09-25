@@ -508,7 +508,8 @@ public class ModernSpeedrunTask extends Task {
         if (mod.getPlayer() == null) return null;
         Task r;
         try {
-            r = onTickInner(mod);
+            Task esc = progressWatchdog(mod);
+            r = esc != null ? esc : onTickInner(mod);
         } catch (Throwable t) {
             T2Log.warn("E199", "onTick crash " + t.getClass().getSimpleName() + ": " + t.getMessage());
             r = active;
@@ -527,6 +528,67 @@ public class ModernSpeedrunTask extends Task {
                     + " child=" + (active == null ? "-" : active.getClass().getSimpleName()));
         } catch (Throwable ignored) {}
         return r;
+    }
+
+    /**
+     * S200. One generic "no progress" rule instead of another pairwise loop guard.
+     *
+     * Runs fix9/fix10 each lost minutes to a different recovery pair (HolePillar <->
+     * SurfaceBail, air-pocket ping-pong, jump-stuck <-> wander); every earlier guard only
+     * knew about the pair it was written for. Progress here is task-agnostic: the bot moved
+     * PROGRESS_DIST blocks from the anchor, or its inventory item count changed. If neither
+     * happens for NO_PROGRESS_TICKS, force a different kind of action for ESCAPE_TICKS:
+     * dig up with Baritone when there is no sky above, otherwise wander somewhere new.
+     */
+    private static final int NO_PROGRESS_TICKS = 20 * 45;
+    private static final int ESCAPE_TICKS = 20 * 20;
+    private static final double PROGRESS_DIST = 4.0;
+    private BlockPos wdAnchor;
+    private int wdItems = -1;
+    private int wdTicks;
+    private int wdEscapeTicks;
+    private Task wdEscape;
+
+    private Task progressWatchdog(AltoClef mod) {
+        if (phase == Phase.END || phase == Phase.DONE
+                || active instanceof ConstructNetherPortalBucketTask
+                || active instanceof adris.altoclef.tasks.speedrun.testrun2.combat.AnyWeaponCombatTask) {
+            wdAnchor = null;
+            wdEscape = null;
+            return null;
+        }
+        BlockPos p = mod.getPlayer().getBlockPos();
+        int items = 0;
+        var inv = mod.getPlayer().getInventory();
+        for (int i = 0; i < inv.size(); i++) items += inv.getStack(i).getCount();
+
+        if (wdEscape != null) {
+            if (--wdEscapeTicks > 0 && !wdEscape.isFinished()) return wdEscape;
+            T2Log.force("S200", "escape done " + wdEscape.getClass().getSimpleName() + " now @" + p.toShortString());
+            wdEscape = null;
+            wdAnchor = null;
+        }
+        if (wdAnchor == null || items != wdItems
+                || !p.isWithinDistance(wdAnchor, PROGRESS_DIST)) {
+            wdAnchor = p;
+            wdItems = items;
+            wdTicks = 0;
+            return null;
+        }
+        if (++wdTicks < NO_PROGRESS_TICKS) return null;
+
+        boolean dark = mod.getWorld().getLightLevel(net.minecraft.world.LightType.SKY, p.up()) <= 0;
+        boolean overworld = WorldHelper.getCurrentDimension() == Dimension.OVERWORLD;
+        wdEscape = dark && overworld
+                ? new adris.altoclef.tasks.movement.GetToYTask(Math.min(70, p.getY() + 24))
+                : new TimeoutWanderTask(24);
+        wdEscapeTicks = ESCAPE_TICKS;
+        wdTicks = 0;
+        active = null;
+        T2Log.warn("S200", "no progress " + (NO_PROGRESS_TICKS / 20) + "s ph=" + phase + " @" + p.toShortString()
+                + " child=" + (active == null ? "-" : active.getClass().getSimpleName())
+                + " -> " + wdEscape.getClass().getSimpleName());
+        return wdEscape;
     }
 
     /**

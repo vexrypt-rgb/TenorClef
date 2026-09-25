@@ -141,6 +141,37 @@ public class MobDefenseChain extends SingleTaskChain {
         return cachedLastPriority;
     }
 
+    // S222: MAX_ENGAGE_MS only bounded the "annoying hostiles" branch. The lock-on chase
+    // (needsChangeOnAttack) and the runaway branches had no budget at all, so run carrytable
+    // idled the run task for ~4 minutes chasing a bouncing magma cube until it killed us --
+    // and T2Deadman (S214) counts a non-user chain as healthy, so nothing noticed.
+    // Bound ANY continuous hold; only real low-HP danger may break the cooldown.
+    private static final long MAX_HOLD_MS = 40_000L;
+    private static final long HOLD_COOLDOWN_MS = 20_000L;
+    private long holdStartMs = 0;
+    private long holdCooldownUntilMs = 0;
+
+    private float S222holdBudget(float pri) {
+        AltoClef mod = AltoClef.getInstance();
+        long now = System.currentTimeMillis();
+        boolean lowHp = mod.getPlayer() != null && mod.getPlayer().getHealth() <= 6;
+        if (pri <= 0 || Float.isInfinite(pri)) { holdStartMs = 0; return pri; }
+        if (holdCooldownUntilMs > now && !lowHp) { clearEngagement(mod); return 0; }
+        if (holdStartMs == 0) holdStartMs = now;
+        if (now - holdStartMs > MAX_HOLD_MS && !lowHp) {
+            T2Log.warn("S222", "mob-defense held priority " + (now - holdStartMs) / 1000 + "s pri=" + pri
+                    + " task=" + (mainTask == null ? "-" : mainTask.getClass().getSimpleName())
+                    + " target=" + (lockedOnEntity == null ? "-" : lockedOnEntity.getType().getTranslationKey())
+                    + " - forcing hand-back");
+            holdStartMs = 0;
+            holdCooldownUntilMs = now + HOLD_COOLDOWN_MS;
+            engageStartMs = 0;
+            clearEngagement(mod);
+            return 0;
+        }
+        return pri;
+    }
+
     private void stopShielding(AltoClef mod) {
         if (shielding) {
             ItemStack cursor = StorageHelper.getItemStackInCursorSlot();

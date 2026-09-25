@@ -79,6 +79,10 @@ public class ModernSpeedrunTask extends Task {
      * and the bot walked into a fortress bare-headed — E110 at 9:51 in the last run.
      */
     private int goldHelmTicks;
+    /** S193 nether climb hysteresis: stall counter, best Y reached, and give-up cooldown. */
+    private int netherClimbStallTicks;
+    private int netherClimbBestY = Integer.MIN_VALUE;
+    private int netherClimbCooldown;
     private int lastInvHash;
     private final Set<BlockPos> looted = new HashSet<>();
     private boolean usedCloser;
@@ -1753,18 +1757,38 @@ public class ModernSpeedrunTask extends Task {
             if (gold < 5) {
                 T2Log.warn("E96", "need 5 gold for helm");
                 // Stay high. CollectGoldIngot loves lava-lake ore.
-                if (mod.getPlayer().getBlockY() < 48) {
+                // S191: a Y level, not the exact block 12 overhead. That block is usually
+                // netherrack, so GoalBlock was unreachable — one run sat at 27,47,26 for 302s
+                // trying to reach 27,59,26 — and the goal moved with every step.
+                // S193: with hysteresis. Start below 48, keep climbing until 52. Live run
+                // fix4 flipped GetToY(52) <-> CollectGold every few seconds at y=47/48 for
+                // 2 min because the climb was dropped the moment y reached 48. A climb that
+                // makes no height for 30s is abandoned for 60s so the gold can still be mined.
+                int ny = mod.getPlayer().getBlockY();
+                if (netherClimbCooldown > 0) netherClimbCooldown--;
+                boolean climbing = active instanceof adris.altoclef.tasks.movement.GetToYTask
+                        && !active.isFinished();
+                if (netherClimbCooldown <= 0 && (ny < 48 || (climbing && ny < 52))) {
+                    if (ny > netherClimbBestY) {
+                        netherClimbBestY = ny;
+                        netherClimbStallTicks = 0;
+                    } else if (++netherClimbStallTicks > 20 * 30) {
+                        T2Log.warn("S193", "nether climb stalled at y=" + ny
+                                + " for 30s - mining gold here for 60s");
+                        netherClimbCooldown = 20 * 60;
+                        netherClimbStallTicks = 0;
+                        netherClimbBestY = Integer.MIN_VALUE;
+                        return TaskCatalogue.getItemTask(Items.GOLD_INGOT, 5);
+                    }
                     T2History.note("WHY nether: climb off lava before gold");
                     try {
-                        // S191: a Y level, not the exact block 12 overhead. That block is
-                        // usually netherrack, so GoalBlock was unreachable — one run sat at
-                        // 27,47,26 for 302s trying to reach 27,59,26 — and the goal moved
-                        // with every step. y=52 clears the y<48 gate from anywhere.
                         return new adris.altoclef.tasks.movement.GetToYTask(52);
                     } catch (Throwable ignored) {
                         return new TimeoutWanderTask();
                     }
                 }
+                netherClimbStallTicks = 0;
+                netherClimbBestY = Integer.MIN_VALUE;
                 return TaskCatalogue.getItemTask(Items.GOLD_INGOT, 5);
             }
             // E96 SOLVER. We have the gold but the helmet craft is not completing —

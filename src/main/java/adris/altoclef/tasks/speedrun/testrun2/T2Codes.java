@@ -367,6 +367,15 @@ public final class T2Codes {
      * ResetSignal disarms the watchdog until the next onStart.
      */
     public static final String S192_AUTORUN_AFTER_REROLL = "S192";
+
+    /**
+     * S193 — CLIMB GATE WITHOUT HYSTERESIS (regression from S191). nether() started the
+     * GetToYTask(52) climb below y=48 and dropped it as soon as y reached 48, so CollectGold
+     * stepped back to 47 and the climb restarted. Live run fix4: GetToY <-> CollectGold every
+     * few seconds at -25,47/48,-5 for 2 min. Now: start below 48, continue to 52; a climb with
+     * no height gain for 30s is abandoned for 60s and the gold is mined where the bot stands.
+     */
+    public static final String S193_NETHER_CLIMB_HYSTERESIS = "S193";
     public static final String E132_SHAFT_STUCK = "E132";
     public static final String E133_PILLAR_PINGPONG = "E133";
     public static final String S139_PILLAR_RISE_HOLD = "S139";

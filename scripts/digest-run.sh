@@ -33,7 +33,8 @@ function emit(line,   key) {
     ts = ""; if (match($0, /^\[[0-9:]+\]/)) ts = substr($0, RSTART, RLENGTH)
     line = $0
     # Drop noise and duplicate channels.
-    if (line ~ /\[CHAT\] \[TenorClef\]/) next
+    # T2 [NOW] heartbeats exist only on the chat channel; every other chat line is a copy.
+    if (line ~ /\[CHAT\] \[TenorClef\]/ && line !~ /T2 \[NOW\]/) next
     if (line ~ /T2 \[HIST\] [0-9:.]+ (FORCE|SOLVE|SNAP|\[[ES][0-9])/) next
     if (line ~ /FAR AWAY FROM PATH|Blacklist RESET|Saving region|Saved region|World save took|movements considered|Open set size|PathNode map size|nodes per second|Path goes for|Saving chunks for level|^[ \t]+at |STDOUT\]:[ \t]+at /) next
     if (line ~ /FabricLoader\/Mixin\) Error loading class|Reloading ResourceManager/) next

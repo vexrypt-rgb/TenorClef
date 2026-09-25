@@ -114,6 +114,7 @@ public final class T2Fault {
             case "S189" -> "harness worlds were HARDCORE: AutoWorldCreateMixin passed true as LevelInfo arg 3 (yarn calls it structures; vanilla passes hardcore there). Deaths made the bot a spectator that sank through blocks - the respawn free-fall behind S165/S169/S172. Now hardcore=false";
             case "S190" -> "water bail kept: an unfinished WaterBailTask is no longer replaced by the phase task (was a per-tick CollectIron/CraftInTable<->WaterBail ping-pong, 63 incidents, one 396s craft stall)";
             case "S191" -> "nether climb-off-lava now targets y=52 (GetToYTask) instead of the exact block 12 overhead, which was usually netherrack (302s stall at 27,47,26)";
+            case "S193" -> "nether climb stalled 30s with no height gain: climb abandoned for 60s and gold mined where the bot stands (climb otherwise continues from <48 up to 52)";
             case "E109b", "S109" -> "mining with a block in hand: force-equip the pick (S109 does this)";
             case "S130", "S131", "S132", "S133", "S134", "S135", "S136", "S137", "S138" ->
                     "pillar state machine: check ban column vs actual shaft column";

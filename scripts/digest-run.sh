@@ -57,3 +57,11 @@ function emit(line,   key) {
     if (keep) emit(ts " " substr(line, 1, 220))
 }
 END { flush() }'
+
+# FaultBook summary (run-summary.json): time lost per fault code, costliest first.
+SUM="$ROOT/versions/1.16.1/run/altoclef/run-summary.json"
+if [ -f "$SUM" ] && [ "$SUM" -nt "$LOGF" -o "${1:-}" = "" ]; then
+    echo "--- FAULT SUMMARY ($(head -c 200 "$SUM" | grep -oE '"(outcome|run_s|lost_s)":"[^"]*"' | head -3 | tr '\n' ' '))"
+    grep -oE '\{"code":"[^"]*","sev":"[^"]*","count":"[^"]*","recovered":"[^"]*","lost_s":"[^"]*"' "$SUM" \
+        | sed -E 's/\{"code":"([^"]*)","sev":"([^"]*)","count":"([^"]*)","recovered":"([^"]*)","lost_s":"([^"]*)"/  \1 \2 x\3 rec=\4 lost=\5s/' | head -12
+fi

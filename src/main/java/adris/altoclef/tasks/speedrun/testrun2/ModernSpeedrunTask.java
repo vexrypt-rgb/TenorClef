@@ -82,6 +82,7 @@ public class ModernSpeedrunTask extends Task {
      */
     private int goldHelmTicks;
     private int helmGoldHuntTicks;
+    private boolean starveHunt;
     private boolean helmLatched;
     /** S193 nether climb hysteresis: stall counter, best Y reached, and give-up cooldown. */
     private int netherClimbStallTicks;
@@ -459,6 +460,7 @@ public class ModernSpeedrunTask extends Task {
         portalAttempts = 0;
         goldHelmTicks = 0;
         helmLatched = false;
+        starveHunt = false;
         helmGoldHuntTicks = 0;
         lastIronN = -1;
         woodForSticksTicks = 0;
@@ -1854,6 +1856,16 @@ public class ModernSpeedrunTask extends Task {
 
     private Task portal(AltoClef mod) {
         if (WorldHelper.getCurrentDimension() == Dimension.NETHER) return null;
+        // S218: the starve branch below sat after the construct latch, so a long portal build
+        // never ate (deepgate: hun=2 for 8+ min, 161x E103, bread branch 0x). Food first.
+        int hun = 20;
+        try { hun = mod.getPlayer().getHungerManager().getFoodLevel(); } catch (Throwable ignored) {}
+        if (hun <= 6 && food(mod) < 1 && !starveHunt) {
+            starveHunt = true;
+            T2Log.force("S218", "hun=" + hun + " no food - hunting before portal");
+        }
+        if (starveHunt && food(mod) >= 10) starveHunt = false;
+        if (starveHunt) return new adris.altoclef.tasks.resources.CollectFoodTask(10);
         if (active instanceof ConstructNetherPortalBucketTask && !active.isFinished()) {
             return active;
         }

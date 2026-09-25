@@ -1114,10 +1114,7 @@ public class Agent {
     }
 
     public int computeFallDamage(double fallDistance, float damageMultiplier) {
-    	if (TungstenModDataContainer.player == null) return 0;
-    	if (TungstenModDataContainer.player.getType().isIn(null /*FALL_DAMAGE_IMMUNE*/)) {
-    		return 0;
-    	}
+        // 1.16.1: FALL_DAMAGE_IMMUNE entity-type tag is unavailable (null) — never call isIn(null).
         float f = this.jumpBoost < 0 ? 0.0F : (float)(this.jumpBoost + 1);
         return MathHelper.ceil((fallDistance - 3.0f - f) * damageMultiplier);
     }
@@ -1504,9 +1501,11 @@ public class Agent {
                         // Snap client position to simulation value (may cause rubber-banding on servers)
                         player.updatePosition(this.posX, this.posY, this.posZ);
                     } else {
-                        // Stop executor so path recalculates from real server position
-                        TungstenModDataContainer.EXECUTOR.stop = true;
-                        TungstenModDataContainer.PATHFINDER.stop.set(true);
+                        // 1.16.1: paths are partly kinematic; real physics always drifts.
+                        // Do NOT stop the executor â€” keep playing inputs open-loop.
+                        if (kaptainwutax.tungsten.TungstenConfig.get().verboseDebugLogging) {
+                            Debug.logMessage("[Agent.compare] drift=" + String.format(java.util.Locale.ROOT, "%.3f", drift) + " (ignored, open-loop)");
+                        }
                     }
                 }
                 if (TungstenModRenderContainer.ERROR.size() > 1000) TungstenModRenderContainer.ERROR.clear();
@@ -1521,7 +1520,7 @@ public class Agent {
                 player.getVelocity().x == this.velX ? "x" : this.velX,
                 player.getVelocity().y == this.velY ? "y" : this.velY,
                 player.getVelocity().z == this.velZ ? "z" : this.velZ));
-            // Do not call setVelocity() — that overrides server-authoritative velocity and
+            // Do not call setVelocity() â€” that overrides server-authoritative velocity and
             // causes position divergence leading to rubber-band teleports.
             // Log the mismatch only; path will self-correct on next recalc if needed.
             if (TungstenModDataContainer.EXECUTOR.isRunning()) {
@@ -1720,8 +1719,9 @@ public class Agent {
             values.add(String.format("First Update mismatch %s vs %s", ((AccessorEntity)player).getFirstUpdate(), this.firstUpdate));
         }
 
-        if(!this.submergedFluids.equals(((AccessorEntity)player).getSubmergedFluidTag())) {
-            values.add(String.format("Submerged Fluids mismatch %s vs %s", ((AccessorEntity)player).getSubmergedFluidTag(), this.submergedFluids));
+        Tag<Fluid> _ps = ((AccessorEntity)player).getSubmergedFluidTagRaw();
+        if ((_ps == null && !this.submergedFluids.isEmpty()) || (_ps != null && !this.submergedFluids.contains(_ps))) {
+            values.add(String.format("Submerged Fluids mismatch %s vs %s", _ps, this.submergedFluids));
         }
 
         if(!values.isEmpty() && TungstenConfig.get().verboseDebugLogging) {
@@ -1764,7 +1764,7 @@ public class Agent {
         agent.mulZ = ((AccessorEntity)player).getMovementMultiplier().z;
         agent.fluidHeight.put(FluidTags.WATER, player.getFluidHeight(FluidTags.WATER));
         agent.fluidHeight.put(FluidTags.LAVA, player.getFluidHeight(FluidTags.LAVA));
-        agent.submergedFluids.addAll(((AccessorEntity)player).getSubmergedFluidTag());
+        Tag<Fluid> _sub = ((AccessorEntity)player).getSubmergedFluidTagRaw(); if (_sub != null) agent.submergedFluids.add(_sub);
         agent.firstUpdate = ((AccessorEntity)player).getFirstUpdate();
         agent.box = player.getBoundingBox();
         agent.dimensions = player.getDimensions(player.getPose());
@@ -1772,7 +1772,7 @@ public class Agent {
         agent.onGround = player.isOnGround();
         agent.sleeping = player.isSleeping();
         agent.sneaking = player.isSneaky();
-        agent.hunger = player.getHungerManager();
+        agent.hunger = new HungerManager(); // never share live player HungerManager with sim agents
         agent.sprinting = player.isSprinting();
         agent.swimming = player.isSwimming();
         agent.fallFlying = player.abilities.flying;
@@ -1791,6 +1791,9 @@ public class Agent {
         agent.dolphinsGrace = player.hasStatusEffect(StatusEffects.DOLPHINS_GRACE) ? player.getStatusEffect(StatusEffects.DOLPHINS_GRACE).getAmplifier() : -1;
         agent.levitation = player.hasStatusEffect(StatusEffects.LEVITATION) ? player.getStatusEffect(StatusEffects.LEVITATION).getAmplifier() : -1;
         agent.movementSpeed = player.getMovementSpeed();
+        if (agent.movementSpeed < 0.05f) {
+            agent.movementSpeed = 0.1f;
+        }
         agent.airStrafingSpeed = 0.06f;
         agent.jumpingCooldown = ((AccessorLivingEntity)player).getJumpingCooldown();
         agent.hunger.setFoodLevel(player.getHungerManager().getFoodLevel());
@@ -1833,7 +1836,7 @@ public class Agent {
         agent.mulZ = ((AccessorEntity)player).getMovementMultiplier().z;
         agent.fluidHeight.put(FluidTags.WATER, player.getFluidHeight(FluidTags.WATER));
         agent.fluidHeight.put(FluidTags.LAVA, player.getFluidHeight(FluidTags.LAVA));
-        agent.submergedFluids.addAll(((AccessorEntity)player).getSubmergedFluidTag());
+        Tag<Fluid> _sub = ((AccessorEntity)player).getSubmergedFluidTagRaw(); if (_sub != null) agent.submergedFluids.add(_sub);
         agent.firstUpdate = ((AccessorEntity)player).getFirstUpdate();
         agent.box = player.getBoundingBox();
         agent.dimensions = player.getDimensions(player.getPose());
@@ -1841,7 +1844,7 @@ public class Agent {
         agent.onGround = player.isOnGround();
         agent.sleeping = player.isSleeping();
         agent.sneaking = player.isSneaky();
-        agent.hunger = player.getHungerManager();
+        agent.hunger = new HungerManager(); // never share live player HungerManager with sim agents
         agent.sprinting = player.isSprinting();
         agent.swimming = player.isSwimming();
         agent.fallFlying = player.abilities.flying;
@@ -1860,6 +1863,9 @@ public class Agent {
         agent.dolphinsGrace = player.hasStatusEffect(StatusEffects.DOLPHINS_GRACE) ? player.getStatusEffect(StatusEffects.DOLPHINS_GRACE).getAmplifier() : -1;
         agent.levitation = player.hasStatusEffect(StatusEffects.LEVITATION) ? player.getStatusEffect(StatusEffects.LEVITATION).getAmplifier() : -1;
         agent.movementSpeed = player.getMovementSpeed();
+        if (agent.movementSpeed < 0.05f) {
+            agent.movementSpeed = 0.1f;
+        }
         agent.airStrafingSpeed = 0.06f;
         agent.jumpingCooldown = ((AccessorLivingEntity)player).getJumpingCooldown();
         agent.hunger.setFoodLevel(player.getHungerManager().getFoodLevel());
@@ -1902,7 +1908,7 @@ public class Agent {
         agent.mulZ = ((AccessorEntity)player).getMovementMultiplier().z;
         agent.fluidHeight.put(FluidTags.WATER, player.getFluidHeight(FluidTags.WATER));
         agent.fluidHeight.put(FluidTags.LAVA, player.getFluidHeight(FluidTags.LAVA));
-        agent.submergedFluids.addAll(((AccessorEntity)player).getSubmergedFluidTag());
+        Tag<Fluid> _sub = ((AccessorEntity)player).getSubmergedFluidTagRaw(); if (_sub != null) agent.submergedFluids.add(_sub);
         agent.firstUpdate = ((AccessorEntity)player).getFirstUpdate();
         agent.box = player.getBoundingBox();
         agent.dimensions = player.getDimensions(player.getPose());
@@ -1910,7 +1916,7 @@ public class Agent {
         agent.onGround = player.isOnGround();
         agent.sleeping = player.isSleeping();
         agent.sneaking = player.isSneaky();
-        agent.hunger = player.getHungerManager();
+        agent.hunger = new HungerManager(); // never share live player HungerManager with sim agents
         agent.sprinting = player.isSprinting();
         agent.swimming = player.isSwimming();
         agent.fallFlying = player.abilities.flying;
@@ -1929,6 +1935,9 @@ public class Agent {
         agent.dolphinsGrace = player.hasStatusEffect(StatusEffects.DOLPHINS_GRACE) ? player.getStatusEffect(StatusEffects.DOLPHINS_GRACE).getAmplifier() : -1;
         agent.levitation = player.hasStatusEffect(StatusEffects.LEVITATION) ? player.getStatusEffect(StatusEffects.LEVITATION).getAmplifier() : -1;
         agent.movementSpeed = player.getMovementSpeed();
+        if (agent.movementSpeed < 0.05f) {
+            agent.movementSpeed = 0.1f;
+        }
         agent.airStrafingSpeed = 0.06f;
         agent.jumpingCooldown = ((AccessorLivingEntity)player).getJumpingCooldown();
         agent.hunger.setFoodLevel(player.getHungerManager().getFoodLevel());
@@ -1998,8 +2007,15 @@ public class Agent {
         agent.levitation = other.levitation;
         agent.depthStrider = other.depthStrider;
         agent.movementSpeed = other.movementSpeed;
+        if (agent.movementSpeed < 0.05f) {
+            agent.movementSpeed = 0.1f;
+        }
         agent.airStrafingSpeed = other.airStrafingSpeed;
         agent.jumpingCooldown = other.jumpingCooldown;
+        // Apply PathInput keys into movementVector before first physics tick.
+        // Without this, forwardSpeed stays at the parent's (often 0) value when
+        // something short-circuits, and dry-land sim reports disp=0.0.
+        agent.input.tick();
         //TODO: frame.ticksToNextAutojump
         return agent;
     }
@@ -2013,4 +2029,63 @@ public class Agent {
         return of(agent, input.forward, input.back, input.left, input.right, input.jump, input.sneak, input.sprint, input.pitch, input.yaw);
     }
 
+
+    /**
+     * Open-loop kinematic fallback when a full physics tick yields ~0 horizontal displacement.
+     * Used by PathFinder Walk inject and Node zero-disp repair (1.16.1).
+     */
+    public static Agent kinematicStep(Agent base, PathInput input, WorldView world) {
+        Agent a = Agent.of(base, input);
+        double speed = a.keySprint ? 0.28 : 0.22;
+        if (a.keySneak) {
+            speed *= 0.3;
+        }
+        double dx = 0.0;
+        double dz = 0.0;
+        float yawRad = a.yaw * ((float) Math.PI / 180.0f);
+        float sin = MathHelper.sin(yawRad);
+        float cos = MathHelper.cos(yawRad);
+        if (a.keyForward) {
+            dx += (double) (-sin) * speed;
+            dz += (double) cos * speed;
+        }
+        if (a.keyBack) {
+            dx -= (double) (-sin) * speed;
+            dz -= (double) cos * speed;
+        }
+        if (a.keyLeft) {
+            dx += (double) cos * speed;
+            dz += (double) sin * speed;
+        }
+        if (a.keyRight) {
+            dx -= (double) cos * speed;
+            dz -= (double) sin * speed;
+        }
+        if (a.keyJump && a.onGround) {
+            a.velY = 0.42;
+            a.onGround = false;
+        }
+        a.posX += dx;
+        a.posZ += dz;
+        a.velX = dx;
+        a.velZ = dz;
+        if (!a.onGround) {
+            a.velY -= 0.08;
+            a.posY += a.velY;
+            a.velY *= 0.98;
+        }
+        BlockPos below = new BlockPos(MathHelper.floor(a.posX), MathHelper.floor(a.posY - 0.01), MathHelper.floor(a.posZ));
+        BlockState st = world.getBlockState(below);
+        VoxelShape shape = st.getCollisionShape(world, below);
+        if (!st.isAir() && !shape.isEmpty()) {
+            double top = (double) below.getY() + shape.getMax(Direction.Axis.Y);
+            if (a.posY < top + 0.01) {
+                a.posY = top;
+                a.velY = 0.0;
+                a.onGround = true;
+            }
+        }
+        a.box = kaptainwutax.tungsten.compat.McCompat.getBoxAt(a.dimensions, a.posX, a.posY, a.posZ);
+        return a;
+    }
 }

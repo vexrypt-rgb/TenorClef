@@ -14,7 +14,6 @@ import adris.altoclef.util.helpers.WorldHelper;
 import adris.altoclef.util.progresscheck.MovementProgressChecker;
 import baritone.api.schematic.AbstractSchematic;
 import baritone.api.schematic.ISchematic;
-import baritone.api.utils.BlockOptionalMeta;
 import baritone.api.utils.input.Input;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -212,7 +211,7 @@ public class PlaceBlockTask extends Task implements ITaskRequiresGrounded {
                 }
                 Debug.logInternal("Failed to find throwaway block");
                 // No throwaways available!!
-                return new BlockOptionalMeta(Blocks.COBBLESTONE).getAnyBlockState();
+                return Blocks.COBBLESTONE.getDefaultState();
             }
             // Don't care.
             return blockState;

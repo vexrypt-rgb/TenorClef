@@ -44,7 +44,17 @@ rootProject.name = "altoclef"
 rootProject.buildFileName = "root.gradle.kts"
 
 // Full remap chain must be included for preprocess (even if we mostly build 1.16.1 / 1.21.11).
-listOf(
+//
+// NOTE: the chain CANNOT be trimmed to speed up a single-version build.
+// PreprocessPlugin.apply() does parent.extensions.getByType<RootPreprocessExtension>()
+// for every non-root project, so each version module requires its PARENT project to
+// have run the root `preprocess {}` block. Dropping ancestors => NullPointerException
+// at PreprocessPlugin.apply(PreprocessPlugin.kt:60). Verified on 1.16.1 both with a
+// lone node and with a trimmed two-node chain.
+//
+// If 16-minute builds become intolerable, prefer REDUCING BUILD COUNT (batch edits,
+// javap-verify before building, longer runs between builds) over trimming the graph.
+val versions = listOf(
     "1.21.11",
     "1.21.1",
     "1.21",
@@ -59,7 +69,9 @@ listOf(
     "1.17.1",
     "1.16.5",
     "1.16.1"
-).forEach { version ->
+)
+
+versions.forEach { version ->
     // Gradle 9+ refuses include() when projectDir is missing (clean CI / fresh clone).
     // Preprocess fills sources later; empty dirs are enough to configure.
     val versionDir = file("versions/$version")

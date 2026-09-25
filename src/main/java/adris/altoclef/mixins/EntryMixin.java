@@ -10,6 +10,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+/**
+ * Publishes {@link TitleScreenEntryEvent} once per JVM.
+ *
+ * <p>The headless auto-world work lives in {@code AutoWorldCreateMixin}, which also
+ * injects into {@code TitleScreen.init()} and runs at TAIL — after this HEAD hook, so
+ * "Global Init" is always logged before any world is created.
+ */
 @Mixin(TitleScreen.class)
 public class EntryMixin {
 
@@ -25,4 +32,3 @@ public class EntryMixin {
         }
     }
 }
-

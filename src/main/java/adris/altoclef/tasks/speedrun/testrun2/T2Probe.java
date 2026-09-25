@@ -30,6 +30,13 @@ public final class T2Probe {
     private static long lastPhaseAt;
     private static String lastPhase = "";
     private static int yPeak;
+    /** Consecutive ticks spent mining with a non-pick equipped. See E109b. */
+    private static int wrongToolTicks;
+    /**
+     * Ticks elapsed in the current phase. Distinct from childAge: this counts from the
+     * last phase change, so it is the right thing to gate start-up transients on.
+     */
+    private static int phaseTicks;
 
     private T2Probe() {}
 
@@ -44,6 +51,8 @@ public final class T2Probe {
         lastInv = 0;
         lastPhase = "";
         yPeak = 0;
+        wrongToolTicks = 0;
+        phaseTicks = 0;
     }
 
     public static void tick(AltoClef mod, String phase, Task child) {
@@ -91,6 +100,9 @@ public final class T2Probe {
             }
             lastPhase = phase;
             lastPhaseAt = now;
+            phaseTicks = 0;
+        } else {
+            phaseTicks++;
         }
 
         // E100 jump in place
@@ -123,11 +135,22 @@ public final class T2Probe {
         }
 
         // E104 GUI
+        //
+        // S185: exclude TIME-BASED screens. A furnace is SUPPOSED to be open for longer than
+        // 8s — smelting one item takes 10s — so counting it here fired E104 on correct
+        // behaviour (run AG: 11 false alarms while the bot was legitimately smelting, each one
+        // re-arming the counter and burying the real signal). This code is a genuine stall
+        // indicator only for a screen that should have closed by now.
         boolean screen = false;
+        boolean slowScreen = false;
         try {
             var mc = MinecraftClient.getInstance();
-            screen = mc != null && mc.currentScreen != null
-                    && !(mc.currentScreen instanceof net.minecraft.client.gui.screen.ChatScreen);
+            if (mc != null && mc.currentScreen != null) {
+                String sn = mc.currentScreen.getClass().getSimpleName();
+                slowScreen = sn.contains("Furnace") || sn.contains("Brew");
+                screen = !(mc.currentScreen instanceof net.minecraft.client.gui.screen.ChatScreen)
+                        && !slowScreen;
+            }
         } catch (Throwable ignored) {}
         if (screen) guiTicks++;
         else guiTicks = 0;
@@ -178,22 +201,41 @@ public final class T2Probe {
                     + count(mod, Items.NETHERITE_PICKAXE);
             if (picks < 1) {
                 fire(T2Codes.E109_NO_TOOL, "mine/collect with no pick child=" + childName);
+                wrongToolTicks = 0;
             } else {
+                boolean eqPick = false;
                 try {
                     net.minecraft.item.Item eq = adris.altoclef.util.helpers.StorageHelper
                             .getItemStackInSlot(adris.altoclef.util.slots.PlayerSlot.getEquipSlot())
                             .getItem();
-                    boolean eqPick = eq == Items.WOODEN_PICKAXE || eq == Items.STONE_PICKAXE
+                    eqPick = eq == Items.WOODEN_PICKAXE || eq == Items.STONE_PICKAXE
                             || eq == Items.IRON_PICKAXE || eq == Items.GOLDEN_PICKAXE
                             || eq == Items.DIAMOND_PICKAXE || eq == Items.NETHERITE_PICKAXE;
-                    if (!eqPick) {
-                        fire(T2Codes.E109_FIST_WITH_PICK, "eq=" + eq.getTranslationKey()
-                                + " woodpick=" + count(mod, Items.WOODEN_PICKAXE)
-                                + " stonepick=" + count(mod, Items.STONE_PICKAXE)
-                                + " child=" + childName + " ph=" + phase);
-                    }
                 } catch (Throwable ignored) {}
+                // Only a real problem once it PERSISTS. Holding dirt for a tick while
+                // CollectIron sets up (or HolePillar just placed a block) is normal and
+                // used to spam this 32x per run with no solver behind it.
+                if (eqPick) {
+                    wrongToolTicks = 0;
+                } else {
+                    wrongToolTicks++;
+                    if (wrongToolTicks > 20 * 4) {
+                        try {
+                            net.minecraft.item.Item eq = adris.altoclef.util.helpers.StorageHelper
+                                    .getItemStackInSlot(adris.altoclef.util.slots.PlayerSlot.getEquipSlot())
+                                    .getItem();
+                            fire(T2Codes.E109_FIST_WITH_PICK, "eq=" + eq.getTranslationKey()
+                                    + " held=" + (wrongToolTicks / 20) + "s"
+                                    + " woodpick=" + count(mod, Items.WOODEN_PICKAXE)
+                                    + " stonepick=" + count(mod, Items.STONE_PICKAXE)
+                                    + " child=" + childName + " ph=" + phase);
+                        } catch (Throwable ignored) {}
+                        wrongToolTicks = 0;
+                    }
+                }
             }
+        } else {
+            wrongToolTicks = 0;
         }
 
         // E110 piglin, no gold
@@ -203,8 +245,12 @@ public final class T2Probe {
             fire(T2Codes.E110_PIGLIN_NAKED, "piglin near, no gold helm");
         }
 
-        // E111 null child
-        if (child == null && !"DONE".equals(phase) && !"END".equals(phase)) {
+        // E111 null child.
+        // Suppress the first second: the task tree is genuinely empty before the first
+        // tick resolves a child, which produced a guaranteed E111 at t=0:00.0 in EVERY
+        // run and drowned the real signal in the first lines of faults.log.
+        if (child == null && phaseTicks > 20
+                && !"DONE".equals(phase) && !"END".equals(phase)) {
             fire(T2Codes.E111_NULL_CHILD, "ph=" + phase);
         }
 

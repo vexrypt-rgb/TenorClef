@@ -14,6 +14,7 @@ import adris.altoclef.tasks.speedrun.beatgame.BeatMinecraftTask;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.ItemTarget;
 import adris.altoclef.util.helpers.StorageHelper;
+import adris.altoclef.tasks.speedrun.testrun2.T2Codes;
 import adris.altoclef.util.helpers.WorldHelper;
 import adris.altoclef.util.progresscheck.MovementProgressChecker;
 import adris.altoclef.util.time.TimerGame;
@@ -393,29 +394,61 @@ public class ConstructNetherPortalBucketTask extends Task {
         Debug.logMessage("Construct: hardResetBuildState (portalOrigin cleared)");
     }
 
+    /**
+     * Prefer a lava lake near the surface.
+     *
+     * S165: the nearest lake is often a deep one, and a deep lake means a 1x1 shaft straight
+     * down through the dark with no way back up. Two runs lost their entire kit that way —
+     * run Q dug 175,187 from y=71 to y=28 and was slain by a zombie at the bottom; run R was
+     * shot by a skeleton at y=34. Both had already reached PORTAL.
+     *
+     * Deep lakes are still allowed, just last: a bare ruined portal is not always available,
+     * and a bucket portal is still the most reliable build. Only the ORDER changes.
+     */
+    private static final int SAFE_LAKE_Y = 40;
+
     private BlockPos findLavaLake(AltoClef mod, BlockPos playerPos) {
         HashSet<BlockPos> alreadyExplored = new HashSet<>();
         double nearestSqDistance = Double.POSITIVE_INFINITY;
         BlockPos nearestLake = null;
+        double deepestFallbackSq = Double.POSITIVE_INFINITY;
+        BlockPos deepestFallback = null;
         List<BlockPos> lavas = mod.getBlockScanner().getKnownLocations(Blocks.LAVA);
 
         if (!lavas.isEmpty()) {
             for (BlockPos pos : lavas) {
                 if (alreadyExplored.contains(pos)) continue;
                 double sqDist = playerPos.getSquaredDistance(pos);
-                if (sqDist < nearestSqDistance) {
-                    int depth = getNumberOfBlocksAdjacent(alreadyExplored, pos);
-                    if (depth != 0) {
-                        Debug.logMessage("Found with depth " + depth);
-                        if (depth >= 12) {
-                            nearestSqDistance = sqDist;
-                            nearestLake = pos;
-                        }
+                // S165: was Math.max(...), which skipped any candidate that could not beat
+                // BOTH trackers at once. With two trackers that prunes a perfectly good deep
+                // fallback the moment a surface lake is found - and vice versa. Skip only
+                // when it can beat neither.
+                if (sqDist >= nearestSqDistance && sqDist >= deepestFallbackSq) continue;
+                int depth = getNumberOfBlocksAdjacent(alreadyExplored, pos);
+                if (depth == 0) continue;
+                Debug.logMessage("Found with depth " + depth);
+                if (depth < 12) continue;
+                if (pos.getY() >= SAFE_LAKE_Y) {
+                    if (sqDist < nearestSqDistance) {
+                        nearestSqDistance = sqDist;
+                        nearestLake = pos;
                     }
+                } else if (sqDist < deepestFallbackSq) {
+                    deepestFallbackSq = sqDist;
+                    deepestFallback = pos;
                 }
             }
         }
-        return nearestLake;
+        if (nearestLake != null) {
+            Debug.logMessage("T2 [" + T2Codes.S165_SURFACE_LAKE + "] lava lake at y="
+                    + nearestLake.getY() + " (surface, safe)");
+            return nearestLake;
+        }
+        if (deepestFallback != null) {
+            Debug.logMessage("T2 [" + T2Codes.S165_SURFACE_LAKE + "] only a deep lava lake at y="
+                    + deepestFallback.getY() + " - expect a long dark shaft");
+        }
+        return deepestFallback;
     }
 
     private int getNumberOfBlocksAdjacent(HashSet<BlockPos> alreadyExplored, BlockPos start) {

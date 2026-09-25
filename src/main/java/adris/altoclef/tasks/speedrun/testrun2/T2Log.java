@@ -72,8 +72,13 @@ public final class T2Log {
         try {
             wet = mod.getPlayer().isSubmergedInWater();
         } catch (Throwable ignored) {}
-        int iron = mod.getItemStorage().getItemCount(Items.IRON_INGOT)
-                + mod.getItemStorage().getItemCount(Items.RAW_IRON);
+        // `iron=` must mean IRON_INGOT and nothing else, in EVERY emitter, because
+        // `T2 [NOW]` uses that definition. The old form added RAW_IRON, which the
+        // preprocessor rewrites to IRON_ORE on 1.16.1, so the same label meant
+        // "ingots" on one line and "ingots + unmelted ore" on the next — see trap 9
+        // in the project memory. Ore gets its own label.
+        int iron = mod.getItemStorage().getItemCount(Items.IRON_INGOT);
+        int ore = mod.getItemStorage().getItemCount(Items.IRON_ORE);
         int pick = mod.getItemStorage().getItemCount(Items.IRON_PICKAXE);
         int water = mod.getItemStorage().getItemCount(Items.WATER_BUCKET);
         int lava = mod.getItemStorage().getItemCount(Items.LAVA_BUCKET);
@@ -89,6 +94,7 @@ public final class T2Log {
                 + " hun=" + hunger
                 + " wet=" + wet
                 + " iron=" + iron
+                + " ore=" + ore
                 + " pick=" + pick
                 + " w=" + water + " l=" + lava + " b=" + empty
                 + " fns=" + flint

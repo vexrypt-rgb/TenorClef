@@ -113,14 +113,23 @@ public final class T2History {
     }
 
     private static String snapshot(AltoClef mod, String phase, int x, int y, int z) {
-        int pick = 0, buck = 0, iron = 0, rods = 0, pearls = 0, eyes = 0;
+        int pick = 0, buck = 0, iron = 0, ironOre = 0, rods = 0, pearls = 0, eyes = 0;
         try {
             pick = mod.getItemStorage().getItemCount(Items.IRON_PICKAXE);
             buck = mod.getItemStorage().getItemCount(Items.BUCKET)
                     + mod.getItemStorage().getItemCount(Items.WATER_BUCKET)
                     + mod.getItemStorage().getItemCount(Items.LAVA_BUCKET);
-            iron = mod.getItemStorage().getItemCount(Items.IRON_INGOT)
-                    + mod.getItemStorage().getItemCount(Items.RAW_IRON);
+            // TRAP (fixed 2026-09-20). This used to be `IRON_INGOT + RAW_IRON` under the
+            // label "iron=", while ModernSpeedrunTask's T2 [NOW] line prints `iron=` as
+            // IRON_INGOT alone. On 1.16.1 the preprocessor rewrites RAW_IRON -> IRON_ORE,
+            // so the SAME field name meant two different things one line apart:
+            //   T2 [HIST] ... SNAP ... iron=19     <- 19 raw ore, 0 ingots
+            //   T2 [NOW]  ... iron=0               <- the actual ingot count
+            // Reading the SNAP line as "19 ingots" makes a stalled IRON phase look
+            // healthy and sends you hunting a phantom bug. Keep `iron=` ingots ONLY, and
+            // report unmelted ore separately as `ore=`.
+            iron = mod.getItemStorage().getItemCount(Items.IRON_INGOT);
+            ironOre = mod.getItemStorage().getItemCount(Items.IRON_ORE);
             rods = mod.getItemStorage().getItemCount(Items.BLAZE_ROD);
             pearls = mod.getItemStorage().getItemCount(Items.ENDER_PEARL);
             eyes = mod.getItemStorage().getItemCount(Items.ENDER_EYE);
@@ -139,7 +148,8 @@ public final class T2History {
                 + " sky=" + sky
                 + " wet=" + wet
                 + " ground=" + ground
-                + " pick=" + pick + " buck=" + buck + " iron=" + iron
+                + " pick=" + pick + " buck=" + buck
+                + " iron=" + iron + " ore=" + ironOre
                 + " rods=" + rods + " pearls=" + pearls + " eyes=" + eyes;
     }
 

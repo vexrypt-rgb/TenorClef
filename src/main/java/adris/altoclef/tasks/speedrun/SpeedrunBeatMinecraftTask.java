@@ -47,7 +47,7 @@ public class SpeedrunBeatMinecraftTask extends Task {
         public int blazeRodTarget = 7;
         /** When true, EarlyOverworld skips CollectFood (default false — food on unless skipfood). */
         public boolean skipFood = false;
-        public TungstenMovement.TravelMover mover = TungstenMovement.TravelMover.AUTO;
+        public TungstenMovement.TravelMover mover = TungstenMovement.TravelMover.BARITONE;
         public boolean verbose = false;
         /** One-liner chat HUD on phase change. */
         public boolean phaseChatHud = true;

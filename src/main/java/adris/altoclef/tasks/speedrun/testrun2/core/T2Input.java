@@ -13,9 +13,36 @@ public final class T2Input {
     private T2Input() {}
 
     public static void walkTurn() {
-        McCompat.setYaw(McCompat.playerYaw() + 70f);
+        Float turn = safeTurn();
+        if (turn == null) {
+            // Every heading drops more than 3 blocks or meets lava: standing still is the nudge.
+            McCompat.setMove(false, false);
+            hold = 0;
+            adris.altoclef.tasks.speedrun.testrun2.T2Log.warn("S187", "walk nudge suppressed: no safe heading");
+            return;
+        }
+        McCompat.setYaw(McCompat.playerYaw() + turn);
         McCompat.setMove(true, false);
         hold = 20 * 2;
+    }
+
+    /** S187: first ledge/lava-free turn, or null. Falls back to the old +70° if the probe fails. */
+    private static Float safeTurn() {
+        try {
+            var mod = adris.altoclef.AltoClef.getInstance();
+            var world = mod.getWorld();
+            var player = mod.getPlayer();
+            if (world == null || player == null) return 70f;
+            SafeHeading.Terrain terrain = (x, y, z) -> {
+                net.minecraft.util.math.BlockPos p = new net.minecraft.util.math.BlockPos(x, y, z);
+                net.minecraft.block.BlockState s = world.getBlockState(p);
+                if (s.getBlock() == net.minecraft.block.Blocks.LAVA) return SafeHeading.Cell.LAVA;
+                return s.getCollisionShape(world, p).isEmpty() ? SafeHeading.Cell.OPEN : SafeHeading.Cell.SOLID;
+            };
+            return SafeHeading.pickTurn(terrain, player.getX(), player.getY(), player.getZ(), McCompat.playerYaw());
+        } catch (Throwable t) {
+            return 70f;
+        }
     }
 
     public static void swim() {

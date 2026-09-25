@@ -268,8 +268,12 @@ public abstract class Task {
         TaskFailure childFail = child.getLastFailure();
         // Phase 6: structured failures get RecoveryManager enrichment.
         // If the child already called failWithRecovery, trust its decision;
-        // otherwise apply policy once here (raw fail() emitters).
-        if (childFail != null && shouldRecoverChildFailure(childFail.getReason())) {
+        // otherwise apply policy once here (raw fail() emitters) — but only for failures the
+        // child marked recoverable. A raw fail(..., recoverable=false) is the child saying
+        // "do not retry me"; re-running policy from retry 0 turned it into ALTERNATE_PATH/RETRY
+        // (TaskPropagationTest.parentAbsorbsChildFailure).
+        if (childFail != null && shouldRecoverChildFailure(childFail.getReason())
+                && (childFail.isRecoverable() || child.getLastRecovery() != null)) {
             RecoveryDecision d = child.getLastRecovery();
             if (d == null) {
                 RecoveryManager.Applied applied = getRecoveryManager().apply(childFail);

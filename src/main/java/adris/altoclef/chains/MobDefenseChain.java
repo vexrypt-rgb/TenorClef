@@ -12,6 +12,8 @@ import adris.altoclef.tasks.movement.DodgeProjectilesTask;
 import adris.altoclef.tasks.movement.RunAwayFromCreepersTask;
 import adris.altoclef.tasks.movement.RunAwayFromHostilesTask;
 import adris.altoclef.tasks.speedrun.DragonBreathTracker;
+import adris.altoclef.tasks.speedrun.testrun2.T2Log;
+import adris.altoclef.tasksystem.Task;
 import adris.altoclef.tasksystem.TaskRunner;
 import adris.altoclef.util.baritone.CachedProjectile;
 import adris.altoclef.util.helpers.*;
@@ -41,6 +43,7 @@ import net.minecraft.world.Difficulty;
 
 
 import java.util.*;
+import java.util.function.Predicate;
 
 
 // TODO: Optimise shielding against spiders and skeletons
@@ -66,6 +69,21 @@ public class MobDefenseChain extends SingleTaskChain {
     private Entity lockedOnEntity = null;
 
     private float cachedLastPriority;
+
+    /**
+     * S155 — "annoying hostile" engagements return priority 65 (attack) or 80 (flee), both of
+     * which outrank UserTaskChain (50). That means the speedrun task is suspended outright, not
+     * merely interrupted: its tick never runs, so no telemetry is emitted either.
+     *
+     * Because {@code KillEntitiesTask} was handed a bare entity class it hunted every entity of
+     * that type anywhere in the tracker, so a single unreachable zombie held priority forever.
+     * These constants put a wall-clock budget and a distance bound on that behaviour.
+     */
+    private static final long MAX_ENGAGE_MS = 20_000L;
+    private static final long DISENGAGE_COOLDOWN_MS = 45_000L;
+    private static final double ENGAGE_CHASE_RANGE = 24.0;
+    private long engageStartMs = 0;
+    private long disengageUntilMs = 0;
 
     public MobDefenseChain(TaskRunner runner) {
         super(runner);
@@ -317,6 +335,20 @@ public class MobDefenseChain extends SingleTaskChain {
 
             if (!toDealWithList.isEmpty()) {
 
+                // S155: hand priority back if we are still inside the disengage cooldown or have
+                // spent our engagement budget. Genuine danger is handled above (creepers,
+                // projectiles, isInDanger) so this only stops optional chasing.
+                long nowMs = System.currentTimeMillis();
+                if (disengageUntilMs > nowMs) {
+                    clearEngagement(mod);
+                    return 0;
+                }
+                if (engageStartMs == 0) engageStartMs = nowMs;
+                if (nowMs - engageStartMs > MAX_ENGAGE_MS) {
+                    disengage(mod, "timeout");
+                    return 0;
+                }
+
                 // Depending on our weapons/armor, we may choose to straight up kill hostiles if we're not dodging their arrows.
                 // Melee damage for fight/flee gate may count axe; KillAura/equip still prefers sword.
                 float damage = getBestMeleeAttackDamage(mod);
@@ -352,7 +384,7 @@ public class MobDefenseChain extends SingleTaskChain {
                     Entity toKill = toDealWithList.get(0);
                     lockedOnEntity = toKill;
 
-                    setTask(new KillEntitiesTask(toKill.getClass()));
+                    setTask(scopedKillTask(mod, toKill));
                     return 65;
                 } else {
                     // We can't deal with it
@@ -360,6 +392,9 @@ public class MobDefenseChain extends SingleTaskChain {
                     setTask(runAwayTask);
                     return 80;
                 }
+            } else {
+                // No annoying hostiles left in range — reset the engagement budget.
+                engageStartMs = 0;
             }
         }
         // By default, if we aren't "immediately" in danger but were running away, keep
@@ -371,8 +406,10 @@ public class MobDefenseChain extends SingleTaskChain {
             runAwayTask = null;
         }
 
-        if (needsChangeOnAttack && lockedOnEntity != null && lockedOnEntity.isAlive()) {
-            setTask(new KillEntitiesTask(lockedOnEntity.getClass()));
+        if (needsChangeOnAttack && lockedOnEntity != null && lockedOnEntity.isAlive()
+                && mod.getPlayer() != null
+                && lockedOnEntity.squaredDistanceTo(mod.getPlayer()) < ENGAGE_CHASE_RANGE * ENGAGE_CHASE_RANGE) {
+            setTask(scopedKillTask(mod, lockedOnEntity));
             return 65;
         } else {
             needsChangeOnAttack = false;
@@ -391,6 +428,42 @@ public class MobDefenseChain extends SingleTaskChain {
 
     private static boolean hasShield(AltoClef mod) {
         return mod.getItemStorage().hasItem(Items.SHIELD) || mod.getItemStorage().hasItemInOffhand(Items.SHIELD);
+    }
+
+    /**
+     * S155: kill only hostiles that stay within {@link #ENGAGE_CHASE_RANGE}. Passing a bare
+     * entity class made {@link KillEntitiesTask} target every entity of that type anywhere in
+     * the tracker, so one unreachable mob suspended the run indefinitely.
+     */
+    private Task scopedKillTask(AltoClef mod, Entity target) {
+        Predicate<Entity> near = e -> {
+            if (e == null || !e.isAlive() || mod.getPlayer() == null) return false;
+            return e.squaredDistanceTo(mod.getPlayer()) < ENGAGE_CHASE_RANGE * ENGAGE_CHASE_RANGE;
+        };
+        return new KillEntitiesTask(near, target.getClass());
+    }
+
+    /**
+     * S155: abandon the optional hostile engagement and start a cooldown so the run task
+     * actually gets a sustained window instead of being re-preempted on the next tick.
+     */
+    private void disengage(AltoClef mod, String why) {
+        engageStartMs = 0;
+        disengageUntilMs = System.currentTimeMillis() + DISENGAGE_COOLDOWN_MS;
+        float hp = mod.getPlayer() == null ? -1f : mod.getPlayer().getHealth();
+        T2Log.warn("S155", "mob-defense disengage (" + why + ") hp=" + hp
+                + " - handing priority back to the run task");
+        clearEngagement(mod);
+    }
+
+    private void clearEngagement(AltoClef mod) {
+        needsChangeOnAttack = false;
+        lockedOnEntity = null;
+        runAwayTask = null;
+        if (mainTask != null) {
+            mainTask.stop();
+            mainTask = null;
+        }
     }
 
     private static Item getBestSword(AltoClef mod) {

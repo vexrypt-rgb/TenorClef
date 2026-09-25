@@ -1,8 +1,5 @@
 package kaptainwutax.tungsten.mixin;
 
-import java.util.Collections;
-import java.util.Set;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
@@ -23,8 +20,4 @@ public interface AccessorEntity {
 	/** 1.16.1: Entity stores a single submerged Tag (intermediary field_25599). */
 	@Accessor("field_25599")
 	Tag<Fluid> getSubmergedFluidTagRaw();
-
-	default Set<Tag<Fluid>> getSubmergedFluidTag() {
-		return kaptainwutax.tungsten.compat.McCompat.singletonTagSet(getSubmergedFluidTagRaw());
-	}
 }

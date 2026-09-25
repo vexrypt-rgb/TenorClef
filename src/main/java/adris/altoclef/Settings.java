@@ -301,6 +301,31 @@ public class Settings implements IFailableConfigFile {
      */
     private String idleCommand = "";
 
+    /**
+     * Headless SIM harness only. When true, the client creates a fresh Survival/Easy
+     * world by itself from the title screen and (optionally) fires
+     * {@link #autoRunCommand} after spawn. Exists because the SIM box has no
+     * interactive desktop, so keyboard/mouse automation of the title screen is
+     * impossible. Leave false for normal play.
+     *
+     * <p>Name kept as {@code autoLoadWorld} for backward compatibility with existing
+     * harness configs; the behaviour is "create a new world", matching the harness
+     * contract (never load an old save, never Hardcore).
+     */
+    private boolean autoLoadWorld = false;
+
+    /**
+     * Reserved for a future headless load-an-existing-save path. Currently unused:
+     * the harness contract requires a brand-new world each cycle.
+     */
+    private String autoLoadWorldName = "";
+
+    /**
+     * Command executed once after a headless auto-load reaches the world (no leading @).
+     * Empty = do nothing. Typically {@code testrun2}. Used with {@link #autoLoadWorld}.
+     */
+    private String autoRunCommand = "";
+
 
     /**
      * If set, will run this command after death.
@@ -460,9 +485,9 @@ public class Settings implements IFailableConfigFile {
     private boolean speedrunSkipFood = false;
 
     /**
-     * @testrun travel mover: auto | tungsten | baritone (travel only; mining stays Baritone).
+     * @testrun travel mover: auto | tungsten | baritone (default baritone; mining stays Baritone).
      */
-    private String speedrunMoverPreference = "auto";
+    private String speedrunMoverPreference = "baritone";
 
     /**
      * @testrun: extra phase/subgoal Debug.logMessage (rate-limited).
@@ -582,6 +607,59 @@ public class Settings implements IFailableConfigFile {
         return idleCommand != null && !idleCommand.isBlank();
     }
 
+    public boolean shouldAutoLoadWorld() {
+        return autoLoadWorld;
+    }
+
+    /** Public, non-static accessor used by the mixin path before an AltoClef instance exists. */
+    public static boolean isAutoLoadWorldEnabled() {
+        return readBoolFromDisk("autoLoadWorld");
+    }
+
+    /**
+     * Reads a single boolean from {@code altoclef_settings.json} without constructing a
+     * full Settings object. Used by mixins that run before {@code AltoClef.onInitializeLoad}.
+     */
+    public static boolean readBoolFromDisk(String key) {
+        com.fasterxml.jackson.databind.JsonNode node = readNodeFromDisk(key);
+        return node != null && node.isBoolean() ? node.asBoolean() : false;
+    }
+
+    /** Reads a single string from {@code altoclef_settings.json} without a full load. */
+    public static String readStringFromDisk(String key) {
+        com.fasterxml.jackson.databind.JsonNode node = readNodeFromDisk(key);
+        return node != null && node.isTextual() ? node.asText() : "";
+    }
+
+    private static com.fasterxml.jackson.databind.JsonNode readNodeFromDisk(String key) {
+        try {
+            java.nio.file.Path p = java.nio.file.Paths.get(SETTINGS_PATH);
+            if (!java.nio.file.Files.exists(p)) {
+                return null;
+            }
+            String raw = java.nio.file.Files.readString(p);
+            if (raw.startsWith("\uFEFF")) {
+                raw = raw.substring(1);
+            }
+            com.fasterxml.jackson.databind.ObjectMapper mapper =
+                    new com.fasterxml.jackson.databind.ObjectMapper();
+            com.fasterxml.jackson.databind.JsonNode root = mapper.readTree(raw);
+            if (root != null && root.isObject() && root.has(key)) {
+                return root.get(key);
+            }
+        } catch (Throwable ignored) {
+        }
+        return null;
+    }
+
+    public String getAutoLoadWorldName() {
+        return autoLoadWorldName == null ? "" : autoLoadWorldName.trim();
+    }
+
+    public String getAutoRunCommand() {
+        return autoRunCommand == null ? "" : autoRunCommand.trim();
+    }
+
     public boolean shouldAutoMLGBucket() {
         return autoMLGBucket;
     }
@@ -611,7 +689,8 @@ public class Settings implements IFailableConfigFile {
     }
 
     public boolean isThrowaway(Item item) {
-        return throwawayItems.contains(item);
+        // S196: see getThrowawayItems — AIR is never a throwaway.
+        return item != net.minecraft.item.Items.AIR && throwawayItems.contains(item);
     }
 
     public boolean isImportant(Item item) {
@@ -639,7 +718,13 @@ public class Settings implements IFailableConfigFile {
     }
 
     public Item[] getThrowawayItems(boolean includeProtected) {
-        return throwawayItems.stream().filter(item -> includeProtected || !AltoClef.getInstance().getBehaviour().isProtected(item)).toArray(Item[]::new);
+        // S196: blocks that do not exist on this version map to UNSUPPORTED (= AIR) and are
+        // saved to the JSON as "air". AIR is never a throwaway: Baritone treated every empty
+        // hotbar slot as a placeable block and pillared with an empty hand forever.
+        return throwawayItems.stream()
+                .filter(item -> item != null && item != net.minecraft.item.Items.AIR)
+                .filter(item -> includeProtected || !AltoClef.getInstance().getBehaviour().isProtected(item))
+                .toArray(Item[]::new);
     }
 
     public Item[] getThrowawayItems(AltoClef mod) {

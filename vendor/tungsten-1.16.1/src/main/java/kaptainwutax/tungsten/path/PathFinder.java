@@ -61,6 +61,8 @@ public class PathFinder {
 	private Set<Vec3d> closed = Collections.synchronizedSet(new HashSet<>());
 	private AtomicDoubleArray bestHeuristicSoFar;
 	private BinaryHeapOpenSet openSet = new BinaryHeapOpenSet();
+	private final java.util.concurrent.atomic.AtomicBoolean dbgLoggedFirstChildren = new java.util.concurrent.atomic.AtomicBoolean(false);
+	private final java.util.concurrent.atomic.AtomicBoolean dbgLoggedZeroDisp = new java.util.concurrent.atomic.AtomicBoolean(false);
 	protected static final double[] COEFFICIENTS = {1.5, 2, 2.5, 3, 4, 5, 10};
 	protected static final AtomicReferenceArray<Node> bestSoFar = new AtomicReferenceArray<Node>(COEFFICIENTS.length);
 	private static final double minimumImprovement = -500;
@@ -192,6 +194,7 @@ public class PathFinder {
 	    if (start == null) {
 		    	start = initializeStartNode(player, target);
 		    	this.start = start;
+		Debug.logMessage("[PathFinder] search start playerPos=" + player.getPos() + " startAgentPos=" + start.agent.getPos() + " target=" + target);
 	    }
 	    if (blockPath.isEmpty()) {
 		    Optional<List<BlockNode>> blockPath = findBlockPath(world, target, player);
@@ -212,6 +215,8 @@ public class PathFinder {
 	    openSet = new BinaryHeapOpenSet();
 	    openSet.insert(this.start);
 	    closed.clear();
+	    dbgLoggedFirstChildren.set(false);
+	    dbgLoggedZeroDisp.set(false);
 
 	    while (!openSet.isEmpty()) {
 		    if (blockPath.isEmpty() || blockPath.get().size() < 1) {
@@ -358,12 +363,16 @@ public class PathFinder {
 	        stop.set(false);
 	    } else if (openSet.isEmpty()) {
 	        TungstenMod.LOG.info("[PathFinder] Ran out of nodes, trying partial path...");
+	        Debug.logMessage("[PathFinder] openSet empty â€” nodesConsidered=" + numNodesConsidered.get()
+	        	+ " start=" + (this.start == null ? "null" : this.start.agent.getPos()));
 	        // Instead of giving up, emit bestSoFar partial path
 	        Optional<List<Node>> partial = PathFinder.bestSoFar(false, 0, this.start, TARGET);
 	        if (partial.isPresent() && partial.get().size() >= 2) {
+	            Debug.logMessage("[PathFinder] executePath partial size=" + partial.get().size());
 	            executePath(partial.get());
 	            TungstenMod.LOG.info("[PathFinder] Emitted partial path: " + partial.get().size() + " nodes");
 	        } else {
+	            Debug.logMessage("[PathFinder] No usable partial path (bestSoFar empty/short)");
 	            TungstenMod.LOG.info("[PathFinder] No usable partial path found.");
 	        }
 	    }
@@ -691,6 +700,7 @@ public class PathFinder {
     }
 
     private void executePath(List<Node> path) {
+        Debug.logMessage("[PathFinder] executePath called size=" + (path == null ? 0 : path.size()) + (path != null && !path.isEmpty() ? (" end=" + path.get(path.size()-1).agent.getPos()) : ""));
         TungstenModDataContainer.EXECUTOR.cb = () -> {
             Debug.logMessage("Finished!");
             RenderHelper.clearRenderers();
@@ -744,7 +754,7 @@ public class PathFinder {
 
 	      // Emit partial path if: result exists, long enough, last node is stable (on ground or in water),
 	      // not climbing (mid-climb is unsafe to cut), and path covers meaningful distance.
-	      // Bug fix: was (onGround && touchingWater) — nearly impossible, now (onGround || touchingWater).
+	      // Bug fix: was (onGround && touchingWater) â€” nearly impossible, now (onGround || touchingWater).
 	      boolean aggressive = TungstenModDataContainer.PATHFINDER.minDistPath < MIN_DIST_PATH;
 	      if (!result.isPresent() || result.get().size() < minPathSizeForTimeout
 	      		|| (!aggressive && (
@@ -833,8 +843,58 @@ public class PathFinder {
             BinaryHeapOpenSet openSet, Set<Vec3d> closed) {
 			AtomicBoolean failing = new AtomicBoolean(true);
 			if (blockPath.isEmpty()) return false;
-			List<Node> children = parent.getChildren(world, target, blockPath.get().get(NEXT_CLOSEST_BLOCKNODE_IDX.get()));
-			if (children.isEmpty()) return false;
+			int bnIdx = Math.min(Math.max(NEXT_CLOSEST_BLOCKNODE_IDX.get(), 0), blockPath.get().size() - 1);
+			List<Node> children = parent.getChildren(world, target, blockPath.get().get(bnIdx));
+			if (!children.isEmpty() && dbgLoggedFirstChildren.compareAndSet(false, true)) {
+				Node c0 = children.get(0);
+				double d0 = parent.agent.getPos().distanceTo(c0.agent.getPos());
+				Debug.logMessage("[PathFinder] first getChildren count=" + children.size()
+					+ " firstChildDisp=" + String.format(java.util.Locale.ROOT, "%.5f", d0)
+					+ " childKeyFwd=" + c0.agent.keyForward
+					+ " childFwdSpeed=" + c0.agent.forwardSpeed
+					+ " childMoveSpeed=" + c0.agent.movementSpeed
+					+ " parentPos=" + parent.agent.getPos()
+					+ " child0Pos=" + c0.agent.getPos()
+					+ " onGround=" + c0.agent.onGround
+					+ " canSprint=" + parent.agent.canSprint());
+			}
+			// If every child failed to displace, inject a simple multi-tick forward walk toward next BlockNode.
+			boolean anyDisp = false;
+			double bestDisp = 0;
+			for (Node c : children) {
+				double d = parent.agent.getPos().distanceTo(c.agent.getPos());
+				if (d > bestDisp) bestDisp = d;
+				if (d > 1.0E-3) anyDisp = true;
+			}
+			// Always inject a direct WalkToNode + one kinematic forward tick toward the next BlockNode.
+			// Special moves often return yaw-only stubs (childKeyFwd=false, disp=0) which starves A*.
+			try {
+				BlockNode bn = blockPath.get().get(bnIdx);
+				Node walk = kaptainwutax.tungsten.path.specialMoves.WalkToNode.generateMove(parent, world, bn);
+				if (walk != null && walk != parent) {
+					children = new ArrayList<>(children);
+					children.add(walk);
+				}
+				float yaw = (float) kaptainwutax.tungsten.helpers.DirectionHelper.calcYawFromVec3d(parent.agent.getPos(), bn.getPos(true));
+				kaptainwutax.tungsten.path.PathInput stepIn = new kaptainwutax.tungsten.path.PathInput(true, false, false, false, false, false, false, parent.agent.pitch, yaw);
+				Agent stepped = Agent.kinematicStep(parent.agent, stepIn, world);
+				Node stepNode = new Node(parent, stepped, new kaptainwutax.tungsten.render.Color(0, 200, 255), parent.cost + 0.2D);
+				stepNode.input = stepIn;
+				children = new ArrayList<>(children);
+				children.add(stepNode);
+				if (dbgLoggedZeroDisp.compareAndSet(false, true)) {
+					Debug.logMessage("[PathFinder] injected Walk+kinematicStep bestPriorDisp=" + String.format(java.util.Locale.ROOT, "%.5f", bestDisp)
+						+ " walkDisp=" + (walk == null || walk == parent ? -1 : parent.agent.getPos().distanceTo(walk.agent.getPos()))
+						+ " stepDisp=" + parent.agent.getPos().distanceTo(stepNode.agent.getPos())
+						+ " stepKeyFwd=" + stepNode.agent.keyForward);
+				}
+			} catch (Exception e) {
+				Debug.logMessage("[PathFinder] WalkToNode inject failed: " + e);
+			}
+			if (children.isEmpty()) {
+				Debug.logMessage("[PathFinder] getChildren empty at " + parent.agent.getPos() + " bnIdx=" + bnIdx);
+				return false;
+			}
 			
 //			Debug.logMessage("All children");
 //			for (Node node : children) {
@@ -851,8 +911,8 @@ public class PathFinder {
 			
 			Queue<Node> validChildren = new ConcurrentLinkedQueue<>();
 
-			BlockNode lastBlockNode = blockPath.get().get(NEXT_CLOSEST_BLOCKNODE_IDX.get()-1);
-			BlockNode nextBlockNode = blockPath.get().get(NEXT_CLOSEST_BLOCKNODE_IDX.get());
+			BlockNode lastBlockNode = blockPath.get().get(Math.max(0, bnIdx - 1));
+			BlockNode nextBlockNode = blockPath.get().get(bnIdx);
 	        double closestBlockVolume = BlockShapeChecker.getShapeVolume(nextBlockNode.getBlockPos().down(), world);
 	        boolean isSmallBlock = closestBlockVolume > 0 && closestBlockVolume < 1;
 			

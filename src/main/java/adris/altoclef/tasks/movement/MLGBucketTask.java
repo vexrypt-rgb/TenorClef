@@ -434,10 +434,23 @@ public class MLGBucketTask extends Task {
     }
 
     private boolean hasClutchItem(AltoClef mod) {
-        if (!mod.getWorld().getDimension().ultrawarm() && mod.getItemStorage().hasItem(Items.WATER_BUCKET)) {
-            return true;
+        return canClutch(mod);
+    }
+
+    /**
+     * S154. Public static mirror of hasClutchItem so MLGBucketFallChain can decide whether
+     * hijacking the user task is worth anything BEFORE it does so.
+     */
+    public static boolean canClutch(AltoClef mod) {
+        if (mod == null || mod.getPlayer() == null) return false;
+        try {
+            if (!mod.getWorld().getDimension().ultrawarm() && mod.getItemStorage().hasItem(Items.WATER_BUCKET)) {
+                return true;
+            }
+            return _config.clutchItems.stream().anyMatch(item -> mod.getItemStorage().hasItem(item));
+        } catch (Throwable t) {
+            return false;
         }
-        return _config.clutchItems.stream().anyMatch(item -> mod.getItemStorage().hasItem(item));
     }
 
     @Override

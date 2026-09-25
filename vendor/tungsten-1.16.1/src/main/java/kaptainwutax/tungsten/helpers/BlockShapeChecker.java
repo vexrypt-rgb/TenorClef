@@ -26,6 +26,7 @@ public class BlockShapeChecker {
      * @return the height of a block at given position.
      */
 	public static double getBlockHeight(BlockPos pos, WorldView world) {
+		if (world == null || pos == null) return 0;
 		BlockState state = world.getBlockState(pos);
 		
 		if (state.isAir()) return 0;
@@ -43,6 +44,7 @@ public class BlockShapeChecker {
      * @return the volume of a block at given position.
      */
 	public static double getShapeVolume(BlockPos pos, WorldView world) {
+		if (world == null || pos == null) return 0;
 		BlockState state = world.getBlockState(pos);
     	return getShapeVolume(state, pos, world);
     }

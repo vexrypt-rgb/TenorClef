@@ -208,4 +208,29 @@ public final class McCompat {
             return "?";
         }
     }
+
+    /**
+     * S195: true while Baritone is placing a block — the current path step is a pillar, or it
+     * is holding right-click. Callers that force-equip a pickaxe must leave the hotbar alone
+     * then: Baritone selects the block one tick and places it after a sneak tick, so swapping
+     * the pick back in every tick means the block never lands (live run fix6: IRON @236,52,15
+     * jumping with an empty hand for 2+ minutes while holding 27 cobblestone).
+     */
+    public static boolean baritonePlacing(adris.altoclef.AltoClef mod) {
+        try {
+            var bari = mod.getClientBaritone();
+            if (bari.getInputOverrideHandler().isInputForcedDown(
+                    baritone.api.utils.input.Input.CLICK_RIGHT)) {
+                return true;
+            }
+            var ex = bari.getPathingBehavior().getCurrent();
+            if (ex == null) return false;
+            var moves = ex.getPath().movements();
+            int i = ex.getPosition();
+            return i >= 0 && i < moves.size()
+                    && moves.get(i).getClass().getSimpleName().contains("Pillar");
+        } catch (Throwable t) {
+            return false;
+        }
+    }
 }

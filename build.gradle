@@ -133,6 +133,11 @@ dependencies {
     // Nether pathfinder
     implementation 'dev.babbaj:nether-pathfinder:1.5'
 
+    // Unit tests (src/test is JUnit 5). Gradle 9 needs the platform launcher on the test runtime.
+    testImplementation(platform('org.junit:junit-bom:5.10.2'))
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
     // PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
     // You may need to force-disable transitiveness on them.
     shadow('com.fasterxml.jackson.core:jackson-core:2.16.0')
@@ -167,7 +172,23 @@ dependencies {
         def jar = jars1161[0]
         println "[altoclef] Ostinato Baritone for ${project.name}: ${jar.name}"
         modImplementation files(jar)
-        include files(jar)
+        // NOTE: deliberately NOT `include files(jar)`.
+        //
+        // Loom's `processIncludeJars` resolves its `jarIds` property and rejects any
+        // candidate that "is not a module component and has no capabilities":
+        //   Attempted to nest artifact baritone-unoptimized-fabric-1.16.1.jar
+        //   which is not a module component and has no capabilities.
+        // A flat-file jar carries no capabilities (and `capabilities { }` is not
+        // available on a FileCollectionDependency), so nesting it fails. This was
+        // latent for a long time because the task stayed cached; it surfaced as soon as
+        // the Ostinato jar was rebuilt and its bytes changed (cost 2 builds on
+        // 2026-09-20, 16m45s + 15m15s).
+        //
+        // Baritone does not need to be nested into the altoclef jar for development or
+        // for runClient: it is a normal runtime mod and is already staged as a Fabric
+        // mod (fabric.mod.json present) alongside altoclef. If a bundled release jar is
+        // ever required, do it as a separate packaging step with a Loom-produced
+        // artifact, not by including a flat file here.
     } else {
         // Only 1.21.11 can use main's matching Ostinato artifact. 1.21 and 1.21.1
         // must resolve their matching Baritone artifact instead of a 1.21.11 jar.
@@ -255,7 +276,13 @@ dependencies {
             println "[altoclef] Tungsten jars for ${project.name}: ${tungstenJars*.name}"
             tungstenJars.each { jarFile ->
                 modImplementation files(jarFile)
-                include files(jarFile)
+                // See the long note in the 1.16.1 Ostinato branch above: a flat-file jar
+                // has no capabilities, so `include files(...)` makes Loom's
+                // processIncludeJars fail with
+                //   Attempted to nest artifact <name> which is not a module component
+                //   and has no capabilities.
+                // Tungsten, like Baritone, is loaded from the dev classpath at runtime,
+                // so nesting is not required for build or runClient.
             }
         } else {
             println "[altoclef] Tungsten jar not found for ${project.name} — Baritone fallback (see docs/TUNGSTEN_BACKEND.md)"
@@ -320,6 +347,10 @@ processResources {
 // see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
 tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
+}
+
+test {
+    useJUnitPlatform()
 }
 
 // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task

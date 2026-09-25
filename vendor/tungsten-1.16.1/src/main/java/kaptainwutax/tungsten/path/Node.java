@@ -64,6 +64,15 @@ public class Node {
 	public Node(Node parent, WorldView world, PathInput input, Color color, double pathCost) {
 		this.parent = parent;
 		this.agent = Agent.of(parent.agent, input).tick(world);
+		// 1.16.1 ClientWorld physics often yields ~0 horizontal disp off-thread.
+		// If movement keys are set but we barely moved, force a kinematic step.
+		if (input.forward || input.back || input.left || input.right) {
+			double dx = this.agent.posX - parent.agent.posX;
+			double dz = this.agent.posZ - parent.agent.posZ;
+			if (dx * dx + dz * dz < 0.0025) { // ~0.05 blocks
+				this.agent = Agent.kinematicStep(parent.agent, input, world);
+			}
+		}
 		this.input = input;
 		this.color = color;
 		this.cost = pathCost;
@@ -194,12 +203,14 @@ public class Node {
 //	    	if (isExitWaterMoveClose) return nodes;
 	    }
 	    
-	    if (!agent.touchingWater && !this.agent.canSprint()) {
-	    	nodes.add(WalkToNode.generateMove(this, nextBlockNode));
+	    // Always offer walk on dry land (even when canSprint). Sprint-only
+	    // RunToNode/SprintJumpMove can fail to displace; walk is the reliable baseline.
+	    if (!agent.touchingWater) {
+	    	nodes.add(WalkToNode.generateMove(this, world, nextBlockNode));
 	    }
 	    
 	    if (!agent.touchingWater && this.agent.canSprint() && nextBlockNode.getPos(true).distanceTo(agent.getPos()) < 4) {
-	    	nodes.add(RunToNode.generateMove(this, nextBlockNode));
+	    	nodes.add(RunToNode.generateMove(this, world, nextBlockNode));
 	    }
     	if (!agent.isClimbing(world) && world.getBlockState(agent.getBlockPos().down()).getBlock() instanceof LadderBlock) {	
 	    	nodes.add(LongJump.generateMove(this, nextBlockNode));    		

@@ -153,10 +153,10 @@ public class T2MenuScreen extends Screen {
         int left = Math.max(16, this.width / 2 - 220);
         int right = this.width / 2 + 20;
         int tabY = 28;
-        attach(button(left, tabY, 100, 18, tab == 0 ? "[ Tasks ]" : "Tasks", "TAB:0"));
-        attach(button(left + 102, tabY, 100, 18, tab == 1 ? "[ Link ]" : "Link", "TAB:1"));
-        attach(button(right, tabY, 100, 18, tab == 2 ? "[ Media ]" : "Media", "TAB:2"));
-        attach(button(right + 102, tabY, 100, 18, tab == 3 ? "[ Agent ]" : "Agent", "TAB:3"));
+        attach(button(left, tabY, 100, 18, "Tasks", "TAB:0"));
+        attach(button(left + 102, tabY, 100, 18, "Link", "TAB:1"));
+        attach(button(right, tabY, 100, 18, "Media", "TAB:2"));
+        attach(button(right + 102, tabY, 100, 18, "Agent", "TAB:3"));
         String[][] L = TAB_TASKS_L;
         String[][] R = TAB_TASKS_R;
         if (tab == 1) { L = TAB_LINK_L; R = TAB_LINK_R; }
@@ -224,41 +224,94 @@ public class T2MenuScreen extends Screen {
     //#if MC >= 12000
     @Override
     public void render(net.minecraft.client.gui.DrawContext context, int mouseX, int mouseY, float delta) {
-        try {
-            this.renderBackground(context, mouseX, mouseY, delta);
-        } catch (Throwable ignored) {}
+        paintUi(adris.altoclef.multiversion.DrawContextWrapper.of(context), mouseX, mouseY);
         super.render(context, mouseX, mouseY, delta);
-        paintLabels(context);
     }
     //#else
     //$$ @Override
     //$$ public void render(net.minecraft.client.util.math.MatrixStack matrices, int mouseX, int mouseY, float delta) {
-    //$$     this.renderBackground(matrices);
+    //$$     paintUi(adris.altoclef.multiversion.DrawContextWrapper.of(matrices), mouseX, mouseY);
+    //$$     com.mojang.blaze3d.systems.RenderSystem.enableTexture();
     //$$     super.render(matrices, mouseX, mouseY, delta);
-    //$$     paintLabels(matrices);
     //$$ }
     //#endif
 
-    private void paintLabels(Object ctx) {
-        drawStr(ctx, "TenorClef", 16, 8, 0xFFFFFF);
-    }
+    // Flat dark theme, ARGB.
+    private static final int C_SCRIM = 0xC00B0D12;
+    private static final int C_CARD = 0xE6161A22;
+    private static final int C_BTN = 0xFF222834;
+    private static final int C_BTN_HOVER = 0xFF2E3646;
+    private static final int C_BORDER = 0xFF303848;
+    private static final int C_ACCENT = 0xFF4FD1C5;
+    private static final int C_DANGER = 0xFFE5534B;
+    private static final int C_TEXT = 0xFFE6EAF0;
+    private static final int C_MUTED = 0xFF8B93A3;
 
-    private void fillSafe(Object ctx, int x1, int y1, int x2, int y2, int color) {
-        if (ctx == null) return;
-        try {
-            ctx.getClass().getMethod("fill", int.class, int.class, int.class, int.class, int.class)
-                    .invoke(ctx, x1, y1, x2, y2, color);
-        } catch (Throwable ignored) {}
-    }
-
-    private void drawStr(Object ctx, String s, int x, int y, int color) {
-        if (s == null || ctx == null) return;
-        try {
-            ctx.getClass().getMethod("drawText",
-                            net.minecraft.client.font.TextRenderer.class, String.class,
-                            int.class, int.class, int.class, boolean.class)
-                    .invoke(ctx, this.textRenderer, s, x, y, color, true);
-        } catch (Throwable ignored) {}
+    /** Everything is painted here; widgets are only the text fields. */
+    private void paintUi(adris.altoclef.multiversion.DrawContextWrapper g, int mx, int my) {
+        if (g == null) return;
+        g.fill(0, 0, this.width, this.height, C_SCRIM);
+        // header bar
+        g.fill(0, 0, this.width, 22, 0xF0101319);
+        g.fill(0, 22, this.width, 23, C_BORDER);
+        g.fill(8, 6, 11, 16, C_ACCENT);
+        if (tab != 3) {
+            g.drawText(this.textRenderer, "TenorClef", 16, 7, C_TEXT, false);
+            String sub = "control panel";
+            g.drawText(this.textRenderer, sub, this.width - 12 - this.textRenderer.getWidth(sub), 7, C_MUTED, false);
+        }
+        // card behind the two columns
+        int left = Math.max(16, this.width / 2 - 220);
+        int cardR = Math.min(this.width - 8, this.width / 2 + 20 + 212);
+        int cardB = tab == 3 ? this.height - 104 : this.height - 32;
+        g.fill(left - 8, 26, cardR, cardB, C_CARD);
+        if (tab == 3) {
+            g.fill(left - 8, this.height - 116, cardR, this.height - 30, C_CARD);
+            g.drawText(this.textRenderer, "API key / URL / model / bind", left, this.height - 110, C_MUTED, false);
+        }
+        for (int i = 0; i < hits.size(); i++) {
+            int[] b = hits.get(i);
+            String cmd = hitCmd.get(i);
+            String label = hitLab.get(i);
+            boolean hover = mx >= b[0] && mx <= b[0] + b[2] && my >= b[1] && my <= b[1] + b[3];
+            if (cmd != null && cmd.startsWith("TAB:")) {
+                boolean on = cmd.equals("TAB:" + tab);
+                if (hover && !on) g.fill(b[0], b[1], b[0] + b[2], b[1] + b[3], 0x30FFFFFF);
+                int tw = this.textRenderer.getWidth(label);
+                g.drawText(this.textRenderer, label, b[0] + (b[2] - tw) / 2, b[1] + (b[3] - 8) / 2,
+                        on ? C_TEXT : C_MUTED, false);
+                g.fill(b[0] + 6, b[1] + b[3] - 2, b[0] + b[2] - 6, b[1] + b[3], on ? C_ACCENT : C_BORDER);
+                continue;
+            }
+            boolean danger = "t2panic".equals(cmd) || "stop".equals(cmd);
+            boolean primary = "SAVECFG".equals(cmd);
+            int bg = hover ? C_BTN_HOVER : C_BTN;
+            if (primary) bg = hover ? 0xFF5FE0D4 : C_ACCENT;
+            g.fill(b[0], b[1], b[0] + b[2], b[1] + b[3], hover ? (danger ? C_DANGER : C_ACCENT) : C_BORDER);
+            g.fill(b[0] + 1, b[1] + 1, b[0] + b[2] - 1, b[1] + b[3] - 1, bg);
+            int strip = danger ? C_DANGER : C_ACCENT;
+            boolean isCmd = cmd != null && !cmd.contains(":") && !primary;
+            if (isCmd) g.fill(b[0] + 1, b[1] + 1, b[0] + 3, b[1] + b[3] - 1, strip);
+            int fg = primary ? 0xFF0B0D12 : (danger ? 0xFFFF8A84 : C_TEXT);
+            int ty = b[1] + (b[3] - 8) / 2;
+            if (cmd == null || primary) {
+                int tw = this.textRenderer.getWidth(label);
+                g.drawText(this.textRenderer, label, b[0] + (b[2] - tw) / 2, ty, fg, false);
+            } else {
+                // "name  hint" -> name bright, hint muted
+                int sp = label.indexOf("  ");
+                String head = sp > 0 ? label.substring(0, sp) : label;
+                String tail = sp > 0 ? label.substring(sp).trim() : "";
+                int tx = b[0] + (isCmd ? 10 : 6);
+                g.drawText(this.textRenderer, head, tx, ty, fg, false);
+                if (!tail.isEmpty()) {
+                    g.drawText(this.textRenderer, tail, tx + this.textRenderer.getWidth(head) + 6, ty, C_MUTED, false);
+                }
+                if (cmd.startsWith("DROP:")) {
+                    g.drawText(this.textRenderer, "v", b[0] + b[2] - 10, ty, C_MUTED, false);
+                }
+            }
+        }
     }
 
     @Override
@@ -332,6 +385,12 @@ public class T2MenuScreen extends Screen {
         hits.add(new int[]{x, y, w, h});
         hitCmd.add(cmd);
         hitLab.add(label);
+        // Painted in paintUi and clicked via hits; no vanilla widget.
+        return null;
+    }
+
+    @SuppressWarnings("unused")
+    private Object vanillaButton(int x, int y, int w, int h, String label, String cmd) {
         Object text;
         try {
             text = Text.class.getMethod("literal", String.class).invoke(null, label);

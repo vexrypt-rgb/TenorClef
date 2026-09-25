@@ -424,6 +424,7 @@ public final class T2Codes {
     public static final String S205_NETHER_PORTAL_AVOID = "S205";
     public static final String S206_HELM_DIRECT_EQUIP = "S206";
     public static final String S207_HELM_LATCHED = "S207";
+    public static final String S208_BUCKET_IRON_RELOCATE = "S208";
     /** S201 — bootstrap crafts a stone sword right after the stone pickaxe. */
     public static final String S201_STONE_SWORD = "S201";
     public static final String E132_SHAFT_STUCK = "E132";

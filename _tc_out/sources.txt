@@ -1,0 +1,11 @@
+C:/Users/redfa/Documents/MinecraftDev/altoclef/_tc_stage/T2Deadman.java
+C:/Users/redfa/Documents/MinecraftDev/altoclef/_tc_stage/RuinedPortalFinishTask.java
+C:/Users/redfa/Documents/MinecraftDev/altoclef/_tc_stage/HolePillar.java
+C:/Users/redfa/Documents/MinecraftDev/altoclef/_tc_stage/WaterBailTask.java
+C:/Users/redfa/Documents/MinecraftDev/altoclef/_tc_stage/WaterBailTask.java
+C:/Users/redfa/Documents/MinecraftDev/altoclef/_tc_stage/T2Codes.java
+C:/Users/redfa/Documents/MinecraftDev/altoclef/_tc_stage/T2Fault.java
+C:/Users/redfa/Documents/MinecraftDev/altoclef/_tc_stage/ModernSpeedrunTask.java
+C:/Users/redfa/Documents/MinecraftDev/altoclef/_tc_stage/T2Solve.java
+C:/Users/redfa/Documents/MinecraftDev/altoclef/_tc_stage/T2Probe.java
+C:/Users/redfa/Documents/MinecraftDev/altoclef/_tc_stage/ClientTickMixin.java

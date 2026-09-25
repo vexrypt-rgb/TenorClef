@@ -1,0 +1,6 @@
+C:\Users\redfa\Documents\MinecraftDev\altoclef\scripts\sim-loop.ps1 : Cannot process argument transformation on 
+parameter 'JoinTimeoutSec'. Cannot convert value "Adoptium\jdk-21.0.12.101-hotspot" to type "System.Int32". Error: 
+"Input string was not in a correct format."
+    + CategoryInfo          : InvalidData: (:) [sim-loop.ps1], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : ParameterArgumentTransformationError,sim-loop.ps1
+ 

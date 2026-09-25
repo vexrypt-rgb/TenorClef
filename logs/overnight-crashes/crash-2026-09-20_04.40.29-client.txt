@@ -1,0 +1,162 @@
+---- Minecraft Crash Report ----
+// My bad.
+
+Time: 9/20/26, 4:40 AM
+Description: Unexpected error
+
+java.lang.IllegalArgumentException: Parameters not allowed in this parameter set: [<parameter minecraft:origin>]
+	at knot//net.minecraft.loot.context.LootContext$Builder.build(LootContext.java:203)
+	at knot//baritone.api.utils.BlockOptionalMeta.lambda$drops$9(BlockOptionalMeta.java:222)
+	at java.base/java.util.HashMap.computeIfAbsent(HashMap.java:1228)
+	at knot//baritone.api.utils.BlockOptionalMeta.drops(BlockOptionalMeta.java:207)
+	at knot//baritone.api.utils.BlockOptionalMeta.lambda$getStackHashes$5(BlockOptionalMeta.java:133)
+	at java.base/java.util.stream.ReferencePipeline$7$1.accept(ReferencePipeline.java:273)
+	at java.base/java.util.HashMap$KeySpliterator.forEachRemaining(HashMap.java:1715)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:575)
+	at java.base/java.util.stream.AbstractPipeline.evaluateToArrayNode(AbstractPipeline.java:260)
+	at java.base/java.util.stream.ReferencePipeline.toArray(ReferencePipeline.java:616)
+	at knot//baritone.api.utils.BlockOptionalMeta.getStackHashes(BlockOptionalMeta.java:138)
+	at knot//baritone.api.utils.BlockOptionalMeta.<init>(BlockOptionalMeta.java:67)
+	at knot//adris.altoclef.tasks.construction.PlaceBlockTask$PlaceStructureSchematic.desiredState(PlaceBlockTask.java:215)
+	at knot//baritone.process.BuilderProcess.fullRecalc(BuilderProcess.java:861)
+	at knot//baritone.process.BuilderProcess.recalc(BuilderProcess.java:801)
+	at knot//baritone.process.BuilderProcess.onTick(BuilderProcess.java:657)
+	at knot//baritone.process.BuilderProcess.onTick(BuilderProcess.java:580)
+	at knot//baritone.utils.PathingControlManager.executeProcesses(PathingControlManager.java:201)
+	at knot//baritone.utils.PathingControlManager.preTick(PathingControlManager.java:90)
+	at knot//baritone.behavior.PathingBehavior.onTick(PathingBehavior.java:104)
+	at knot//baritone.event.GameEventHandler.lambda$onTick$0(GameEventHandler.java:60)
+	at java.base/java.util.concurrent.CopyOnWriteArrayList.forEach(CopyOnWriteArrayList.java:891)
+	at knot//baritone.event.GameEventHandler.onTick(GameEventHandler.java:60)
+	at knot//net.minecraft.client.MinecraftClient.handler$zzl000$baritone$runTick(MinecraftClient.java:2857)
+	at knot//net.minecraft.client.MinecraftClient.tick(MinecraftClient.java:1498)
+	at knot//net.minecraft.client.MinecraftClient.render(MinecraftClient.java:994)
+	at knot//net.minecraft.client.MinecraftClient.run(MinecraftClient.java:654)
+	at knot//net.minecraft.client.main.Main.main(Main.java:215)
+	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.launch(MinecraftGameProvider.java:480)
+	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:74)
+	at net.fabricmc.loader.impl.launch.knot.KnotClient.main(KnotClient.java:23)
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86)
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- Head --
+Thread: Render thread
+Stacktrace:
+	at knot//net.minecraft.loot.context.LootContext$Builder.build(LootContext.java:203)
+	at knot//baritone.api.utils.BlockOptionalMeta.lambda$drops$9(BlockOptionalMeta.java:222)
+	at java.base/java.util.HashMap.computeIfAbsent(HashMap.java:1228)
+	at knot//baritone.api.utils.BlockOptionalMeta.drops(BlockOptionalMeta.java:207)
+	at knot//baritone.api.utils.BlockOptionalMeta.lambda$getStackHashes$5(BlockOptionalMeta.java:133)
+	at java.base/java.util.stream.ReferencePipeline$7$1.accept(ReferencePipeline.java:273)
+	at java.base/java.util.HashMap$KeySpliterator.forEachRemaining(HashMap.java:1715)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:575)
+	at java.base/java.util.stream.AbstractPipeline.evaluateToArrayNode(AbstractPipeline.java:260)
+	at java.base/java.util.stream.ReferencePipeline.toArray(ReferencePipeline.java:616)
+	at knot//baritone.api.utils.BlockOptionalMeta.getStackHashes(BlockOptionalMeta.java:138)
+	at knot//baritone.api.utils.BlockOptionalMeta.<init>(BlockOptionalMeta.java:67)
+	at knot//adris.altoclef.tasks.construction.PlaceBlockTask$PlaceStructureSchematic.desiredState(PlaceBlockTask.java:215)
+	at knot//baritone.process.BuilderProcess.fullRecalc(BuilderProcess.java:861)
+	at knot//baritone.process.BuilderProcess.recalc(BuilderProcess.java:801)
+	at knot//baritone.process.BuilderProcess.onTick(BuilderProcess.java:657)
+	at knot//baritone.process.BuilderProcess.onTick(BuilderProcess.java:580)
+	at knot//baritone.utils.PathingControlManager.executeProcesses(PathingControlManager.java:201)
+	at knot//baritone.utils.PathingControlManager.preTick(PathingControlManager.java:90)
+	at knot//baritone.behavior.PathingBehavior.onTick(PathingBehavior.java:104)
+	at knot//baritone.event.GameEventHandler.lambda$onTick$0(GameEventHandler.java:60)
+	at java.base/java.util.concurrent.CopyOnWriteArrayList.forEach(CopyOnWriteArrayList.java:891)
+	at knot//baritone.event.GameEventHandler.onTick(GameEventHandler.java:60)
+	at knot//net.minecraft.client.MinecraftClient.handler$zzl000$baritone$runTick(MinecraftClient.java:2857)
+
+-- Affected level --
+Details:
+	All players: 1 total; [ClientPlayerEntity['Player233'/150, l='ClientLevel', x=-47.52, y=63.00, z=210.25]]
+	Chunk stats: Client Chunk Cache: 841, 552
+	Level dimension: minecraft:overworld
+	Level spawn location: World: (-48,64,208), Chunk: (at 0,4,0 in -3,13; contains blocks -48,0,208 to -33,255,223), Region: (-1,0; contains chunks -32,0 to -1,31, blocks -512,0,0 to -1,255,511)
+	Level time: 721 game time, 721 day time
+	Server brand: fabric
+	Server type: Integrated singleplayer server
+Stacktrace:
+	at knot//net.minecraft.client.world.ClientWorld.addDetailsToCrashReport(ClientWorld.java:449)
+	at knot//net.minecraft.client.MinecraftClient.addDetailsToCrashReport(MinecraftClient.java:2181)
+	at knot//net.minecraft.client.MinecraftClient.run(MinecraftClient.java:677)
+	at knot//net.minecraft.client.main.Main.main(Main.java:215)
+	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.launch(MinecraftGameProvider.java:480)
+	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:74)
+	at net.fabricmc.loader.impl.launch.knot.KnotClient.main(KnotClient.java:23)
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86)
+
+-- System Details --
+Details:
+	Minecraft Version: 1.16.1
+	Minecraft Version ID: 1.16.1
+	Operating System: Windows 11 (amd64) version 10.0
+	Java Version: 21.0.12.1, Eclipse Adoptium
+	Java VM Version: OpenJDK 64-Bit Server VM (mixed mode, sharing), Eclipse Adoptium
+	Memory: 499480672 bytes (476 MB) / 1310720000 bytes (1250 MB) up to 4246732800 bytes (4050 MB)
+	CPUs: 8
+	JVM Flags: 0 total; 
+	Fabric Mods: 
+		altoclef: Alto Clef 1.16.1-0.19
+		baritone: Ostinato (Baritone 1.16.1) 1.16.1-ostinato
+		fabric: Fabric API 0.18.0+build.387-1.16.1
+		fabric-api-base: Fabric API Base 0.1.3+12a8474c02
+		fabric-biomes-v1: Fabric Biomes (v1) 0.2.7+059ea86602
+		fabric-blockrenderlayer-v1: Fabric BlockRenderLayer Registration (v1) 1.1.4+c6a8ea8902
+		fabric-command-api-v1: Fabric Command API (v1) 1.0.8+5ce5339802
+		fabric-commands-v0: Fabric Commands (v0) 0.2.0+52d3083602
+		fabric-containers-v0: Fabric Containers (v0) 0.1.8+045df74f02
+		fabric-content-registries-v0: Fabric Content Registries (v0) 0.1.9+059ea86602
+		fabric-crash-report-info-v1: Fabric Crash Report Info (v1) 0.1.2+b7f9825d02
+		fabric-dimensions-v1: fabric-dimensions-v1 1.0.0+a71b305302
+		fabric-events-interaction-v0: Fabric Events Interaction (v0) 0.4.0+e540c58402
+		fabric-events-lifecycle-v0: Fabric Events Lifecycle (v0) 0.2.0+16acbe5b02
+		fabric-game-rule-api-v1: Fabric Game Rule API (v1) 1.0.0+fe81e12502
+		fabric-item-api-v1: Fabric Item API (v1) 1.0.0+16acbe5b02
+		fabric-item-groups-v0: Fabric Item Groups (v0) 0.2.0+438f963602
+		fabric-key-binding-api-v1: Fabric Key Binding API (v1) 1.0.1+f404f3be02
+		fabric-keybindings-v0: Fabric Key Bindings (v0) 0.2.0+3fa9f7c502
+		fabric-lifecycle-events-v1: Fabric Lifecycle Events (v1) 1.2.0+e83e061c02
+		fabric-loot-tables-v1: Fabric Loot Tables (v1) 1.0.0+386eb69e02
+		fabric-mining-levels-v0: Fabric Mining Levels (v0) 0.1.2+b764ce9902
+		fabric-models-v0: Fabric Models (v0) 0.1.0+dfdb52d602
+		fabric-networking-blockentity-v0: Fabric Networking Block Entity (v0) 0.2.5+b50ffc7b02
+		fabric-networking-v0: Fabric Networking (v0) 0.1.10+e00ecb5f02
+		fabric-object-builder-api-v1: Fabric Object Builder API (v1) 1.5.7+2242e77202
+		fabric-object-builders-v0: Fabric Object Builders (v0) 0.6.1+a2d21ddd02
+		fabric-particles-v1: fabric-particles-v1 0.2.1+0a6f2a7002
+		fabric-registry-sync-v0: Fabric Registry Sync (v0) 0.3.8+7dba2d6c02
+		fabric-renderer-api-v1: Fabric Renderer API (v1) 0.2.13+eae12eb802
+		fabric-renderer-indigo: Fabric Renderer - Indigo 0.3.4+34d6c87102
+		fabric-renderer-registries-v1: Fabric Renderer Registries (v1) 2.1.0+be551d3c02
+		fabric-rendering-data-attachment-v1: Fabric Rendering Data Attachment (v1) 0.1.3+b7f9825d02
+		fabric-rendering-fluids-v1: Fabric Rendering Fluids (v1) 0.1.8+b7084faa02
+		fabric-rendering-v0: Fabric Rendering (v0) 1.1.0+5341049002
+		fabric-rendering-v1: Fabric Rendering (v1) 1.1.2+346247d702
+		fabric-resource-loader-v0: Fabric Resource Loader (v0) 0.2.6+f41e209802
+		fabric-screen-handler-api-v1: Fabric Screen Handler API (v1) 1.1.0+97324d1102
+		fabric-tag-extensions-v0: Fabric Tag Extensions (v0) 0.2.7+a4c57d8e02
+		fabric-textures-v0: Fabric Textures (v0) 1.0.4+eae12eb802
+		fabric-tool-attribute-api-v1: Fabric Tool Attribute API (v1) 1.2.1+91fca5cd02
+		fabricloader: Fabric Loader 0.16.7
+		java: OpenJDK 64-Bit Server VM 21
+		minecraft: Minecraft 1.16.1
+		mixinextras: MixinExtras 0.4.1
+		tungsten: Tungsten ALPHA-1.6.0-1.16.1-SNAPSHOT
+	Launched Version: Fabric
+	Backend library: LWJGL version 3.3.2-snapshot
+	Backend API: Intel(R) Iris(R) Xe Graphics GL version 4.6.0 - Build 32.0.101.6737, Intel
+	GL Caps: Using framebuffer using OpenGL 3.0
+	Using VBOs: Yes
+	Is Modded: Definitely; Client brand changed to 'fabric'
+	Type: Client (map_client.txt)
+	Resource Packs: vanilla (incompatible)
+	Current Language: English (US)
+	CPU: 8x 11th Gen Intel(R) Core(TM) i5-1145G7 @ 2.60GHz

@@ -1,0 +1,397 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.4.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+[tenorclef] gradle.properties.local sets org.gradle.java.home — Gradle selects the daemon JDK from JAVA_HOME or ~/.gradle/gradle.properties; export JAVA_HOME="C:/Program Files/Eclipse Adoptium/jdk-21.0.12.101-hotspot" if this pin is required.
+[tenorclef] Loaded 4 entries from gradle.properties.local
+
+> Configure project :1.16.1
+Fabric Loom: 1.15.5
+
+> Configure project :1.21.1
+Fabric Loom: 1.15.5
+[altoclef] Tungsten jars for 1.21.1: [tungsten-fabric-ALPHA-1.6.0-1.21compat-SNAPSHOT.jar]
+Build file 'C:\Users\redfa\Documents\MinecraftDev\altoclef\build.gradle': line 335
+Properties should be assigned using the 'propName = value' syntax. Setting a property via the Gradle-generated 'propName value' or 'propName(value)' syntax in Groovy DSL has been deprecated. This is scheduled to be removed in Gradle 10. Use assignment ('duplicatesStrategy = <value>') instead. Consult the upgrading guide for further information: https://docs.gradle.org/9.4.1/userguide/upgrading_version_8.html#groovy_space_assignment_syntax
+	at build_dsk7s0l5lw6a69ogktr7fgsy9$_run_closure13$_closure39.doCall$original(C:\Users\redfa\Documents\MinecraftDev\altoclef\build.gradle:335)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+	at build_dsk7s0l5lw6a69ogktr7fgsy9$_run_closure13.doCall$original(C:\Users\redfa\Documents\MinecraftDev\altoclef\build.gradle:334)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.16.5
+Fabric Loom: 1.15.5
+
+> Configure project :1.21
+Fabric Loom: 1.15.5
+[altoclef] Tungsten jars for 1.21: [tungsten-fabric-ALPHA-1.6.0-1.21compat-SNAPSHOT.jar]
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.17.1
+Fabric Loom: 1.15.5
+
+> Configure project :1.20.6
+Fabric Loom: 1.15.5
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.18
+Fabric Loom: 1.15.5
+
+> Configure project :1.20.5
+Fabric Loom: 1.15.5
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.18.2
+Fabric Loom: 1.15.5
+
+> Configure project :1.20.4
+Fabric Loom: 1.15.5
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.19.4
+Fabric Loom: 1.15.5
+
+> Configure project :1.20.2
+Fabric Loom: 1.15.5
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.20.1
+Fabric Loom: 1.15.5
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.19.4
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.18.2
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.18
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.17.1
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.16.5
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.16.1
+[altoclef] Ostinato Baritone for 1.16.1: baritone-unoptimized-fabric-1.16.1.jar
+[altoclef] Tungsten jars for 1.16.1: [tungsten-fabric-ALPHA-1.6.0-1.16.1-SNAPSHOT.jar]
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.21.11
+Fabric Loom: 1.15.5
+[altoclef] Ostinato Baritone for 1.21.11: baritone-unoptimized-fabric-1.17.0-7-g9bb1b309-dirty.jar
+[altoclef] Tungsten jars for 1.21.11: [tungsten-fabric-ALPHA-1.6.0-1.21compat-SNAPSHOT.jar]
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Task :1.16.1:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.16.1:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.16.5:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.16.5:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.17.1:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.17.1:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.18:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.18:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.18.2:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.18.2:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.19.4:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.19.4:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.1:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.1:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.2:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.2:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.4:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.4:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.5:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.5:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.6:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.6:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.21:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.21:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.21:preprocessCode UP-TO-DATE
+> Task :1.20.6:preprocessCode UP-TO-DATE
+> Task :1.20.5:preprocessCode UP-TO-DATE
+> Task :1.20.4:preprocessCode UP-TO-DATE
+> Task :1.20.2:preprocessCode UP-TO-DATE
+> Task :1.20.1:preprocessCode UP-TO-DATE
+> Task :1.19.4:preprocessCode UP-TO-DATE
+> Task :1.18.2:preprocessCode UP-TO-DATE
+> Task :1.18:preprocessCode UP-TO-DATE
+> Task :1.17.1:preprocessCode UP-TO-DATE
+> Task :1.16.5:preprocessCode UP-TO-DATE
+> Task :1.16.1:preprocessCode UP-TO-DATE
+> Task :1.16.1:compileJava UP-TO-DATE
+> Task :1.21:preprocessResources UP-TO-DATE
+> Task :1.20.6:preprocessResources UP-TO-DATE
+> Task :1.20.5:preprocessResources UP-TO-DATE
+> Task :1.20.4:preprocessResources UP-TO-DATE
+> Task :1.20.2:preprocessResources UP-TO-DATE
+> Task :1.20.1:preprocessResources UP-TO-DATE
+> Task :1.19.4:preprocessResources UP-TO-DATE
+> Task :1.18.2:preprocessResources UP-TO-DATE
+> Task :1.18:preprocessResources UP-TO-DATE
+> Task :1.17.1:preprocessResources UP-TO-DATE
+> Task :1.16.5:preprocessResources UP-TO-DATE
+> Task :1.16.1:preprocessResources UP-TO-DATE
+> Task :1.16.1:processResources UP-TO-DATE
+> Task :1.16.1:classes UP-TO-DATE
+> Task :1.16.1:generateLog4jConfig UP-TO-DATE
+> Task :1.16.1:generateRemapClasspath UP-TO-DATE
+> Task :1.16.1:generateDLIConfig UP-TO-DATE
+> Task :1.16.1:configureLaunch UP-TO-DATE
+> Task :1.16.1:downloadAssets UP-TO-DATE
+> Task :1.16.1:extractNatives UP-TO-DATE
+> Task :1.16.1:configureClientLaunch UP-TO-DATE
+
+> Task :1.16.1:runClient
+2026-09-21 17:01:50,069 main ERROR Error processing element Queue ([Appenders: null]): CLASS_NOT_FOUND
+2026-09-21 17:01:50,702 main ERROR Unable to locate appender "ServerGuiConsole" for logger config "root"
+[34m[17:01:50][m [32m[main/INFO][m [36m(FabricLoader/GameProvider)[m [0mLoading Minecraft 1.16.1 with Fabric Loader 0.16.7
+[m[34m[17:01:50][m [33m[ForkJoinPool-1-worker-5/WARN][m [36m(FabricLoader/Metadata)[m [0mMod tungsten uses the version ALPHA-1.6.0-1.16.1-SNAPSHOT which isn't compatible with Loader's extended semantic version format (Could not parse version number component 'ALPHA'!), SemVer is recommended for reliably evaluating dependencies and prioritizing newer version
+[m[34m[17:01:51][m [32m[main/INFO][m [36m(FabricLoader)[m [0mLoading 46 mods:
+	- altoclef 1.16.1-0.19
+	- baritone 1.16.1-ostinato
+	- fabric 0.18.0+build.387-1.16.1
+	- fabric-api-base 0.1.3+12a8474c02
+	- fabric-biomes-v1 0.2.7+059ea86602
+	- fabric-blockrenderlayer-v1 1.1.4+c6a8ea8902
+	- fabric-command-api-v1 1.0.8+5ce5339802
+	- fabric-commands-v0 0.2.0+52d3083602
+	- fabric-containers-v0 0.1.8+045df74f02
+	- fabric-content-registries-v0 0.1.9+059ea86602
+	- fabric-crash-report-info-v1 0.1.2+b7f9825d02
+	- fabric-dimensions-v1 1.0.0+a71b305302
+	- fabric-events-interaction-v0 0.4.0+e540c58402
+	- fabric-events-lifecycle-v0 0.2.0+16acbe5b02
+	- fabric-game-rule-api-v1 1.0.0+fe81e12502
+	- fabric-item-api-v1 1.0.0+16acbe5b02
+	- fabric-item-groups-v0 0.2.0+438f963602
+	- fabric-key-binding-api-v1 1.0.1+f404f3be02
+	- fabric-keybindings-v0 0.2.0+3fa9f7c502
+	- fabric-lifecycle-events-v1 1.2.0+e83e061c02
+	- fabric-loot-tables-v1 1.0.0+386eb69e02
+	- fabric-mining-levels-v0 0.1.2+b764ce9902
+	- fabric-models-v0 0.1.0+dfdb52d602
+	- fabric-networking-blockentity-v0 0.2.5+b50ffc7b02
+	- fabric-networking-v0 0.1.10+e00ecb5f02
+	- fabric-object-builder-api-v1 1.5.7+2242e77202
+	- fabric-object-builders-v0 0.6.1+a2d21ddd02
+	- fabric-particles-v1 0.2.1+0a6f2a7002
+	- fabric-registry-sync-v0 0.3.8+7dba2d6c02
+	- fabric-renderer-api-v1 0.2.13+eae12eb802
+	- fabric-renderer-indigo 0.3.4+34d6c87102
+	- fabric-renderer-registries-v1 2.1.0+be551d3c02
+	- fabric-rendering-data-attachment-v1 0.1.3+b7f9825d02
+	- fabric-rendering-fluids-v1 0.1.8+b7084faa02
+	- fabric-rendering-v0 1.1.0+5341049002
+	- fabric-rendering-v1 1.1.2+346247d702
+	- fabric-resource-loader-v0 0.2.6+f41e209802
+	- fabric-screen-handler-api-v1 1.1.0+97324d1102
+	- fabric-tag-extensions-v0 0.2.7+a4c57d8e02
+	- fabric-textures-v0 1.0.4+eae12eb802
+	- fabric-tool-attribute-api-v1 1.2.1+91fca5cd02
+	- fabricloader 0.16.7
+	- java 21
+	- minecraft 1.16.1
+	- mixinextras 0.4.1
+	- tungsten ALPHA-1.6.0-1.16.1-SNAPSHOT
+[m[34m[17:01:51][m [32m[main/INFO][m [36m(FabricLoader/Mixin)[m [0mSpongePowered MIXIN Subsystem Version=0.8.7 Source=file:/C:/Users/redfa/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.3+mixin.0.8.7/51ee0a44ab05f6fddd66b09e66b3a16904f9c55d/sponge-mixin-0.15.3+mixin.0.8.7.jar Service=Knot/Fabric Env=CLIENT
+[m[34m[17:01:51][m [32m[main/INFO][m [36m(FabricLoader/Mixin)[m [0mLoaded Fabric development mappings for mixin remapper!
+[m[34m[17:01:51][m [32m[main/INFO][m [36m(FabricLoader/Mixin)[m [0mCompatibility level set to JAVA_21
+[m[34m[17:01:51][m [33m[main/WARN][m [36m(FabricLoader/Mixin)[m [0mError loading class: me/jellysquid/mods/sodium/client/world/SodiumChunkManager (java.lang.ClassNotFoundException: me/jellysquid/mods/sodium/client/world/SodiumChunkManager)
+[m[34m[17:01:51][m [33m[main/WARN][m [36m(FabricLoader/Mixin)[m [0mError loading class: me/jellysquid/mods/sodium/client/util/collections/FixedLongHashTable (java.lang.ClassNotFoundException: me/jellysquid/mods/sodium/client/util/collections/FixedLongHashTable)
+[m[34m[17:01:52][m [32m[main/INFO][m [36m(FabricLoader/MixinExtras|Service)[m [0mInitializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.4.1).
+[m[34m[17:01:54][m [32m[main/INFO][m [36m(FabricLoader/Mixin)[m [0maltoclef.mixins.json:AxeItemAccessor from mod altoclef->@Accessor[FIELD_GETTER]::getEffectiveMaterials()Ljava/util/Set; should be static as its target is
+[m[34m[17:01:57][m [32m[main/INFO][m [36m(Minecraft)[m [0mEnvironment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', name='PROD'
+[m[34m[17:01:57][m [32m[main/INFO][m [36m(Minecraft)[m [0mSetting user: Player581
+[m[34m[17:01:57][m [32m[main/INFO][m [36m(Indigo)[m [0m[Indigo] Registering Indigo renderer!
+[m[34m[17:01:57][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDERR]: [LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[m[34m[17:01:57][m [32m[main/INFO][m [36m(Minecraft)[m [0mBackend library: LWJGL version 3.3.2-snapshot
+[m[34m[17:02:00][m [32m[main/INFO][m [36m(Minecraft)[m [0mNarrator library for x64 successfully loaded
+[m[34m[17:02:00][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: TENORCLEF: Global Init
+[m[34m[17:02:00][m [32m[main/INFO][m [36m(Minecraft)[m [0m[CHAT] [Baritone] Baritone settings file not found, resetting.
+[m[34m[17:02:01][m [32m[main/INFO][m [36m(Minecraft)[m [0mReloading ResourceManager: Default, Fabric Events Interaction (v0), Fabric Renderer - Indigo, Fabric API Base, Fabric Key Binding API (v1), Fabric Events Lifecycle (v0), Fabric BlockRenderLayer Registration (v1), Alto Clef, Fabric API, Fabric Models (v0), Fabric Renderer API (v1), Fabric Networking Block Entity (v0), Fabric Loot Tables (v1), Fabric Biomes (v1), Fabric Mining Levels (v0), Fabric Textures (v0), Fabric Loader, Fabric Registry Sync (v0), Fabric Item Groups (v0), Fabric Tag Extensions (v0), Fabric Rendering (v1), Fabric Rendering Data Attachment (v1), Fabric Item API (v1), Fabric Rendering Fluids (v1), Fabric Content Registries (v0), Fabric Object Builders (v0), Fabric Crash Report Info (v1), Fabric Renderer Registries (v1), Fabric Screen Handler API (v1), Fabric Object Builder API (v1), Fabric Networking (v0), Fabric Game Rule API (v1), Fabric Lifecycle Events (v1), Fabric Resource Loader (v0), Fabric Rendering (v0), Tungsten, Fabric Containers (v0), Fabric Key Bindings (v0), Fabric Tool Attribute API (v1)
+[m[34m[17:02:01][m [32m[main/INFO][m [36m(Minecraft)[m [0m[STDOUT]: TENORCLEF: MIXIN OK ClientTickMixin injected into MinecraftClient.tick()
+[m[34m[17:02:02][m [31m[main/FATAL][m [36m(Minecraft)[m [31mReported exception thrown!
+[m net.minecraft.util.crash.CrashException: Ticking screen
+	at net.minecraft.client.gui.screen.Screen.wrapScreenError(Screen.java:436) ~[minecraft-merged-4d6cd39190-1.16.1-net.fabricmc.yarn.1_16_1.1.16.1+build.21-v2.jar:?]
+	at net.minecraft.client.MinecraftClient.tick(MinecraftClient.java:1499) ~[minecraft-merged-4d6cd39190-1.16.1-net.fabricmc.yarn.1_16_1.1.16.1+build.21-v2.jar:?]
+	at net.minecraft.client.MinecraftClient.render(MinecraftClient.java:994) ~[minecraft-merged-4d6cd39190-1.16.1-net.fabricmc.yarn.1_16_1.1.16.1+build.21-v2.jar:?]
+	at net.minecraft.client.MinecraftClient.run(MinecraftClient.java:654) [minecraft-merged-4d6cd39190-1.16.1-net.fabricmc.yarn.1_16_1.1.16.1+build.21-v2.jar:?]
+	at net.minecraft.client.main.Main.main(Main.java:215) [minecraft-merged-4d6cd39190-1.16.1-net.fabricmc.yarn.1_16_1.1.16.1+build.21-v2.jar:?]
+	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.launch(MinecraftGameProvider.java:480) [fabric-loader-0.16.7.jar:?]
+	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:74) [fabric-loader-0.16.7.jar:?]
+	at net.fabricmc.loader.impl.launch.knot.KnotClient.main(KnotClient.java:23) [fabric-loader-0.16.7.jar:?]
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86) [dev-launch-injector-0.2.1+build.8.jar:?]
+Caused by: java.lang.RuntimeException: Mixin transformation of adris.altoclef.mixins.AutoWorldState failed
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.getPostMixinClassByteArray(KnotClassDelegate.java:427) ~[fabric-loader-0.16.7.jar:?]
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.tryLoadClass(KnotClassDelegate.java:323) ~[fabric-loader-0.16.7.jar:?]
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.loadClass(KnotClassDelegate.java:218) ~[fabric-loader-0.16.7.jar:?]
+	at net.fabricmc.loader.impl.launch.knot.KnotClassLoader.loadClass(KnotClassLoader.java:119) ~[fabric-loader-0.16.7.jar:?]
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:526) ~[?:?]
+	at net.minecraft.client.gui.screen.TitleScreen.handler$zzp000$altoclef$altoAutoCreateWorld(TitleScreen.java:561) ~[minecraft-merged-4d6cd39190-1.16.1-net.fabricmc.yarn.1_16_1.1.16.1+build.21-v2.jar:?]
+	at net.minecraft.client.gui.screen.TitleScreen.tick(TitleScreen.java:84) ~[minecraft-merged-4d6cd39190-1.16.1-net.fabricmc.yarn.1_16_1.1.16.1+build.21-v2.jar:?]
+	at net.minecraft.client.MinecraftClient.method_1572(MinecraftClient.java:1499) ~[minecraft-merged-4d6cd39190-1.16.1-net.fabricmc.yarn.1_16_1.1.16.1+build.21-v2.jar:?]
+	at net.minecraft.client.gui.screen.Screen.wrapScreenError(Screen.java:431) ~[minecraft-merged-4d6cd39190-1.16.1-net.fabricmc.yarn.1_16_1.1.16.1+build.21-v2.jar:?]
+	... 8 more
+Caused by: org.spongepowered.asm.mixin.transformer.throwables.IllegalClassLoadError: adris.altoclef.mixins.AutoWorldState is in a defined mixin package adris.altoclef.mixins.* owned by altoclef.mixins.json and cannot be referenced directly
+	at org.spongepowered.asm.mixin.transformer.MixinProcessor.applyMixins(MixinProcessor.java:334) ~[sponge-mixin-0.15.3+mixin.0.8.7.jar:0.15.3+mixin.0.8.7]
+	at org.spongepowered.asm.mixin.transformer.MixinTransformer.transformClass(MixinTransformer.java:234) ~[sponge-mixin-0.15.3+mixin.0.8.7.jar:0.15.3+mixin.0.8.7]
+	at org.spongepowered.asm.mixin.transformer.MixinTransformer.transformClassBytes(MixinTransformer.java:202) ~[sponge-mixin-0.15.3+mixin.0.8.7.jar:0.15.3+mixin.0.8.7]
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.getPostMixinClassByteArray(KnotClassDelegate.java:422) ~[fabric-loader-0.16.7.jar:?]
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.tryLoadClass(KnotClassDelegate.java:323) ~[fabric-loader-0.16.7.jar:?]
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.loadClass(KnotClassDelegate.java:218) ~[fabric-loader-0.16.7.jar:?]
+	at net.fabricmc.loader.impl.launch.knot.KnotClassLoader.loadClass(KnotClassLoader.java:119) ~[fabric-loader-0.16.7.jar:?]
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:526) ~[?:?]
+	at net.minecraft.client.gui.screen.TitleScreen.handler$zzp000$altoclef$altoAutoCreateWorld(TitleScreen.java:561) ~[minecraft-merged-4d6cd39190-1.16.1-net.fabricmc.yarn.1_16_1.1.16.1+build.21-v2.jar:?]
+	at net.minecraft.client.gui.screen.TitleScreen.tick(TitleScreen.java:84) ~[minecraft-merged-4d6cd39190-1.16.1-net.fabricmc.yarn.1_16_1.1.16.1+build.21-v2.jar:?]
+	at net.minecraft.client.MinecraftClient.method_1572(MinecraftClient.java:1499) ~[minecraft-merged-4d6cd39190-1.16.1-net.fabricmc.yarn.1_16_1.1.16.1+build.21-v2.jar:?]
+	at net.minecraft.client.gui.screen.Screen.wrapScreenError(Screen.java:431) ~[minecraft-merged-4d6cd39190-1.16.1-net.fabricmc.yarn.1_16_1.1.16.1+build.21-v2.jar:?]
+	... 8 more
+---- Minecraft Crash Report ----
+// Who set us up the TNT?
+
+Time: 9/21/26, 5:02?PM
+Description: Ticking screen
+
+java.lang.RuntimeException: Mixin transformation of adris.altoclef.mixins.AutoWorldState failed
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.getPostMixinClassByteArray(KnotClassDelegate.java:427)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.tryLoadClass(KnotClassDelegate.java:323)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.loadClass(KnotClassDelegate.java:218)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassLoader.loadClass(KnotClassLoader.java:119)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526)
+	at knot//net.minecraft.client.gui.screen.TitleScreen.handler$zzp000$altoclef$altoAutoCreateWorld(TitleScreen.java:561)
+	at knot//net.minecraft.client.gui.screen.TitleScreen.tick(TitleScreen.java:84)
+	at knot//net.minecraft.client.MinecraftClient.method_1572(MinecraftClient.java:1499)
+	at knot//net.minecraft.client.gui.screen.Screen.wrapScreenError(Screen.java:431)
+	at knot//net.minecraft.client.MinecraftClient.tick(MinecraftClient.java:1499)
+	at knot//net.minecraft.client.MinecraftClient.render(MinecraftClient.java:994)
+	at knot//net.minecraft.client.MinecraftClient.run(MinecraftClient.java:654)
+	at knot//net.minecraft.client.main.Main.main(Main.java:215)
+	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.launch(MinecraftGameProvider.java:480)
+	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:74)
+	at net.fabricmc.loader.impl.launch.knot.KnotClient.main(KnotClient.java:23)
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86)
+Caused by: org.spongepowered.asm.mixin.transformer.throwables.IllegalClassLoadError: adris.altoclef.mixins.AutoWorldState is in a defined mixin package adris.altoclef.mixins.* owned by altoclef.mixins.json and cannot be referenced directly
+	at org.spongepowered.asm.mixin.transformer.MixinProcessor.applyMixins(MixinProcessor.java:334)
+	at org.spongepowered.asm.mixin.transformer.MixinTransformer.transformClass(MixinTransformer.java:234)
+	at org.spongepowered.asm.mixin.transformer.MixinTransformer.transformClassBytes(MixinTransformer.java:202)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.getPostMixinClassByteArray(KnotClassDelegate.java:422)
+	... 16 more
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- Head --
+Thread: Render thread
+Stacktrace:
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.getPostMixinClassByteArray(KnotClassDelegate.java:427)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.tryLoadClass(KnotClassDelegate.java:323)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.loadClass(KnotClassDelegate.java:218)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassLoader.loadClass(KnotClassLoader.java:119)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526)
+	at knot//net.minecraft.client.gui.screen.TitleScreen.handler$zzp000$altoclef$altoAutoCreateWorld(TitleScreen.java:561)
+	at knot//net.minecraft.client.gui.screen.TitleScreen.tick(TitleScreen.java:84)
+	at knot//net.minecraft.client.MinecraftClient.method_1572(MinecraftClient.java:1499)
+
+-- Affected screen --
+Details:
+	Screen name: net.minecraft.client.gui.screen.TitleScreen
+Stacktrace:
+	at knot//net.minecraft.client.gui.screen.Screen.wrapScreenError(Screen.java:431)
+	at knot//net.minecraft.client.MinecraftClient.tick(MinecraftClient.java:1499)
+	at knot//net.minecraft.client.MinecraftClient.render(MinecraftClient.java:994)
+	at knot//net.minecraft.client.MinecraftClient.run(MinecraftClient.java:654)
+	at knot//net.minecraft.client.main.Main.main(Main.java:215)
+	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.launch(MinecraftGameProvider.java:480)
+	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:74)
+	at net.fabricmc.loader.impl.launch.knot.KnotClient.main(KnotClient.java:23)
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86)
+
+-- System Details --
+Details:
+	Minecraft Version: 1.16.1
+	Minecraft Version ID: 1.16.1
+	Operating System: Windows 11 (amd64) version 10.0
+	Java Version: 21.0.12.1, Eclipse Adoptium
+	Java VM Version: OpenJDK 64-Bit Server VM (mixed mode, sharing), Eclipse Adoptium
+	Memory: 1151492608 bytes (1098 MB) / 1423966208 bytes (1358 MB) up to 4246732800 bytes (4050 MB)
+	CPUs: 8
+	JVM Flags: 0 total; 
+	Fabric Mods: 
+		altoclef: Alto Clef 1.16.1-0.19
+		baritone: Ostinato (Baritone 1.16.1) 1.16.1-ostinato
+		fabric: Fabric API 0.18.0+build.387-1.16.1
+		fabric-api-base: Fabric API Base 0.1.3+12a8474c02
+		fabric-biomes-v1: Fabric Biomes (v1) 0.2.7+059ea86602
+		fabric-blockrenderlayer-v1: Fabric BlockRenderLayer Registration (v1) 1.1.4+c6a8ea8902
+		fabric-command-api-v1: Fabric Command API (v1) 1.0.8+5ce5339802
+		fabric-commands-v0: Fabric Commands (v0) 0.2.0+52d3083602
+		fabric-containers-v0: Fabric Containers (v0) 0.1.8+045df74f02
+		fabric-content-registries-v0: Fabric Content Registries (v0) 0.1.9+059ea86602
+		fabric-crash-report-info-v1: Fabric Crash Report Info (v1) 0.1.2+b7f9825d02
+		fabric-dimensions-v1: fabric-dimensions-v1 1.0.0+a71b305302
+		fabric-events-interaction-v0: Fabric Events Interaction (v0) 0.4.0+e540c58402
+		fabric-events-lifecycle-v0: Fabric Events Lifecycle (v0) 0.2.0+16acbe5b02
+		fabric-game-rule-api-v1: Fabric Game Rule API (v1) 1.0.0+fe81e12502
+		fabric-item-api-v1: Fabric Item API (v1) 1.0.0+16acbe5b02
+		fabric-item-groups-v0: Fabric Item Groups (v0) 0.2.0+438f963602
+		fabric-key-binding-api-v1: Fabric Key Binding API (v1) 1.0.1+f404f3be02
+		fabric-keybindings-v0: Fabric Key Bindings (v0) 0.2.0+3fa9f7c502
+		fabric-lifecycle-events-v1: Fabric Lifecycle Events (v1) 1.2.0+e83e061c02
+		fabric-loot-tables-v1: Fabric Loot Tables (v1) 1.0.0+386eb69e02
+		fabric-mining-levels-v0: Fabric Mining Levels (v0) 0.1.2+b764ce9902
+		fabric-models-v0: Fabric Models (v0) 0.1.0+dfdb52d602
+		fabric-networking-blockentity-v0: Fabric Networking Block Entity (v0) 0.2.5+b50ffc7b02
+		fabric-networking-v0: Fabric Networking (v0) 0.1.10+e00ecb5f02
+		fabric-object-builder-api-v1: Fabric Object Builder API (v1) 1.5.7+2242e77202
+		fabric-object-builders-v0: Fabric Object Builders (v0) 0.6.1+a2d21ddd02
+		fabric-particles-v1: fabric-particles-v1 0.2.1+0a6f2a7002
+		fabric-registry-sync-v0: Fabric Registry Sync (v0) 0.3.8+7dba2d6c02
+		fabric-renderer-api-v1: Fabric Renderer API (v1) 0.2.13+eae12eb802
+		fabric-renderer-indigo: Fabric Renderer - Indigo 0.3.4+34d6c87102
+		fabric-renderer-registries-v1: Fabric Renderer Registries (v1) 2.1.0+be551d3c02
+		fabric-rendering-data-attachment-v1: Fabric Rendering Data Attachment (v1) 0.1.3+b7f9825d02
+		fabric-rendering-fluids-v1: Fabric Rendering Fluids (v1) 0.1.8+b7084faa02
+		fabric-rendering-v0: Fabric Rendering (v0) 1.1.0+5341049002
+		fabric-rendering-v1: Fabric Rendering (v1) 1.1.2+346247d702
+		fabric-resource-loader-v0: Fabric Resource Loader (v0) 0.2.6+f41e209802
+		fabric-screen-handler-api-v1: Fabric Screen Handler API (v1) 1.1.0+97324d1102
+		fabric-tag-extensions-v0: Fabric Tag Extensions (v0) 0.2.7+a4c57d8e02
+		fabric-textures-v0: Fabric Textures (v0) 1.0.4+eae12eb802
+		fabric-tool-attribute-api-v1: Fabric Tool Attribute API (v1) 1.2.1+91fca5cd02
+		fabricloader: Fabric Loader 0.16.7
+		java: OpenJDK 64-Bit Server VM 21
+		minecraft: Minecraft 1.16.1
+		mixinextras: MixinExtras 0.4.1
+		tungsten: Tungsten ALPHA-1.6.0-1.16.1-SNAPSHOT
+	Launched Version: Fabric
+	Backend library: LWJGL version 3.3.2-snapshot
+	Backend API: Intel(R) Iris(R) Xe Graphics GL version 4.6.0 - Build 32.0.101.6737, Intel
+	GL Caps: Using framebuffer using OpenGL 3.0
+	Using VBOs: Yes
+	Is Modded: Definitely; Client brand changed to 'fabric'
+	Type: Client (map_client.txt)
+	Resource Packs: vanilla (incompatible)
+	Current Language: English (US)
+	CPU: 8x 11th Gen Intel(R) Core(TM) i5-1145G7 @ 2.60GHz
+#@!@# Game crashed! Crash report saved to: #@!@# C:\Users\redfa\Documents\MinecraftDev\altoclef\versions\1.16.1\run\crash-reports\crash-2026-09-21_17.02.02-client.txt
+
+> Task :1.16.1:runClient FAILED
+
+[Incubating] Problems report is available at: file:///C:/Users/redfa/Documents/MinecraftDev/altoclef/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':1.16.1:runClient'.
+> Process 'command 'C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot\bin\java.exe'' finished with non-zero exit value -1 (NTSTATUS 0xFFFFFFFF)
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 38s
+56 actionable tasks: 1 executed, 55 up-to-date

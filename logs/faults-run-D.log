@@ -1,0 +1,181 @@
+FAULT 0:34.7 E116 | drop 8 from 73 to 65 ph=BOOTSTRAP | hole loop: stop place, surface bail
+FAULT 0:52.8 E116 | drop 8 from 70 to 62 ph=BOOTSTRAP | hole loop: stop place, surface bail
+FAULT 1:30.0 E118 | CraftInTableTask 90s no inv change ph=BOOTSTRAP | see T2Codes / paste faults.log
+FAULT 2:29.8 E116 | drop 8 from 70 to 62 ph=BOOTSTRAP | hole loop: stop place, surface bail
+FAULT 2:33.8 S102 | escape water spd=0.006 | water still: swim+jump, do not pillar
+FAULT 2:37.1 E102 | spd=0.000 @-232,62,84 | water still: swim+jump, do not pillar
+FAULT 2:39.8 S102 | escape water spd=0.000 | water still: swim+jump, do not pillar
+FAULT 2:43.1 E102 | spd=0.000 @-232,62,84 | water still: swim+jump, do not pillar
+FAULT 2:43.8 E97 | wood jump-lock — retarget nearest any-type log | see T2Codes / paste faults.log
+FAULT 2:44.2 S140 | replace MineAndCollectTask after 13s same xz | see T2Codes / paste faults.log
+FAULT 2:56.4 S102 | escape water spd=0.000 | water still: swim+jump, do not pillar
+FAULT 2:57.8 E10 | submerged — bail once | water still: swim+jump, do not pillar
+FAULT 3:00.4 E102 | spd=0.000 @-247,61,84 | water still: swim+jump, do not pillar
+FAULT 3:02.5 S102 | escape water spd=0.000 | water still: swim+jump, do not pillar
+FAULT 3:04.2 E97 | wood jump-lock — retarget nearest any-type log | see T2Codes / paste faults.log
+FAULT 3:04.5 S140 | replace MineAndCollectTask after 11s same xz | see T2Codes / paste faults.log
+FAULT 3:22.6 E97 | wood jump-lock — retarget nearest any-type log | see T2Codes / paste faults.log
+FAULT 3:22.8 S140 | replace MineAndCollectTask after 8s same xz | see T2Codes / paste faults.log
+FAULT 4:12.8 E97 | wood jump-lock — retarget nearest any-type log | see T2Codes / paste faults.log
+FAULT 4:13.1 S140 | replace MineAndCollectTask after 8s same xz | see T2Codes / paste faults.log
+FAULT 4:36.1 S130 | START trigger=flips=3 ph=IRON prev=CollectIronIngotTask cycle=1 pos=-299,62,136 walls=4/4/4 sky=10 place=3 boxed=true hold=false cool=0 ban=0 startY=62 step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 4:36.8 E100 | jumps=6 @-299,63,136 ph=IRON child=HolePillarTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 4:37.1 S130 | tick y=64 slot=1 air=true pos=-299,64,136 walls=0/0/4 sky=12 place=2 boxed=false hold=true cool=0 ban=0 startY=62 step=21 | pillar state machine: check ban column vs actual shaft column
+FAULT 4:38.0 S139 | rise confirmed +4y y=66 startY=62 pos=-299,66,136 walls=0/0/0 sky=12 place=1 boxed=false hold=true cool=0 ban=0 startY=62 step=37 | rise confirmed: real escape, cool armed
+FAULT 4:38.0 S133 | cool arm ticks=80 reason=risen y=66 startY=62 ban=-299,136 pos=-299,66,136 walls=0/0/0 sky=12 place=1 boxed=false hold=true cool=80 ban=80 startY=62 step=37 | pillar state machine: check ban column vs actual shaft column
+FAULT 4:38.0 S136 | END reason=risen y=66 startY=62 roseReal=true giveUp=true pos=-299,66,136 walls=0/0/0 sky=12 place=1 boxed=false hold=true cool=80 ban=80 startY=62 step=37 | pillar state machine: check ban column vs actual shaft column
+FAULT 4:38.3 S109 | equip pick for mining (was holding empty) | mining with a block in hand: force-equip the pick (S109 does this)
+FAULT 4:41.5 S135 | S130 suppressed why=would-S130 but busy cool=10 flips=6 sameXz=70 child=CollectIronIngotTask cool=10 ban=10 hold=false pos=-299,62,136 walls=4/4/4 sky=10 place=3 boxed=true hold=false cool=10 ban=10 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 4:41.5 S100 | stop jump-walk @-299,136 ph=IRON child=CollectIronIngotTask esc=0 | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 4:42.0 S134 | pillar cool expire after flips=3 end=risen y=66 startY=62 | pillar state machine: check ban column vs actual shaft column
+FAULT 4:42.0 S137 | re-cool still-boxed@-299,136 n=1 ticks=160 end=risen y=66 startY=62 pos=-299,62,136 walls=4/4/4 sky=10 place=4 boxed=true hold=false cool=160 ban=160 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 4:44.0 S135 | S130 suppressed why=would-S130 but busy cool=120 flips=2 sameXz=41 child=CollectIronIngotTask cool=120 ban=120 hold=false pos=-299,61,136 walls=4/4/4 sky=9 place=6 boxed=true hold=false cool=120 ban=120 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 4:46.2 E100 | jumps=6 @-299,59,136 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 4:46.2 S144 | jump-stuck collector — replace CollectIronIngotTask with wander (esc=2) | S100 nudge ineffective on a collector: child replaced with TimeoutWanderTask to break the re-path loop
+FAULT 4:49.9 S138 | shaft ban clear left-xz ban=-299,136 now=-301,136 manh=2 left=2 | pillar state machine: check ban column vs actual shaft column
+FAULT 4:50.0 S134 | pillar cool expire after flips=3 end=risen y=66 startY=62 | pillar state machine: check ban column vs actual shaft column
+FAULT 4:50.0 S138 | shaft ban clear left-xz ban=-299,136 now=-301,136 manh=2 left=60 | pillar state machine: check ban column vs actual shaft column
+FAULT 4:57.4 S130 | START trigger=flips=3 ph=IRON prev=CollectIronIngotTask cycle=1 pos=-315,62,147 walls=4/4/4 sky=15 place=6 boxed=true hold=false cool=0 ban=0 startY=62 step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 4:59.3 S139 | rise confirmed +4y y=66 startY=62 pos=-315,66,147 walls=0/0/0 sky=15 place=4 boxed=false hold=true cool=0 ban=0 startY=62 step=37 | rise confirmed: real escape, cool armed
+FAULT 4:59.3 S133 | cool arm ticks=80 reason=risen y=66 startY=62 ban=-315,147 pos=-315,66,147 walls=0/0/0 sky=15 place=4 boxed=false hold=true cool=80 ban=80 startY=62 step=37 | pillar state machine: check ban column vs actual shaft column
+FAULT 4:59.3 S136 | END reason=risen y=66 startY=62 roseReal=true giveUp=true pos=-315,66,147 walls=0/0/0 sky=15 place=4 boxed=false hold=true cool=80 ban=80 startY=62 step=37 | pillar state machine: check ban column vs actual shaft column
+FAULT 4:59.6 S109 | equip pick for mining (was holding empty) | mining with a block in hand: force-equip the pick (S109 does this)
+FAULT 5:00.2 E100 | jumps=12 @-315,65,147 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 5:02.8 S135 | S130 suppressed why=would-S130 but busy cool=10 flips=6 sameXz=70 child=CollectIronIngotTask cool=10 ban=10 hold=false pos=-315,62,147 walls=4/4/4 sky=15 place=6 boxed=true hold=false cool=10 ban=10 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 5:02.8 S100 | stop jump-walk @-315,147 ph=IRON child=CollectIronIngotTask esc=0 | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 5:03.3 S134 | pillar cool expire after flips=3 end=risen y=66 startY=62 | pillar state machine: check ban column vs actual shaft column
+FAULT 5:03.3 S137 | re-cool still-boxed@-315,147 n=1 ticks=160 end=risen y=66 startY=62 pos=-315,62,147 walls=4/4/4 sky=15 place=7 boxed=true hold=false cool=160 ban=160 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 5:05.3 S135 | S130 suppressed why=would-S130 but busy cool=120 flips=2 sameXz=41 child=CollectIronIngotTask cool=120 ban=120 hold=false pos=-315,61,147 walls=4/4/4 sky=15 place=8 boxed=true hold=false cool=120 ban=120 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 5:06.4 E100 | jumps=6 @-315,61,147 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 5:06.4 S144 | jump-stuck collector — replace CollectIronIngotTask with wander (esc=2) | S100 nudge ineffective on a collector: child replaced with TimeoutWanderTask to break the re-path loop
+FAULT 5:09.2 S138 | shaft ban clear left-xz ban=-315,147 now=-316,148 manh=2 left=43 | pillar state machine: check ban column vs actual shaft column
+FAULT 5:11.3 S134 | pillar cool expire after flips=3 end=risen y=66 startY=62 | pillar state machine: check ban column vs actual shaft column
+FAULT 5:11.3 S138 | shaft ban clear left-xz ban=-315,147 now=-318,155 manh=11 left=60 | pillar state machine: check ban column vs actual shaft column
+FAULT 5:33.9 S130 | START trigger=flips=3 ph=IRON prev=CollectIronIngotTask cycle=1 pos=-310,62,137 walls=4/4/4 sky=15 place=4 boxed=true hold=false cool=0 ban=0 startY=62 step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 5:35.7 S139 | rise confirmed +4y y=66 startY=62 pos=-310,66,137 walls=0/0/0 sky=15 place=1 boxed=false hold=true cool=0 ban=0 startY=62 step=37 | rise confirmed: real escape, cool armed
+FAULT 5:35.7 S133 | cool arm ticks=80 reason=risen y=66 startY=62 ban=-310,137 pos=-310,66,137 walls=0/0/0 sky=15 place=1 boxed=false hold=true cool=80 ban=80 startY=62 step=37 | pillar state machine: check ban column vs actual shaft column
+FAULT 5:35.7 S136 | END reason=risen y=66 startY=62 roseReal=true giveUp=true pos=-310,66,137 walls=0/0/0 sky=15 place=1 boxed=false hold=true cool=80 ban=80 startY=62 step=37 | pillar state machine: check ban column vs actual shaft column
+FAULT 5:36.5 S138 | shaft ban clear left-xz ban=-310,137 now=-308,137 manh=2 left=65 | pillar state machine: check ban column vs actual shaft column
+FAULT 5:36.7 S109 | equip pick for mining (was holding empty) | mining with a block in hand: force-equip the pick (S109 does this)
+FAULT 5:38.9 S135 | S130 suppressed why=would-S130 but busy cool=16 flips=3 sameXz=27 child=CollectIronIngotTask cool=16 ban=0 hold=false pos=-309,62,137 walls=4/4/4 sky=15 place=1 boxed=true hold=false cool=16 ban=0 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 5:39.7 S134 | pillar cool expire after flips=3 end=risen y=66 startY=62 | pillar state machine: check ban column vs actual shaft column
+FAULT 5:40.9 S135 | S130 suppressed why=would-S130 but busy cool=0 flips=4 sameXz=25 child=CollectIronIngotTask cool=0 ban=36 hold=false pos=-309,60,137 walls=4/4/4 sky=15 place=1 boxed=true hold=false cool=0 ban=36 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 5:41.6 E100 | jumps=10 @-309,59,137 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 5:41.7 S100 | stop jump-walk @-309,137 ph=IRON child=CollectIronIngotTask esc=0 | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 5:42.7 S130 | START trigger=sameXz=61 ph=IRON prev=CollectIronIngotTask cycle=1 pos=-309,59,137 walls=4/4/4 sky=15 place=3 boxed=true hold=false cool=0 ban=0 startY=59 step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 5:44.0 S133 | cool arm ticks=240 reason=!hasPlace y=62 ban=-309,137 pos=-309,62,137 walls=4/4/4 sky=15 place=0 boxed=true hold=true cool=240 ban=240 startY=59 step=26 | pillar state machine: check ban column vs actual shaft column
+FAULT 5:44.0 S136 | END reason=!hasPlace y=62 roseReal=false giveUp=true pos=-309,62,137 walls=4/4/4 sky=15 place=0 boxed=true hold=true cool=240 ban=240 startY=59 step=26 | pillar state machine: check ban column vs actual shaft column
+FAULT 5:44.4 S109 | equip pick for mining (was holding empty) | mining with a block in hand: force-equip the pick (S109 does this)
+FAULT 5:56.0 S134 | pillar cool expire after sameXz=61 end=!hasPlace y=62 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:04.9 S130 | START trigger=flips=3 ph=IRON prev=CollectIronIngotTask cycle=1 pos=-307,56,139 walls=4/4/4 sky=3 place=12 boxed=true hold=false cool=0 ban=0 startY=56 step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:07.4 S133 | cool arm ticks=240 reason=stuck-low step=50 y=58 startY=56 ban=-307,139 pos=-307,58,139 walls=3/3/4 sky=5 place=11 boxed=false hold=true cool=240 ban=240 startY=56 step=50 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:07.4 S136 | END reason=stuck-low step=50 y=58 startY=56 roseReal=false giveUp=true pos=-307,58,139 walls=3/3/4 sky=5 place=11 boxed=false hold=true cool=240 ban=240 startY=56 step=50 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:07.8 E100 | jumps=14 @-307,58,139 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 6:11.5 S135 | S130 suppressed why=would-S130 but busy cool=158 flips=3 sameXz=23 child=CollectIronIngotTask cool=158 ban=158 hold=false pos=-306,56,139 walls=4/4/4 sky=2 place=14 boxed=true hold=false cool=158 ban=158 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:12.6 S100 | stop jump-walk @-306,139 ph=IRON child=CollectIronIngotTask esc=1 | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 6:12.6 S144 | jump-stuck collector — replace CollectIronIngotTask with wander (esc=2) | S100 nudge ineffective on a collector: child replaced with TimeoutWanderTask to break the re-path loop
+FAULT 6:14.4 E100 | jumps=8 @-306,56,139 ph=IRON child=TimeoutWanderTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 6:15.7 S138 | shaft ban clear left-xz ban=-307,139 now=-309,139 manh=2 left=75 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:19.4 S134 | pillar cool expire after flips=3 end=stuck-low step=50 y=58 startY=56 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:19.4 S138 | shaft ban clear left-xz ban=-307,139 now=-309,136 manh=5 left=60 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:24.1 S130 | START trigger=flips=3 ph=IRON prev=CollectIronIngotTask cycle=1 pos=-310,62,132 walls=4/4/4 sky=15 place=14 boxed=true hold=false cool=0 ban=0 startY=62 step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:26.0 S139 | rise confirmed +4y y=66 startY=62 pos=-310,66,132 walls=0/0/0 sky=15 place=11 boxed=false hold=true cool=0 ban=0 startY=62 step=37 | rise confirmed: real escape, cool armed
+FAULT 6:26.0 S133 | cool arm ticks=80 reason=risen y=66 startY=62 ban=-310,132 pos=-310,66,132 walls=0/0/0 sky=15 place=11 boxed=false hold=true cool=80 ban=80 startY=62 step=37 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:26.0 S136 | END reason=risen y=66 startY=62 roseReal=true giveUp=true pos=-310,66,132 walls=0/0/0 sky=15 place=11 boxed=false hold=true cool=80 ban=80 startY=62 step=37 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:26.9 E100 | jumps=13 @-310,64,132 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 6:28.2 S135 | S130 suppressed why=would-S130 but busy cool=35 flips=6 sameXz=45 child=CollectIronIngotTask cool=35 ban=35 hold=false pos=-310,62,132 walls=4/4/4 sky=15 place=13 boxed=true hold=false cool=35 ban=35 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:28.2 S100 | stop jump-walk @-310,132 ph=IRON child=CollectIronIngotTask esc=0 | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 6:28.6 S109 | equip pick for mining (was holding empty) | mining with a block in hand: force-equip the pick (S109 does this)
+FAULT 6:30.0 S134 | pillar cool expire after flips=3 end=risen y=66 startY=62 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:30.0 S137 | re-cool still-boxed@-310,132 n=1 ticks=160 end=risen y=66 startY=62 pos=-310,61,132 walls=4/4/4 sky=15 place=14 boxed=true hold=false cool=160 ban=160 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:31.0 S135 | S130 suppressed why=would-S130 but busy cool=140 flips=3 sameXz=21 child=CollectIronIngotTask cool=140 ban=140 hold=false pos=-310,59,132 walls=4/4/4 sky=15 place=15 boxed=true hold=false cool=140 ban=140 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:32.6 E100 | jumps=6 @-310,58,132 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 6:32.8 S144 | jump-stuck collector — replace CollectIronIngotTask with wander (esc=2) | S100 nudge ineffective on a collector: child replaced with TimeoutWanderTask to break the re-path loop
+FAULT 6:37.0 S138 | shaft ban clear left-xz ban=-310,132 now=-312,132 manh=2 left=21 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:38.0 S134 | pillar cool expire after flips=3 end=risen y=66 startY=62 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:38.0 S138 | shaft ban clear left-xz ban=-310,132 now=-316,132 manh=6 left=60 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:43.9 S130 | START trigger=flips=3 ph=IRON prev=CollectIronIngotTask cycle=1 pos=-331,62,133 walls=4/4/4 sky=15 place=12 boxed=true hold=false cool=0 ban=0 startY=62 step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:45.8 S139 | rise confirmed +4y y=66 startY=62 pos=-331,66,133 walls=0/0/0 sky=15 place=9 boxed=false hold=true cool=0 ban=0 startY=62 step=37 | rise confirmed: real escape, cool armed
+FAULT 6:45.8 S133 | cool arm ticks=80 reason=risen y=66 startY=62 ban=-331,133 pos=-331,66,133 walls=0/0/0 sky=15 place=9 boxed=false hold=true cool=80 ban=80 startY=62 step=37 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:45.8 S136 | END reason=risen y=66 startY=62 roseReal=true giveUp=true pos=-331,66,133 walls=0/0/0 sky=15 place=9 boxed=false hold=true cool=80 ban=80 startY=62 step=37 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:46.6 E100 | jumps=13 @-331,64,133 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 6:48.0 S135 | S130 suppressed why=would-S130 but busy cool=35 flips=6 sameXz=45 child=CollectIronIngotTask cool=35 ban=35 hold=false pos=-331,62,133 walls=4/4/4 sky=15 place=11 boxed=true hold=false cool=35 ban=35 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:48.0 S100 | stop jump-walk @-331,133 ph=IRON child=CollectIronIngotTask esc=0 | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 6:48.4 S109 | equip pick for mining (was holding empty) | mining with a block in hand: force-equip the pick (S109 does this)
+FAULT 6:49.8 S134 | pillar cool expire after flips=3 end=risen y=66 startY=62 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:49.8 S137 | re-cool still-boxed@-331,133 n=1 ticks=160 end=risen y=66 startY=62 pos=-331,61,133 walls=4/4/4 sky=15 place=12 boxed=true hold=false cool=160 ban=160 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:51.8 S135 | S130 suppressed why=would-S130 but busy cool=120 flips=2 sameXz=41 child=CollectIronIngotTask cool=120 ban=120 hold=false pos=-331,60,133 walls=4/4/4 sky=15 place=12 boxed=true hold=false cool=120 ban=120 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:53.3 E100 | jumps=6 @-331,58,133 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 6:53.5 S100 | stop jump-walk @-331,133 ph=IRON child=CollectIronIngotTask esc=1 | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 6:53.5 S144 | jump-stuck collector — replace CollectIronIngotTask with wander (esc=2) | S100 nudge ineffective on a collector: child replaced with TimeoutWanderTask to break the re-path loop
+FAULT 6:57.4 S138 | shaft ban clear left-xz ban=-331,133 now=-333,133 manh=2 left=8 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:57.8 S134 | pillar cool expire after flips=3 end=risen y=66 startY=62 | pillar state machine: check ban column vs actual shaft column
+FAULT 6:57.8 S138 | shaft ban clear left-xz ban=-331,133 now=-334,133 manh=3 left=60 | pillar state machine: check ban column vs actual shaft column
+FAULT 7:06.1 S130 | START trigger=flips=3 ph=IRON prev=CollectIronIngotTask cycle=1 pos=-353,62,139 walls=4/4/4 sky=15 place=9 boxed=true hold=false cool=0 ban=0 startY=62 step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 7:08.0 S139 | rise confirmed +4y y=66 startY=62 pos=-353,66,139 walls=0/0/0 sky=15 place=6 boxed=false hold=true cool=0 ban=0 startY=62 step=37 | rise confirmed: real escape, cool armed
+FAULT 7:08.0 S133 | cool arm ticks=80 reason=risen y=66 startY=62 ban=-353,139 pos=-353,66,139 walls=0/0/0 sky=15 place=6 boxed=false hold=true cool=80 ban=80 startY=62 step=37 | pillar state machine: check ban column vs actual shaft column
+FAULT 7:08.0 S136 | END reason=risen y=66 startY=62 roseReal=true giveUp=true pos=-353,66,139 walls=0/0/0 sky=15 place=6 boxed=false hold=true cool=80 ban=80 startY=62 step=37 | pillar state machine: check ban column vs actual shaft column
+FAULT 7:08.8 E100 | jumps=13 @-353,64,139 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 7:10.2 S135 | S130 suppressed why=would-S130 but busy cool=35 flips=6 sameXz=45 child=CollectIronIngotTask cool=35 ban=35 hold=false pos=-353,62,139 walls=4/4/4 sky=15 place=8 boxed=true hold=false cool=35 ban=35 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 7:10.2 S100 | stop jump-walk @-353,139 ph=IRON child=CollectIronIngotTask esc=0 | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 7:10.6 S109 | equip pick for mining (was holding empty) | mining with a block in hand: force-equip the pick (S109 does this)
+FAULT 7:12.0 S134 | pillar cool expire after flips=3 end=risen y=66 startY=62 | pillar state machine: check ban column vs actual shaft column
+FAULT 7:12.0 S137 | re-cool still-boxed@-353,139 n=1 ticks=160 end=risen y=66 startY=62 pos=-353,61,139 walls=4/4/4 sky=15 place=9 boxed=true hold=false cool=160 ban=160 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 7:13.6 S135 | S130 suppressed why=would-S130 but busy cool=128 flips=3 sameXz=33 child=CollectIronIngotTask cool=128 ban=128 hold=false pos=-353,59,139 walls=4/4/4 sky=15 place=9 boxed=true hold=false cool=128 ban=128 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 7:15.2 E100 | jumps=6 @-353,58,139 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 7:15.4 S100 | stop jump-walk @-353,139 ph=IRON child=CollectIronIngotTask esc=1 | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 7:15.4 S144 | jump-stuck collector — replace CollectIronIngotTask with wander (esc=2) | S100 nudge ineffective on a collector: child replaced with TimeoutWanderTask to break the re-path loop
+FAULT 7:20.0 S134 | pillar cool expire after flips=3 end=risen y=66 startY=62 | pillar state machine: check ban column vs actual shaft column
+FAULT 7:20.0 S137 | re-cool still-boxed@-353,139 n=2 ticks=320 end=risen y=66 startY=62 pos=-353,59,139 walls=4/4/4 sky=15 place=8 boxed=true hold=false cool=320 ban=320 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 7:20.0 S142 | unban for real pillar attempt@-353,139 reCool=2 pos=-353,59,139 walls=4/4/4 sky=15 place=8 boxed=true hold=false cool=320 ban=320 startY=- step=0 | shaft ban lifted: 1x1 shaft cannot clear a ban by walking, so pillaring is the only way out
+FAULT 7:20.8 E100 | jumps=6 @-353,59,139 ph=IRON child=TimeoutWanderTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 7:23.5 S130 | START trigger=flips=25 ph=IRON prev=CollectIronIngotTask cycle=2 pos=-353,60,139 walls=4/4/4 sky=15 place=8 boxed=true hold=false cool=0 ban=0 startY=60 step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 7:25.8 E100 | jumps=6 @-353,63,139 ph=IRON child=HolePillarTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 7:25.9 S139 | rise confirmed +4y y=64 startY=60 pos=-353,64,139 walls=0/0/4 sky=15 place=4 boxed=false hold=true cool=0 ban=0 startY=60 step=43 | rise confirmed: real escape, cool armed
+FAULT 7:25.9 S133 | cool arm ticks=80 reason=risen y=64 startY=60 ban=-353,139 pos=-353,64,139 walls=0/0/4 sky=15 place=4 boxed=false hold=true cool=80 ban=80 startY=60 step=43 | pillar state machine: check ban column vs actual shaft column
+FAULT 7:25.9 S136 | END reason=risen y=64 startY=60 roseReal=true giveUp=true pos=-353,64,139 walls=0/0/4 sky=15 place=4 boxed=false hold=true cool=80 ban=80 startY=60 step=43 | pillar state machine: check ban column vs actual shaft column
+FAULT 7:26.9 S135 | S130 suppressed why=would-S130 but busy cool=61 flips=3 sameXz=19 child=CollectIronIngotTask cool=61 ban=61 hold=false pos=-353,62,139 walls=4/4/4 sky=15 place=4 boxed=true hold=false cool=61 ban=61 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 7:28.0 S100 | stop jump-walk @-353,139 ph=IRON child=CollectIronIngotTask esc=0 | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 7:28.9 S135 | S130 suppressed why=would-S130 but busy cool=20 flips=2 sameXz=60 child=CollectIronIngotTask cool=20 ban=20 hold=false pos=-353,59,139 walls=4/4/4 sky=15 place=7 boxed=true hold=false cool=20 ban=20 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 7:29.9 S134 | pillar cool expire after flips=25 end=risen y=64 startY=60 | pillar state machine: check ban column vs actual shaft column
+FAULT 7:29.9 S137 | re-cool still-boxed@-353,139 n=1 ticks=160 end=risen y=64 startY=60 pos=-353,58,139 walls=4/4/4 sky=15 place=8 boxed=true hold=false cool=160 ban=160 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 7:31.5 E100 | jumps=6 @-353,57,139 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 7:31.7 S135 | S130 suppressed why=would-S130 but busy cool=125 flips=3 sameXz=36 child=CollectIronIngotTask cool=125 ban=125 hold=false pos=-353,57,139 walls=4/4/4 sky=15 place=9 boxed=true hold=false cool=125 ban=125 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 7:37.9 S134 | pillar cool expire after flips=25 end=risen y=64 startY=60 | pillar state machine: check ban column vs actual shaft column
+FAULT 7:40.1 S138 | shaft ban clear left-xz ban=-353,139 now=-353,137 manh=2 left=17 | pillar state machine: check ban column vs actual shaft column
+FAULT 7:51.0 E70 | iron stall 6s @-352,133 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 7:57.0 E70 | iron stall 6s @-352,132 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 8:14.8 E70 | iron stall 6s @-352,129 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 8:20.8 S100 | stop jump-walk @-353,139 ph=IRON child=CollectIronIngotTask esc=1 | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 8:20.8 S144 | jump-stuck collector — replace CollectIronIngotTask with wander (esc=2) | S100 nudge ineffective on a collector: child replaced with TimeoutWanderTask to break the re-path loop
+FAULT 8:22.8 E100 | jumps=15 @-353,59,139 ph=IRON child=TimeoutWanderTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 8:31.9 S130 | START trigger=flips=3 ph=IRON prev=CollectIronIngotTask cycle=1 pos=-373,65,140 walls=4/4/4 sky=15 place=23 boxed=true hold=false cool=0 ban=0 startY=65 step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 8:33.8 S139 | rise confirmed +4y y=69 startY=65 pos=-373,69,140 walls=0/0/0 sky=15 place=20 boxed=false hold=true cool=0 ban=0 startY=65 step=37 | rise confirmed: real escape, cool armed
+FAULT 8:33.8 S133 | cool arm ticks=80 reason=risen y=69 startY=65 ban=-373,140 pos=-373,69,140 walls=0/0/0 sky=15 place=20 boxed=false hold=true cool=80 ban=80 startY=65 step=37 | pillar state machine: check ban column vs actual shaft column
+FAULT 8:33.8 S136 | END reason=risen y=69 startY=65 roseReal=true giveUp=true pos=-373,69,140 walls=0/0/0 sky=15 place=20 boxed=false hold=true cool=80 ban=80 startY=65 step=37 | pillar state machine: check ban column vs actual shaft column
+FAULT 8:34.7 E100 | jumps=12 @-373,68,140 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 8:36.6 S135 | S130 suppressed why=would-S130 but busy cool=24 flips=6 sameXz=56 child=CollectIronIngotTask cool=24 ban=24 hold=false pos=-373,65,140 walls=4/4/4 sky=15 place=22 boxed=true hold=false cool=24 ban=24 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 8:36.6 S100 | stop jump-walk @-373,140 ph=IRON child=CollectIronIngotTask esc=0 | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 8:36.9 S109 | equip pick for mining (was holding diorite) | mining with a block in hand: force-equip the pick (S109 does this)
+FAULT 8:37.8 S134 | pillar cool expire after flips=3 end=risen y=69 startY=65 | pillar state machine: check ban column vs actual shaft column
+FAULT 8:37.8 S137 | re-cool still-boxed@-373,140 n=1 ticks=160 end=risen y=69 startY=65 pos=-373,64,140 walls=4/4/4 sky=15 place=23 boxed=true hold=false cool=160 ban=160 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 8:38.9 S135 | S130 suppressed why=would-S130 but busy cool=138 flips=3 sameXz=23 child=CollectIronIngotTask cool=138 ban=138 hold=false pos=-373,63,140 walls=4/4/4 sky=15 place=23 boxed=true hold=false cool=138 ban=138 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 8:39.9 E100 | jumps=6 @-373,62,140 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 8:40.9 S135 | S130 suppressed why=would-S130 but busy cool=97 flips=5 sameXz=64 child=CollectIronIngotTask cool=97 ban=97 hold=false pos=-373,62,140 walls=4/4/4 sky=15 place=23 boxed=true hold=false cool=97 ban=97 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 8:41.3 S144 | jump-stuck collector — replace CollectIronIngotTask with wander (esc=2) | S100 nudge ineffective on a collector: child replaced with TimeoutWanderTask to break the re-path loop
+FAULT 8:45.5 S138 | shaft ban clear left-xz ban=-373,140 now=-374,139 manh=2 left=7 | pillar state machine: check ban column vs actual shaft column
+FAULT 8:45.8 S134 | pillar cool expire after flips=3 end=risen y=69 startY=65 | pillar state machine: check ban column vs actual shaft column
+FAULT 8:45.8 S138 | shaft ban clear left-xz ban=-373,140 now=-374,139 manh=2 left=60 | pillar state machine: check ban column vs actual shaft column
+FAULT 8:52.5 S130 | START trigger=flips=5 ph=IRON prev=CollectIronIngotTask cycle=1 pos=-383,70,137 walls=4/4/4 sky=15 place=19 boxed=true hold=false cool=0 ban=0 startY=70 step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 8:54.1 E100 | jumps=11 @-383,73,137 ph=IRON child=HolePillarTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 8:54.4 S139 | rise confirmed +4y y=74 startY=70 pos=-383,74,137 walls=0/0/1 sky=15 place=16 boxed=false hold=true cool=0 ban=0 startY=70 step=37 | rise confirmed: real escape, cool armed
+FAULT 8:54.4 S133 | cool arm ticks=80 reason=risen y=74 startY=70 ban=-383,137 pos=-383,74,137 walls=0/0/1 sky=15 place=16 boxed=false hold=true cool=80 ban=80 startY=70 step=37 | pillar state machine: check ban column vs actual shaft column
+FAULT 8:54.4 S136 | END reason=risen y=74 startY=70 roseReal=true giveUp=true pos=-383,74,137 walls=0/0/1 sky=15 place=16 boxed=false hold=true cool=80 ban=80 startY=70 step=37 | pillar state machine: check ban column vs actual shaft column
+FAULT 8:57.2 S135 | S130 suppressed why=would-S130 but busy cool=23 flips=6 sameXz=57 child=CollectIronIngotTask cool=23 ban=23 hold=false pos=-383,70,137 walls=4/4/4 sky=15 place=18 boxed=true hold=false cool=23 ban=23 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 8:57.2 S100 | stop jump-walk @-383,137 ph=IRON child=CollectIronIngotTask esc=0 | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 8:57.6 S109 | equip pick for mining (was holding diorite) | mining with a block in hand: force-equip the pick (S109 does this)
+FAULT 8:58.4 S134 | pillar cool expire after flips=5 end=risen y=74 startY=70 | pillar state machine: check ban column vs actual shaft column
+FAULT 8:58.4 S137 | re-cool still-boxed@-383,137 n=1 ticks=160 end=risen y=74 startY=70 pos=-383,69,137 walls=4/4/4 sky=15 place=19 boxed=true hold=false cool=160 ban=160 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 8:59.3 E100 | jumps=6 @-383,68,137 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 8:59.5 S135 | S130 suppressed why=would-S130 but busy cool=137 flips=3 sameXz=24 child=CollectIronIngotTask cool=137 ban=137 hold=false pos=-383,68,137 walls=4/4/4 sky=15 place=19 boxed=true hold=false cool=137 ban=137 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 9:01.0 S144 | jump-stuck collector — replace CollectIronIngotTask with wander (esc=2) | S100 nudge ineffective on a collector: child replaced with TimeoutWanderTask to break the re-path loop

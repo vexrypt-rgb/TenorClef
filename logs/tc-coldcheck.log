@@ -1,0 +1,128 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.4.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+[tenorclef] gradle.properties.local sets org.gradle.java.home — Gradle selects the daemon JDK from JAVA_HOME or ~/.gradle/gradle.properties; export JAVA_HOME="C:/Program Files/Eclipse Adoptium/jdk-21.0.12.101-hotspot" if this pin is required.
+[tenorclef] Loaded 1 entries from gradle.properties.local
+
+> Configure project :1.16.1
+Fabric Loom: 1.15.5
+
+> Configure project :1.21.1
+Fabric Loom: 1.15.5
+[altoclef] Tungsten jars for 1.21.1: [tungsten-fabric-ALPHA-1.6.0-1.21compat-SNAPSHOT.jar]
+Build file 'C:\Users\redfa\Documents\MinecraftDev\altoclef\build.gradle': line 313
+Properties should be assigned using the 'propName = value' syntax. Setting a property via the Gradle-generated 'propName value' or 'propName(value)' syntax in Groovy DSL has been deprecated. This is scheduled to be removed in Gradle 10. Use assignment ('duplicatesStrategy = <value>') instead. Consult the upgrading guide for further information: https://docs.gradle.org/9.4.1/userguide/upgrading_version_8.html#groovy_space_assignment_syntax
+	at build_dsk7s0l5lw6a69ogktr7fgsy9$_run_closure13$_closure39.doCall$original(C:\Users\redfa\Documents\MinecraftDev\altoclef\build.gradle:313)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+	at build_dsk7s0l5lw6a69ogktr7fgsy9$_run_closure13.doCall$original(C:\Users\redfa\Documents\MinecraftDev\altoclef\build.gradle:312)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.16.5
+Fabric Loom: 1.15.5
+
+> Configure project :1.21
+Fabric Loom: 1.15.5
+[altoclef] Tungsten jars for 1.21: [tungsten-fabric-ALPHA-1.6.0-1.21compat-SNAPSHOT.jar]
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.17.1
+Fabric Loom: 1.15.5
+
+> Configure project :1.20.6
+Fabric Loom: 1.15.5
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.18
+Fabric Loom: 1.15.5
+
+> Configure project :1.20.5
+Fabric Loom: 1.15.5
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.18.2
+Fabric Loom: 1.15.5
+
+> Configure project :1.20.4
+Fabric Loom: 1.15.5
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.19.4
+Fabric Loom: 1.15.5
+
+> Configure project :1.20.2
+Fabric Loom: 1.15.5
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.20.1
+Fabric Loom: 1.15.5
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.19.4
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.18.2
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.18
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.17.1
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.16.5
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.16.1
+[altoclef] Ostinato Baritone for 1.16.1: baritone-unoptimized-fabric-1.16.1.jar
+[altoclef] Tungsten jars for 1.16.1: [tungsten-fabric-ALPHA-1.6.0-1.16.1-SNAPSHOT.jar]
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.21.11
+Fabric Loom: 1.15.5
+[altoclef] Ostinato Baritone for 1.21.11: baritone-unoptimized-fabric-1.17.0-7-g9bb1b309-dirty.jar
+[altoclef] Tungsten jars for 1.21.11: [tungsten-fabric-ALPHA-1.6.0-1.21compat-SNAPSHOT.jar]
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Task :1.16.1:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.16.1:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.16.5:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.16.5:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.17.1:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.17.1:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.18:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.18:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.18.2:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.18.2:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.19.4:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.19.4:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.1:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.1:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.2:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.2:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.4:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.4:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.5:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.5:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.6:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.6:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.21:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.21:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.21:preprocessCode UP-TO-DATE
+> Task :1.20.6:preprocessCode UP-TO-DATE
+> Task :1.20.5:preprocessCode UP-TO-DATE
+> Task :1.20.4:preprocessCode UP-TO-DATE
+> Task :1.20.2:preprocessCode UP-TO-DATE
+> Task :1.20.1:preprocessCode UP-TO-DATE
+> Task :1.19.4:preprocessCode UP-TO-DATE
+> Task :1.18.2:preprocessCode UP-TO-DATE
+> Task :1.18:preprocessCode UP-TO-DATE
+> Task :1.17.1:preprocessCode UP-TO-DATE
+> Task :1.16.5:preprocessCode UP-TO-DATE
+> Task :1.16.1:preprocessCode UP-TO-DATE
+> Task :1.16.1:compileJava UP-TO-DATE
+
+[Incubating] Problems report is available at: file:///C:/Users/redfa/Documents/MinecraftDev/altoclef/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 25s
+37 actionable tasks: 37 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.4.1/userguide/configuration_cache_enabling.html

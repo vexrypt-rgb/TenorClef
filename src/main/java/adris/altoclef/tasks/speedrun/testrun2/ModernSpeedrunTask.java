@@ -524,6 +524,23 @@ public class ModernSpeedrunTask extends Task {
         // the live child the chain is keeping; `r` is what the driver decided this tick.
         T2Trace.tick(mod, phase.name(), active, r);
 
+        // S205. fix19: mining gold beside the arrival portal walked back through it to the
+        // overworld and stranded the run. In the Nether, portal blocks are walls unless we
+        // actually mean to use one.
+        try {
+            boolean avoid = phase == Phase.NETHER
+                    && WorldHelper.getCurrentDimension() == Dimension.NETHER
+                    && !(r instanceof EnterNetherPortalTask);
+            var list = mod.getClientBaritoneSettings().blocksToAvoid.value;
+            boolean has = list.contains(Blocks.NETHER_PORTAL);
+            if (avoid && !has) {
+                list.add(Blocks.NETHER_PORTAL);
+                T2Log.force("S205", "nether: portal blocks avoided while ph=NETHER");
+            } else if (!avoid && has) {
+                list.remove(Blocks.NETHER_PORTAL);
+            }
+        } catch (Throwable ignored) {}
+
         // S203. Generic A<->B child flip: names any pair, not just the ones a guard was written for.
         try {
             long nowMs = System.currentTimeMillis();

@@ -1,0 +1,147 @@
+FAULT 0:09.2 S140 | replace MineAndCollectTask after 8s same xz | see T2Codes / paste faults.log
+FAULT 0:30.8 E100 | jumps=6 @102,64,168 ph=BOOTSTRAP child=CraftInTableTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 0:32.7 E91 | craft stall 12s @102,168 n=1 ph=BOOTSTRAP | see T2Codes / paste faults.log
+FAULT 0:36.2 E100 | jumps=6 @102,64,168 ph=BOOTSTRAP child=CraftInTableTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 0:54.9 S120 | craft-gui jump @103,63,167 child=CraftInTableTask | see T2Codes / paste faults.log
+FAULT 0:59.5 S130 | START trigger=flips=3 ph=IRON prev=CollectIronIngotTask cycle=1 pos=101,62,168 walls=4/4/4 sky=8 place=4 boxed=true hold=false cool=0 ban=0 startY=62 step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 1:02.0 S133 | cool arm ticks=240 reason=stuck-low step=50 y=65 startY=62 ban=101,168 pos=101,65,168 walls=2/1/3 sky=11 place=2 boxed=false hold=true cool=240 ban=240 startY=62 step=50 | pillar state machine: check ban column vs actual shaft column
+FAULT 1:02.0 S136 | END reason=stuck-low step=50 y=65 startY=62 roseReal=false giveUp=true pos=101,65,168 walls=2/1/3 sky=11 place=2 boxed=false hold=true cool=240 ban=240 startY=62 step=50 | pillar state machine: check ban column vs actual shaft column
+FAULT 1:02.3 E100 | jumps=14 @101,65,168 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 1:02.4 S109 | equip pick for mining (was holding empty) | mining with a block in hand: force-equip the pick (S109 does this)
+FAULT 1:05.4 S135 | S130 suppressed why=would-S130 but busy cool=172 flips=5 sameXz=68 child=CollectIronIngotTask cool=172 ban=172 hold=false pos=101,62,168 walls=4/4/4 sky=8 place=4 boxed=true hold=false cool=172 ban=172 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 1:05.6 S100 | stop jump-walk @101,168 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 1:09.1 S109 | equip pick for mining (was holding dirt) | mining with a block in hand: force-equip the pick (S109 does this)
+FAULT 1:14.0 S134 | pillar cool expire after flips=3 end=stuck-low step=50 y=65 startY=62 | pillar state machine: check ban column vs actual shaft column
+FAULT 1:16.8 S135 | S130 suppressed why=would-S130 but busy cool=0 flips=3 sameXz=45 child=CollectIronIngotTask cool=0 ban=4 hold=false pos=101,59,168 walls=4/4/4 sky=5 place=8 boxed=true hold=false cool=0 ban=4 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 1:17.0 S130 | START trigger=flips=4 ph=IRON prev=CollectIronIngotTask cycle=2 pos=101,59,168 walls=4/4/4 sky=5 place=8 boxed=true hold=false cool=0 ban=0 startY=59 step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 1:18.6 E100 | jumps=11 @101,62,168 ph=IRON child=HolePillarTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 1:18.7 S139 | rise confirmed +4y y=63 startY=59 pos=101,63,168 walls=4/3/3 sky=9 place=6 boxed=false hold=true cool=0 ban=0 startY=59 step=33 | rise confirmed: real escape, cool armed
+FAULT 1:18.7 S133 | cool arm ticks=80 reason=risen y=63 startY=59 ban=101,168 pos=101,63,168 walls=4/3/3 sky=9 place=6 boxed=false hold=true cool=80 ban=80 startY=59 step=33 | pillar state machine: check ban column vs actual shaft column
+FAULT 1:18.7 S136 | END reason=risen y=63 startY=59 roseReal=true giveUp=true pos=101,63,168 walls=4/3/3 sky=9 place=6 boxed=false hold=true cool=80 ban=80 startY=59 step=33 | pillar state machine: check ban column vs actual shaft column
+FAULT 1:19.0 S109 | equip pick for mining (was holding dirt) | mining with a block in hand: force-equip the pick (S109 does this)
+FAULT 1:21.9 S135 | S130 suppressed why=would-S130 but busy cool=15 flips=6 sameXz=65 child=CollectIronIngotTask cool=15 ban=15 hold=false pos=101,59,168 walls=4/4/4 sky=5 place=8 boxed=true hold=false cool=15 ban=15 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 1:21.9 S100 | stop jump-walk @101,168 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 1:22.7 S134 | pillar cool expire after flips=4 end=risen y=63 startY=59 | pillar state machine: check ban column vs actual shaft column
+FAULT 1:22.7 S137 | re-cool still-boxed@101,168 n=1 ticks=160 end=risen y=63 startY=59 pos=101,59,168 walls=4/4/4 sky=5 place=9 boxed=true hold=false cool=160 ban=160 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 1:24.0 S135 | S130 suppressed why=would-S130 but busy cool=134 flips=4 sameXz=27 child=CollectIronIngotTask cool=134 ban=134 hold=false pos=101,57,168 walls=4/4/4 sky=3 place=10 boxed=true hold=false cool=134 ban=134 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 1:24.6 E100 | jumps=6 @101,56,168 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 1:26.0 S135 | S130 suppressed why=would-S130 but busy cool=93 flips=2 sameXz=68 child=CollectIronIngotTask cool=93 ban=93 hold=false pos=101,55,168 walls=4/4/4 sky=1 place=13 boxed=true hold=false cool=93 ban=93 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 1:30.7 S134 | pillar cool expire after flips=4 end=risen y=63 startY=59 | pillar state machine: check ban column vs actual shaft column
+FAULT 1:39.6 E70 | iron stall 6s @101,168 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 1:46.7 E70 | iron stall 6s @101,171 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 1:51.6 S130 | START trigger=flips=5 ph=IRON prev=CollectIronIngotTask cycle=3 pos=101,57,168 walls=4/4/4 sky=3 place=22 boxed=true hold=false cool=0 ban=0 startY=57 step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 1:53.6 S139 | rise confirmed +4y y=61 startY=57 pos=101,61,168 walls=3/3/4 sky=7 place=18 boxed=false hold=true cool=0 ban=0 startY=57 step=40 | rise confirmed: real escape, cool armed
+FAULT 1:53.6 S133 | cool arm ticks=80 reason=risen y=61 startY=57 ban=101,168 pos=101,61,168 walls=3/3/4 sky=7 place=18 boxed=false hold=true cool=80 ban=80 startY=57 step=40 | pillar state machine: check ban column vs actual shaft column
+FAULT 1:53.6 S136 | END reason=risen y=61 startY=57 roseReal=true giveUp=true pos=101,61,168 walls=3/3/4 sky=7 place=18 boxed=false hold=true cool=80 ban=80 startY=57 step=40 | pillar state machine: check ban column vs actual shaft column
+FAULT 1:54.5 E100 | jumps=14 @101,60,168 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 1:54.8 S135 | S130 suppressed why=would-S130 but busy cool=57 flips=3 sameXz=23 child=CollectIronIngotTask cool=57 ban=57 hold=false pos=101,59,168 walls=4/4/4 sky=5 place=18 boxed=true hold=false cool=57 ban=57 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 1:56.0 S109 | equip pick for mining (was holding empty) | mining with a block in hand: force-equip the pick (S109 does this)
+FAULT 1:56.7 S100 | stop jump-walk @101,168 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 1:56.8 S135 | S130 suppressed why=would-S130 but busy cool=17 flips=0 sameXz=63 child=CollectIronIngotTask cool=17 ban=17 hold=false pos=101,57,168 walls=4/4/4 sky=3 place=20 boxed=true hold=false cool=17 ban=17 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 1:57.6 S134 | pillar cool expire after flips=5 end=risen y=61 startY=57 | pillar state machine: check ban column vs actual shaft column
+FAULT 1:57.6 S137 | re-cool still-boxed@101,168 n=2 ticks=160 end=risen y=61 startY=57 pos=101,57,168 walls=4/4/4 sky=3 place=21 boxed=true hold=false cool=160 ban=160 startY=- step=0 | pillar state machine: check ban column vs actual shaft column
+FAULT 2:03.6 S138 | shaft ban clear left-xz ban=101,168 now=101,166 manh=2 left=42 | pillar state machine: check ban column vs actual shaft column
+FAULT 2:05.6 S134 | pillar cool expire after flips=5 end=risen y=61 startY=57 | pillar state machine: check ban column vs actual shaft column
+FAULT 2:05.7 S138 | shaft ban clear left-xz ban=101,168 now=101,166 manh=2 left=60 | pillar state machine: check ban column vs actual shaft column
+FAULT 2:11.7 E70 | iron stall 6s @101,166 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 2:22.2 E70 | iron stall 6s @103,162 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 2:29.8 E70 | iron stall 6s @105,160 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 2:38.6 E70 | iron stall 6s @106,159 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 2:44.6 E70 | iron stall 6s @107,159 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 2:57.9 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 2:59.9 E100 | jumps=13 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 3:01.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 3:04.9 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 3:04.9 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 3:07.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 3:10.3 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 3:12.1 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 3:13.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 3:15.7 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 3:19.3 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 3:19.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 3:21.1 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 3:23.8 E118 | CollectIronIngotTask 90s no inv change ph=IRON | see T2Codes / paste faults.log
+FAULT 3:25.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 3:26.5 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 3:26.5 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 3:31.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 3:31.9 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 3:33.7 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 3:37.3 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 3:37.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 3:41.0 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 3:42.8 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 3:43.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 3:48.2 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 3:48.2 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 3:49.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 3:53.6 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 3:55.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 3:55.4 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 3:59.0 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 4:01.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 4:02.6 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 4:04.4 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 4:07.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 4:09.8 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 4:09.8 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 4:13.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 4:15.2 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 4:17.0 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 4:19.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 4:20.6 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 4:23.8 E118 | CollectIronIngotTask 90s no inv change ph=IRON | see T2Codes / paste faults.log
+FAULT 4:24.2 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 4:25.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 4:26.0 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 4:31.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 4:31.4 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 4:31.4 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 4:36.8 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 4:37.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 4:38.6 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 4:42.2 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 4:43.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 4:45.9 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 4:47.7 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 4:49.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 4:53.1 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 4:53.1 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 4:55.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 4:58.5 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 5:00.3 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 5:01.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 5:03.9 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 5:07.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 5:07.5 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 5:09.3 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 5:13.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 5:14.7 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 5:14.7 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 5:19.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 5:20.1 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 5:21.9 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 5:23.9 E118 | CollectIronIngotTask 90s no inv change ph=IRON | see T2Codes / paste faults.log
+FAULT 5:25.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 5:25.5 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 5:29.1 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 5:30.9 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 5:31.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 5:36.3 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 5:36.3 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 5:37.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 5:41.7 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 5:43.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 5:43.5 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 5:47.2 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 5:49.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 5:50.8 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 5:52.6 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 5:55.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 5:58.0 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 5:58.0 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 6:01.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log
+FAULT 6:03.4 E100 | jumps=6 @101,55,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 6:05.2 S100 | stop jump-walk @101,167 ph=IRON child=CollectIronIngotTask | jump-in-place: release jump, turn 90, walk. check cobble reserve
+FAULT 6:07.3 E70 | iron stall 6s @101,167 — clear blacklist + re-pick ore | see T2Codes / paste faults.log

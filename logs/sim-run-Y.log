@@ -1,0 +1,620 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.4.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+[tenorclef] gradle.properties.local sets org.gradle.java.home — Gradle selects the daemon JDK from JAVA_HOME or ~/.gradle/gradle.properties; export JAVA_HOME="C:/Program Files/Eclipse Adoptium/jdk-21.0.12.101-hotspot" if this pin is required.
+[tenorclef] Loaded 4 entries from gradle.properties.local
+
+> Configure project :1.16.1
+Fabric Loom: 1.15.5
+
+> Configure project :1.21.1
+Fabric Loom: 1.15.5
+[altoclef] Tungsten jars for 1.21.1: [tungsten-fabric-ALPHA-1.6.0-1.21compat-SNAPSHOT.jar]
+Build file 'C:\Users\redfa\Documents\MinecraftDev\altoclef\build.gradle': line 335
+Properties should be assigned using the 'propName = value' syntax. Setting a property via the Gradle-generated 'propName value' or 'propName(value)' syntax in Groovy DSL has been deprecated. This is scheduled to be removed in Gradle 10. Use assignment ('duplicatesStrategy = <value>') instead. Consult the upgrading guide for further information: https://docs.gradle.org/9.4.1/userguide/upgrading_version_8.html#groovy_space_assignment_syntax
+	at build_dsk7s0l5lw6a69ogktr7fgsy9$_run_closure13$_closure39.doCall$original(C:\Users\redfa\Documents\MinecraftDev\altoclef\build.gradle:335)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+	at build_dsk7s0l5lw6a69ogktr7fgsy9$_run_closure13.doCall$original(C:\Users\redfa\Documents\MinecraftDev\altoclef\build.gradle:334)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.16.5
+Fabric Loom: 1.15.5
+
+> Configure project :1.21
+Fabric Loom: 1.15.5
+[altoclef] Tungsten jars for 1.21: [tungsten-fabric-ALPHA-1.6.0-1.21compat-SNAPSHOT.jar]
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.17.1
+Fabric Loom: 1.15.5
+
+> Configure project :1.20.6
+Fabric Loom: 1.15.5
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.18
+Fabric Loom: 1.15.5
+
+> Configure project :1.18.2
+Fabric Loom: 1.15.5
+
+> Configure project :1.20.5
+Fabric Loom: 1.15.5
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.19.4
+Fabric Loom: 1.15.5
+
+> Configure project :1.20.1
+Fabric Loom: 1.15.5
+
+> Configure project :1.20.2
+Fabric Loom: 1.15.5
+
+> Configure project :1.20.4
+Fabric Loom: 1.15.5
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.20.2
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.20.1
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.19.4
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.18.2
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.18
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.17.1
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.16.5
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.16.1
+[altoclef] Ostinato Baritone for 1.16.1: baritone-unoptimized-fabric-1.16.1.jar
+[altoclef] Tungsten jars for 1.16.1: [tungsten-fabric-ALPHA-1.6.0-1.16.1-SNAPSHOT.jar]
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Configure project :1.21.11
+Fabric Loom: 1.15.5
+[altoclef] Ostinato Baritone for 1.21.11: baritone-unoptimized-fabric-1.17.0-7-g9bb1b309-dirty.jar
+[altoclef] Tungsten jars for 1.21.11: [tungsten-fabric-ALPHA-1.6.0-1.21compat-SNAPSHOT.jar]
+Not publishing sources jar as it was not created by the java plugin. Use java.withSourcesJar() to fix.
+
+> Task :1.16.1:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.16.1:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.16.5:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.16.5:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.17.1:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.17.1:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.18:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.18:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.18.2:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.18.2:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.19.4:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.19.4:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.1:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.1:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.2:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.2:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.4:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.4:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.5:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.5:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.6:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.20.6:prepareSourceMappingsForPreprocessor UP-TO-DATE
+> Task :1.21:prepareDestMappingsForPreprocessor UP-TO-DATE
+> Task :1.21:prepareSourceMappingsForPreprocessor UP-TO-DATE
+
+> Task :1.21:preprocessCode
+Invocation of Task.project at execution time has been deprecated. This will fail with an error in Gradle 10. This API is incompatible with the configuration cache, which will become the only mode supported by Gradle in a future release. Consult the upgrading guide for further information: https://docs.gradle.org/9.4.1/userguide/upgrading_version_7.html#task_project
+WARN: Failed to initialize native filesystem for Windows
+java.lang.UnsatisfiedLinkError: 'IdeaWin64.dll' not found in 'C:\Users\redfa\AppData\Local\Temp\bin' among null
+	at org.jetbrains.kotlin.com.intellij.util.loader.NativeLibraryLoader.loadPlatformLibrary(NativeLibraryLoader.java:29)
+	at org.jetbrains.kotlin.com.intellij.openapi.util.io.win32.IdeaWin32.<clinit>(IdeaWin32.java:33)
+	at org.jetbrains.kotlin.com.intellij.openapi.util.io.FileSystemUtil.getMediator(FileSystemUtil.java:54)
+	at org.jetbrains.kotlin.com.intellij.openapi.util.io.FileSystemUtil.<clinit>(FileSystemUtil.java:49)
+	at org.jetbrains.kotlin.com.intellij.openapi.vfs.impl.ZipHandler.setFileAttributes(ZipHandler.java:48)
+	at org.jetbrains.kotlin.com.intellij.openapi.vfs.impl.ZipHandler$1.createAccessor(ZipHandler.java:30)
+	at org.jetbrains.kotlin.com.intellij.openapi.vfs.impl.ZipHandler$1.createAccessor(ZipHandler.java:25)
+	at org.jetbrains.kotlin.com.intellij.util.io.FileAccessorCache.createHandle(FileAccessorCache.java:62)
+	at org.jetbrains.kotlin.com.intellij.util.io.FileAccessorCache.get(FileAccessorCache.java:55)
+	at org.jetbrains.kotlin.com.intellij.openapi.vfs.impl.ZipHandler.getCachedZipFileHandle(ZipHandler.java:70)
+	at org.jetbrains.kotlin.com.intellij.openapi.vfs.impl.ZipHandler.acquireZipHandle(ZipHandler.java:117)
+	at org.jetbrains.kotlin.com.intellij.openapi.vfs.impl.ZipHandlerBase.createEntriesMap(ZipHandlerBase.java:38)
+	at org.jetbrains.kotlin.com.intellij.openapi.vfs.impl.ArchiveHandler.getEntriesMap(ArchiveHandler.java:179)
+	at org.jetbrains.kotlin.com.intellij.openapi.vfs.impl.jar.CoreJarHandler.<init>(CoreJarHandler.java:42)
+	at org.jetbrains.kotlin.com.intellij.openapi.vfs.impl.jar.CoreJarFileSystem.lambda$new$0(CoreJarFileSystem.java:33)
+	at org.jetbrains.kotlin.com.intellij.util.containers.ConcurrentFactoryMap$2.create(ConcurrentFactoryMap.java:174)
+	at org.jetbrains.kotlin.com.intellij.util.containers.ConcurrentFactoryMap.get(ConcurrentFactoryMap.java:40)
+	at org.jetbrains.kotlin.com.intellij.openapi.vfs.impl.jar.CoreJarFileSystem.findFileByPath(CoreJarFileSystem.java:44)
+	at org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment.findJarRoot(KotlinCoreEnvironment.kt:394)
+	at org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment.contentRootToVirtualFile(KotlinCoreEnvironment.kt:373)
+	at org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment.access$contentRootToVirtualFile(KotlinCoreEnvironment.kt:109)
+	at org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment$3.invoke(KotlinCoreEnvironment.kt:213)
+	at org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment$3.invoke(KotlinCoreEnvironment.kt:213)
+	at org.jetbrains.kotlin.cli.jvm.compiler.ClasspathRootsResolver.convertClasspathRoots(ClasspathRootsResolver.kt:75)
+	at org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment.<init>(KotlinCoreEnvironment.kt:221)
+	at org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment.<init>(KotlinCoreEnvironment.kt)
+	at org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment$Companion.createForProduction(KotlinCoreEnvironment.kt:431)
+	at com.replaymod.gradle.remap.Transformer.remap(Transformer.kt:87)
+	at com.replaymod.gradle.preprocess.PreprocessTask.preprocess(PreprocessTask.kt:288)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.gradle.internal.reflect.JavaMethod.invoke(JavaMethod.java:125)
+	at org.gradle.api.internal.project.taskfactory.StandardTaskAction.doExecute(StandardTaskAction.java:58)
+	at org.gradle.api.internal.project.taskfactory.StandardTaskAction.execute(StandardTaskAction.java:51)
+	at org.gradle.api.internal.project.taskfactory.StandardTaskAction.execute(StandardTaskAction.java:29)
+	at org.gradle.api.internal.tasks.execution.TaskExecution$3.run(TaskExecution.java:259)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:30)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:27)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.run(DefaultBuildOperationRunner.java:48)
+	at org.gradle.api.internal.tasks.execution.TaskExecution.executeAction(TaskExecution.java:244)
+	at org.gradle.api.internal.tasks.execution.TaskExecution.executeActions(TaskExecution.java:227)
+	at org.gradle.api.internal.tasks.execution.TaskExecution.executeWithPreviousOutputFiles(TaskExecution.java:210)
+	at org.gradle.api.internal.tasks.execution.TaskExecution.execute(TaskExecution.java:176)
+	at org.gradle.internal.execution.steps.ExecuteStep.executeInternal(ExecuteStep.java:167)
+	at org.gradle.internal.execution.steps.ExecuteStep.access$000(ExecuteStep.java:47)
+	at org.gradle.internal.execution.steps.ExecuteStep$1.call(ExecuteStep.java:137)
+	at org.gradle.internal.execution.steps.ExecuteStep$1.call(ExecuteStep.java:134)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
+	at org.gradle.internal.execution.steps.ExecuteStep.execute(ExecuteStep.java:134)
+	at org.gradle.internal.execution.steps.ExecuteStep$Mutable.execute(ExecuteStep.java:80)
+	at org.gradle.internal.execution.steps.CancelExecutionStep.execute(CancelExecutionStep.java:42)
+	at org.gradle.internal.execution.steps.TimeoutStep.executeWithoutTimeout(TimeoutStep.java:75)
+	at org.gradle.internal.execution.steps.TimeoutStep.execute(TimeoutStep.java:55)
+	at org.gradle.internal.execution.steps.PreCreateOutputParentsStep.execute(PreCreateOutputParentsStep.java:51)
+	at org.gradle.internal.execution.steps.PreCreateOutputParentsStep.execute(PreCreateOutputParentsStep.java:29)
+	at org.gradle.internal.execution.steps.RemovePreviousOutputsStep.executeMutable(RemovePreviousOutputsStep.java:67)
+	at org.gradle.internal.execution.steps.RemovePreviousOutputsStep.executeMutable(RemovePreviousOutputsStep.java:39)
+	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
+	at org.gradle.internal.execution.steps.BroadcastChangingOutputsStep.execute(BroadcastChangingOutputsStep.java:42)
+	at org.gradle.internal.execution.steps.BroadcastChangingOutputsStep.execute(BroadcastChangingOutputsStep.java:24)
+	at org.gradle.internal.execution.steps.CaptureOutputsAfterExecutionStep.execute(CaptureOutputsAfterExecutionStep.java:69)
+	at org.gradle.internal.execution.steps.CaptureOutputsAfterExecutionStep.execute(CaptureOutputsAfterExecutionStep.java:46)
+	at org.gradle.internal.execution.steps.ResolveInputChangesStep.executeMutable(ResolveInputChangesStep.java:39)
+	at org.gradle.internal.execution.steps.ResolveInputChangesStep.executeMutable(ResolveInputChangesStep.java:28)
+	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
+	at org.gradle.internal.execution.steps.BuildCacheStep.executeWithoutCache(BuildCacheStep.java:189)
+	at org.gradle.internal.execution.steps.BuildCacheStep.executeAndStoreInCache(BuildCacheStep.java:145)
+	at org.gradle.internal.execution.steps.BuildCacheStep.lambda$executeWithCache$4(BuildCacheStep.java:104)
+	at java.base/java.util.Optional.orElseGet(Optional.java:364)
+	at org.gradle.internal.execution.steps.BuildCacheStep.lambda$executeWithCache$5(BuildCacheStep.java:104)
+	at org.gradle.internal.Try$Success.map(Try.java:170)
+	at org.gradle.internal.execution.steps.BuildCacheStep.executeWithCache(BuildCacheStep.java:88)
+	at org.gradle.internal.execution.steps.BuildCacheStep.lambda$execute$0(BuildCacheStep.java:75)
+	at org.gradle.internal.Either$Left.fold(Either.java:116)
+	at org.gradle.internal.execution.caching.CachingState.fold(CachingState.java:62)
+	at org.gradle.internal.execution.steps.BuildCacheStep.execute(BuildCacheStep.java:74)
+	at org.gradle.internal.execution.steps.BuildCacheStep.execute(BuildCacheStep.java:49)
+	at org.gradle.internal.execution.steps.StoreExecutionStateStep.executeMutable(StoreExecutionStateStep.java:46)
+	at org.gradle.internal.execution.steps.StoreExecutionStateStep.executeMutable(StoreExecutionStateStep.java:35)
+	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
+	at org.gradle.internal.execution.steps.SkipUpToDateStep.executeBecause(SkipUpToDateStep.java:75)
+	at org.gradle.internal.execution.steps.SkipUpToDateStep.lambda$execute$2(SkipUpToDateStep.java:53)
+	at java.base/java.util.Optional.orElseGet(Optional.java:364)
+	at org.gradle.internal.execution.steps.SkipUpToDateStep.execute(SkipUpToDateStep.java:53)
+	at org.gradle.internal.execution.steps.SkipUpToDateStep.execute(SkipUpToDateStep.java:35)
+	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsFinishedStep.execute(MarkSnapshottingInputsFinishedStep.java:37)
+	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsFinishedStep.execute(MarkSnapshottingInputsFinishedStep.java:27)
+	at org.gradle.internal.execution.steps.ResolveMutableCachingStateStep.executeDelegate(ResolveMutableCachingStateStep.java:70)
+	at org.gradle.internal.execution.steps.ResolveMutableCachingStateStep.executeDelegate(ResolveMutableCachingStateStep.java:32)
+	at org.gradle.internal.execution.steps.AbstractResolveCachingStateStep.execute(AbstractResolveCachingStateStep.java:69)
+	at org.gradle.internal.execution.steps.AbstractResolveCachingStateStep.execute(AbstractResolveCachingStateStep.java:37)
+	at org.gradle.internal.execution.steps.ResolveChangesStep.executeMutable(ResolveChangesStep.java:63)
+	at org.gradle.internal.execution.steps.ResolveChangesStep.executeMutable(ResolveChangesStep.java:34)
+	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
+	at org.gradle.internal.execution.steps.ValidateStep$Mutable.executeDelegate(ValidateStep.java:79)
+	at org.gradle.internal.execution.steps.ValidateStep$Mutable.executeDelegate(ValidateStep.java:65)
+	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:99)
+	at org.gradle.internal.execution.steps.ValidateStep$Mutable.execute(ValidateStep.java:65)
+	at org.gradle.internal.execution.steps.CaptureMutableStateBeforeExecutionStep.executeMutable(CaptureMutableStateBeforeExecutionStep.java:86)
+	at org.gradle.internal.execution.steps.CaptureMutableStateBeforeExecutionStep.execute(CaptureMutableStateBeforeExecutionStep.java:65)
+	at org.gradle.internal.execution.steps.CaptureMutableStateBeforeExecutionStep.execute(CaptureMutableStateBeforeExecutionStep.java:45)
+	at org.gradle.internal.execution.steps.SkipEmptyMutableWorkStep.executeWithNonEmptySources(SkipEmptyMutableWorkStep.java:210)
+	at org.gradle.internal.execution.steps.SkipEmptyMutableWorkStep.executeMutable(SkipEmptyMutableWorkStep.java:90)
+	at org.gradle.internal.execution.steps.SkipEmptyMutableWorkStep.executeMutable(SkipEmptyMutableWorkStep.java:53)
+	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
+	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsStartedStep.execute(MarkSnapshottingInputsStartedStep.java:38)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.executeMutable(LoadPreviousExecutionStateStep.java:36)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.executeMutable(LoadPreviousExecutionStateStep.java:23)
+	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.executeMutable(HandleStaleOutputsStep.java:77)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.executeMutable(HandleStaleOutputsStep.java:43)
+	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.lambda$executeMutable$0(AssignMutableWorkspaceStep.java:34)
+	at org.gradle.api.internal.tasks.execution.TaskExecution$4.withWorkspace(TaskExecution.java:305)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.executeMutable(AssignMutableWorkspaceStep.java:30)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.executeMutable(AssignMutableWorkspaceStep.java:21)
+	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:40)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:23)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.lambda$execute$2(ExecuteWorkBuildOperationFiringStep.java:67)
+	at java.base/java.util.Optional.orElseGet(Optional.java:364)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:39)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:46)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:34)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:56)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:38)
+	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:68)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:132)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.execute(ExecuteActionsTaskExecuter.java:121)
+	at org.gradle.api.internal.tasks.execution.ProblemsTaskPathTrackingTaskExecuter.execute(ProblemsTaskPathTrackingTaskExecuter.java:41)
+	at org.gradle.api.internal.tasks.execution.ResolveTaskExecutionModeExecuter.execute(ResolveTaskExecutionModeExecuter.java:51)
+	at org.gradle.api.internal.tasks.execution.FinalizePropertiesTaskExecuter.execute(FinalizePropertiesTaskExecuter.java:46)
+	at org.gradle.api.internal.tasks.execution.SkipTaskWithNoActionsExecuter.execute(SkipTaskWithNoActionsExecuter.java:57)
+	at org.gradle.api.internal.tasks.execution.SkipOnlyIfTaskExecuter.execute(SkipOnlyIfTaskExecuter.java:74)
+	at org.gradle.api.internal.tasks.execution.CatchExceptionTaskExecuter.execute(CatchExceptionTaskExecuter.java:36)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.executeTask(EventFiringTaskExecuter.java:77)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:55)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:52)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter.execute(EventFiringTaskExecuter.java:52)
+	at org.gradle.execution.plan.DefaultNodeExecutor.executeLocalTaskNode(DefaultNodeExecutor.java:55)
+	at org.gradle.execution.plan.DefaultNodeExecutor.execute(DefaultNodeExecutor.java:34)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:355)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:343)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.lambda$execute$0(DefaultTaskExecutionGraph.java:339)
+	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:84)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:339)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:328)
+	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.execute(DefaultPlanExecutor.java:459)
+	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.run(DefaultPlanExecutor.java:376)
+	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
+	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:47)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+v: Loading modules: [java.se, jdk.accessibility, jdk.attach, jdk.compiler, jdk.dynalink, jdk.httpserver, jdk.incubator.vector, jdk.jartool, jdk.javadoc, jdk.jconsole, jdk.jdi, jdk.jfr, jdk.jshell, jdk.jsobject, jdk.management, jdk.management.jfr, jdk.net, jdk.nio.mapmode, jdk.sctp, jdk.security.auth, jdk.security.jgss, jdk.unsupported, jdk.unsupported.desktop, jdk.xml.dom, java.base, java.compiler, java.datatransfer, java.desktop, java.xml, java.instrument, java.logging, java.management, java.management.rmi, java.rmi, java.naming, java.net.http, java.prefs, java.scripting, java.security.jgss, java.security.sasl, java.sql, java.transaction.xa, java.sql.rowset, java.xml.crypto, jdk.internal.jvmstat, jdk.internal.opt, jdk.zipfs, jdk.management.agent, jdk.jdwp.agent, jdk.internal.ed, jdk.internal.le]
+e: C:/Users/redfa/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/26.0.2/c7ce3cdeda3d18909368dfe5977332dfad326c6d/annotations-26.0.2.jar!/META-INF/annotations.kotlin_module: Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.9.0, expected version is 1.5.1.
+v: Loading modules: [java.se, jdk.accessibility, jdk.attach, jdk.compiler, jdk.dynalink, jdk.httpserver, jdk.incubator.vector, jdk.jartool, jdk.javadoc, jdk.jconsole, jdk.jdi, jdk.jfr, jdk.jshell, jdk.jsobject, jdk.management, jdk.management.jfr, jdk.net, jdk.nio.mapmode, jdk.sctp, jdk.security.auth, jdk.security.jgss, jdk.unsupported, jdk.unsupported.desktop, jdk.xml.dom, java.base, java.compiler, java.datatransfer, java.desktop, java.xml, java.instrument, java.logging, java.management, java.management.rmi, java.rmi, java.naming, java.net.http, java.prefs, java.scripting, java.security.jgss, java.security.sasl, java.sql, java.transaction.xa, java.sql.rowset, java.xml.crypto, jdk.internal.jvmstat, jdk.internal.opt, jdk.zipfs, jdk.management.agent, jdk.jdwp.agent, jdk.internal.ed, jdk.internal.le]
+e: C:/Users/redfa/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/26.0.2/c7ce3cdeda3d18909368dfe5977332dfad326c6d/annotations-26.0.2.jar!/META-INF/annotations.kotlin_module: Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.9.0, expected version is 1.5.1.
+WARN: The registry key 'java.correct.class.type.by.place.resolve.scope' accessed, but not loaded yet
+WARN: The registry key 'unsound.capture.conversion.java.spec.change' accessed, but not loaded yet
+
+> Task :1.20.6:preprocessCode
+v: Loading modules: [java.se, jdk.accessibility, jdk.attach, jdk.compiler, jdk.dynalink, jdk.httpserver, jdk.incubator.vector, jdk.jartool, jdk.javadoc, jdk.jconsole, jdk.jdi, jdk.jfr, jdk.jshell, jdk.jsobject, jdk.management, jdk.management.jfr, jdk.net, jdk.nio.mapmode, jdk.sctp, jdk.security.auth, jdk.security.jgss, jdk.unsupported, jdk.unsupported.desktop, jdk.xml.dom, java.base, java.compiler, java.datatransfer, java.desktop, java.xml, java.instrument, java.logging, java.management, java.management.rmi, java.rmi, java.naming, java.net.http, java.prefs, java.scripting, java.security.jgss, java.security.sasl, java.sql, java.transaction.xa, java.sql.rowset, java.xml.crypto, jdk.internal.jvmstat, jdk.internal.opt, jdk.zipfs, jdk.management.agent, jdk.jdwp.agent, jdk.internal.ed, jdk.internal.le]
+e: C:/Users/redfa/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/26.0.2/c7ce3cdeda3d18909368dfe5977332dfad326c6d/annotations-26.0.2.jar!/META-INF/annotations.kotlin_module: Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.9.0, expected version is 1.5.1.
+v: Loading modules: [java.se, jdk.accessibility, jdk.attach, jdk.compiler, jdk.dynalink, jdk.httpserver, jdk.incubator.vector, jdk.jartool, jdk.javadoc, jdk.jconsole, jdk.jdi, jdk.jfr, jdk.jshell, jdk.jsobject, jdk.management, jdk.management.jfr, jdk.net, jdk.nio.mapmode, jdk.sctp, jdk.security.auth, jdk.security.jgss, jdk.unsupported, jdk.unsupported.desktop, jdk.xml.dom, java.base, java.compiler, java.datatransfer, java.desktop, java.xml, java.instrument, java.logging, java.management, java.management.rmi, java.rmi, java.naming, java.net.http, java.prefs, java.scripting, java.security.jgss, java.security.sasl, java.sql, java.transaction.xa, java.sql.rowset, java.xml.crypto, jdk.internal.jvmstat, jdk.internal.opt, jdk.zipfs, jdk.management.agent, jdk.jdwp.agent, jdk.internal.ed, jdk.internal.le]
+e: C:/Users/redfa/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/26.0.2/c7ce3cdeda3d18909368dfe5977332dfad326c6d/annotations-26.0.2.jar!/META-INF/annotations.kotlin_module: Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.9.0, expected version is 1.5.1.
+
+> Task :1.20.5:preprocessCode
+v: Loading modules: [java.se, jdk.accessibility, jdk.attach, jdk.compiler, jdk.dynalink, jdk.httpserver, jdk.incubator.vector, jdk.jartool, jdk.javadoc, jdk.jconsole, jdk.jdi, jdk.jfr, jdk.jshell, jdk.jsobject, jdk.management, jdk.management.jfr, jdk.net, jdk.nio.mapmode, jdk.sctp, jdk.security.auth, jdk.security.jgss, jdk.unsupported, jdk.unsupported.desktop, jdk.xml.dom, java.base, java.compiler, java.datatransfer, java.desktop, java.xml, java.instrument, java.logging, java.management, java.management.rmi, java.rmi, java.naming, java.net.http, java.prefs, java.scripting, java.security.jgss, java.security.sasl, java.sql, java.transaction.xa, java.sql.rowset, java.xml.crypto, jdk.internal.jvmstat, jdk.internal.opt, jdk.zipfs, jdk.management.agent, jdk.jdwp.agent, jdk.internal.ed, jdk.internal.le]
+e: C:/Users/redfa/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/26.0.2/c7ce3cdeda3d18909368dfe5977332dfad326c6d/annotations-26.0.2.jar!/META-INF/annotations.kotlin_module: Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.9.0, expected version is 1.5.1.
+v: Loading modules: [java.se, jdk.accessibility, jdk.attach, jdk.compiler, jdk.dynalink, jdk.httpserver, jdk.incubator.vector, jdk.jartool, jdk.javadoc, jdk.jconsole, jdk.jdi, jdk.jfr, jdk.jshell, jdk.jsobject, jdk.management, jdk.management.jfr, jdk.net, jdk.nio.mapmode, jdk.sctp, jdk.security.auth, jdk.security.jgss, jdk.unsupported, jdk.unsupported.desktop, jdk.xml.dom, java.base, java.compiler, java.datatransfer, java.desktop, java.xml, java.instrument, java.logging, java.management, java.management.rmi, java.rmi, java.naming, java.net.http, java.prefs, java.scripting, java.security.jgss, java.security.sasl, java.sql, java.transaction.xa, java.sql.rowset, java.xml.crypto, jdk.internal.jvmstat, jdk.internal.opt, jdk.zipfs, jdk.management.agent, jdk.jdwp.agent, jdk.internal.ed, jdk.internal.le]
+e: C:/Users/redfa/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/26.0.2/c7ce3cdeda3d18909368dfe5977332dfad326c6d/annotations-26.0.2.jar!/META-INF/annotations.kotlin_module: Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.9.0, expected version is 1.5.1.
+
+> Task :1.20.4:preprocessCode
+v: Loading modules: [java.se, jdk.accessibility, jdk.attach, jdk.compiler, jdk.dynalink, jdk.httpserver, jdk.incubator.vector, jdk.jartool, jdk.javadoc, jdk.jconsole, jdk.jdi, jdk.jfr, jdk.jshell, jdk.jsobject, jdk.management, jdk.management.jfr, jdk.net, jdk.nio.mapmode, jdk.sctp, jdk.security.auth, jdk.security.jgss, jdk.unsupported, jdk.unsupported.desktop, jdk.xml.dom, java.base, java.compiler, java.datatransfer, java.desktop, java.xml, java.instrument, java.logging, java.management, java.management.rmi, java.rmi, java.naming, java.net.http, java.prefs, java.scripting, java.security.jgss, java.security.sasl, java.sql, java.transaction.xa, java.sql.rowset, java.xml.crypto, jdk.internal.jvmstat, jdk.internal.opt, jdk.zipfs, jdk.management.agent, jdk.jdwp.agent, jdk.internal.ed, jdk.internal.le]
+e: C:/Users/redfa/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/26.0.2/c7ce3cdeda3d18909368dfe5977332dfad326c6d/annotations-26.0.2.jar!/META-INF/annotations.kotlin_module: Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.9.0, expected version is 1.5.1.
+v: Loading modules: [java.se, jdk.accessibility, jdk.attach, jdk.compiler, jdk.dynalink, jdk.httpserver, jdk.incubator.vector, jdk.jartool, jdk.javadoc, jdk.jconsole, jdk.jdi, jdk.jfr, jdk.jshell, jdk.jsobject, jdk.management, jdk.management.jfr, jdk.net, jdk.nio.mapmode, jdk.sctp, jdk.security.auth, jdk.security.jgss, jdk.unsupported, jdk.unsupported.desktop, jdk.xml.dom, java.base, java.compiler, java.datatransfer, java.desktop, java.xml, java.instrument, java.logging, java.management, java.management.rmi, java.rmi, java.naming, java.net.http, java.prefs, java.scripting, java.security.jgss, java.security.sasl, java.sql, java.transaction.xa, java.sql.rowset, java.xml.crypto, jdk.internal.jvmstat, jdk.internal.opt, jdk.zipfs, jdk.management.agent, jdk.jdwp.agent, jdk.internal.ed, jdk.internal.le]
+e: C:/Users/redfa/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/26.0.2/c7ce3cdeda3d18909368dfe5977332dfad326c6d/annotations-26.0.2.jar!/META-INF/annotations.kotlin_module: Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.9.0, expected version is 1.5.1.
+
+> Task :1.20.2:preprocessCode
+v: Loading modules: [java.se, jdk.accessibility, jdk.attach, jdk.compiler, jdk.dynalink, jdk.httpserver, jdk.incubator.vector, jdk.jartool, jdk.javadoc, jdk.jconsole, jdk.jdi, jdk.jfr, jdk.jshell, jdk.jsobject, jdk.management, jdk.management.jfr, jdk.net, jdk.nio.mapmode, jdk.sctp, jdk.security.auth, jdk.security.jgss, jdk.unsupported, jdk.unsupported.desktop, jdk.xml.dom, java.base, java.compiler, java.datatransfer, java.desktop, java.xml, java.instrument, java.logging, java.management, java.management.rmi, java.rmi, java.naming, java.net.http, java.prefs, java.scripting, java.security.jgss, java.security.sasl, java.sql, java.transaction.xa, java.sql.rowset, java.xml.crypto, jdk.internal.jvmstat, jdk.internal.opt, jdk.zipfs, jdk.management.agent, jdk.jdwp.agent, jdk.internal.ed, jdk.internal.le]
+e: C:/Users/redfa/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/26.0.2/c7ce3cdeda3d18909368dfe5977332dfad326c6d/annotations-26.0.2.jar!/META-INF/annotations.kotlin_module: Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.9.0, expected version is 1.5.1.
+v: Loading modules: [java.se, jdk.accessibility, jdk.attach, jdk.compiler, jdk.dynalink, jdk.httpserver, jdk.incubator.vector, jdk.jartool, jdk.javadoc, jdk.jconsole, jdk.jdi, jdk.jfr, jdk.jshell, jdk.jsobject, jdk.management, jdk.management.jfr, jdk.net, jdk.nio.mapmode, jdk.sctp, jdk.security.auth, jdk.security.jgss, jdk.unsupported, jdk.unsupported.desktop, jdk.xml.dom, java.base, java.compiler, java.datatransfer, java.desktop, java.xml, java.instrument, java.logging, java.management, java.management.rmi, java.rmi, java.naming, java.net.http, java.prefs, java.scripting, java.security.jgss, java.security.sasl, java.sql, java.transaction.xa, java.sql.rowset, java.xml.crypto, jdk.internal.jvmstat, jdk.internal.opt, jdk.zipfs, jdk.management.agent, jdk.jdwp.agent, jdk.internal.ed, jdk.internal.le]
+e: C:/Users/redfa/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/26.0.2/c7ce3cdeda3d18909368dfe5977332dfad326c6d/annotations-26.0.2.jar!/META-INF/annotations.kotlin_module: Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.9.0, expected version is 1.5.1.
+
+> Task :1.20.1:preprocessCode
+v: Loading modules: [java.se, jdk.accessibility, jdk.attach, jdk.compiler, jdk.dynalink, jdk.httpserver, jdk.incubator.vector, jdk.jartool, jdk.javadoc, jdk.jconsole, jdk.jdi, jdk.jfr, jdk.jshell, jdk.jsobject, jdk.management, jdk.management.jfr, jdk.net, jdk.nio.mapmode, jdk.sctp, jdk.security.auth, jdk.security.jgss, jdk.unsupported, jdk.unsupported.desktop, jdk.xml.dom, java.base, java.compiler, java.datatransfer, java.desktop, java.xml, java.instrument, java.logging, java.management, java.management.rmi, java.rmi, java.naming, java.net.http, java.prefs, java.scripting, java.security.jgss, java.security.sasl, java.sql, java.transaction.xa, java.sql.rowset, java.xml.crypto, jdk.internal.jvmstat, jdk.internal.opt, jdk.zipfs, jdk.management.agent, jdk.jdwp.agent, jdk.internal.ed, jdk.internal.le]
+e: C:/Users/redfa/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/26.0.2/c7ce3cdeda3d18909368dfe5977332dfad326c6d/annotations-26.0.2.jar!/META-INF/annotations.kotlin_module: Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.9.0, expected version is 1.5.1.
+v: Loading modules: [java.se, jdk.accessibility, jdk.attach, jdk.compiler, jdk.dynalink, jdk.httpserver, jdk.incubator.vector, jdk.jartool, jdk.javadoc, jdk.jconsole, jdk.jdi, jdk.jfr, jdk.jshell, jdk.jsobject, jdk.management, jdk.management.jfr, jdk.net, jdk.nio.mapmode, jdk.sctp, jdk.security.auth, jdk.security.jgss, jdk.unsupported, jdk.unsupported.desktop, jdk.xml.dom, java.base, java.compiler, java.datatransfer, java.desktop, java.xml, java.instrument, java.logging, java.management, java.management.rmi, java.rmi, java.naming, java.net.http, java.prefs, java.scripting, java.security.jgss, java.security.sasl, java.sql, java.transaction.xa, java.sql.rowset, java.xml.crypto, jdk.internal.jvmstat, jdk.internal.opt, jdk.zipfs, jdk.management.agent, jdk.jdwp.agent, jdk.internal.ed, jdk.internal.le]
+e: C:/Users/redfa/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/26.0.2/c7ce3cdeda3d18909368dfe5977332dfad326c6d/annotations-26.0.2.jar!/META-INF/annotations.kotlin_module: Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.9.0, expected version is 1.5.1.
+
+> Task :1.19.4:preprocessCode
+v: Loading modules: [java.se, jdk.accessibility, jdk.attach, jdk.compiler, jdk.dynalink, jdk.httpserver, jdk.incubator.vector, jdk.jartool, jdk.javadoc, jdk.jconsole, jdk.jdi, jdk.jfr, jdk.jshell, jdk.jsobject, jdk.management, jdk.management.jfr, jdk.net, jdk.nio.mapmode, jdk.sctp, jdk.security.auth, jdk.security.jgss, jdk.unsupported, jdk.unsupported.desktop, jdk.xml.dom, java.base, java.compiler, java.datatransfer, java.desktop, java.xml, java.instrument, java.logging, java.management, java.management.rmi, java.rmi, java.naming, java.net.http, java.prefs, java.scripting, java.security.jgss, java.security.sasl, java.sql, java.transaction.xa, java.sql.rowset, java.xml.crypto, jdk.internal.jvmstat, jdk.internal.opt, jdk.zipfs, jdk.management.agent, jdk.jdwp.agent, jdk.internal.ed, jdk.internal.le]
+e: C:/Users/redfa/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/26.0.2/c7ce3cdeda3d18909368dfe5977332dfad326c6d/annotations-26.0.2.jar!/META-INF/annotations.kotlin_module: Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.9.0, expected version is 1.5.1.
+v: Loading modules: [java.se, jdk.accessibility, jdk.attach, jdk.compiler, jdk.dynalink, jdk.httpserver, jdk.incubator.vector, jdk.jartool, jdk.javadoc, jdk.jconsole, jdk.jdi, jdk.jfr, jdk.jshell, jdk.jsobject, jdk.management, jdk.management.jfr, jdk.net, jdk.nio.mapmode, jdk.sctp, jdk.security.auth, jdk.security.jgss, jdk.unsupported, jdk.unsupported.desktop, jdk.xml.dom, java.base, java.compiler, java.datatransfer, java.desktop, java.xml, java.instrument, java.logging, java.management, java.management.rmi, java.rmi, java.naming, java.net.http, java.prefs, java.scripting, java.security.jgss, java.security.sasl, java.sql, java.transaction.xa, java.sql.rowset, java.xml.crypto, jdk.internal.jvmstat, jdk.internal.opt, jdk.zipfs, jdk.management.agent, jdk.jdwp.agent, jdk.internal.ed, jdk.internal.le]
+e: C:/Users/redfa/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/26.0.2/c7ce3cdeda3d18909368dfe5977332dfad326c6d/annotations-26.0.2.jar!/META-INF/annotations.kotlin_module: Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.9.0, expected version is 1.5.1.
+
+> Task :1.18.2:preprocessCode
+v: Loading modules: [java.se, jdk.accessibility, jdk.attach, jdk.compiler, jdk.dynalink, jdk.httpserver, jdk.incubator.vector, jdk.jartool, jdk.javadoc, jdk.jconsole, jdk.jdi, jdk.jfr, jdk.jshell, jdk.jsobject, jdk.management, jdk.management.jfr, jdk.net, jdk.nio.mapmode, jdk.sctp, jdk.security.auth, jdk.security.jgss, jdk.unsupported, jdk.unsupported.desktop, jdk.xml.dom, java.base, java.compiler, java.datatransfer, java.desktop, java.xml, java.instrument, java.logging, java.management, java.management.rmi, java.rmi, java.naming, java.net.http, java.prefs, java.scripting, java.security.jgss, java.security.sasl, java.sql, java.transaction.xa, java.sql.rowset, java.xml.crypto, jdk.internal.jvmstat, jdk.internal.opt, jdk.zipfs, jdk.management.agent, jdk.jdwp.agent, jdk.internal.ed, jdk.internal.le]
+e: C:/Users/redfa/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/26.0.2/c7ce3cdeda3d18909368dfe5977332dfad326c6d/annotations-26.0.2.jar!/META-INF/annotations.kotlin_module: Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.9.0, expected version is 1.5.1.
+v: Loading modules: [java.se, jdk.accessibility, jdk.attach, jdk.compiler, jdk.dynalink, jdk.httpserver, jdk.incubator.vector, jdk.jartool, jdk.javadoc, jdk.jconsole, jdk.jdi, jdk.jfr, jdk.jshell, jdk.jsobject, jdk.management, jdk.management.jfr, jdk.net, jdk.nio.mapmode, jdk.sctp, jdk.security.auth, jdk.security.jgss, jdk.unsupported, jdk.unsupported.desktop, jdk.xml.dom, java.base, java.compiler, java.datatransfer, java.desktop, java.xml, java.instrument, java.logging, java.management, java.management.rmi, java.rmi, java.naming, java.net.http, java.prefs, java.scripting, java.security.jgss, java.security.sasl, java.sql, java.transaction.xa, java.sql.rowset, java.xml.crypto, jdk.internal.jvmstat, jdk.internal.opt, jdk.zipfs, jdk.management.agent, jdk.jdwp.agent, jdk.internal.ed, jdk.internal.le]
+e: C:/Users/redfa/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/26.0.2/c7ce3cdeda3d18909368dfe5977332dfad326c6d/annotations-26.0.2.jar!/META-INF/annotations.kotlin_module: Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.9.0, expected version is 1.5.1.
+
+> Task :1.18:preprocessCode
+v: Loading modules: [java.se, jdk.accessibility, jdk.attach, jdk.compiler, jdk.dynalink, jdk.httpserver, jdk.incubator.vector, jdk.jartool, jdk.javadoc, jdk.jconsole, jdk.jdi, jdk.jfr, jdk.jshell, jdk.jsobject, jdk.management, jdk.management.jfr, jdk.net, jdk.nio.mapmode, jdk.sctp, jdk.security.auth, jdk.security.jgss, jdk.unsupported, jdk.unsupported.desktop, jdk.xml.dom, java.base, java.compiler, java.datatransfer, java.desktop, java.xml, java.instrument, java.logging, java.management, java.management.rmi, java.rmi, java.naming, java.net.http, java.prefs, java.scripting, java.security.jgss, java.security.sasl, java.sql, java.transaction.xa, java.sql.rowset, java.xml.crypto, jdk.internal.jvmstat, jdk.internal.opt, jdk.zipfs, jdk.management.agent, jdk.jdwp.agent, jdk.internal.ed, jdk.internal.le]
+e: C:/Users/redfa/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/26.0.2/c7ce3cdeda3d18909368dfe5977332dfad326c6d/annotations-26.0.2.jar!/META-INF/annotations.kotlin_module: Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.9.0, expected version is 1.5.1.
+v: Loading modules: [java.se, jdk.accessibility, jdk.attach, jdk.compiler, jdk.dynalink, jdk.httpserver, jdk.incubator.vector, jdk.jartool, jdk.javadoc, jdk.jconsole, jdk.jdi, jdk.jfr, jdk.jshell, jdk.jsobject, jdk.management, jdk.management.jfr, jdk.net, jdk.nio.mapmode, jdk.sctp, jdk.security.auth, jdk.security.jgss, jdk.unsupported, jdk.unsupported.desktop, jdk.xml.dom, java.base, java.compiler, java.datatransfer, java.desktop, java.xml, java.instrument, java.logging, java.management, java.management.rmi, java.rmi, java.naming, java.net.http, java.prefs, java.scripting, java.security.jgss, java.security.sasl, java.sql, java.transaction.xa, java.sql.rowset, java.xml.crypto, jdk.internal.jvmstat, jdk.internal.opt, jdk.zipfs, jdk.management.agent, jdk.jdwp.agent, jdk.internal.ed, jdk.internal.le]
+e: C:/Users/redfa/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/26.0.2/c7ce3cdeda3d18909368dfe5977332dfad326c6d/annotations-26.0.2.jar!/META-INF/annotations.kotlin_module: Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.9.0, expected version is 1.5.1.
+
+> Task :1.17.1:preprocessCode
+v: Loading modules: [java.se, jdk.accessibility, jdk.attach, jdk.compiler, jdk.dynalink, jdk.httpserver, jdk.incubator.vector, jdk.jartool, jdk.javadoc, jdk.jconsole, jdk.jdi, jdk.jfr, jdk.jshell, jdk.jsobject, jdk.management, jdk.management.jfr, jdk.net, jdk.nio.mapmode, jdk.sctp, jdk.security.auth, jdk.security.jgss, jdk.unsupported, jdk.unsupported.desktop, jdk.xml.dom, java.base, java.compiler, java.datatransfer, java.desktop, java.xml, java.instrument, java.logging, java.management, java.management.rmi, java.rmi, java.naming, java.net.http, java.prefs, java.scripting, java.security.jgss, java.security.sasl, java.sql, java.transaction.xa, java.sql.rowset, java.xml.crypto, jdk.internal.jvmstat, jdk.internal.opt, jdk.zipfs, jdk.management.agent, jdk.jdwp.agent, jdk.internal.ed, jdk.internal.le]
+e: C:/Users/redfa/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/26.0.2/c7ce3cdeda3d18909368dfe5977332dfad326c6d/annotations-26.0.2.jar!/META-INF/annotations.kotlin_module: Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.9.0, expected version is 1.5.1.
+v: Loading modules: [java.se, jdk.accessibility, jdk.attach, jdk.compiler, jdk.dynalink, jdk.httpserver, jdk.incubator.vector, jdk.jartool, jdk.javadoc, jdk.jconsole, jdk.jdi, jdk.jfr, jdk.jshell, jdk.jsobject, jdk.management, jdk.management.jfr, jdk.net, jdk.nio.mapmode, jdk.sctp, jdk.security.auth, jdk.security.jgss, jdk.unsupported, jdk.unsupported.desktop, jdk.xml.dom, java.base, java.compiler, java.datatransfer, java.desktop, java.xml, java.instrument, java.logging, java.management, java.management.rmi, java.rmi, java.naming, java.net.http, java.prefs, java.scripting, java.security.jgss, java.security.sasl, java.sql, java.transaction.xa, java.sql.rowset, java.xml.crypto, jdk.internal.jvmstat, jdk.internal.opt, jdk.zipfs, jdk.management.agent, jdk.jdwp.agent, jdk.internal.ed, jdk.internal.le]
+e: C:/Users/redfa/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/26.0.2/c7ce3cdeda3d18909368dfe5977332dfad326c6d/annotations-26.0.2.jar!/META-INF/annotations.kotlin_module: Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.9.0, expected version is 1.5.1.
+
+> Task :1.16.5:preprocessCode
+v: Loading modules: [java.se, jdk.accessibility, jdk.attach, jdk.compiler, jdk.dynalink, jdk.httpserver, jdk.incubator.vector, jdk.jartool, jdk.javadoc, jdk.jconsole, jdk.jdi, jdk.jfr, jdk.jshell, jdk.jsobject, jdk.management, jdk.management.jfr, jdk.net, jdk.nio.mapmode, jdk.sctp, jdk.security.auth, jdk.security.jgss, jdk.unsupported, jdk.unsupported.desktop, jdk.xml.dom, java.base, java.compiler, java.datatransfer, java.desktop, java.xml, java.instrument, java.logging, java.management, java.management.rmi, java.rmi, java.naming, java.net.http, java.prefs, java.scripting, java.security.jgss, java.security.sasl, java.sql, java.transaction.xa, java.sql.rowset, java.xml.crypto, jdk.internal.jvmstat, jdk.internal.opt, jdk.zipfs, jdk.management.agent, jdk.jdwp.agent, jdk.internal.ed, jdk.internal.le]
+e: C:/Users/redfa/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/26.0.2/c7ce3cdeda3d18909368dfe5977332dfad326c6d/annotations-26.0.2.jar!/META-INF/annotations.kotlin_module: Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.9.0, expected version is 1.5.1.
+v: Loading modules: [java.se, jdk.accessibility, jdk.attach, jdk.compiler, jdk.dynalink, jdk.httpserver, jdk.incubator.vector, jdk.jartool, jdk.javadoc, jdk.jconsole, jdk.jdi, jdk.jfr, jdk.jshell, jdk.jsobject, jdk.management, jdk.management.jfr, jdk.net, jdk.nio.mapmode, jdk.sctp, jdk.security.auth, jdk.security.jgss, jdk.unsupported, jdk.unsupported.desktop, jdk.xml.dom, java.base, java.compiler, java.datatransfer, java.desktop, java.xml, java.instrument, java.logging, java.management, java.management.rmi, java.rmi, java.naming, java.net.http, java.prefs, java.scripting, java.security.jgss, java.security.sasl, java.sql, java.transaction.xa, java.sql.rowset, java.xml.crypto, jdk.internal.jvmstat, jdk.internal.opt, jdk.zipfs, jdk.management.agent, jdk.jdwp.agent, jdk.internal.ed, jdk.internal.le]
+e: C:/Users/redfa/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/26.0.2/c7ce3cdeda3d18909368dfe5977332dfad326c6d/annotations-26.0.2.jar!/META-INF/annotations.kotlin_module: Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.9.0, expected version is 1.5.1.
+
+> Task :1.16.1:preprocessCode
+v: Loading modules: [java.se, jdk.accessibility, jdk.attach, jdk.compiler, jdk.dynalink, jdk.httpserver, jdk.incubator.vector, jdk.jartool, jdk.javadoc, jdk.jconsole, jdk.jdi, jdk.jfr, jdk.jshell, jdk.jsobject, jdk.management, jdk.management.jfr, jdk.net, jdk.nio.mapmode, jdk.sctp, jdk.security.auth, jdk.security.jgss, jdk.unsupported, jdk.unsupported.desktop, jdk.xml.dom, java.base, java.compiler, java.datatransfer, java.desktop, java.xml, java.instrument, java.logging, java.management, java.management.rmi, java.rmi, java.naming, java.net.http, java.prefs, java.scripting, java.security.jgss, java.security.sasl, java.sql, java.transaction.xa, java.sql.rowset, java.xml.crypto, jdk.internal.jvmstat, jdk.internal.opt, jdk.zipfs, jdk.management.agent, jdk.jdwp.agent, jdk.internal.ed, jdk.internal.le]
+e: C:/Users/redfa/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/26.0.2/c7ce3cdeda3d18909368dfe5977332dfad326c6d/annotations-26.0.2.jar!/META-INF/annotations.kotlin_module: Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.9.0, expected version is 1.5.1.
+v: Loading modules: [java.se, jdk.accessibility, jdk.attach, jdk.compiler, jdk.dynalink, jdk.httpserver, jdk.incubator.vector, jdk.jartool, jdk.javadoc, jdk.jconsole, jdk.jdi, jdk.jfr, jdk.jshell, jdk.jsobject, jdk.management, jdk.management.jfr, jdk.net, jdk.nio.mapmode, jdk.sctp, jdk.security.auth, jdk.security.jgss, jdk.unsupported, jdk.unsupported.desktop, jdk.xml.dom, java.base, java.compiler, java.datatransfer, java.desktop, java.xml, java.instrument, java.logging, java.management, java.management.rmi, java.rmi, java.naming, java.net.http, java.prefs, java.scripting, java.security.jgss, java.security.sasl, java.sql, java.transaction.xa, java.sql.rowset, java.xml.crypto, jdk.internal.jvmstat, jdk.internal.opt, jdk.zipfs, jdk.management.agent, jdk.jdwp.agent, jdk.internal.ed, jdk.internal.le]
+e: C:/Users/redfa/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/26.0.2/c7ce3cdeda3d18909368dfe5977332dfad326c6d/annotations-26.0.2.jar!/META-INF/annotations.kotlin_module: Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.9.0, expected version is 1.5.1.
+
+> Task :1.16.1:compileJava
+> Task :1.21:preprocessResources UP-TO-DATE
+> Task :1.20.6:preprocessResources UP-TO-DATE
+> Task :1.20.5:preprocessResources UP-TO-DATE
+> Task :1.20.4:preprocessResources UP-TO-DATE
+> Task :1.20.2:preprocessResources UP-TO-DATE
+> Task :1.20.1:preprocessResources UP-TO-DATE
+> Task :1.19.4:preprocessResources UP-TO-DATE
+> Task :1.18.2:preprocessResources UP-TO-DATE
+> Task :1.18:preprocessResources UP-TO-DATE
+> Task :1.17.1:preprocessResources UP-TO-DATE
+> Task :1.16.5:preprocessResources UP-TO-DATE
+> Task :1.16.1:preprocessResources UP-TO-DATE
+> Task :1.16.1:processResources UP-TO-DATE
+> Task :1.16.1:classes
+> Task :1.16.1:generateLog4jConfig UP-TO-DATE
+> Task :1.16.1:generateRemapClasspath UP-TO-DATE
+> Task :1.16.1:generateDLIConfig UP-TO-DATE
+> Task :1.16.1:configureLaunch UP-TO-DATE
+> Task :1.16.1:downloadAssets UP-TO-DATE
+> Task :1.16.1:extractNatives UP-TO-DATE
+> Task :1.16.1:configureClientLaunch UP-TO-DATE
+
+> Task :1.16.1:runClient
+2026-09-24 00:58:54,569 main ERROR Error processing element Queue ([Appenders: null]): CLASS_NOT_FOUND
+2026-09-24 00:58:55,315 main ERROR Unable to locate appender "ServerGuiConsole" for logger config "root"
+[00:58:55] [main/INFO] (FabricLoader/GameProvider) Loading Minecraft 1.16.1 with Fabric Loader 0.16.7
+[00:58:55] [ForkJoinPool-1-worker-2/WARN] (FabricLoader/Metadata) Mod tungsten uses the version ALPHA-1.6.0-1.16.1-SNAPSHOT which isn't compatible with Loader's extended semantic version format (Could not parse version number component 'ALPHA'!), SemVer is recommended for reliably evaluating dependencies and prioritizing newer version
+[00:58:55] [main/INFO] (FabricLoader) Loading 46 mods:
+	- altoclef 1.16.1-0.19
+	- baritone 1.16.1-ostinato
+	- fabric 0.18.0+build.387-1.16.1
+	- fabric-api-base 0.1.3+12a8474c02
+	- fabric-biomes-v1 0.2.7+059ea86602
+	- fabric-blockrenderlayer-v1 1.1.4+c6a8ea8902
+	- fabric-command-api-v1 1.0.8+5ce5339802
+	- fabric-commands-v0 0.2.0+52d3083602
+	- fabric-containers-v0 0.1.8+045df74f02
+	- fabric-content-registries-v0 0.1.9+059ea86602
+	- fabric-crash-report-info-v1 0.1.2+b7f9825d02
+	- fabric-dimensions-v1 1.0.0+a71b305302
+	- fabric-events-interaction-v0 0.4.0+e540c58402
+	- fabric-events-lifecycle-v0 0.2.0+16acbe5b02
+	- fabric-game-rule-api-v1 1.0.0+fe81e12502
+	- fabric-item-api-v1 1.0.0+16acbe5b02
+	- fabric-item-groups-v0 0.2.0+438f963602
+	- fabric-key-binding-api-v1 1.0.1+f404f3be02
+	- fabric-keybindings-v0 0.2.0+3fa9f7c502
+	- fabric-lifecycle-events-v1 1.2.0+e83e061c02
+	- fabric-loot-tables-v1 1.0.0+386eb69e02
+	- fabric-mining-levels-v0 0.1.2+b764ce9902
+	- fabric-models-v0 0.1.0+dfdb52d602
+	- fabric-networking-blockentity-v0 0.2.5+b50ffc7b02
+	- fabric-networking-v0 0.1.10+e00ecb5f02
+	- fabric-object-builder-api-v1 1.5.7+2242e77202
+	- fabric-object-builders-v0 0.6.1+a2d21ddd02
+	- fabric-particles-v1 0.2.1+0a6f2a7002
+	- fabric-registry-sync-v0 0.3.8+7dba2d6c02
+	- fabric-renderer-api-v1 0.2.13+eae12eb802
+	- fabric-renderer-indigo 0.3.4+34d6c87102
+	- fabric-renderer-registries-v1 2.1.0+be551d3c02
+	- fabric-rendering-data-attachment-v1 0.1.3+b7f9825d02
+	- fabric-rendering-fluids-v1 0.1.8+b7084faa02
+	- fabric-rendering-v0 1.1.0+5341049002
+	- fabric-rendering-v1 1.1.2+346247d702
+	- fabric-resource-loader-v0 0.2.6+f41e209802
+	- fabric-screen-handler-api-v1 1.1.0+97324d1102
+	- fabric-tag-extensions-v0 0.2.7+a4c57d8e02
+	- fabric-textures-v0 1.0.4+eae12eb802
+	- fabric-tool-attribute-api-v1 1.2.1+91fca5cd02
+	- fabricloader 0.16.7
+	- java 21
+	- minecraft 1.16.1
+	- mixinextras 0.4.1
+	- tungsten ALPHA-1.6.0-1.16.1-SNAPSHOT
+[00:58:55] [main/INFO] (FabricLoader/Mixin) SpongePowered MIXIN Subsystem Version=0.8.7 Source=file:/C:/Users/redfa/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.3+mixin.0.8.7/51ee0a44ab05f6fddd66b09e66b3a16904f9c55d/sponge-mixin-0.15.3+mixin.0.8.7.jar Service=Knot/Fabric Env=CLIENT
+[00:58:55] [main/INFO] (FabricLoader/Mixin) Loaded Fabric development mappings for mixin remapper!
+[00:58:56] [main/INFO] (FabricLoader/Mixin) Compatibility level set to JAVA_17
+[00:58:56] [main/INFO] (FabricLoader/Mixin) Compatibility level set to JAVA_21
+[00:58:56] [main/WARN] (FabricLoader/Mixin) Error loading class: me/jellysquid/mods/sodium/client/world/SodiumChunkManager (java.lang.ClassNotFoundException: me/jellysquid/mods/sodium/client/world/SodiumChunkManager)
+[00:58:56] [main/WARN] (FabricLoader/Mixin) Error loading class: me/jellysquid/mods/sodium/client/util/collections/FixedLongHashTable (java.lang.ClassNotFoundException: me/jellysquid/mods/sodium/client/util/collections/FixedLongHashTable)
+[00:58:56] [main/INFO] (FabricLoader/MixinExtras|Service) Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.4.1).
+[00:59:00] [main/INFO] (FabricLoader/Mixin) altoclef.mixins.json:AxeItemAccessor from mod altoclef->@Accessor[FIELD_GETTER]::getEffectiveMaterials()Ljava/util/Set; should be static as its target is
+[00:59:03] [main/INFO] (Minecraft) Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', name='PROD'
+[00:59:03] [main/INFO] (Minecraft) Setting user: Player570
+[00:59:03] [main/INFO] (Indigo) [Indigo] Registering Indigo renderer!
+[00:59:04] [main/INFO] (Minecraft) [STDERR]: [LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[00:59:04] [main/INFO] (Minecraft) Backend library: LWJGL version 3.3.2-snapshot
+[00:59:06] [main/INFO] (Minecraft) Narrator library for x64 successfully loaded
+[00:59:06] [main/INFO] (Minecraft) [STDOUT]: TENORCLEF: Global Init
+[00:59:06] [main/INFO] (Minecraft) [CHAT] [Baritone] Baritone settings file not found, resetting.
+[00:59:09] [main/INFO] (Minecraft) Reloading ResourceManager: Default, Fabric Loader, Fabric Renderer - Indigo, Fabric Events Interaction (v0), Fabric Renderer Registries (v1), Fabric Lifecycle Events (v1), Fabric Renderer API (v1), Fabric Textures (v0), Fabric BlockRenderLayer Registration (v1), Fabric Registry Sync (v0), Fabric Resource Loader (v0), Tungsten, Fabric Content Registries (v0), Fabric Item API (v1), Fabric Networking (v0), Fabric Key Binding API (v1), Fabric Tool Attribute API (v1), Fabric Rendering Data Attachment (v1), Fabric Screen Handler API (v1), Fabric Containers (v0), Fabric Game Rule API (v1), Fabric Models (v0), Fabric Events Lifecycle (v0), Fabric Mining Levels (v0), Fabric Object Builder API (v1), Fabric API Base, Fabric Crash Report Info (v1), Fabric Key Bindings (v0), Fabric API, Alto Clef, Fabric Object Builders (v0), Fabric Rendering Fluids (v1), Fabric Rendering (v1), Fabric Networking Block Entity (v0), Fabric Rendering (v0), Fabric Tag Extensions (v0), Fabric Biomes (v1), Fabric Item Groups (v0), Fabric Loot Tables (v1)
+[00:59:09] [main/INFO] (Minecraft) [STDOUT]: TENORCLEF: MIXIN OK ClientTickMixin injected into MinecraftClient.tick()
+[00:59:09] [main/INFO] (Minecraft) [STDOUT]: TENORCLEF: HARNESS: AUTOWORLD: fresh-world create armed (firing in 3s)
+[00:59:12] [main/INFO] (Minecraft) [STDOUT]: TENORCLEF: HARNESS: AUTOWORLD: creating fresh world 'AutoRun_20260924_005911' mode=survival difficulty=easy hardcore=false
+[00:59:13] [main/WARN] (Minecraft) Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[00:59:13] [main/WARN] (Minecraft) Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[00:59:13] [main/WARN] (Minecraft) Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[00:59:13] [main/WARN] (Minecraft) Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[00:59:13] [main/WARN] (Minecraft) Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[00:59:13] [main/INFO] (Minecraft) Reloading ResourceManager: Default, Fabric Loader, Fabric Renderer - Indigo, Fabric Events Interaction (v0), Fabric Renderer Registries (v1), Fabric Lifecycle Events (v1), Fabric Renderer API (v1), Fabric Textures (v0), Fabric BlockRenderLayer Registration (v1), Fabric Registry Sync (v0), Fabric Resource Loader (v0), Tungsten, Fabric Content Registries (v0), Fabric Item API (v1), Fabric Networking (v0), Fabric Key Binding API (v1), Fabric Tool Attribute API (v1), Fabric Rendering Data Attachment (v1), Fabric Screen Handler API (v1), Fabric Containers (v0), Fabric Game Rule API (v1), Fabric Models (v0), Fabric Events Lifecycle (v0), Fabric Mining Levels (v0), Fabric Object Builder API (v1), Fabric API Base, Fabric Crash Report Info (v1), Fabric Key Bindings (v0), Fabric API, Alto Clef, Fabric Object Builders (v0), Fabric Rendering Fluids (v1), Fabric Rendering (v1), Fabric Networking Block Entity (v0), Fabric Rendering (v0), Fabric Tag Extensions (v0), Fabric Biomes (v1), Fabric Item Groups (v0), Fabric Loot Tables (v1), Fabric Tool Attribute API (v1)
+[00:59:15] [main/INFO] (Minecraft) Loaded 7 recipes
+[00:59:16] [main/INFO] (Minecraft) Loaded 927 advancements
+[00:59:17] [main/INFO] (Minecraft) Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', name='PROD'
+[00:59:17] [Server thread/INFO] (Minecraft) Starting integrated minecraft server version 1.16.1
+[00:59:17] [Server thread/INFO] (Minecraft) Generating keypair
+[00:59:22] [Server thread/INFO] (Minecraft) Preparing start region for dimension minecraft:overworld
+[00:59:22] [main/INFO] (Minecraft) Preparing spawn area: 0%
+[00:59:23] [main/INFO] (Minecraft) Preparing spawn area: 0%
+[00:59:23] [main/INFO] (Minecraft) Preparing spawn area: 3%
+[00:59:24] [main/INFO] (Minecraft) Preparing spawn area: 6%
+[00:59:24] [main/INFO] (Minecraft) Preparing spawn area: 10%
+[00:59:25] [main/INFO] (Minecraft) Preparing spawn area: 13%
+[00:59:25] [main/INFO] (Minecraft) Preparing spawn area: 16%
+[00:59:26] [main/INFO] (Minecraft) Preparing spawn area: 16%
+[00:59:26] [main/INFO] (Minecraft) Preparing spawn area: 25%
+[00:59:27] [main/INFO] (Minecraft) Preparing spawn area: 27%
+[00:59:27] [main/INFO] (Minecraft) Preparing spawn area: 32%
+[00:59:28] [main/INFO] (Minecraft) Preparing spawn area: 36%
+[00:59:28] [main/INFO] (Minecraft) Preparing spawn area: 37%
+[00:59:29] [main/INFO] (Minecraft) Preparing spawn area: 43%
+[00:59:29] [main/INFO] (Minecraft) Preparing spawn area: 48%
+[00:59:30] [main/INFO] (Minecraft) Preparing spawn area: 53%
+[00:59:30] [main/INFO] (Minecraft) Preparing spawn area: 59%
+[00:59:31] [main/INFO] (Minecraft) Preparing spawn area: 66%
+[00:59:31] [main/INFO] (Minecraft) Preparing spawn area: 70%
+[00:59:32] [main/INFO] (Minecraft) Preparing spawn area: 75%
+[00:59:32] [main/INFO] (Minecraft) Preparing spawn area: 81%
+[00:59:33] [main/INFO] (Minecraft) Preparing spawn area: 85%
+[00:59:33] [main/INFO] (Minecraft) Preparing spawn area: 91%
+[00:59:34] [main/INFO] (Minecraft) Preparing spawn area: 93%
+[00:59:34] [main/INFO] (Minecraft) Time elapsed: 11750 ms
+[00:59:34] [Server thread/INFO] (Minecraft) Changing view distance to 11, from 10
+[00:59:35] [main/INFO] (Minecraft) [STDOUT]: TENORCLEF: HARNESS: AUTOWORLD: create call returned — waiting for join
+[00:59:35] [Server thread/INFO] (Minecraft) Player570[local:E:379d772a] logged in with entity id 172 at (119.5, 68.0, -113.5)
+[00:59:35] [Server thread/INFO] (Minecraft) Player570 joined the game
+[00:59:35] [main/INFO] (Minecraft) OpenAL initialized.
+[00:59:35] [main/INFO] (Minecraft) Sound engine started
+[00:59:35] [main/INFO] (Minecraft) Created: 1024x1024x4 minecraft:textures/atlas/blocks.png-atlas
+[00:59:36] [main/INFO] (Minecraft) Created: 256x128x4 minecraft:textures/atlas/signs.png-atlas
+[00:59:36] [main/INFO] (Minecraft) Created: 1024x512x4 minecraft:textures/atlas/banner_patterns.png-atlas
+[00:59:36] [main/INFO] (Minecraft) Created: 1024x512x4 minecraft:textures/atlas/shield_patterns.png-atlas
+[00:59:36] [main/INFO] (Minecraft) Created: 256x256x4 minecraft:textures/atlas/chest.png-atlas
+[00:59:36] [main/INFO] (Minecraft) Created: 512x256x4 minecraft:textures/atlas/beds.png-atlas
+[00:59:36] [main/INFO] (Minecraft) Created: 512x256x4 minecraft:textures/atlas/shulker_boxes.png-atlas
+[00:59:36] [main/INFO] (Minecraft) Created: 256x256x0 minecraft:textures/atlas/particles.png-atlas
+[00:59:36] [main/INFO] (Minecraft) Created: 256x256x0 minecraft:textures/atlas/paintings.png-atlas
+[00:59:36] [main/INFO] (Minecraft) Created: 256x128x0 minecraft:textures/atlas/mob_effects.png-atlas
+[00:59:37] [main/INFO] (Minecraft) [STDOUT]: Baritone world data dir: C:\Users\redfa\Documents\MinecraftDev\altoclef\versions\1.16.1\run\saves\AutoRun_20260924_005911\.\baritone
+[00:59:37] [main/INFO] (Minecraft) [STDOUT]: Cached world directory: C:\Users\redfa\Documents\MinecraftDev\altoclef\versions\1.16.1\run\saves\AutoRun_20260924_005911\.\baritone\cache
+[00:59:37] [main/INFO] (Minecraft) [STDOUT]: Would save waypoints to C:\Users\redfa\Documents\MinecraftDev\altoclef\versions\1.16.1\run\saves\AutoRun_20260924_005911\.\baritone\waypoints
+[00:59:37] [Server thread/INFO] (Minecraft) Saving and pausing game...
+[00:59:37] [main/INFO] (Minecraft) Loaded 0 advancements
+[00:59:38] [main/INFO] (Minecraft) [STDOUT]: TENORCLEF: HARNESS: AUTORUN: armed 'testrun2' (firing in 5s)
+[00:59:38] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[AutoRun_20260924_005911]'/minecraft:overworld
+[00:59:39] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[AutoRun_20260924_005911]'/minecraft:the_nether
+
+Problem in daemon expiration check
+java.io.UncheckedIOException: java.io.FileNotFoundException: C:\Users\redfa\.gradle\daemon\9.4.1\registry.bin.lock (Access is denied)
+	at org.gradle.internal.UncheckedException.throwAsUncheckedException(UncheckedException.java:63)
+	at org.gradle.internal.UncheckedException.throwAsUncheckedException(UncheckedException.java:42)
+	at org.gradle.cache.internal.DefaultFileLockManager.lock(DefaultFileLockManager.java:131)
+	at org.gradle.cache.internal.DefaultFileLockManager.lock(DefaultFileLockManager.java:109)
+	at org.gradle.cache.internal.DefaultFileLockManager.lock(DefaultFileLockManager.java:104)
+	at org.gradle.cache.internal.OnDemandFileAccess.readFile(OnDemandFileAccess.java:41)
+	at org.gradle.cache.internal.FileBackedObjectHolder.get(FileBackedObjectHolder.java:49)
+	at org.gradle.cache.internal.FileIntegrityViolationSuppressingObjectHolderDecorator.get(FileIntegrityViolationSuppressingObjectHolderDecorator.java:35)
+	at org.gradle.launcher.daemon.registry.PersistentDaemonRegistry.getAll(PersistentDaemonRegistry.java:71)
+	at org.gradle.launcher.daemon.registry.PersistentDaemonRegistry.getDaemonsMatching(PersistentDaemonRegistry.java:116)
+	at org.gradle.launcher.daemon.registry.PersistentDaemonRegistry.getIdle(PersistentDaemonRegistry.java:84)
+	at org.gradle.launcher.daemon.server.CompatibleDaemonExpirationStrategy.checkExpiration(CompatibleDaemonExpirationStrategy.java:47)
+	at org.gradle.launcher.daemon.server.expiry.AllDaemonExpirationStrategy.checkExpiration(AllDaemonExpirationStrategy.java:47)
+	at org.gradle.launcher.daemon.server.expiry.AnyDaemonExpirationStrategy.checkExpiration(AnyDaemonExpirationStrategy.java:44)
+	at org.gradle.launcher.daemon.server.MasterExpirationStrategy.checkExpiration(MasterExpirationStrategy.java:80)
+	at org.gradle.launcher.daemon.server.Daemon$DaemonExpirationPeriodicCheck.run(Daemon.java:273)
+	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
+	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:47)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java:358)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: java.io.FileNotFoundException: C:\Users\redfa\.gradle\daemon\9.4.1\registry.bin.lock (Access is denied)
+	at java.base/java.io.RandomAccessFile.open0(Native Method)
+	at java.base/java.io.RandomAccessFile.open(RandomAccessFile.java:356)
+	at java.base/java.io.RandomAccessFile.<init>(RandomAccessFile.java:273)
+	at java.base/java.io.RandomAccessFile.<init>(RandomAccessFile.java:223)
+	at org.gradle.cache.internal.filelock.LockFileAccess.<init>(LockFileAccess.java:31)
+	at org.gradle.cache.internal.DefaultFileLockManager$DefaultFileLock.<init>(DefaultFileLockManager.java:214)
+	at org.gradle.cache.internal.DefaultFileLockManager.acquireFileLock(DefaultFileLockManager.java:155)
+	at org.gradle.cache.internal.DefaultFileLockManager.lock(DefaultFileLockManager.java:128)
+	... 21 more
+
+> Task :1.16.1:runClient
+[00:59:41] [Worker-Main-14/WARN] (Minecraft) Couldn't look up profile properties for com.mojang.authlib.GameProfile@279c8659[id=130bfefb-ac8d-3a05-b27c-6205f9d12a06,name=Player570,properties={},legacy=false]
+com.mojang.authlib.exceptions.AuthenticationUnavailableException: Cannot contact authentication server
+	at com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService.makeRequest(YggdrasilAuthenticationService.java:104) ~[authlib-1.6.25.jar:?]
+	at com.mojang.authlib.yggdrasil.YggdrasilMinecraftSessionService.fillGameProfile(YggdrasilMinecraftSessionService.java:186) ~[authlib-1.6.25.jar:?]
+	at com.mojang.authlib.yggdrasil.YggdrasilMinecraftSessionService$1.load(YggdrasilMinecraftSessionService.java:61) ~[authlib-1.6.25.jar:?]
+	at com.mojang.authlib.yggdrasil.YggdrasilMinecraftSessionService$1.load(YggdrasilMinecraftSessionService.java:58) ~[authlib-1.6.25.jar:?]
+	at com.google.common.cache.LocalCache$LoadingValueReference.loadFuture(LocalCache.java:3716) ~[guava-21.0.jar:?]
+	at com.google.common.cache.LocalCache$Segment.loadSync(LocalCache.java:2424) ~[guava-21.0.jar:?]
+	at com.google.common.cache.LocalCache$Segment.lockedGetOrLoad(LocalCache.java:2298) ~[guava-21.0.jar:?]
+	at com.google.common.cache.LocalCache$Segment.get(LocalCache.java:2211) ~[guava-21.0.jar:?]
+	at com.google.common.cache.LocalCache.get(LocalCache.java:4154) ~[guava-21.0.jar:?]
+	at com.google.common.cache.LocalCache.getOrLoad(LocalCache.java:4158) ~[guava-21.0.jar:?]
+	at com.google.common.cache.LocalCache$LocalLoadingCache.get(LocalCache.java:5147) ~[guava-21.0.jar:?]
+	at com.google.common.cache.LocalCache$LocalLoadingCache.getUnchecked(LocalCache.java:5153) ~[guava-21.0.jar:?]
+	at com.mojang.authlib.yggdrasil.YggdrasilMinecraftSessionService.fillProfileProperties(YggdrasilMinecraftSessionService.java:176) ~[authlib-1.6.25.jar:?]
+	at net.minecraft.client.MinecraftClient.getSessionProperties(MinecraftClient.java:2340) ~[minecraft-merged-4d6cd39190-1.16.1-net.fabricmc.yarn.1_16_1.1.16.1+build.21-v2.jar:?]
+	at net.minecraft.client.texture.PlayerSkinProvider.method_4653(PlayerSkinProvider.java:91) ~[minecraft-merged-4d6cd39190-1.16.1-net.fabricmc.yarn.1_16_1.1.16.1+build.21-v2.jar:?]
+	at java.util.concurrent.ForkJoinTask$RunnableExecuteAction.exec(ForkJoinTask.java:1423) [?:?]
+	at java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:387) [?:?]
+	at java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1312) [?:?]
+	at java.util.concurrent.ForkJoinPool.scan(ForkJoinPool.java:1843) [?:?]
+	at java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:1808) [?:?]
+	at java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:188) [?:?]
+Caused by: java.net.UnknownHostException: sessionserver.mojang.com
+	at sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:567) ~[?:?]
+	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327) ~[?:?]
+	at java.net.Socket.connect(Socket.java:751) ~[?:?]
+	at sun.security.ssl.SSLSocketImpl.connect(SSLSocketImpl.java:304) ~[?:?]
+	at sun.net.NetworkClient.doConnect(NetworkClient.java:178) ~[?:?]
+	at sun.net.www.http.HttpClient.openServer(HttpClient.java:539) ~[?:?]
+	at sun.net.www.http.HttpClient.openServer(HttpClient.java:644) ~[?:?]
+	at sun.net.www.protocol.https.HttpsClient.<init>(HttpsClient.java:265) ~[?:?]
+	at sun.net.www.protocol.https.HttpsClient.New(HttpsClient.java:378) ~[?:?]
+	at sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.getNewHttpClient(AbstractDelegateHttpsURLConnection.java:196) ~[?:?]
+	at sun.net.www.protocol.http.HttpURLConnection.plainConnect0(HttpURLConnection.java:1305) ~[?:?]
+	at sun.net.www.protocol.http.HttpURLConnection.plainConnect(HttpURLConnection.java:1146) ~[?:?]
+	at sun.net.www.protocol.http.HttpURLConnection.connect(HttpURLConnection.java:1075) ~[?:?]
+	at sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:181) ~[?:?]
+	at sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1707) ~[?:?]
+	at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1632) ~[?:?]
+	at sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:223) ~[?:?]
+	at com.mojang.authlib.HttpAuthenticationService.performGetRequest(HttpAuthenticationService.java:130) ~[authlib-1.6.25.jar:?]
+	at com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService.makeRequest(YggdrasilAuthenticationService.java:85) ~[authlib-1.6.25.jar:?]
+	... 20 more
+[00:59:41] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[AutoRun_20260924_005911]'/minecraft:the_end
+[00:59:42] [Server thread/WARN] (Minecraft) Can't keep up! Is the server overloaded? Running 4940ms or 98 ticks behind
+[00:59:42] [main/INFO] (Minecraft) [STDOUT]: TENORCLEF: HARNESS: AUTORUN: executing 'testrun2'
+[00:59:42] [main/INFO] (Minecraft) [CHAT] §2§l§o[TenorClef] §rAUTORUN: executing 'testrun2'
+[00:59:42] [main/INFO] (Minecraft) [CHAT] §2§l§o[TenorClef] §rTESRUN2 start — @stop to cancel
+[00:59:42] [main/INFO] (Minecraft) [CHAT] §2§l§o[TenorClef] §rUser Task Set: <testrun2/BOOTSTRAP> 
+[00:59:42] [main/INFO] (Minecraft) [CHAT] §2§l§o[TenorClef] §rTESRUN2 clock 0:00.0
+[00:59:42] [main/INFO] (Minecraft) [CHAT] §2§l§o[TenorClef] §rTungstenBridge: kaptainwutax.tungsten bound
+[00:59:42] [main/INFO] (Minecraft) [CHAT] §2§l§o[TenorClef] §rTESRUN2 start Tungsten backend: AVAILABLE (kaptainwutax.tungsten bound; mover=BARITONE) eyes=12 rods=6 skipDiamond=true
+[00:59:42] [main/INFO] (Minecraft) [CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:00.0 PHASE  -> BOOTSTRAP
+[00:59:42] [main/INFO] (Minecraft) [CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:00.0 DIM  -> OVERWORLD at 119,68,-114
+[00:59:42] [main/INFO] (Minecraft) [CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:00.0 CHILD  -> - ph=BOOTSTRAP @119,68,-114 sky=15 wet=false ground=true pick=0 buck=0 iron=0 ore=0 rods=0 pearls=0 eyes=0
+[00:59:42] [main/INFO] (Minecraft) [CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:00.0 WHY wood: mine 1.16 logs only (no air)
+[00:59:42] [main/INFO] (Minecraft) [CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:00.0 CHILD - -> MineAndCollectTask ph=BOOTSTRAP @119,68,-114 sky=15 wet=false ground=true pick=0 buck=0 iron=0 ore=0 rods=0 pearls=0 eyes=0
+[00:59:42] [main/INFO] (Minecraft) [STDOUT]: ALTO CLEF: WARNING: T2 [S176] one client tick took 33517ms (limit 8000ms) — BOOTSTRAP @119,68,-114 child=MineAndCollectTask
+[00:59:42] [main/INFO] (Minecraft) [CHAT] §2§l§o[TenorClef] §cT2 [S176] one client tick took 33517ms (limit 8000ms) — BOOTSTRAP @119,68,-114 child=MineAndCollectTask§r
+[00:59:43] [main/INFO] (Minecraft) [CHAT] §2§l§o[TenorClef] §rT2 [HIST] 0:00.1 FORCE S176 one client tick took 33517ms (limit 8000ms) — BOOTSTRAP @119,68,-114 child=MineAndCollectTask
+[00:59:43] [main/INFO] (Minecraft) [STDOUT]: TENORCLEF: HARNESS: DEADMAN: watchdog started (warn 30s, fatal 120s, worst-tick limit 8s)

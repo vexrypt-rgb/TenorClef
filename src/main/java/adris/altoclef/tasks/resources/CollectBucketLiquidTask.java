@@ -49,7 +49,7 @@ public class CollectBucketLiquidTask extends ResourceTask {
     /** Sticky escape child so we do not thrash-recreate GetOutOfWater every tick. */
     private Task escapeWaterTask = null;
     private int wetBobTicks = 0;
-    private static final int WET_BOB_BLACKLIST_TICKS = 20 * 8;
+    private static final int WET_BOB_BLACKLIST_TICKS = 3 * 20 * 8;
 
     public CollectBucketLiquidTask(String liquidName, Item filledBucket, int targetCount, Block toCollect) {
         super(filledBucket, targetCount);
@@ -178,7 +178,7 @@ public class CollectBucketLiquidTask extends ResourceTask {
                 } catch (Throwable ignored) {}
 
                 if (ShoreStandSelector.shouldEscapeBeforeInteract(playerWet, playerGround)) {
-                    wetBobTicks++;
+                    wetBobTicks += 3; // S212: 3 up per wet tick, 1 down per dry tick
                     // Long bob with no progress: blacklist this source and wander (TIMEOUT recovery path).
                     if (wetBobTicks >= WET_BOB_BLACKLIST_TICKS) {
                         Debug.logMessage("CollectBucket: wet-bob timeout, blacklisting " + blockPos);
@@ -190,7 +190,9 @@ public class CollectBucketLiquidTask extends ResourceTask {
                     }
                     return stickyEscapeWater();
                 } else {
-                    wetBobTicks = 0;
+                    // S212: bobbing touches ground every other second; a hard reset here meant the
+                    // blacklist never fired (80s stall). Decay slowly instead.
+                    wetBobTicks = Math.max(0, wetBobTicks - 1);
                     escapeWaterTask = null;
                 }
 

@@ -14,7 +14,7 @@ public final class SpeedrunOpt {
     public static final int PEARLS = 6;
 
     /** Iron ingots before we stop mining / looting for iron. Pick + bucket + flint leftovers. */
-    public static final int IRON = 8;
+    public static final int IRON = 10; // pick 3 + flint&steel 1 + 2 buckets 6; 8 forced an underground iron trip in PORTAL
 
     /** Food units (half-shanks). Stock grind is 20–40. */
     public static final int FOOD = 12;

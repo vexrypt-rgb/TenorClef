@@ -408,6 +408,8 @@ public final class T2Codes {
      * from Baritone's list; Ostinato-1.16.1 InventoryBehavior skips empty stacks too.
      */
     public static final String S196_AIR_THROWAWAY = "S196";
+    /** S197 — E90 blacklists crafting tables with no sky light so CraftInTableTask stops walking back into the hole. */
+    public static final String S197_DARK_TABLE = "S197";
     public static final String E132_SHAFT_STUCK = "E132";
     public static final String E133_PILLAR_PINGPONG = "E133";
     public static final String S139_PILLAR_RISE_HOLD = "S139";

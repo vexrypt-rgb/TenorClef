@@ -1467,6 +1467,12 @@ public class ModernSpeedrunTask extends Task {
             T2History.note("WHY iron: pick done — skip sword/shield table, go PORTAL");
             return null;
         }
+        // S201: phase leaves BOOTSTRAP once any pick exists, so the sword check lives here too.
+        if (count(mod, Items.STONE_PICKAXE) >= 1 && count(mod, Items.STONE_SWORD) < 1
+                && count(mod, Items.IRON_SWORD) < 1 && count(mod, Items.COBBLESTONE) >= 2) {
+            T2Log.force("S201", "craft stone sword");
+            return TaskCatalogue.getItemTask(Items.STONE_SWORD, 1);
+        }
         int ore = count(mod, Items.IRON_ORE) + countOpt(mod, "DEEPSLATE_IRON_ORE");
         // IRON TARGET MUST BE STABLE.
         //

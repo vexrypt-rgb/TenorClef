@@ -3007,10 +3007,34 @@ public class ModernSpeedrunTask extends Task {
     }
 
     /**
+     * S219: Baritone only mines with tools on the HOTBAR. In foodgate the iron pick sat in main
+     * inventory; once the wooden pick broke in the nether every path needed netherrack digging,
+     * so Baritone failed for 15+ minutes at one spot. Any phase: no hotbar pick -> pull the best one in.
+     */
+    private void ensureHotbarPick(AltoClef mod) {
+        if (HolePillar.busy() || HolePillar.holding() || McCompat.baritonePlacing(mod)) return;
+        try {
+            for (int i = 0; i < 9; i++) {
+                if (mod.getPlayer().getInventory().getStack(i).getItem() instanceof net.minecraft.item.PickaxeItem) return;
+            }
+            Item[] picks = new Item[]{Items.NETHERITE_PICKAXE, Items.DIAMOND_PICKAXE, Items.IRON_PICKAXE,
+                    Items.STONE_PICKAXE, Items.GOLDEN_PICKAXE, Items.WOODEN_PICKAXE};
+            for (Item pick : picks) {
+                if (count(mod, pick) >= 1) {
+                    T2Log.force("S219", "no pick on hotbar, pulling " + pick);
+                    mod.getSlotHandler().forceEquipItem(pick);
+                    return;
+                }
+            }
+        } catch (Throwable ignored) {}
+    }
+
+    /**
      * E109b: PlaceBlocks/HolePillar leave dirt in hand; while mining/collecting in
      * BOOTSTRAP/IRON, keep the best pick equipped so dirt does not stick across mine ticks.
      */
     private void ensureMiningPick(AltoClef mod) {
+        ensureHotbarPick(mod);
         if (phase != Phase.IRON && phase != Phase.BOOTSTRAP) return;
         if (HolePillar.busy() || HolePillar.holding()) return;
         String cn = active == null ? "" : active.getClass().getSimpleName();

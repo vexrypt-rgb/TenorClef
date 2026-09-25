@@ -920,6 +920,14 @@ public class ModernSpeedrunTask extends Task {
             // HolePillarTask is already exempt from the Construct pin in stick(), so this is
             // the one task that can actually take the slot and climb.
             if (active instanceof HolePillarTask && !active.isFinished()) return active;
+            // S198: HolePillarTask only climbs a 1x1 shaft. In an open cave (fix9: walls=3/3/4
+            // at y=20) it finishes instantly and was re-created every tick for 3 minutes
+            // while the bot drifted down to y=9. Outside a shaft, walk/tower to the sky.
+            if (!HolePillar.boxed(mod)) {
+                if (active instanceof SurfaceBailTask && !active.isFinished()) return active;
+                T2Log.warn("S198", "deep bail not boxed - surface bail instead of pillar");
+                return stick(new SurfaceBailTask());
+            }
             return stick(new HolePillarTask());
         }
 

@@ -707,7 +707,9 @@ public class MobDefenseChain extends SingleTaskChain {
         boolean witchNearby = mod.getEntityTracker().entityFound(WitchEntity.class);
 
         float health = mod.getPlayer().getHealth();
-        if (health <= 10 && !witchNearby) {
+        // S225: low HP alone is not danger - with nothing hostile nearby, running away just
+        // blocks eating/regen (runawaydiag: hp=10 food=6 danger=- held pri 70 for minutes).
+        if (health <= 10 && !witchNearby && angryHostileNear(mod)) {
             return true;
         }
         if (mod.getPlayer().hasStatusEffect(StatusEffects.WITHER) ||
@@ -732,6 +734,24 @@ public class MobDefenseChain extends SingleTaskChain {
             } catch (Exception e) {
                 Debug.logWarning("Weird multithread exception. Will fix later. " + e.getMessage());
             }
+        }
+        return false;
+    }
+
+    private boolean angryHostileNear(AltoClef mod) {
+        try {
+            ClientPlayerEntity player = mod.getPlayer();
+            synchronized (BaritoneHelper.MINECRAFT_LOCK) {
+                for (Entity entity : mod.getEntityTracker().getHostiles()) {
+                    if (entity.isInRange(player, SAFE_KEEP_DISTANCE)
+                            && !mod.getBehaviour().shouldExcludeFromForcefield(entity)
+                            && EntityHelper.isAngryAtPlayer(mod, entity)) {
+                        return true;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Debug.logWarning("S225 hostile scan: " + e.getMessage());
         }
         return false;
     }

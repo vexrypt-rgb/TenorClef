@@ -1279,15 +1279,10 @@ public class ModernSpeedrunTask extends Task {
         // portal is only actionable with an actual mining pick in inventory.
         boolean naked = !hasMiningPick(mod)
                 && mod.getItemStorage().getItemCount(Items.IRON_INGOT) + mod.getItemStorage().getItemCount(Items.RAW_IRON) < 1;
-        // S209: a wooden pick is not "geared". Run portalfix: after each death the bot crafted a
-        // wooden pick, walked back into the existing portal with nothing else, and was shot by
-        // piglins within 20s, three times in a row. Require a stone pick AND a sword so a respawn
-        // at least re-arms; otherwise fall through to IRON like a fresh start.
-        boolean rearmed = mod.getItemStorage().getItemCount(Items.STONE_PICKAXE) + mod.getItemStorage().getItemCount(Items.IRON_PICKAXE) >= 1
-                && mod.getItemStorage().getItemCount(Items.STONE_SWORD) + mod.getItemStorage().getItemCount(Items.IRON_SWORD) >= 1;
-        if (portalNearby(mod) && !naked && rearmed) {
-            return Phase.PORTAL;
-        }
+        // S209: a nearby portal alone no longer sends a respawned bot back in. Run portalfix: a
+        // wooden pick was enough and piglins killed it 3x. Run geargate: stone pick + sword was
+        // enough and it walked in with iron=0 while 6 iron ore sat in view. Re-entry now needs
+        // the same iron pick as a fresh run (branch above); a death falls through to IRON.
         boolean empty = mod.getItemStorage().getItemCount(Items.IRON_PICKAXE) < 1
                 && mod.getItemStorage().getItemCount(Items.WOODEN_PICKAXE) < 1
                 && mod.getItemStorage().getItemCount(Items.STONE_PICKAXE) < 1

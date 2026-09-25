@@ -28,11 +28,15 @@ public abstract class Task {
     /** Last recovery decision from absorb / failWithRecovery (Phase 6). */
     private RecoveryDecision lastRecovery = null;
 
+    /** Wall-clock ms when this run started (0 = never started). Observability only. */
+    private long startMillis = 0;
+
     public void tick(TaskChain parentChain) {
         parentChain.addTaskToChain(this);
         if (first) {
             Debug.logInternal("Task START: " + this);
             active = true;
+            startMillis = System.currentTimeMillis();
             onStart();
             first = false;
             stopped = false;
@@ -176,6 +180,14 @@ public abstract class Task {
     /** Explicit result only (null if never set by this task). */
     public TaskResult getExplicitResult() {
         return explicitResult;
+    }
+
+    public long getStartMillis() {
+        return startMillis;
+    }
+
+    public String getDebugState() {
+        return debugState;
     }
 
     public TaskFailure getLastFailure() {

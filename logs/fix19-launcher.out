@@ -1,8 +1,0 @@
-=== run-once: tag=fix19 ===
-settings: both files set (autoLoadWorld=true, autoRunCommand=testrun2)
-launching :1.16.1:runClient (log -> C:\Users\redfa\Documents\MinecraftDev\altoclef\logs\sim-run-fix19.log)
-gradle pid=7592
-AUTOWORLD seen - world loaded, @testrun2 driving.
-pid=7592; faults at C:\Users\redfa\Documents\MinecraftDev\altoclef\versions\1.16.1\run\altoclef\faults.log
-MaxRunSec=900 reached - stopping client.
-run finished. Now: bash scripts/analyze-run.sh logs/sim-run-fix19.log

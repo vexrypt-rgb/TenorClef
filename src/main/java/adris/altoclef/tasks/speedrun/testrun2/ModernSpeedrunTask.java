@@ -551,7 +551,6 @@ public class ModernSpeedrunTask extends Task {
 
     private Task progressWatchdog(AltoClef mod) {
         if (phase == Phase.END || phase == Phase.DONE
-                || active instanceof ConstructNetherPortalBucketTask
                 || active instanceof adris.altoclef.tasks.speedrun.testrun2.combat.AnyWeaponCombatTask) {
             wdAnchor = null;
             wdEscape = null;
@@ -575,7 +574,9 @@ public class ModernSpeedrunTask extends Task {
             wdTicks = 0;
             return null;
         }
-        if (++wdTicks < NO_PROGRESS_TICKS) return null;
+        // Portal building legitimately stands still, so give it longer (fix15 froze in water inside it).
+        int limit = active instanceof ConstructNetherPortalBucketTask ? NO_PROGRESS_TICKS * 2 : NO_PROGRESS_TICKS;
+        if (++wdTicks < limit) return null;
 
         boolean dark = mod.getWorld().getLightLevel(net.minecraft.world.LightType.SKY, p.up()) <= 0;
         boolean overworld = WorldHelper.getCurrentDimension() == Dimension.OVERWORLD;
@@ -585,7 +586,7 @@ public class ModernSpeedrunTask extends Task {
         wdEscapeTicks = ESCAPE_TICKS;
         wdTicks = 0;
         active = null;
-        T2Log.warn("S200", "no progress " + (NO_PROGRESS_TICKS / 20) + "s ph=" + phase + " @" + p.toShortString()
+        T2Log.warn("S200", "no progress " + (limit / 20) + "s ph=" + phase + " @" + p.toShortString()
                 + " child=" + (active == null ? "-" : active.getClass().getSimpleName())
                 + " -> " + wdEscape.getClass().getSimpleName());
         return wdEscape;

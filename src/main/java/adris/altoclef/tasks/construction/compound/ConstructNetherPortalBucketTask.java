@@ -100,7 +100,8 @@ public class ConstructNetherPortalBucketTask extends Task {
     private final TimerGame secondBucketIronLogTimer = new TimerGame(15);
     // S208: 2nd-bucket iron stall (fix21: stood in 1-deep water 30s+ at unreachable ore at y-12).
     private final TimerGame secondBucketIronStallTimer = new TimerGame(25);
-    private final TimerGame deepLakeGate = new TimerGame(180);
+    // S216b: static - onStart ran every few seconds and kept resetting a per-instance timer (deepgate: 33 min gated).
+    private static long deepLakeFirstSeenMs = 0;
     private int secondBucketIronLast = -1;
     private Task secondBucketRelocate;
     /** Set when Construct gives up so EarlyOverworld can tear down goToNether and re-acquire. */
@@ -116,7 +117,6 @@ public class ConstructNetherPortalBucketTask extends Task {
         currentDestroyTarget = null;
         firstSearch = true;
         lavaSearchTimer.reset();
-        deepLakeGate.reset();
         refreshTimer.reset();
         bucketAcquireTiming = false;
         bucketAcquireTimer.reset();
@@ -484,7 +484,8 @@ public class ConstructNetherPortalBucketTask extends Task {
                     + nearestLake.getY() + " (surface, safe)");
             return nearestLake;
         }
-        if (deepestFallback != null && !deepLakeGate.elapsed()) {
+        if (deepestFallback != null && deepLakeFirstSeenMs == 0) deepLakeFirstSeenMs = System.currentTimeMillis();
+        if (deepestFallback != null && System.currentTimeMillis() - deepLakeFirstSeenMs < 180_000) {
             // S216: a deep lake (helmcap: y=9) cost 35min - a dark shaft then a stuck pillar-out. Keep
             // exploring the surface for up to 3 min before accepting one.
             Debug.logMessage("T2 [S216] deep lava lake at y=" + deepestFallback.getY() + " ignored, surface search first");

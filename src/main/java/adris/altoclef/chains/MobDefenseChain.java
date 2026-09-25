@@ -743,7 +743,10 @@ public class MobDefenseChain extends SingleTaskChain {
             ClientPlayerEntity player = mod.getPlayer();
             synchronized (BaritoneHelper.MINECRAFT_LOCK) {
                 for (Entity entity : mod.getEntityTracker().getHostiles()) {
-                    if (entity.isInRange(player, SAFE_KEEP_DISTANCE)
+                    // S226: skeletons/pillagers hurt from range; SAFE_KEEP_DISTANCE alone let them snipe us to death
+                    boolean ranged = entity instanceof net.minecraft.entity.mob.AbstractSkeletonEntity
+                            || entity instanceof net.minecraft.entity.mob.PillagerEntity;
+                    if (entity.isInRange(player, ranged ? 16 : SAFE_KEEP_DISTANCE)
                             && !mod.getBehaviour().shouldExcludeFromForcefield(entity)
                             && EntityHelper.isAngryAtPlayer(mod, entity)) {
                         return true;

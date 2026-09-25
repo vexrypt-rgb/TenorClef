@@ -84,6 +84,7 @@ public class ModernSpeedrunTask extends Task {
     private int helmGoldHuntTicks;
     private boolean starveHunt;
     private boolean helmLatched;
+    private Object helmLife = null;
     /** S193 nether climb hysteresis: stall counter, best Y reached, and give-up cooldown. */
     private int netherClimbStallTicks;
     private int netherClimbBestY = Integer.MIN_VALUE;
@@ -2830,6 +2831,13 @@ public class ModernSpeedrunTask extends Task {
                 return true;
             }
         } catch (Throwable ignored) {}
+        // S220: the latch outlived death (helmlatch run: 2 piglin deaths re-entering naked).
+        // A respawn creates a new player entity; reset the latch and hunt cap per life.
+        if (mod.getPlayer() != helmLife) {
+            helmLife = mod.getPlayer();
+            if (helmLatched) T2Log.force("S220", "new life, clearing helm latch");
+            helmLatched = false; helmGoldHuntTicks = 0; goldHelmTicks = 0;
+        }
         if (helmLatched) return true;
         return false;
     }

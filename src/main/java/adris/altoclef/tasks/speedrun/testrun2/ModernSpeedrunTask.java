@@ -1907,6 +1907,18 @@ public class ModernSpeedrunTask extends Task {
             goldHelmTicks++;
             T2History.note("WHY nether: gold helm on head before fortress");
             if (count(mod, Items.GOLDEN_HELMET) >= 1) {
+                // S206. fix20: EquipArmorTask sat 40s on "Equipping armor" after a
+                // table craft. Every 2s, close any screen and shift-click the helm on.
+                if (goldHelmTicks % 40 == 20) {
+                    try {
+                        adris.altoclef.util.helpers.StorageHelper.closeScreen();
+                        var slots = mod.getItemStorage().getSlotsWithItemPlayerInventory(false, Items.GOLDEN_HELMET);
+                        if (!slots.isEmpty()) {
+                            mod.getSlotHandler().clickSlot(slots.get(0), 0, net.minecraft.screen.slot.SlotActionType.QUICK_MOVE);
+                            T2Log.force("S206", "helm: direct shift-click equip");
+                        }
+                    } catch (Throwable ignored) {}
+                }
                 try {
                     return new adris.altoclef.tasks.misc.EquipArmorTask(Items.GOLDEN_HELMET);
                 } catch (Throwable t) {

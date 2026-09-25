@@ -1,7 +1,7 @@
 # TODO
 
 ### SIGIL encrypted chat (queued behind the testrun2 speedrun work)
-The spec and reference implementation are in `docs/sigil/`. Treat `sigil.py` as the source of truth for interop test vectors.
+The spec and reference implementation live in https://github.com/vexrypt-rgb/sigil (local checkout: `../sigil`). Treat `sigil.py` there as the source of truth for interop test vectors; pin the commit (currently c49bad5) when porting.
 - Port the SIGIL core to pure Java with the JCA built-ins: AES-256-GCM, PBKDF2-HMAC-SHA256 at 210k iterations, ECDH P-256 and HKDF-SHA256. No new dependencies. Add unit tests that round-trip with tokens from `sigil.py`.
 - Butler: in `WhisperChecker`/`Butler`, decrypt inbound `S1C.`/`S1K.`/`S1E.` whispers (including `i/n` fragments) before auth and command parsing. Reply sealed when the request arrived sealed.
     - Config: circle name and passphrase, plus a signet keypair, in `ButlerConfig`.

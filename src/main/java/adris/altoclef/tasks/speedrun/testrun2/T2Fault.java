@@ -115,6 +115,7 @@ public final class T2Fault {
             case "S190" -> "water bail kept: an unfinished WaterBailTask is no longer replaced by the phase task (was a per-tick CollectIron/CraftInTable<->WaterBail ping-pong, 63 incidents, one 396s craft stall)";
             case "S191" -> "nether climb-off-lava now targets y=52 (GetToYTask) instead of the exact block 12 overhead, which was usually netherrack (302s stall at 27,47,26)";
             case "S193" -> "nether climb stalled 30s with no height gain: climb abandoned for 60s and gold mined where the bot stands (climb otherwise continues from <48 up to 52)";
+            case "S194" -> "dig-down in progress: a collector is mining straight down (Y fell in the last 3s), so pillar-out/jump nudges stand aside instead of pillaring back up with the cobble it just mined";
             case "E109b", "S109" -> "mining with a block in hand: force-equip the pick (S109 does this)";
             case "S130", "S131", "S132", "S133", "S134", "S135", "S136", "S137", "S138" ->
                     "pillar state machine: check ban column vs actual shaft column";

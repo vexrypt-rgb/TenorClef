@@ -47,6 +47,10 @@ public final class T2Solve {
      */
     private static int s145Ticks;
     private static boolean lastGround = true;
+    /** S194 descent tracking: last block Y, ticks since Y last decreased, one log per episode. */
+    private static int lastY = Integer.MIN_VALUE;
+    private static int descentAge = Integer.MAX_VALUE;
+    private static boolean digLogged = false;
     private static int guiAge;
     /** Ticks the bot has mined while holding a non-pick with no blocks to place. */
     private static int wrongToolHits;
@@ -87,6 +91,9 @@ public final class T2Solve {
     public static void reset() {
         lastFix = "";
         cool = 0;
+        lastY = Integer.MIN_VALUE;
+        descentAge = Integer.MAX_VALUE;
+        digLogged = false;
         sameXz = 0;
         lastX = Integer.MIN_VALUE;
         flips = 0;
@@ -126,8 +133,27 @@ public final class T2Solve {
         lastX = x;
         lastZ = z;
         lastGround = ground;
+        if (lastY != Integer.MIN_VALUE && y < lastY) descentAge = 0;
+        else if (descentAge < Integer.MAX_VALUE) descentAge++;
+        lastY = y;
 
         String childName = child == null ? "-" : child.getClass().getSimpleName();
+        // S194: a collector mining straight down drops one block per break, which toggles
+        // ground and keeps the same XZ — exactly the "jump-stuck" signature (flips/sameXz).
+        // Live run fix5 (IRON, 9 iron ore, 2 cobble, needs 8 for a furnace): the collector
+        // dug 65→59 collecting cobble, S144 swapped in a wander that pillared back up
+        // PLACING that cobble, and the cycle repeated for minutes. While the bot has gone
+        // down within the last 3s under a collector, the pillar/jump nudges stand aside;
+        // a bot that stops descending is judged normally 3s later.
+        boolean digging = !wet && descentAge < 20 * 3
+                && (childName.contains("Collect") || childName.contains("Mine"));
+        if (digging && !digLogged) {
+            digLogged = true;
+            act("S194", "dig-down in progress y=" + y + " child=" + childName
+                    + " - pillar/jump nudges stand aside");
+        } else if (!digging) {
+            digLogged = false;
+        }
         boolean portalWork = "PORTAL".equals(phase) && childName.contains("Construct");
 
         // 1. GUI. Craft/furnace stay open UNLESS we are jump-stuck on the table.
@@ -249,7 +275,7 @@ public final class T2Solve {
             return new HolePillarTask();
         }
         boolean walking = childName.contains("GetToBlock") || childName.contains("Wander") || childName.contains("HolePillar");
-        boolean wouldPillar = !wet && !"PORTAL".equals(phase)
+        boolean wouldPillar = !wet && !digging && !"PORTAL".equals(phase)
                 && !childName.contains("Craft") && !childName.contains("StepOff")
                 && !walking
                 && HolePillar.boxed(mod) && HolePillar.hasPlace(mod)
@@ -274,7 +300,7 @@ public final class T2Solve {
             HolePillar.logSuppress(mod, "would-S130 but shaft-hop-banned "
                     + HolePillar.hopBanInfo() + " sameXz=" + sameXz);
         }
-        if (!wet && !"PORTAL".equals(phase)
+        if (!wet && !digging && !"PORTAL".equals(phase)
                 && !childName.contains("Craft") && !childName.contains("StepOff")
                 && !walking
                 && !HolePillar.busy()
@@ -326,7 +352,7 @@ public final class T2Solve {
         }
 
         // 5. Jump in place - walk. Do not pillar a tunnel.
-        if (!wet && flips >= 6 && sameXz > 20 * 2 && !"BOOTSTRAP".equals(phase)
+        if (!wet && !digging && flips >= 6 && sameXz > 20 * 2 && !"BOOTSTRAP".equals(phase)
                 && !childName.contains("StepOff") && !walking) {
             // S147 guard applies here too - this is the second S130 arming site.
             if (HolePillar.stickyBlocked(mod) || HolePillar.hopBlocked(mod, sameXz)) {

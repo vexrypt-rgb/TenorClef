@@ -376,6 +376,16 @@ public final class T2Codes {
      * no height gain for 30s is abandoned for 60s and the gold is mined where the bot stands.
      */
     public static final String S193_NETHER_CLIMB_HYSTERESIS = "S193";
+
+    /**
+     * S194 — DIG-DOWN VS PILLAR-UP LIVELOCK. A collector mining straight down drops a block
+     * per break, toggling ground in one column — the flips/sameXz "jump-stuck" signature. Live
+     * run fix5 (IRON, 9 iron ore, 2 cobble, furnace needs 8): the collector dug 65→59 gaining
+     * cobble, S144 swapped in TimeoutWanderTask, Baritone pillared back up PLACING that cobble,
+     * repeat for minutes. T2Solve now leaves S130/S100/S144 alone while Y fell within the last
+     * 3s under a Collect/Mine child.
+     */
+    public static final String S194_DIG_DOWN_NOT_STUCK = "S194";
     public static final String E132_SHAFT_STUCK = "E132";
     public static final String E133_PILLAR_PINGPONG = "E133";
     public static final String S139_PILLAR_RISE_HOLD = "S139";

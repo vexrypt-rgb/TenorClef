@@ -2,6 +2,8 @@ package adris.altoclef.tasks.speedrun.testrun2;
 
 import adris.altoclef.AltoClef;
 import adris.altoclef.Debug;
+import adris.altoclef.tasks.speedrun.testrun2.fault.FaultBook;
+import adris.altoclef.tasks.speedrun.testrun2.util.GameFiles;
 import adris.altoclef.TaskCatalogue;
 import adris.altoclef.tasks.container.LootContainerTask;
 import adris.altoclef.tasks.movement.EnterNetherPortalTask;
@@ -468,6 +470,8 @@ public class ModernSpeedrunTask extends Task {
         pickCraftLock = false;
         deathLock = 0;
         SpeedrunClock.reset();
+        FaultBook.configure(GameFiles.dir(), this::faultContext, T2Fault::hint);
+        FaultBook.reset(System.currentTimeMillis());
         T2Trace.reset();   // fresh trace.log for this session
         spawnGateChecked = false;
         gateProbes = 0;
@@ -520,6 +524,17 @@ public class ModernSpeedrunTask extends Task {
         // the live child the chain is keeping; `r` is what the driver decided this tick.
         T2Trace.tick(mod, phase.name(), active, r);
 
+        // S203. Generic A<->B child flip: names any pair, not just the ones a guard was written for.
+        try {
+            long nowMs = System.currentTimeMillis();
+            String loop = FaultBook.child(r == null ? "-" : r.getClass().getSimpleName(), nowMs);
+            if (loop != null) T2Log.warn("S203", "child loop " + loop + " in 60s ph=" + phase);
+            if (nowMs - summaryAt > 30_000) {
+                summaryAt = nowMs;
+                FaultBook.writeSummary(nowMs, "running ph=" + phase + " t=" + SpeedrunClock.now());
+            }
+        } catch (Throwable ignored) {}
+
         // S175. Beat LAST, once per real client tick. This is the only measurement in the
         // project that runs on the client thread and can therefore observe a tick that
         // never finished: run X's trace.log simply stops mid-file, because the client
@@ -551,6 +566,32 @@ public class ModernSpeedrunTask extends Task {
     private int wdEscapeTicks;
     private Task wdEscape;
 
+    private long summaryAt;
+
+    /** Context attached to every faults.jsonl event. */
+    private java.util.Map<String, String> faultContext() {
+        java.util.Map<String, String> m = new java.util.LinkedHashMap<>();
+        m.put("clock", SpeedrunClock.now());
+        m.put("phase", String.valueOf(phase));
+        m.put("child", active == null ? "-" : active.getClass().getSimpleName());
+        try {
+            AltoClef mod = AltoClef.getInstance();
+            if (mod.getPlayer() != null) {
+                m.put("pos", mod.getPlayer().getBlockPos().toShortString());
+                m.put("dim", String.valueOf(WorldHelper.getCurrentDimension()));
+                m.put("hp", String.valueOf((int) mod.getPlayer().getHealth()));
+                m.put("inv", "iron=" + mod.getItemStorage().getItemCount(Items.IRON_INGOT)
+                        + " pick=" + mod.getItemStorage().getItemCount(Items.IRON_PICKAXE)
+                        + " w=" + mod.getItemStorage().getItemCount(Items.WATER_BUCKET)
+                        + " l=" + mod.getItemStorage().getItemCount(Items.LAVA_BUCKET)
+                        + " rods=" + mod.getItemStorage().getItemCount(Items.BLAZE_ROD)
+                        + " pearls=" + mod.getItemStorage().getItemCount(Items.ENDER_PEARL)
+                        + " eyes=" + mod.getItemStorage().getItemCount(Items.ENDER_EYE));
+            }
+        } catch (Throwable ignored) {}
+        return m;
+    }
+
     private Task progressWatchdog(AltoClef mod) {
         if (phase == Phase.END || phase == Phase.DONE
                 || active instanceof adris.altoclef.tasks.speedrun.testrun2.combat.AnyWeaponCombatTask) {
@@ -573,6 +614,7 @@ public class ModernSpeedrunTask extends Task {
                 || !p.isWithinDistance(wdAnchor, PROGRESS_DIST)) {
             wdAnchor = p;
             wdItems = items;
+            FaultBook.progress(System.currentTimeMillis());
             wdTicks = 0;
             return null;
         }
@@ -2829,6 +2871,7 @@ public class ModernSpeedrunTask extends Task {
                 + (interruptTask == null ? "null" : interruptTask.getClass().getSimpleName())
                 + " dead=" + dead + " ph=" + phase + " y=" + String.format("%.1f", yNow)
                 + " -> session preserved");
+        FaultBook.writeSummary(System.currentTimeMillis(), "stopped ph=" + phase + " dead=" + dead);
     }
 
     @Override

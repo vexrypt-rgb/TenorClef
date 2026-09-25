@@ -153,8 +153,9 @@ public class T2MenuScreen extends Screen {
         int left = Math.max(16, this.width / 2 - 220);
         int right = this.width / 2 + 20;
         int tabY = 28;
-        attach(button(left, tabY, 100, 18, "Tasks", "TAB:0"));
-        attach(button(left + 102, tabY, 100, 18, "Link", "TAB:1"));
+        attach(button(left, tabY, 78, 18, "Tasks", "TAB:0"));
+        attach(button(left + 80, tabY, 78, 18, "Link", "TAB:1"));
+        attach(button(left + 160, tabY, 78, 18, "Faults", "TAB:4"));
         attach(button(right, tabY, 100, 18, "Media", "TAB:2"));
         attach(button(right + 102, tabY, 100, 18, "Agent", "TAB:3"));
         String[][] L = TAB_TASKS_L;
@@ -162,6 +163,7 @@ public class T2MenuScreen extends Screen {
         if (tab == 1) { L = TAB_LINK_L; R = TAB_LINK_R; }
         if (tab == 2) { L = TAB_MEDIA_L; R = TAB_MEDIA_R; }
         if (tab == 3) { L = TAB_AGENT_L; R = TAB_AGENT_R; }
+        if (tab == 4) { L = new String[0][]; R = new String[0][]; }
         int y = 52;
         for (String[] row : L) {
             attach(button(left, y, bw, bh, row[0], row[1]));
@@ -268,6 +270,24 @@ public class T2MenuScreen extends Screen {
         if (tab == 3) {
             g.fill(left - 8, this.height - 116, cardR, this.height - 30, C_CARD);
             g.drawText(this.textRenderer, "API key / URL / model / bind", left, this.height - 110, C_MUTED, false);
+        }
+        if (tab == 4) {
+            long now = System.currentTimeMillis();
+            String head = "time lost to faults: " + (adris.altoclef.tasks.speedrun.testrun2.fault.FaultBook.lostMs(now) / 1000)
+                    + "s   (full detail: altoclef/faults.jsonl, run-summary.json)";
+            g.drawText(this.textRenderer, head, left, 54, C_ACCENT, false);
+            String[] lines = adris.altoclef.tasks.speedrun.testrun2.fault.FaultBook.recentText().split("\n");
+            int maxW = cardR - left - 8;
+            int rows = Math.max(1, (cardB - 72) / 11);
+            int from = Math.max(0, lines.length - rows);
+            int ly = 68;
+            for (int i = lines.length - 1; i >= from; i--) { // newest first
+                String s = lines[i];
+                while (s.length() > 4 && this.textRenderer.getWidth(s) > maxW) s = s.substring(0, s.length() - 4) + "..";
+                int col = s.contains(" E") ? 0xFFFF8A84 : C_TEXT;
+                g.drawText(this.textRenderer, s, left, ly, col, false);
+                ly += 11;
+            }
         }
         for (int i = 0; i < hits.size(); i++) {
             int[] b = hits.get(i);

@@ -137,6 +137,7 @@ public class MobDefenseChain extends SingleTaskChain {
     @Override
     public float getPriority() {
         cachedLastPriority = getPriorityInner();
+        cachedLastPriority = S222holdBudget(cachedLastPriority);
         prevHealth = AltoClef.getInstance().getPlayer().getHealth();
         return cachedLastPriority;
     }

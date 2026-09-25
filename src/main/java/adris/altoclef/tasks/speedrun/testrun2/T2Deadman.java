@@ -140,9 +140,10 @@ public final class T2Deadman {
             // running, and the client ticks from the very first frame.
             return;
         }
-        long stalled = clientTicks - driverProbeAtLastClientTick;
-        if (stalled != 0) {
-            driverProbeAtLastClientTick = clientTicks;
+        // S213: compare the DRIVER beat counter; clientTicks vs itself was always nonzero,
+        // so the latch was never counted and S186 recovery never fired.
+        if (driverBeats != driverProbeAtLastClientTick) {
+            driverProbeAtLastClientTick = driverBeats;
             driverProbeBehind = 0;
             return;
         }
@@ -196,7 +197,7 @@ public final class T2Deadman {
             // Treat this as progress so the stall watchdog does not also fire on the same gap.
             lastProgressAt = System.currentTimeMillis();
             currentTickBeganAt = lastProgressAt;
-            driverProbeAtLastClientTick = clientTicks;
+            driverProbeAtLastClientTick = driverBeats;
             driverProbeBehind = 0;
         } catch (Throwable t) {
             Debug.logHarness("S186 driver re-install failed: " + t);

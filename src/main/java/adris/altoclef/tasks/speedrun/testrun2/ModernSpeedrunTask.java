@@ -1867,6 +1867,14 @@ public class ModernSpeedrunTask extends Task {
         }
         if (starveHunt && food(mod) >= 10) starveHunt = false;
         if (starveHunt) return new adris.altoclef.tasks.resources.CollectFoodTask(10);
+        // S221: helmlatch run: helm craft in the Nether had no table or planks, wandered 45s+
+        // and got shot by piglins twice. Carry a table through the portal.
+        if (mod.getItemStorage().getItemCount(Items.GOLDEN_HELMET) < 1 && !wearingGold(mod)
+                && mod.getItemStorage().getItemCount(Items.CRAFTING_TABLE) < 1
+                && !(active instanceof ConstructNetherPortalBucketTask && !active.isFinished())) {
+            T2History.note("WHY portal: carry crafting table for nether helm");
+            return TaskCatalogue.getItemTask(Items.CRAFTING_TABLE, 1);
+        }
         if (active instanceof ConstructNetherPortalBucketTask && !active.isFinished()) {
             return active;
         }

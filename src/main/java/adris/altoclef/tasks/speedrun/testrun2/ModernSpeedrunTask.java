@@ -81,6 +81,7 @@ public class ModernSpeedrunTask extends Task {
      * and the bot walked into a fortress bare-headed — E110 at 9:51 in the last run.
      */
     private int goldHelmTicks;
+    private boolean helmLatched;
     /** S193 nether climb hysteresis: stall counter, best Y reached, and give-up cooldown. */
     private int netherClimbStallTicks;
     private int netherClimbBestY = Integer.MIN_VALUE;
@@ -456,6 +457,7 @@ public class ModernSpeedrunTask extends Task {
         stillTicks = 0;
         portalAttempts = 0;
         goldHelmTicks = 0;
+        helmLatched = false;
         lastIronN = -1;
         woodForSticksTicks = 0;
         woodForSticks = null;
@@ -1906,7 +1908,14 @@ public class ModernSpeedrunTask extends Task {
         if (!wearingGold(mod)) {
             goldHelmTicks++;
             T2History.note("WHY nether: gold helm on head before fortress");
-            if (count(mod, Items.GOLDEN_HELMET) >= 1) {
+            if (count(mod, Items.GOLDEN_HELMET) >= 1 && goldHelmTicks > 20 * 6) {
+                // S207: helm in hand but equip never "registers" -- it was on the head in fix20.
+                // Latch as worn so we stop looping EquipArmorTask.
+                helmLatched = true;
+                T2Log.force("S207", "helm: equip unconfirmed after 6s, latching as worn");
+                goldHelmTicks = 0;
+                return null;
+            } else if (count(mod, Items.GOLDEN_HELMET) >= 1) {
                 // S206. fix20: EquipArmorTask sat 40s on "Equipping armor" after a
                 // table craft. Every 2s, close any screen and shift-click the helm on.
                 if (goldHelmTicks % 40 == 20) {
@@ -2784,6 +2793,14 @@ public class ModernSpeedrunTask extends Task {
                 }
             }
         } catch (Throwable ignored) {}
+        try {
+            // S207: second opinion via the head slot directly (fix20 stall had the helm on).
+            if (mod.getPlayer().getEquippedStack(net.minecraft.entity.EquipmentSlot.HEAD).getItem() == Items.GOLDEN_HELMET
+                    || adris.altoclef.util.helpers.StorageHelper.isArmorEquipped(Items.GOLDEN_HELMET)) {
+                return true;
+            }
+        } catch (Throwable ignored) {}
+        if (helmLatched) return true;
         return false;
     }
 

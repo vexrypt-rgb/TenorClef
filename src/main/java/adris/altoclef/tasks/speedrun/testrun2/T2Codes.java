@@ -414,6 +414,8 @@ public final class T2Codes {
     public static final String S198_DEEP_BAIL_OPEN = "S198";
     /** S199 — SurfaceBailTask S151 air-pocket target is sticky and never the pocket just reached. */
     public static final String S199_STICKY_POCKET = "S199";
+    /** S200 — task-agnostic watchdog: 45s without moving 4 blocks or an inventory change forces an escape. */
+    public static final String S200_NO_PROGRESS = "S200";
     public static final String E132_SHAFT_STUCK = "E132";
     public static final String E133_PILLAR_PINGPONG = "E133";
     public static final String S139_PILLAR_RISE_HOLD = "S139";

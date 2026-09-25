@@ -85,6 +85,9 @@ public class ConstructNetherPortalBucketTask extends Task {
     private static final Vec3i PORTALABLE_REGION_SIZE = new Vec3i(4, 6, 6);
     private static final Vec3i PORTAL_ORIGIN_RELATIVE_TO_REGION = new Vec3i(1, 0, 2);
     private final TimerGame lavaSearchTimer = new TimerGame(5);
+    private final TimerGame lavaStallTimer = new TimerGame(40);
+    private BlockPos lavaStallAnchor = null;
+    private Task lavaRelocate;
     private final MovementProgressChecker progressChecker = new MovementProgressChecker();
     private final TimeoutWanderTask wanderTask = new TimeoutWanderTask(5);
     // Stored here to cache lava blacklist
@@ -279,6 +282,10 @@ public class ConstructNetherPortalBucketTask extends Task {
             noFluidProgressTimer.reset();
         }
 
+        if (lavaRelocate != null && lavaRelocate.isActive() && !lavaRelocate.isFinished()) {
+            setDebugState("S211 relocating after lava stall");
+            return lavaRelocate;
+        }
         boolean needsToLookForPortal = portalOrigin == null;
         if (needsToLookForPortal) {
             progressChecker.reset();
@@ -339,6 +346,21 @@ public class ConstructNetherPortalBucketTask extends Task {
 
             // Get lava early so placing it is faster
             if (!mod.getItemStorage().hasItem(Items.LAVA_BUCKET) && frameBlock != Blocks.LAVA) {
+                // S211: run ironregate bobbed in water at 222,66,208 for 80s on "Collecting lava"
+                // (progressChecker is reset here, so nothing ever noticed). If we stay within a
+                // few blocks for 40s without a lava bucket, abandon this site and relocate.
+                BlockPos here = mod.getPlayer().getBlockPos();
+                if (lavaStallAnchor == null || !lavaStallAnchor.isWithinDistance(here, 4)) {
+                    lavaStallAnchor = here;
+                    lavaStallTimer.reset();
+                } else if (lavaStallTimer.elapsed()) {
+                    Debug.logWarning("[S211] lava collect stalled 40s @" + here.toShortString() + " - relocating portal site");
+                    lavaStallAnchor = null;
+                    portalOrigin = null;
+                    currentDestroyTarget = null;
+                    lavaRelocate = new TimeoutWanderTask(20);
+                    return lavaRelocate;
+                }
                 setDebugState("Collecting lava");
                 progressChecker.reset();
                 return collectLavaTask;

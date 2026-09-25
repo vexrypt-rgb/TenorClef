@@ -117,6 +117,7 @@ public final class T2Fault {
             case "S191" -> "nether climb-off-lava now targets y=52 (GetToYTask) instead of the exact block 12 overhead, which was usually netherrack (302s stall at 27,47,26)";
             case "S193" -> "nether climb stalled 30s with no height gain: climb abandoned for 60s and gold mined where the bot stands (climb otherwise continues from <48 up to 52)";
             case "S203" -> "child task flipped A<->B 4x in 60s: see faults.jsonl for the pair, add a latch or cooldown for it";
+            case "S204" -> "crafting shield before the nether: MobDefenseChain blocks blaze fireballs with it";
             case "S202" -> "nether climb restarted 3x in 60s (gold dig keeps dropping below 48): climb off for 90s, gold mined in place";
             case "S194" -> "dig-down in progress: a collector is mining straight down (Y fell in the last 3s), so pillar-out/jump nudges stand aside instead of pillaring back up with the cobble it just mined";
             case "E109b", "S109" -> "mining with a block in hand: force-equip the pick (S109 does this)";

@@ -1664,13 +1664,16 @@ public class ModernSpeedrunTask extends Task {
         return n;
     }
 
-    /** Shield as soon as 1 iron exists. Does not wait for a full iron kit. */
+    /** S204: shield before the Nether (blocks blaze fireballs via MobDefenseChain). Never digs deep for it. */
     private Task maybeShield(AltoClef mod) {
         if (!SpeedrunOpt.GET_SHIELD_EARLY) return null;
         if (count(mod, Items.SHIELD) >= 1) return null;
         int iron = count(mod, Items.IRON_INGOT) + count(mod, Items.RAW_IRON)
                 + count(mod, Items.IRON_NUGGET) / 9;
-        if (iron < 1 && count(mod, Items.IRON_PICKAXE) < 1) return null;
+        boolean oreNear = false;
+        try { oreNear = mod.getBlockScanner().anyFoundWithinDistance(24, Blocks.IRON_ORE); } catch (Throwable ignored) {}
+        if (iron < 1 && !oreNear) return null;
+        T2Log.force("S204", "shield before nether iron=" + iron + " oreNear=" + oreNear);
         return TaskCatalogue.getItemTask(Items.SHIELD, 1);
     }
 
@@ -1867,6 +1870,8 @@ public class ModernSpeedrunTask extends Task {
             T2History.note("WHY portal: 1 flint before construct");
             return TaskCatalogue.getItemTask(Items.FLINT, 1);
         }
+        Task shield = maybeShield(mod);
+        if (shield != null) return shield;
         if (LavaBucketPortal.ready(mod)) {
             Task bucket = LavaBucketPortal.start(mod);
             if (bucket != null) return bucket;

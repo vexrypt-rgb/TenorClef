@@ -420,6 +420,7 @@ public final class T2Codes {
     public static final String S202_NETHER_CLIMB_FLIP = "S202";
     /** Generic child-task A<->B flip detected by fault.LoopDetector (any pair). */
     public static final String S203_CHILD_LOOP = "S203";
+    public static final String S204_SHIELD = "S204";
     /** S201 — bootstrap crafts a stone sword right after the stone pickaxe. */
     public static final String S201_STONE_SWORD = "S201";
     public static final String E132_SHAFT_STUCK = "E132";

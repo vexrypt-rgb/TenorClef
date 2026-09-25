@@ -1383,6 +1383,12 @@ public class ModernSpeedrunTask extends Task {
         if (count(mod, Items.STONE_PICKAXE) < 1) {
             return TaskCatalogue.getItemTask(Items.STONE_PICKAXE, 1);
         }
+        // S201: a stone sword (5 damage vs 1 bare-handed) is 2 cobble + 1 stick, made right
+        // after the stone pickaxe while the table is still next to the bot. WeaponPicker
+        // already prefers it; the bot just never crafted one.
+        if (count(mod, Items.STONE_SWORD) < 1 && count(mod, Items.IRON_SWORD) < 1) {
+            return TaskCatalogue.getItemTask(Items.STONE_SWORD, 1);
+        }
         return null;
     }
 

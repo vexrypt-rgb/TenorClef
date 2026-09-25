@@ -16,7 +16,7 @@ public final class KeepList {
 
     public static final Set<Item> KEEP = Set.of(
             Items.IRON_PICKAXE, Items.IRON_SWORD, Items.IRON_AXE,
-            Items.STONE_PICKAXE, Items.WOODEN_PICKAXE,
+            Items.STONE_PICKAXE, Items.WOODEN_PICKAXE, Items.STONE_SWORD,
             Items.SHIELD,
             Items.BUCKET, Items.WATER_BUCKET, Items.LAVA_BUCKET,
             Items.FLINT_AND_STEEL, Items.FIRE_CHARGE, Items.FLINT,

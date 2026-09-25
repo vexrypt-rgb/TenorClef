@@ -140,6 +140,22 @@ public final class T2Deadman {
             // running, and the client ticks from the very first frame.
             return;
         }
+        // S214: another chain (mob defense, food, MLG...) legitimately owns this tick, so the
+        // driver is SUPPOSED to be idle. Run lavastall2 was killed with code 87 at 11:19 while
+        // fighting piglins/hoglins for >30s: no beats, so the watchdog called a healthy client
+        // "blocked". A client tick on a non-user chain is progress, and is not a latch.
+        try {
+            AltoClef m = AltoClef.getInstance();
+            if (m != null && m.getTaskRunner().getCurrentTaskChain() != null
+                    && m.getTaskRunner().getCurrentTaskChain() != m.getUserTaskChain()) {
+                long now = System.currentTimeMillis();
+                lastProgressAt = now;
+                currentTickBeganAt = now;
+                driverProbeAtLastClientTick = driverBeats;
+                driverProbeBehind = 0;
+                return;
+            }
+        } catch (Throwable ignored) {}
         // S213: compare the DRIVER beat counter; clientTicks vs itself was always nonzero,
         // so the latch was never counted and S186 recovery never fired.
         if (driverBeats != driverProbeAtLastClientTick) {

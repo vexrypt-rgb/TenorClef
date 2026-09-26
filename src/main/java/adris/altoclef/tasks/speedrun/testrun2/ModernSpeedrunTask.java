@@ -2608,7 +2608,9 @@ public class ModernSpeedrunTask extends Task {
         if (ironStill == 20 * 6) {
             T2Log.warn("E70", "iron stall 6s @" + x + "," + z + " — clear blacklist + re-pick ore");
             clearBlockBlacklist(mod);
-            ironStill = 0;
+            // S236: do NOT reset ironStill here. Resetting it meant the 12s walk and 35s escape
+            // below could never fire: s235 cleared the blacklist every 6s and re-picked the same
+            // unreachable ore (-164,58,56) for 90s+. Only real iron progress resets the window.
             return stick(iron(mod));
         }
         if (ironStill == 20 * 12) {

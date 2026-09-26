@@ -63,7 +63,7 @@ package adris.altoclef.benchmark;
 //$$         BlockPos origin = mc.player.getBlockPos();
 //$$         Thread t = new Thread(() -> {
 //$$             try {
-//$$                 if (mode.equalsIgnoreCase("travel")) travel(mc, origin, opt, Math.max(1, reps));
+//$$                 if (mode.equalsIgnoreCase("travel")) for (String m : (opt == null ? "-" : opt).split("[;+]")) travel(mc, origin, m, Math.max(1, reps));
 //$$                 else for (String sweep : (opt == null ? "-" : opt).split("[;+]")) search(mc, origin, sweep, Math.max(1, reps));
 //$$             } catch (Throwable e) {
 //$$                 Debug.logHarness("PATHBENCH failed: " + e);
@@ -160,7 +160,7 @@ package adris.altoclef.benchmark;
 //$$         long limitTicks = Long.getLong("tenorclef.pathbench.travelTicks", 20L * 90);
 //$$         PrintWriter csv = open("travel_" + mover);
 //$$         csv.println("mover,goal,dx,dz,dist,rep,result,ticks,endDist,firstMoveTicks");
-//$$         int ok = 0, n = 0; long sumTicks = 0;
+//$$         int ok = 0, n = 0, moved = 0; long sumTicks = 0, sumFirst = 0; double sumEnd = 0;
 //$$         try {
 //$$             for (int gi = 0; gi < goals.size(); gi++) {
 //$$                 BlockPos g = goals.get(gi);
@@ -193,14 +193,16 @@ package adris.altoclef.benchmark;
 //$$                     csv.flush();
 //$$                     n++;
 //$$                     if (result.equals("GOAL")) { ok++; sumTicks += ticks; }
+//$$                     if (firstMove >= 0) { moved++; sumFirst += firstMove; }
+//$$                     sumEnd += end;
 //$$                     Thread.sleep(500);
 //$$                 }
 //$$             }
 //$$         } finally {
 //$$             csv.close();
 //$$         }
-//$$         Debug.logHarness(String.format(Locale.ROOT, "PATHBENCH SUMMARY mode=travel mover=%s goalRate=%d/%d avgGoalTicks=%.0f",
-//$$                 mover, ok, n, ok == 0 ? 0 : sumTicks / (double) ok));
+//$$         Debug.logHarness(String.format(Locale.ROOT, "PATHBENCH SUMMARY mode=travel mover=%s goalRate=%d/%d avgGoalTicks=%.0f avgFirstMoveTicks=%.1f avgEndDist=%.1f",
+//$$                 mover, ok, n, ok == 0 ? 0 : sumTicks / (double) ok, moved == 0 ? -1 : sumFirst / (double) moved, n == 0 ? 0 : sumEnd / n));
 //$$     }
 //$$
 //$$     private static boolean startBaritone(MinecraftClient mc, IBaritone b, BlockPos g) {

@@ -208,9 +208,30 @@ public class BlockStateChecker {
     }
 
 	// Helper method to check if the block is lava. Either flowing or source
-	static boolean isAnyLava(BlockState state) {
+	public static boolean isAnyLava(BlockState state) {
         return isLava(state) || isFlowingLava(state);
     }
+
+	// Blocks that damage or kill the player on contact.
+	public static boolean isHazard(BlockState state) {
+        return isAnyLava(state) || state.getBlock() instanceof FireBlock
+            || state.isOf(Blocks.SOUL_FIRE) || state.isOf(Blocks.MAGMA_BLOCK)
+            || state.isOf(Blocks.CAMPFIRE) || state.isOf(Blocks.SOUL_CAMPFIRE);
+    }
+
+	// True if any block within the box (expanded by margin horizontally, one block below) is a hazard.
+	public static boolean isNearHazard(WorldView world, double minX, double minY, double minZ,
+			double maxX, double maxY, double maxZ, double margin) {
+		int x0 = net.minecraft.util.math.MathHelper.floor(minX - margin), x1 = net.minecraft.util.math.MathHelper.floor(maxX + margin);
+		int y0 = net.minecraft.util.math.MathHelper.floor(minY - 1), y1 = net.minecraft.util.math.MathHelper.floor(maxY);
+		int z0 = net.minecraft.util.math.MathHelper.floor(minZ - margin), z1 = net.minecraft.util.math.MathHelper.floor(maxZ + margin);
+		BlockPos.Mutable m = new BlockPos.Mutable();
+		for (int x = x0; x <= x1; x++)
+			for (int y = y0; y <= y1; y++)
+				for (int z = z0; z <= z1; z++)
+					if (isHazard(world.getBlockState(m.set(x, y, z)))) return true;
+		return false;
+	}
 
 
 }

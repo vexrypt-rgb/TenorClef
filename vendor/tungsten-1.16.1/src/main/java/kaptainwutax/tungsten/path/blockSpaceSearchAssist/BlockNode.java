@@ -399,8 +399,16 @@ public class BlockNode {
 
 
 		// Specific block checks
-		if (childState.isOf(Blocks.LAVA))
+		if (BlockStateChecker.isHazard(childState) || BlockStateChecker.isHazard(childBelowState)
+				|| BlockStateChecker.isHazard(childAboveState))
 			return true;
+		// Don't path directly alongside lava: one misstep or knockback is fatal.
+		for (net.minecraft.util.math.Direction d : net.minecraft.util.math.Direction.Type.HORIZONTAL) {
+			BlockPos side = child.getBlockPos().offset(d);
+			if (BlockStateChecker.isAnyLava(world.getBlockState(side))
+					|| BlockStateChecker.isAnyLava(world.getBlockState(side.down())))
+				return true;
+		}
 		if (childBelowBlock instanceof LilyPadBlock)
 			return true;
 		if (childBelowBlock instanceof CarpetBlock)

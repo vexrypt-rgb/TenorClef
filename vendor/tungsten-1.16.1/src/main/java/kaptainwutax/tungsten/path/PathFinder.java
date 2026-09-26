@@ -140,6 +140,14 @@ public class PathFinder {
         thread.start();
     }
 	
+	// Rejects simulated states that touch or hover over lava/fire at any point of the move.
+	private boolean isInHazard(Node n, WorldView world) {
+		Agent a = n.agent;
+		if (a.isInLava()) return true;
+		net.minecraft.util.math.Box b = a.box;
+		return BlockStateChecker.isNearHazard(world, b.minX, b.minY, b.minZ, b.maxX, b.maxY, b.maxZ, 0.3);
+	}
+
 	private boolean checkForFallDamage(Node n, WorldView world) {
 		if (TungstenModDataContainer.ignoreFallDamage) return false;
 		if (BlockStateChecker.isAnyWater(world.getBlockState(n.agent.getBlockPos()))) return false;
@@ -939,7 +947,7 @@ public class PathFinder {
 					}
 				}
 				if (tooClose) continue;
-				if (filterChidren(child, lastBlockNode, nextBlockNode, isSmallBlock, world) || checkForFallDamage(child, world)) continue;
+				if (filterChidren(child, lastBlockNode, nextBlockNode, isSmallBlock, world) || checkForFallDamage(child, world) || isInHazard(child, world)) continue;
 				validChildren.add(child);
 				validClimbing.add(childClimbing);
 			}

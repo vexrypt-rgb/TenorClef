@@ -12,6 +12,10 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.CollisionView;
+import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.ChunkStatus;
+import net.minecraft.world.chunk.WorldChunk;
 import org.jetbrains.annotations.Nullable;
 
 public class AgentBlockCollisions extends AbstractIterator<VoxelShape> {
@@ -24,6 +28,10 @@ public class AgentBlockCollisions extends AbstractIterator<VoxelShape> {
     private final CollisionView world;
     private final boolean forEntity;
     public int scannedBlocks;
+    // Last chunk looked up. A collision box spans a few blocks, so nearly every lookup hits the
+    // same chunk; resolving it through the chunk manager per block dominated PathFinder time.
+    private int cachedChunkX = Integer.MIN_VALUE, cachedChunkZ = Integer.MIN_VALUE;
+    private Chunk cachedChunk;
 
     public AgentBlockCollisions(CollisionView world, Agent agent, Box box) {
         this(world, agent, box, false);
@@ -58,7 +66,7 @@ public class AgentBlockCollisions extends AbstractIterator<VoxelShape> {
                 continue;
             }
             this.pos.set(i, j, k);
-            BlockState blockState = this.world.getBlockState(this.pos);
+            BlockState blockState = getBlockState(i, j, k);
             this.scannedBlocks++;
             if (this.forEntity && !blockState.shouldSuffocate(this.world, this.pos)
                     || l == 1 && !blockState.exceedsCube()
@@ -79,6 +87,22 @@ public class AgentBlockCollisions extends AbstractIterator<VoxelShape> {
             return voxelShape2;
         }
         return this.endOfData();
+    }
+
+    private BlockState getBlockState(int x, int y, int z) {
+        if (y < 0 || y >= 256) return this.world.getBlockState(this.pos);
+        int cx = x >> 4, cz = z >> 4;
+        if (cx != cachedChunkX || cz != cachedChunkZ) {
+            cachedChunkX = cx;
+            cachedChunkZ = cz;
+            Chunk c = null;
+            if (this.world instanceof World) {
+                c = ((World) this.world).getChunkManager().getChunk(cx, cz, ChunkStatus.FULL, false);
+            }
+            // EmptyChunk/null happen off-thread on 1.16.1 ClientWorld: defer to the world path.
+            cachedChunk = c instanceof WorldChunk && !((WorldChunk) c).isEmpty() ? c : null;
+        }
+        return cachedChunk != null ? cachedChunk.getBlockState(this.pos) : this.world.getBlockState(this.pos);
     }
 
 }

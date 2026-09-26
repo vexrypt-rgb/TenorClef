@@ -146,7 +146,7 @@ public class PathFinder {
 		Agent a = n.agent;
 		if (a.isInLava()) return true;
 		net.minecraft.util.math.Box b = a.box;
-		return BlockStateChecker.isNearHazard(world, b.minX, b.minY, b.minZ, b.maxX, b.maxY, b.maxZ, 0.3);
+		return BlockStateChecker.isNearHazard(world, b.minX, b.minY, b.minZ, b.maxX, b.maxY, b.maxZ, 0.0);
 	}
 
 	private boolean checkForFallDamage(Node n, WorldView world) {

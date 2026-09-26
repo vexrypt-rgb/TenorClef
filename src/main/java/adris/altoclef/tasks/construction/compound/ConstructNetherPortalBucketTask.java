@@ -107,6 +107,7 @@ public class ConstructNetherPortalBucketTask extends Task {
     /** Set when Construct gives up so EarlyOverworld can tear down goToNether and re-acquire. */
     public boolean abortedForReacquire = false;
     private BlockPos portalOrigin = null;
+    private final List<BlockPos> unportalableLakes = new ArrayList<>();
     private Task getToLakeTask = null;
     private BlockPos currentDestroyTarget = null;
 
@@ -310,6 +311,9 @@ public class ConstructNetherPortalBucketTask extends Task {
                     BlockPos foundPortalRegion = getPortalableRegion(mod, lavaPos, mod.getPlayer().getBlockPos(), new Vec3i(-1, 0, 0), PORTALABLE_REGION_SIZE, 48);
                     if (foundPortalRegion == null) {
                         Debug.logWarning("Failed to find portalable region nearby. Consider increasing the search timeout range");
+                        // S229: remember it, or the next search re-picks the same lake forever
+                        // (chainlog: 14 bail/wander cycles over the ocean around one y=6 lake).
+                        unportalableLakes.add(lavaPos);
                     } else {
                         portalOrigin = foundPortalRegion.add(PORTAL_ORIGIN_RELATIVE_TO_REGION);
                         foundSpot = true;
@@ -458,6 +462,7 @@ public class ConstructNetherPortalBucketTask extends Task {
         if (!lavas.isEmpty()) {
             for (BlockPos pos : lavas) {
                 if (alreadyExplored.contains(pos)) continue;
+                if (unportalableLakes.stream().anyMatch(b -> b.isWithinDistance(pos, 16))) continue;
                 double sqDist = playerPos.getSquaredDistance(pos);
                 // S165: was Math.max(...), which skipped any candidate that could not beat
                 // BOTH trackers at once. With two trackers that prunes a perfectly good deep
@@ -569,7 +574,9 @@ public class ConstructNetherPortalBucketTask extends Task {
                 }
                 // Check for solid ground at least somewhere
                 if (!solidFound) {
-                    break;
+                    // S229: was `break` - a cave lake has open air beside it, so one floorless box
+                    // abandoned the whole direction and deep lakes never got a region.
+                    continue;
                 }
 
                 if (found) {

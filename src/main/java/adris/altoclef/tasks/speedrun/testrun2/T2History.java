@@ -76,6 +76,9 @@ public final class T2History {
         }
     }
 
+    private static String prevChild = "";
+    private static int flipCount, flipStartTick;
+
     public static void note(String msg) {
         long now = System.currentTimeMillis();
         Long prev = NOTE_AT.get(msg);

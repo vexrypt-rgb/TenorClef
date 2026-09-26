@@ -87,10 +87,8 @@ public class ModernSpeedrunTask extends Task {
             AltoClef mod = AltoClef.getInstance();
             var b = mod.getWorld().getBlockState(pos).getBlock();
             if (b != Blocks.NETHER_GOLD_ORE && b != Blocks.GILDED_BLACKSTONE && b != Blocks.GOLD_BLOCK) return false;
-            for (var st : mod.getPlayer().getArmorItems()) {
-                if (st != null && (st.getItem() == Items.GOLDEN_HELMET || st.getItem() == Items.GOLDEN_CHESTPLATE
-                        || st.getItem() == Items.GOLDEN_LEGGINGS || st.getItem() == Items.GOLDEN_BOOTS)) return false;
-            }
+            // S266: gold armor does NOT excuse this - vanilla angers piglins at any gold-ore break
+            // (s262t: helm on, TradeWithPiglins mined gold, 18hp -> dead in 2s).
             var ps = mod.getEntityTracker().getTrackedEntities(net.minecraft.entity.mob.PiglinEntity.class);
             if (ps == null) return false;
             for (var e : ps) {

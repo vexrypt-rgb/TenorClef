@@ -63,7 +63,8 @@ package adris.altoclef.benchmark;
 //$$         BlockPos origin = mc.player.getBlockPos();
 //$$         Thread t = new Thread(() -> {
 //$$             try {
-//$$                 if (mode.equalsIgnoreCase("travel")) for (String m : (opt == null ? "-" : opt).split("[;+]")) travel(mc, origin, m, Math.max(1, reps));
+//$$                 if (mode.equalsIgnoreCase("swim")) swim(mc, origin, Math.max(1, reps));
+//$$                 else if (mode.equalsIgnoreCase("travel")) for (String m : (opt == null ? "-" : opt).split("[;+]")) travel(mc, origin, m, Math.max(1, reps));
 //$$                 else for (String sweep : (opt == null ? "-" : opt).split("[;+]")) search(mc, origin, sweep, Math.max(1, reps));
 //$$             } catch (Throwable e) {
 //$$                 Debug.logHarness("PATHBENCH failed: " + e);
@@ -258,6 +259,71 @@ package adris.altoclef.benchmark;
 //$$         }
 //$$         Debug.logHarness(String.format(Locale.ROOT, "PATHBENCH SUMMARY mode=travel mover=%s goalRate=%d/%d avgGoalTicks=%.0f avgFirstMoveTicks=%.1f avgEndDist=%.1f",
 //$$                 mover, ok, n, ok == 0 ? 0 : sumTicks / (double) ok, moved == 0 ? -1 : sumFirst / (double) moved, n == 0 ? 0 : sumEnd / n));
+//$$     }
+//$$
+//$$     // ---- swim --------------------------------------------------------------------------
+//$$
+//$$     /** Glass tank of water high above origin; Baritone must reach 3D goals inside it (floor, mid-depth, surface). */
+//$$     private static void swim(MinecraftClient mc, BlockPos origin, int reps) throws Exception {
+//$$         IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
+//$$         int R = 12, H = 12, by = 200, ox = origin.getX(), oz = origin.getZ();
+//$$         java.util.concurrent.CompletableFuture<Void> built = new java.util.concurrent.CompletableFuture<>();
+//$$         mc.getServer().execute(() -> {
+//$$             net.minecraft.server.world.ServerWorld w = mc.getServer().getOverworld();
+//$$             for (int x = -R - 1; x <= R + 1; x++) for (int z = -R - 1; z <= R + 1; z++) for (int y = by - 1; y < by + H; y++) {
+//$$                 boolean wall = Math.abs(x) > R || Math.abs(z) > R || y < by;
+//$$                 w.setBlockState(new BlockPos(ox + x, y, oz + z), wall ? net.minecraft.block.Blocks.GLASS.getDefaultState() : net.minecraft.block.Blocks.WATER.getDefaultState(), 2);
+//$$             }
+//$$             built.complete(null);
+//$$         });
+//$$         built.get();
+//$$         Thread.sleep(3000);
+//$$         BlockPos start = new BlockPos(ox, by + H - 2, oz);
+//$$         int[][] offs = {{10, 0, 10}, {-10, 0, 10}, {-10, 0, -10}, {10, 0, -10}, {10, 5, 0}, {0, 5, -10}, {-10, 9, 0}, {0, 2, 10}};
+//$$         long limitTicks = Long.getLong("tenorclef.pathbench.travelTicks", 20L * 90);
+//$$         PrintWriter csv = open("swim_baritone");
+//$$         csv.println("mover,goal,dx,dy,dz,dist,rep,result,ticks,endDist,firstMoveTicks");
+//$$         int ok = 0, n = 0;
+//$$         try {
+//$$             for (int gi = 0; gi < offs.length; gi++) {
+//$$                 BlockPos g = new BlockPos(ox + offs[gi][0], by + offs[gi][1], oz + offs[gi][2]);
+//$$                 for (int r = 0; r < reps; r++) {
+//$$                     teleport(mc, start);
+//$$                     long t0 = worldTime(mc);
+//$$                     startBaritone(mc, baritone, g);
+//$$                     double startD = dist3(mc, g), bestD = startD; long bestAt = 0, firstMove = -1;
+//$$                     String result = "TIMEOUT";
+//$$                     while (true) {
+//$$                         Thread.sleep(25);
+//$$                         long el = worldTime(mc) - t0;
+//$$                         double d = dist3(mc, g);
+//$$                         if (firstMove < 0 && Math.abs(d - startD) > 0.5) firstMove = el;
+//$$                         if (d < 1.5) { result = "GOAL"; break; }
+//$$                         if (d < bestD - 1.0) { bestD = d; bestAt = el; }
+//$$                         if (el - bestAt > 400) { result = "STALLED"; break; }
+//$$                         if (el > 40 && !baritone.getCustomGoalProcess().isActive()) { result = "STOPPED"; break; }
+//$$                         if (el > limitTicks) break;
+//$$                     }
+//$$                     mc.execute(() -> baritone.getPathingBehavior().cancelEverything());
+//$$                     long ticks = worldTime(mc) - t0;
+//$$                     csv.printf(Locale.ROOT, "baritone,%d,%d,%d,%d,%d,%d,%s,%d,%.2f,%d%n", gi, offs[gi][0], offs[gi][1] - (H - 2), offs[gi][2],
+//$$                             (int) Math.round(Math.sqrt(g.getSquaredDistance(start))), r, result, ticks, dist3(mc, g), firstMove);
+//$$                     csv.flush();
+//$$                     n++;
+//$$                     if (result.equals("GOAL")) ok++;
+//$$                     Thread.sleep(500);
+//$$                 }
+//$$             }
+//$$         } finally {
+//$$             csv.close();
+//$$         }
+//$$         Debug.logHarness(String.format(Locale.ROOT, "PATHBENCH SUMMARY mode=swim goalRate=%d/%d", ok, n));
+//$$     }
+//$$
+//$$     private static double dist3(MinecraftClient mc, BlockPos g) {
+//$$         if (mc.player == null) return 1e9;
+//$$         double dx = mc.player.getX() - (g.getX() + 0.5), dy = mc.player.getY() - g.getY(), dz = mc.player.getZ() - (g.getZ() + 0.5);
+//$$         return Math.sqrt(dx * dx + dy * dy + dz * dz);
 //$$     }
 //$$
 //$$     private static boolean startBaritone(MinecraftClient mc, IBaritone b, BlockPos g) {

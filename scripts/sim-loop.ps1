@@ -12,12 +12,18 @@ param(
   [int]$StallSec = 120,
   [int]$StatusEverySec = 30,
   [int]$MaxWorlds = 0,
+  # Sim time warp (1 = off). The forked MC JVM inherits JAVA_TOOL_OPTIONS -> WarpClock.
+  [double]$Warp = 1,
   [switch]$MonitorOnly,
   [switch]$ForceKillStale
 )
 
 $ErrorActionPreference = 'Continue'
 Set-Location $Repo
+if ($Warp -gt 1) {
+  $env:JAVA_TOOL_OPTIONS = ("$env:JAVA_TOOL_OPTIONS -Dtenorclef.warp=$Warp").Trim()
+  Write-Host "WARP x$Warp (world + bot run $Warp times faster)"
+}
 
 # NOTE: no Set-StrictMode here. Under StrictMode, `.Count` on a scalar or $null
 # throws "The property 'Count' cannot be found on this object", which killed the

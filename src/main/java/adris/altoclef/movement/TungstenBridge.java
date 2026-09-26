@@ -58,7 +58,9 @@ final class TungstenBridge {
             Field pfField = dataClass.getField("PATHFINDER");
             pathfinder = pfField.get(null);
             if (pathfinder == null) {
-                presentDetail = "PATHFINDER null";
+                // Tungsten not initialised yet: do not cache false, or it stays "missing" all session.
+                presentDetail = "PATHFINDER null (not initialised yet)";
+                present = null;
                 return false;
             }
             Class<?> pfClass = pathfinder.getClass();
@@ -94,12 +96,16 @@ final class TungstenBridge {
         if (mc == null || mc.player == null || mc.world == null) return false;
         try {
             cancelPathingOnly();
+            // PathFinder.find() silently returns while the previous search thread is still
+            // winding down, so report "busy" instead of a success that started nothing.
+            AtomicBoolean active = (AtomicBoolean) pathfinderActive.get(pathfinder);
+            if (active != null && active.get()) return false;
             Vec3d target = new Vec3d(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
             Field targetField = Class.forName(MOD).getField("TARGET");
             targetField.set(null, target);
             try { dataClass.getField("world").set(null, mc.world); dataClass.getField("player").set(null, mc.player); } catch (Throwable ignored) {}
             pathfinderFind.invoke(pathfinder, mc.world, target, mc.player);
-            return true;
+            return active == null || active.get();
         } catch (Throwable t) {
             Debug.logWarning("TungstenBridge.pathTo failed: " + t);
             return false;

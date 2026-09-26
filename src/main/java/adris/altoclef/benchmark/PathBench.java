@@ -169,11 +169,18 @@ package adris.altoclef.benchmark;
 //$$         IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
 //$$         List<BlockPos> goals = ring(mc, origin);
 //$$         long limitTicks = Long.getLong("tenorclef.pathbench.travelTicks", 20L * 90);
+//$$         // End a trial early once it stops getting closer; 0 disables.
+//$$         long stallTicks = Long.getLong("tenorclef.pathbench.stallTicks", 400L);
+//$$         // Optional goal subset, e.g. -Dtenorclef.pathbench.goals=8,9,10
+//$$         String goalSel = System.getProperty("tenorclef.pathbench.goals", "").trim();
+//$$         java.util.Set<Integer> only = new java.util.HashSet<>();
+//$$         if (!goalSel.isEmpty()) for (String x : goalSel.split(",")) only.add(Integer.parseInt(x.trim()));
 //$$         PrintWriter csv = open("travel_" + mover);
 //$$         csv.println("mover,goal,dx,dz,dist,rep,result,ticks,endDist,firstMoveTicks");
 //$$         int ok = 0, n = 0, moved = 0; long sumTicks = 0, sumFirst = 0; double sumEnd = 0;
 //$$         try {
 //$$             for (int gi = 0; gi < goals.size(); gi++) {
+//$$                 if (!only.isEmpty() && !only.contains(gi)) continue;
 //$$                 BlockPos g = goals.get(gi);
 //$$                 for (int r = 0; r < reps; r++) {
 //$$                     teleport(mc, origin);
@@ -182,12 +189,15 @@ package adris.altoclef.benchmark;
 //$$                     long firstMove = -1;
 //$$                     double startD = dist(mc, g);
 //$$                     String result = started ? "TIMEOUT" : "NOSTART";
+//$$                     double bestD = startD; long bestAt = 0;
 //$$                     while (started) {
 //$$                         Thread.sleep(25);
 //$$                         long el = worldTime(mc) - t0;
 //$$                         double d = dist(mc, g);
 //$$                         if (firstMove < 0 && Math.abs(d - startD) > 0.5) firstMove = el;
 //$$                         if (d < 2.0) { result = "GOAL"; break; }
+//$$                         if (d < bestD - 1.0) { bestD = d; bestAt = el; }
+//$$                         if (stallTicks > 0 && el - bestAt > stallTicks) { result = "STALLED"; break; }
 //$$                         boolean active = mover.equals("tungsten") ? TungstenMovement.isPathing() : baritone.getCustomGoalProcess().isActive();
 //$$                         if (!active && el > 40) {
 //$$                             if (mover.equals("tungsten") && el < limitTicks) { TungstenMovement.requestPathTo(g); continue; }

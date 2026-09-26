@@ -38,3 +38,28 @@ or in game: `@warp 5` (`@warp 1` turns it off). Max 20.
   as fast as it can (watch for "Can't keep up!" in latest.log). 3-5x is a sensible start.
 - Wall-clock timers (TimerReal, keepalive, `-StallSec`, T2Deadman) are not scaled, so they
   get more game time per real second: more lenient, never stricter.
+
+## Pathfinding benchmark (`@pathbench`, 1.16.1)
+
+Measures pathfinding against a fixed ring of 16 goals around the bot (8 directions × 32/96 blocks).
+
+- `@pathbench search [- | setting=v1,v2,...] [reps]` runs Baritone's A* only, with no movement.
+  With a sweep, the whole ring is re-run once per value of that Baritone setting, e.g.
+  `@pathbench search costHeuristic=3.0,3.563,4.0 2`. The original value is restored afterwards.
+- `@pathbench travel [baritone|tungsten] [reps]` runs end to end. The bot teleports back to the
+  start before each trial. Results are in game ticks, so they don't depend on `@warp`.
+
+Output goes to `run/pathbench/pathbench_*.csv`, plus a `PATHBENCH SUMMARY ...` line in latest.log.
+
+Reproducible headless loop (Linux; `xvfb` required):
+
+```
+# run/altoclef_settings.json: {"autoLoadWorld": true, "autoRunCommand": "pathbench search - 2"}
+JAVA_TOOL_OPTIONS="-Dtenorclef.seed=12345 -Dtenorclef.pathbench.exit=true" \
+  xvfb-run -a ./gradlew :1.16.1:runClient
+```
+
+- `tenorclef.seed` pins the auto-created world seed.
+- `tenorclef.pathbench.exit` closes the client when the bench finishes.
+- Optional: `tenorclef.pathbench.timeoutMs` (search, default 4000) and
+  `tenorclef.pathbench.travelTicks` (travel, default 1800).

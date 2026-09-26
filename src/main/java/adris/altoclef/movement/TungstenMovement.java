@@ -100,6 +100,11 @@ public final class TungstenMovement {
         return TungstenBridge.pathTo(pos);
     }
 
+    /** Start Tungsten path to block along a given route of feet positions (e.g. from Baritone). */
+    public static boolean requestPathVia(BlockPos pos, java.util.List<BlockPos> waypoints) {
+        return TungstenBridge.pathToVia(pos, waypoints);
+    }
+
     /** Start Tungsten entity follow (used by TungstenFollowTask). */
     public static boolean requestFollow(Entity entity, double maintainDistance) {
         return TungstenBridge.follow(entity, maintainDistance);

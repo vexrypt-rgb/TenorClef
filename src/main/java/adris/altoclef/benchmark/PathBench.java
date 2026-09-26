@@ -164,6 +164,32 @@ package adris.altoclef.benchmark;
 //$$
 //$$     // ---- travel ------------------------------------------------------------------------
 //$$
+//$$     /** Tungsten movement along a Baritone block route: Baritone picks the blocks, Tungsten the sprint/jump inputs. */
+//$$     private static boolean startGuided(MinecraftClient mc, IBaritone b, BlockPos g) {
+//$$         try {
+//$$             BlockPos from = mc.submit(() -> mc.player.getBlockPos()).get();
+//$$             CalculationContext ctx = mc.submit(() -> new CalculationContext(b, true)).get();
+//$$             AStarPathFinder pf = new AStarPathFinder(from.getX(), from.getY(), from.getZ(), new GoalBlock(g), new Favoring(null, ctx), ctx);
+//$$             long ms = Long.getLong("tenorclef.pathbench.guideMs", 1500L);
+//$$             IPath p = pf.calculate(ms, ms * 2).getPath().orElse(null);
+//$$             if (p == null || p.positions().size() < 2) return TungstenMovement.requestPathTo(g);
+//$$             // Keep every Nth block plus every height change, so Tungsten is free to cut corners on flat runs.
+//$$             int stride = Integer.getInteger("tenorclef.pathbench.guideStride", 3);
+//$$             List<? extends baritone.api.utils.BetterBlockPos> pos = p.positions();
+//$$             java.util.List<BlockPos> way = new java.util.ArrayList<>();
+//$$             for (int i = 0; i < pos.size(); i++) {
+//$$                 boolean yChange = i > 0 && pos.get(i).getY() != pos.get(i - 1).getY()
+//$$                         || i + 1 < pos.size() && pos.get(i).getY() != pos.get(i + 1).getY();
+//$$                 if (i == 0 || i == pos.size() - 1 || i % stride == 0 || yChange) way.add(new BlockPos(pos.get(i).getX(), pos.get(i).getY(), pos.get(i).getZ()));
+//$$             }
+//$$             BlockPos end = way.get(way.size() - 1);
+//$$             return TungstenMovement.requestPathVia(end, way);
+//$$         } catch (Exception e) {
+//$$             Debug.logHarness("PATHBENCH guided route failed: " + e);
+//$$             return TungstenMovement.requestPathTo(g);
+//$$         }
+//$$     }
+//$$
 //$$     private static void travel(MinecraftClient mc, BlockPos origin, String opt, int reps) throws Exception {
 //$$         String mover = opt == null || opt.equals("-") ? "baritone" : opt.toLowerCase(Locale.ROOT);
 //$$         IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
@@ -185,7 +211,7 @@ package adris.altoclef.benchmark;
 //$$                 for (int r = 0; r < reps; r++) {
 //$$                     teleport(mc, origin);
 //$$                     long t0 = worldTime(mc);
-//$$                     boolean started = mover.equals("tungsten") ? TungstenMovement.requestPathTo(g) : startBaritone(mc, baritone, g);
+//$$                     boolean started = mover.equals("tungsten") ? TungstenMovement.requestPathTo(g) : mover.equals("guided") ? startGuided(mc, baritone, g) : startBaritone(mc, baritone, g);
 //$$                     long firstMove = -1;
 //$$                     double startD = dist(mc, g);
 //$$                     String result = started ? "TIMEOUT" : "NOSTART";
@@ -198,14 +224,15 @@ package adris.altoclef.benchmark;
 //$$                         if (d < 2.0) { result = "GOAL"; break; }
 //$$                         if (d < bestD - 1.0) { bestD = d; bestAt = el; }
 //$$                         if (stallTicks > 0 && el - bestAt > stallTicks) { result = "STALLED"; break; }
-//$$                         boolean active = mover.equals("tungsten") ? TungstenMovement.isPathing() : baritone.getCustomGoalProcess().isActive();
+//$$                         boolean active = !mover.equals("baritone") ? TungstenMovement.isPathing() : baritone.getCustomGoalProcess().isActive();
 //$$                         if (!active && el > 40) {
 //$$                             if (mover.equals("tungsten") && el < limitTicks) { TungstenMovement.requestPathTo(g); continue; }
+//$$                             if (mover.equals("guided") && el < limitTicks) { startGuided(mc, baritone, g); continue; }
 //$$                             result = "STOPPED"; break;
 //$$                         }
 //$$                         if (el > limitTicks) break;
 //$$                     }
-//$$                     if (mover.equals("tungsten")) TungstenMovement.cancel();
+//$$                     if (!mover.equals("baritone")) TungstenMovement.cancel();
 //$$                     else mc.execute(() -> baritone.getPathingBehavior().cancelEverything());
 //$$                     long ticks = worldTime(mc) - t0;
 //$$                     double end = dist(mc, g);

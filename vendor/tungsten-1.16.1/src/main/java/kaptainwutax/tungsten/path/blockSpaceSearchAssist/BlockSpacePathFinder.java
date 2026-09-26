@@ -237,6 +237,22 @@ public class BlockSpacePathFinder {
         return node.getPos().squaredDistanceTo(target) < 1.0D && !failing;
     }
 	
+	/**
+	 * Build a block path from externally supplied feet positions (e.g. a Baritone path), start to end.
+	 * Runs through the same string-pulling as a native search result.
+	 */
+	public static Optional<List<BlockNode>> fromWaypoints(WorldView world, List<net.minecraft.util.math.BlockPos> waypoints, Vec3d target, PlayerEntity player) {
+		if (waypoints == null || waypoints.size() < 2) return Optional.empty();
+		Goal goal = new Goal(net.minecraft.util.math.MathHelper.floor(target.x), net.minecraft.util.math.MathHelper.floor(target.y), net.minecraft.util.math.MathHelper.floor(target.z));
+		BlockNode prev = null;
+		for (net.minecraft.util.math.BlockPos bp : waypoints) {
+			BlockNode n = new BlockNode(bp.getX(), bp.getY(), bp.getZ(), goal, prev, 0, player);
+			prev = n;
+		}
+		List<BlockNode> path = generatePath(prev, world);
+		return path.size() > 1 ? Optional.of(path) : Optional.empty();
+	}
+
 	private static List<BlockNode> generatePath(BlockNode node, WorldView world) {
 		BlockNode n = node;
 		List<BlockNode> path = new ArrayList<>();

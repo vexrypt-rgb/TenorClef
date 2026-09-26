@@ -112,6 +112,37 @@ final class TungstenBridge {
         }
     }
 
+    /**
+     * Like {@link #pathTo} but hands Tungsten a ready-made route (feet positions, start to end)
+     * instead of letting it run its own block-space search. Falls back to {@link #pathTo} if the
+     * jar predates BlockSpacePathFinder.fromWaypoints.
+     */
+    static boolean pathToVia(BlockPos pos, java.util.List<BlockPos> waypoints) {
+        if (!isPresent()) return false;
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc == null || mc.player == null || mc.world == null) return false;
+        try {
+            Class<?> bspf = Class.forName("kaptainwutax.tungsten.path.blockSpaceSearchAssist.BlockSpacePathFinder");
+            Method from = bspf.getMethod("fromWaypoints", WorldView.class, java.util.List.class, Vec3d.class, PlayerEntity.class);
+            Method findVia = pathfinder.getClass().getMethod("find", WorldView.class, Vec3d.class, PlayerEntity.class, java.util.Optional.class);
+            cancelPathingOnly();
+            AtomicBoolean active = (AtomicBoolean) pathfinderActive.get(pathfinder);
+            if (active != null && active.get()) return false;
+            Vec3d target = new Vec3d(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+            Class.forName(MOD).getField("TARGET").set(null, target);
+            try { dataClass.getField("world").set(null, mc.world); dataClass.getField("player").set(null, mc.player); } catch (Throwable ignored) {}
+            Object route = from.invoke(null, mc.world, waypoints, target, mc.player);
+            if (!(route instanceof java.util.Optional) || ((java.util.Optional<?>) route).isEmpty()) return pathTo(pos);
+            findVia.invoke(pathfinder, mc.world, target, mc.player, route);
+            return active == null || active.get();
+        } catch (NoSuchMethodException | ClassNotFoundException e) {
+            return pathTo(pos);
+        } catch (Throwable t) {
+            Debug.logWarning("TungstenBridge.pathToVia failed: " + t);
+            return false;
+        }
+    }
+
     static boolean follow(Entity entity, double maintainDistance) {
         if (!isPresent() || entity == null) return false;
         try {

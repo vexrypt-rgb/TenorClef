@@ -71,6 +71,8 @@ public class CollectFoodTask extends Task {
     // S232: was a final null smoker task with the cook loop commented out, so raw meat was
     // never cooked and callers counting real food score hunted forever.
     private Task smeltTask = null;
+    // S262: s260t sat on "Cooking..." 40s+ (never reached a furnace, wandered into water).
+    private long smeltStartMs, cookBanUntilMs;
     private Task currentResourceTask = null;
 
     public CollectFoodTask(double unitsNeeded) {
@@ -157,6 +159,12 @@ public class CollectFoodTask extends Task {
             }
         }
         // If we were previously smelting, keep on smelting.
+        if (smeltTask != null && smeltTask.isActive() && !smeltTask.isFinished()
+                && System.currentTimeMillis() - smeltStartMs > 30_000) {
+            Debug.logMessage("S262 cooking timed out after 30s - keeping raw food");
+            smeltTask = null;
+            cookBanUntilMs = System.currentTimeMillis() + 90_000;
+        }
         if (smeltTask != null && smeltTask.isActive() && !smeltTask.isFinished()) {
             // TODO: If we don't have cooking materials, cancel.
             setDebugState("Cooking...");
@@ -198,11 +206,12 @@ public class CollectFoodTask extends Task {
             }
             // Convert raw foods -> cooked foods
 
-            for (CookableFoodTarget cookable : COOKABLE_FOODS) {
+            if (System.currentTimeMillis() >= cookBanUntilMs) for (CookableFoodTarget cookable : COOKABLE_FOODS) {
                 int rawCount = mod.getItemStorage().getItemCount(cookable.getRaw());
                 if (rawCount > 0) {
                     int toSmelt = rawCount + mod.getItemStorage().getItemCount(cookable.getCooked());
                     setDebugState("Cooking " + rawCount + " " + cookable.rawFood);
+                    smeltStartMs = System.currentTimeMillis();
                     smeltTask = new SmeltInFurnaceTask(new SmeltTarget(new ItemTarget(cookable.getCooked(), toSmelt), new ItemTarget(cookable.getRaw(), rawCount)));
                     return smeltTask;
                 }

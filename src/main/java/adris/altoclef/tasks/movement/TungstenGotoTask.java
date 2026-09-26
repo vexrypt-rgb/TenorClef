@@ -21,6 +21,9 @@ public class TungstenGotoTask extends Task {
     private boolean failed;
     private Task baritoneFallback;
     private long startedAtMs;
+    private long lastRequestMs;
+    /** Re-requesting restarts the search from scratch, so never do it every tick. */
+    private static final long RETRY_EVERY_MS = 1500L;
 
     public TungstenGotoTask(BlockPos target) {
         this.target = target;
@@ -56,9 +59,13 @@ public class TungstenGotoTask extends Task {
         if (!started) {
             started = true;
             startedAtMs = System.currentTimeMillis();
-            if (!TungstenMovement.requestPathTo(target)) {
+            lastRequestMs = startedAtMs;
+            if (!TungstenMovement.isAvailable()) {
                 failed = true;
-                setDebugState("Tungsten path request failed");
+                setDebugState("Tungsten missing");
+            } else if (!TungstenMovement.requestPathTo(target)) {
+                // Usually the previous search is still stopping; the retry below picks it up.
+                setDebugState("Tungsten busy - retry pending");
             } else {
                 setDebugState("Tungsten pathing to " + target.toShortString());
             }
@@ -89,7 +96,10 @@ public class TungstenGotoTask extends Task {
 
         // Pathfinder may briefly go idle between search end and executor start; do not
         // treat that as failure. Retry only when truly idle and still within windows.
-        if (!TungstenMovement.isPathing() && !isFinished() && elapsed <= FALLBACK_AFTER_MS) {
+        long now = System.currentTimeMillis();
+        if (!TungstenMovement.isPathing() && !isFinished() && elapsed <= FALLBACK_AFTER_MS
+                && now - lastRequestMs >= RETRY_EVERY_MS) {
+            lastRequestMs = now;
             setDebugState("Tungsten idle — retry path");
             if (!TungstenMovement.requestPathTo(target)) {
                 // Keep trying until idle-timeout; do not fail immediately on one reject.

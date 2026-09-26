@@ -2,11 +2,16 @@ package adris.altoclef.tasks.speedrun.testrun2;
 
 import adris.altoclef.AltoClef;
 import adris.altoclef.tasks.movement.GetToBlockTask;
+import adris.altoclef.tasks.movement.TungstenGotoTask;
+import adris.altoclef.util.helpers.TungstenHelper;
 import adris.altoclef.tasksystem.Task;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
-/** Baritone travel. Class name kept for callers. */
+/**
+ * Travel: Tungsten physics A* when it is the primary mover (speedrunMoverPreference = tungsten/auto
+ * and the jar is bound), else Baritone. TungstenGotoTask falls back to Baritone on its own timeouts.
+ */
 public class TungstenMoveTask extends Task {
 
     private final BlockPos target;
@@ -24,7 +29,11 @@ public class TungstenMoveTask extends Task {
 
     @Override
     protected void onStart() {
-        inner = new GetToBlockTask(target);
+        inner = newInner();
+    }
+
+    private Task newInner() {
+        return TungstenHelper.isPrimary() ? new TungstenGotoTask(target) : new GetToBlockTask(target);
     }
 
     @Override
@@ -35,11 +44,13 @@ public class TungstenMoveTask extends Task {
         if (SpeedrunOpt.AVOID_DEEP_WATER) {
             try {
                 if (mod.getPlayer().isTouchingWater() || mod.getPlayer().isSubmergedInWater()) {
+                    // Water is handled by the bail; make sure Tungsten is not steering at the same time.
+                    if (inner instanceof TungstenGotoTask) TungstenHelper.stop();
                     return new WaterBailTask();
                 }
             } catch (Throwable ignored) {}
         }
-        if (inner == null) inner = new GetToBlockTask(target);
+        if (inner == null) inner = newInner();
         return inner;
     }
 

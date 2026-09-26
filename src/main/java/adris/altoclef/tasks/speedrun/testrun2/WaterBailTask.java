@@ -103,7 +103,9 @@ public class WaterBailTask extends Task {
         lastX = x;
         lastZ = z;
 
-        if (shoreTask == null && noProgressTicks > SHORE_AFTER_TICKS) {
+        // S273: in open ocean EscapeFromWaterGoal is flat (every water block scores 8), so the bot
+        // swam a straight line for minutes (s272t: x -86 -> 58 at z=72). Aim at a real shore at once.
+        if (shoreTask == null && (noProgressTicks > SHORE_AFTER_TICKS || ticks % 40 == 1)) {
             BlockPos shore = findShore(mod);
             if (shore != null) {
                 shoreTask = new GetToBlockTask(shore);
@@ -135,7 +137,7 @@ public class WaterBailTask extends Task {
     private BlockPos findShore(AltoClef mod) {
         if (mod.getPlayer() == null || mod.getWorld() == null) return null;
         BlockPos from = mod.getPlayer().getBlockPos();
-        for (int r = 1; r <= 16; r++) {
+        for (int r = 1; r <= SHORE_RADIUS; r++) {
             for (int dx = -r; dx <= r; dx++) {
                 for (int dz = -r; dz <= r; dz++) {
                     if (Math.abs(dx) != r && Math.abs(dz) != r) continue;
@@ -151,8 +153,10 @@ public class WaterBailTask extends Task {
                 }
             }
         }
-        return from.up(4);
+        return null;
     }
+
+    private static final int SHORE_RADIUS = 64;
 
     @Override
     public boolean isFinished() {

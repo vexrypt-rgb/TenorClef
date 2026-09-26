@@ -1220,12 +1220,15 @@ public class ModernSpeedrunTask extends Task {
         Task ironStuck = ironWatch(mod);
         if (ironStuck != null) return ironStuck;
 
-        if (usedCloser && closer != null && phase == Phase.PORTAL) {
+        // S231: the closer latch overrode food/water needs on alternate ticks (s230: FLIP
+        // CollectFood<->Construct x1297 then WaterBail<->Construct). Let those finish first.
+        boolean closerYields = starveHunt || (active instanceof WaterBailTask && !active.isFinished());
+        if (usedCloser && closer != null && phase == Phase.PORTAL && !closerYields) {
             T2History.tick(mod, phase.name(), closer);
             return closer;
         }
-        usedCloser = false;
-        if (stalled(mod) && phase == Phase.PORTAL) {
+        if (!closerYields) usedCloser = false;
+        if (stalled(mod) && phase == Phase.PORTAL && !closerYields) {
             T2Log.warn("E30", "stall ph=" + phase + " after " + (phaseTicks / 20) + "s");
             return startCloser(mod);
         }

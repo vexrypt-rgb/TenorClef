@@ -69,8 +69,11 @@ public class CollectBlazeRodsTask extends ResourceTask {
         if (mod.getEntityTracker().entityFound(BlazeEntity.class)) {
             toKill = mod.getEntityTracker().getClosestEntity(BlazeEntity.class);
             if (toKill.isPresent()) {
+                // S253: s253t burned 14 -> 3.5hp vs two blazes and died; only 5+ blazes ever triggered a retreat.
+                int blazes = mod.getEntityTracker().getTrackedEntities(BlazeEntity.class).size();
                 if (mod.getPlayer().getHealth() <= TOO_LITTLE_HEALTH_BLAZE &&
-                        mod.getEntityTracker().getTrackedEntities(BlazeEntity.class).size() >= TOO_MANY_BLAZES) {
+                        (blazes >= TOO_MANY_BLAZES || blazes >= 2 || mod.getPlayer().isOnFire()
+                                || mod.getPlayer().getHealth() <= 6)) {
                     setDebugState("Running away as there are too many blazes nearby.");
                     return new RunAwayFromHostilesTask(15 * 2, true);
                 }

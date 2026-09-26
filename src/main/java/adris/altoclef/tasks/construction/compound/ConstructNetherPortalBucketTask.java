@@ -102,6 +102,7 @@ public class ConstructNetherPortalBucketTask extends Task {
     private final TimerGame secondBucketIronStallTimer = new TimerGame(25);
     // S216b: static - onStart ran every few seconds and kept resetting a per-instance timer (deepgate: 33 min gated).
     private static long deepLakeFirstSeenMs = 0;
+    private static final int MID_LAKE_Y = 25;
     private int secondBucketIronLast = -1;
     private Task secondBucketRelocate;
     /** Set when Construct gives up so EarlyOverworld can tear down goToNether and re-acquire. */
@@ -457,6 +458,8 @@ public class ConstructNetherPortalBucketTask extends Task {
         BlockPos nearestLake = null;
         double deepestFallbackSq = Double.POSITIVE_INFINITY;
         BlockPos deepestFallback = null;
+        double midSq = Double.POSITIVE_INFINITY;
+        BlockPos midLake = null;
         List<BlockPos> lavas = mod.getBlockScanner().getKnownLocations(Blocks.LAVA);
 
         if (!lavas.isEmpty()) {
@@ -482,6 +485,10 @@ public class ConstructNetherPortalBucketTask extends Task {
                     deepestFallbackSq = sqDist;
                     deepestFallback = pos;
                 }
+                if (pos.getY() < SAFE_LAKE_Y && pos.getY() >= MID_LAKE_Y && sqDist < midSq) {
+                    midSq = sqDist;
+                    midLake = pos;
+                }
             }
         }
         if (nearestLake != null) {
@@ -490,6 +497,12 @@ public class ConstructNetherPortalBucketTask extends Task {
             return nearestLake;
         }
         if (deepestFallback != null && deepLakeFirstSeenMs == 0) deepLakeFirstSeenMs = System.currentTimeMillis();
+        // S248: s249t wandered 2 min "Looking for lava lake" past lakes at y=33-34. Only the
+        // very deep ones (y~9) earned the 3 min wait; a mid-depth lake is fine after 45s.
+        if (midLake != null && System.currentTimeMillis() - deepLakeFirstSeenMs >= 45_000) {
+            Debug.logMessage("T2 [S248] mid-depth lava lake at y=" + midLake.getY() + " accepted");
+            return midLake;
+        }
         if (deepestFallback != null && System.currentTimeMillis() - deepLakeFirstSeenMs < 180_000) {
             // S216: a deep lake (helmcap: y=9) cost 35min - a dark shaft then a stuck pillar-out. Keep
             // exploring the surface for up to 3 min before accepting one.

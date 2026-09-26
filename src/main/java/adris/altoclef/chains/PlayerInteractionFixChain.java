@@ -61,10 +61,16 @@ public class PlayerInteractionFixChain extends TaskChain {
 
         boolean t2Hold = false;
         try {
-            t2Hold = adris.altoclef.tasks.speedrun.testrun2.HolePillar.busy();
+            t2Hold = adris.altoclef.tasks.speedrun.testrun2.HolePillar.holding(); // busy() includes cooldowns: s241t mined with mutton for minutes
         } catch (Throwable ignored) {}
 
-        if (!t2Hold && mod.getUserTaskChain().isActive() && betterToolTimer.elapsed()) {
+        // HolePillar holds its pillar block, so it opts out of tool swaps. But s241t dug down
+        // for minutes holding raw mutton: never let the hold protect a non-block item.
+        boolean holdingBlock = false;
+        try {
+            holdingBlock = mod.getPlayer().getMainHandStack().getItem() instanceof net.minecraft.item.BlockItem;
+        } catch (Throwable ignored) {}
+        if ((!t2Hold || !holdingBlock) && mod.getUserTaskChain().isActive() && betterToolTimer.elapsed()) {
             // Equip the right tool for the job if we're not using one.
             betterToolTimer.reset();
             if (mod.getControllerExtras().isBreakingBlock()) {

@@ -89,11 +89,22 @@ package adris.altoclef.benchmark;
 //$$                 double len = Math.sqrt(dir[0] * dir[0] + dir[1] * dir[1]);
 //$$                 int x = origin.getX() + (int) Math.round(dir[0] * d / len);
 //$$                 int z = origin.getZ() + (int) Math.round(dir[1] * d / len);
-//$$                 int y = mc.world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, x, z);
+//$$                 // Client worlds only receive MOTION_BLOCKING/WORLD_SURFACE heightmaps; NO_LEAVES reads 0.
+//$$                 final int fx = x, fz = z;
+//$$                 int y;
+//$$                 try { y = mc.submit(() -> surfaceY(mc, fx, fz)).get(); } catch (Exception e) { y = surfaceY(mc, fx, fz); }
 //$$                 out.add(new BlockPos(x, y, z));
 //$$             }
 //$$         }
 //$$         return out;
+//$$     }
+//$$
+//$$     private static int surfaceY(MinecraftClient mc, int x, int z) {
+//$$         int y = mc.world.getTopY(Heightmap.Type.MOTION_BLOCKING, x, z);
+//$$         if (y > 0) return y;
+//$$         BlockPos.Mutable p = new BlockPos.Mutable(x, 255, z);
+//$$         while (p.getY() > 0 && mc.world.getBlockState(p).getCollisionShape(mc.world, p).isEmpty()) p.move(0, -1, 0);
+//$$         return p.getY() + 1;
 //$$     }
 //$$
 //$$     // ---- search ------------------------------------------------------------------------

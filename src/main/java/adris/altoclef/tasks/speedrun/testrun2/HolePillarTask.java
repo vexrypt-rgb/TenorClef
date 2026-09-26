@@ -21,8 +21,16 @@ public class HolePillarTask extends Task {
         }
         // isFinished() also returns true here; without fail() Task.tick would record the
         // give-up as SUCCESS.
+        // The cooldown latch is also armed after a successful rise (S133 "reason=risen"),
+        // so givingUp() alone does not mean failure: check why the pillar ended.
         if (HolePillar.givingUp()) {
-            fail(FailureReason.TIMEOUT, "pillar-out gave up, cool=" + HolePillar.failCoolLeft(), false);
+            String end = HolePillar.lastEndReason();
+            if (end != null && end.startsWith("risen")) {
+                succeed();
+            } else {
+                fail(FailureReason.TIMEOUT, "pillar-out gave up, end=" + end
+                        + " cool=" + HolePillar.failCoolLeft(), false);
+            }
             return null;
         }
         // Keep ticking while holding even if boxed flickers for a hop.

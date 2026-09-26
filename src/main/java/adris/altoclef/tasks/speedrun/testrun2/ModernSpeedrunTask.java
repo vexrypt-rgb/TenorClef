@@ -1226,7 +1226,10 @@ public class ModernSpeedrunTask extends Task {
         // CollectFood<->Construct x1297 then WaterBail<->Construct). Let those finish first.
         // S233: s232 showed the same flip vs CraftInInventory, HolePillar, CollectFlint. The
         // closer bypasses stick(), so it must yield to ANY live non-Construct child, not a list.
-        boolean closerYields = starveHunt
+        // S235: s234 flipped CraftInInventory<->Construct x259. The 2x2 craft reports finished
+        // for a tick while the table sits in the output slot; the closer grabbed the slot, the
+        // craft was interrupted, and S221 asked for the table again. Yield while S221 is unmet.
+        boolean closerYields = starveHunt || needsNetherTable(mod)
                 || (active != null && active != closer && !(active instanceof ConstructNetherPortalBucketTask)
                     && !active.isFinished());
         if (usedCloser && closer != null && phase == Phase.PORTAL && !closerYields) {
@@ -1888,8 +1891,7 @@ public class ModernSpeedrunTask extends Task {
         if (starveHunt) return new adris.altoclef.tasks.resources.CollectFoodTask(20);
         // S221: helmlatch run: helm craft in the Nether had no table or planks, wandered 45s+
         // and got shot by piglins twice. Carry a table through the portal.
-        if (mod.getItemStorage().getItemCount(Items.GOLDEN_HELMET) < 1 && !wearingGold(mod)
-                && mod.getItemStorage().getItemCount(Items.CRAFTING_TABLE) < 1
+        if (needsNetherTable(mod)
                 && !(active instanceof ConstructNetherPortalBucketTask && !active.isFinished())) {
             T2History.note("WHY portal: carry crafting table for nether helm");
             return TaskCatalogue.getItemTask(Items.CRAFTING_TABLE, 1);
@@ -2711,6 +2713,12 @@ public class ModernSpeedrunTask extends Task {
             return stick(new StepOffTableTask());
         }
         return null;
+    }
+
+    /** S221: no golden helmet yet and no table to craft one with in the Nether. */
+    private boolean needsNetherTable(AltoClef mod) {
+        return mod.getItemStorage().getItemCount(Items.GOLDEN_HELMET) < 1 && !wearingGold(mod)
+                && mod.getItemStorage().getItemCount(Items.CRAFTING_TABLE) < 1;
     }
 
     private Task startCloser(AltoClef mod) {

@@ -73,6 +73,20 @@ public class ModernSpeedrunTask extends Task {
     private Task active;
     private Task closer;
     private int lootTicks;
+    private boolean lavaGuardAdded;
+
+    /** True for a Nether block with lava above or beside it: breaking it lets the lava flow in. */
+    private static boolean holdsBackLava(BlockPos pos) {
+        try {
+            if (WorldHelper.getCurrentDimension() != Dimension.NETHER) return false;
+            var w = AltoClef.getInstance().getWorld();
+            if (w == null) return false;
+            for (BlockPos n : new BlockPos[]{pos.up(), pos.add(0, 0, -1), pos.add(0, 0, 1), pos.add(1, 0, 0), pos.add(-1, 0, 0)}) {
+                if (w.getBlockState(n).getBlock() == Blocks.LAVA) return true;
+            }
+        } catch (Throwable ignored) {}
+        return false;
+    }
     private int phaseTicks;
     private int tradeTicks;
     /**
@@ -413,6 +427,12 @@ public class ModernSpeedrunTask extends Task {
 
     @Override
     protected void onStart() {
+        // S251: s250t mined out a block holding back nether lava and the flow killed it.
+        // Baritone's pathing avoids fluid-adjacent breaks, but mine targets (gold ore) do not.
+        if (!lavaGuardAdded) {
+            lavaGuardAdded = true;
+            AltoClef.getInstance().getBehaviour().avoidBlockBreaking(ModernSpeedrunTask::holdsBackLava);
+        }
         if (sessionLive && phase != Phase.DONE) {
             T2Log.warn("E80", "parent onStart ignored, still ph=" + phase + " t=" + SpeedrunClock.now());
             T2History.note("onStart swallowed — keep " + phase);

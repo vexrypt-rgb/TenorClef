@@ -164,14 +164,20 @@ public final class T2History {
                 + " ground=" + ground
                 + " pick=" + pick + " buck=" + buck
                 + " iron=" + iron + " ore=" + ironOre
-                + " rods=" + rods + " pearls=" + pearls + " eyes=" + eyes;
+                + " rods=" + rods + " pearls=" + pearls + " eyes=" + eyes
+                + " hp=" + (mod.getPlayer() == null ? -1 : (int) mod.getPlayer().getHealth());
     }
 
     private static String mobs(AltoClef mod) {
         StringBuilder sb = new StringBuilder("mobs=");
         try {
-            var list = mod.getEntityTracker().getTrackedEntities(net.minecraft.entity.mob.HostileEntity.class);
-            if (list == null || list.isEmpty() || mod.getPlayer() == null) return "mobs=none";
+            // Magma cubes/slimes are not HostileEntity; s245t died to one while this said mobs=none.
+            var list = new java.util.ArrayList<net.minecraft.entity.Entity>();
+            var h = mod.getEntityTracker().getTrackedEntities(net.minecraft.entity.mob.HostileEntity.class);
+            if (h != null) list.addAll(h);
+            var sl = mod.getEntityTracker().getTrackedEntities(net.minecraft.entity.mob.SlimeEntity.class);
+            if (sl != null) list.addAll(sl);
+            if (list.isEmpty() || mod.getPlayer() == null) return "mobs=none";
             var me = mod.getPlayer().getPos();
             int n = 0;
             for (var e : list) {

@@ -428,6 +428,12 @@ public class ModernSpeedrunTask extends Task {
             T2Deadman.arm();
         } catch (Throwable ignored) {}
         sessionLive = true;
+        // Travel mover comes from settings (speedrunMoverPreference: baritone | tungsten | auto).
+        // Before this, @testrun2 never read it and TungstenHelper was a stub, so Tungsten never ran.
+        try {
+            adris.altoclef.movement.TungstenMovement.setTravelMover(adris.altoclef.movement.TungstenMovement
+                    .parseTravelMover(AltoClef.getInstance().getModSettings().getSpeedrunMoverPreference()));
+        } catch (Throwable ignored) {}
         T2Brain.reset();
         AltoClef boot = AltoClef.getInstance();
         if (boot != null && boot.getPlayer() != null && count(boot, Items.IRON_PICKAXE) >= 1) {
@@ -1237,8 +1243,16 @@ public class ModernSpeedrunTask extends Task {
             return closer;
         }
         if (!closerYields) usedCloser = false;
-        if (stalled(mod) && phase == Phase.PORTAL && !closerYields) {
-            T2Log.warn("E30", "stall ph=" + phase + " after " + (phaseTicks / 20) + "s");
+        // The stall rescue exists for a STUCK child, so it may only wait on real needs
+        // (food, water), not on "any live child" like the latch above: with the S233 gate a
+        // non-Construct child stuck in PORTAL (a CollectFlint that never finishes) disabled
+        // the rescue for the rest of the run.
+        boolean needYield = starveHunt || (active instanceof WaterBailTask && !active.isFinished());
+        if (stalled(mod) && phase == Phase.PORTAL && !needYield) {
+            T2Log.warn("E30", "stall ph=" + phase + " after " + (phaseTicks / 20) + "s"
+                    + " child=" + (active == null ? "-" : active.getClass().getSimpleName()));
+            // Drop the stuck child, or the latch would yield to it next tick and flip.
+            active = null;
             return startCloser(mod);
         }
 
@@ -2734,8 +2748,9 @@ public class ModernSpeedrunTask extends Task {
         if (closer == null) {
             T2Log.warn("E40", "closer=ConstructNetherPortalBucketTask");
             closer = new ConstructNetherPortalBucketTask();
-            usedCloser = true;
         }
+        // Latch every time, not just on creation: a reused closer was otherwise unlatched.
+        usedCloser = true;
         return closer;
     }
 

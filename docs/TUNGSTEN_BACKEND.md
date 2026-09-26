@@ -74,3 +74,18 @@ Jar must contain:
 - kaptainwutax.tungsten.task.FollowEntityTask
 
 See `src/test/java/adris/altoclef/movement/TungstenJarPresenceTest.java`.
+
+## Using Tungsten in @testrun2
+`@testrun2` travel (`TungstenMoveTask`) now really uses Tungsten. Before, `TungstenHelper` was an
+all-false stub and `TungstenMoveTask` always used Baritone, so the bundled jar was never used.
+
+- Set `speedrunMoverPreference` in `altoclef_settings.json` to `"tungsten"` or `"auto"`
+  (default `"baritone"` keeps the old behaviour). Sim loop: `sim-loop.ps1 -Mover tungsten`.
+- Tungsten gives up to Baritone on its own: 25s with nothing pathing, or 75s total.
+- Water always goes to `WaterBailTask`; mining/placing stays on Baritone.
+- `@t2status` shows `tungsten=true primary=true` when it is live.
+
+Bridge fixes that came with it: a path request made while the previous search was still
+stopping used to be dropped silently (the bridge reported success); probing before Tungsten
+initialised cached "missing" for the whole session; `TungstenGotoTask` re-requested every tick,
+restarting the search each time (now every 1.5s at most).

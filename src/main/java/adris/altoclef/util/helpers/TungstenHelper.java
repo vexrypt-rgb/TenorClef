@@ -1,40 +1,63 @@
 package adris.altoclef.util.helpers;
 
+import adris.altoclef.movement.TungstenMovement;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
 /**
- * MiranCZ AltoClef does not ship Tungsten.
- * Drop this file into src/main/java/adris/altoclef/util/helpers/
- * ONLY if that class is missing (do not overwrite UnionClef's real helper).
+ * testrun2's view of Tungsten, backed by the real {@link TungstenMovement} bridge.
+ * (This used to be an all-false stub, so @testrun2 never used Tungsten even with the jar present.)
  *
- * All methods no-op / return false so TungstenMoveTask uses GetToBlockTask
- * (Baritone) instead of locking a pathfinder that isn't there.
+ * "Primary" = the travel mover preference is not BARITONE and the Tungsten jar is bound.
+ * Everything falls back to Baritone when Tungsten is missing.
  */
 public final class TungstenHelper {
 
+    /** Callers like combat ask every tick with a moving target; each request restarts the search. */
+    private static final long MIN_REQUEST_GAP_MS = 1000L;
+    private static long lastRequestMs;
+    private static BlockPos lastTarget;
+
     private TungstenHelper() {}
 
-    public static void setPrimary(boolean primary) {}
+    public static void setPrimary(boolean primary) {
+        TungstenMovement.setTravelMover(primary ? TungstenMovement.TravelMover.TUNGSTEN
+                : TungstenMovement.TravelMover.BARITONE);
+    }
 
     public static boolean isPrimary() {
-        return false;
+        return TungstenMovement.getTravelMover() != TungstenMovement.TravelMover.BARITONE
+                && TungstenMovement.isAvailable();
     }
 
     public static boolean isTungstenLoaded() {
-        return false;
+        return TungstenMovement.isAvailable();
     }
 
     public static boolean isActive() {
-        return false;
+        return TungstenMovement.isAvailable() && TungstenMovement.isPathing();
     }
 
     public static boolean isLocked() {
-        return false;
+        return isActive();
     }
 
     public static boolean tryPathTo(Vec3d dest) {
-        return false;
+        if (dest == null || !isPrimary()) return false;
+        BlockPos pos = new BlockPos(MathHelper.floor(dest.x), MathHelper.floor(dest.y), MathHelper.floor(dest.z));
+        long now = System.currentTimeMillis();
+        boolean sameTarget = lastTarget != null && lastTarget.getSquaredDistance(pos) <= 2;
+        if (now - lastRequestMs < MIN_REQUEST_GAP_MS || (sameTarget && TungstenMovement.isPathing())) {
+            return TungstenMovement.isPathing();
+        }
+        lastRequestMs = now;
+        lastTarget = pos;
+        return TungstenMovement.requestPathTo(pos);
     }
 
-    public static void stop() {}
+    public static void stop() {
+        lastTarget = null;
+        if (TungstenMovement.isAvailable()) TungstenMovement.cancel();
+    }
 }

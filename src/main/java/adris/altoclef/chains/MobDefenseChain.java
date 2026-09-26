@@ -408,6 +408,17 @@ public class MobDefenseChain extends SingleTaskChain {
                     canDealWith = Math.max(canDealWith, toDealWithList.size());
                 }
 
+                // S280: s279t chased a skeleton bare-handed (pick=0, no sword) from hp 19 to death in 15s.
+                // Without a real weapon, or once hurt, never chase a ranged mob; break line of sight instead.
+                Entity nearest = toDealWithList.get(0);
+                boolean rangedTarget = nearest instanceof net.minecraft.entity.mob.AbstractSkeletonEntity
+                        || nearest instanceof WitchEntity || nearest instanceof PillagerEntity;
+                if (rangedTarget && (damage < 4 || mod.getPlayer().getHealth() <= 10)) {
+                    needsChangeOnAttack = false;
+                    runAwayTask = new RunAwayFromHostilesTask(DANGER_KEEP_DISTANCE, true);
+                    setTask(runAwayTask);
+                    return 80;
+                }
                 if (canDealWith >= getDangerousnessScore(toDealWithList) || needsChangeOnAttack) {
                     // we just decided to attack, so we should either get it, or hit something before running away again
                     if (!(mainTask instanceof KillEntitiesTask)) {

@@ -8,6 +8,7 @@ import adris.altoclef.tasks.CraftInInventoryTask;
 import adris.altoclef.tasks.DoToClosestBlockTask;
 import adris.altoclef.tasks.construction.DestroyBlockTask;
 import adris.altoclef.tasks.container.CraftInTableTask;
+import adris.altoclef.tasks.container.SmeltInFurnaceTask;
 import adris.altoclef.tasks.container.SmeltInSmokerTask;
 import adris.altoclef.tasks.movement.PickupDroppedItemTask;
 import adris.altoclef.tasks.movement.TimeoutWanderTask;
@@ -15,6 +16,7 @@ import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.CraftingRecipe;
 import adris.altoclef.util.ItemTarget;
 import adris.altoclef.util.RecipeTarget;
+import adris.altoclef.util.SmeltTarget;
 import adris.altoclef.util.helpers.StorageHelper;
 import adris.altoclef.util.helpers.WorldHelper;
 import adris.altoclef.util.slots.Slot;
@@ -66,7 +68,9 @@ public class CollectFoodTask extends Task {
 
     private final double unitsNeeded;
     private final TimerGame checkNewOptionsTimer = new TimerGame(10);
-    private final SmeltInSmokerTask smeltTask = null;
+    // S232: was a final null smoker task with the cook loop commented out, so raw meat was
+    // never cooked and callers counting real food score hunted forever.
+    private Task smeltTask = null;
     private Task currentResourceTask = null;
 
     public CollectFoodTask(double unitsNeeded) {
@@ -194,16 +198,15 @@ public class CollectFoodTask extends Task {
             }
             // Convert raw foods -> cooked foods
 
-            /*for (CookableFoodTarget cookable : COOKABLE_FOODS) {
+            for (CookableFoodTarget cookable : COOKABLE_FOODS) {
                 int rawCount = mod.getItemStorage().getItemCount(cookable.getRaw());
                 if (rawCount > 0) {
-                    //Debug.logMessage("STARTING COOK OF " + cookable.getRaw().getTranslationKey());
                     int toSmelt = rawCount + mod.getItemStorage().getItemCount(cookable.getCooked());
-                    smeltTask = new SmeltInSmokerTask(new SmeltTarget(new ItemTarget(cookable.cookedFood, toSmelt), new ItemTarget(cookable.rawFood, rawCount)));
-                    smeltTask.ignoreMaterials();
+                    setDebugState("Cooking " + rawCount + " " + cookable.rawFood);
+                    smeltTask = new SmeltInFurnaceTask(new SmeltTarget(new ItemTarget(cookable.getCooked(), toSmelt), new ItemTarget(cookable.getRaw(), rawCount)));
                     return smeltTask;
                 }
-            }*/
+            }
         } else {
             // Pick up food items from ground
             for (Item item : ITEMS_TO_PICK_UP) {

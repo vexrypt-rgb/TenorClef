@@ -237,7 +237,19 @@ public class AltoClef implements ModInitializer {
     }
 
     // Client tick
+    private boolean tickErrorLogged = false;
+
     private void onClientTick() {
+        // Fire the headless auto-run first so an exception later in the tick can't starve it.
+        try {
+            maybeFireAutoRunCommand();
+        } catch (Throwable t) {
+            if (!tickErrorLogged) {
+                tickErrorLogged = true;
+                Debug.logHarness("AUTORUN: tick error " + t);
+                t.printStackTrace();
+            }
+        }
         runEnqueuedPostInits();
 
         inputControls.onTickPre();
@@ -271,7 +283,6 @@ public class AltoClef implements ModInitializer {
                 threatMonitor.applyToGoalManager(gm);
             }
         }
-        maybeFireAutoRunCommand();
         taskRunner.tick();
 
         messageSender.tick();
@@ -290,7 +301,14 @@ public class AltoClef implements ModInitializer {
     private int autoRunReroll = -1;
     private Object autoRunWorld = null;
 
+    private int autoRunProbe = 0;
+
     private void maybeFireAutoRunCommand() {
+        if (!autoRunFired && ++autoRunProbe % 200 == 1 && Boolean.getBoolean("tenorclef.autorun.debug")) {
+            adris.altoclef.Settings ds = getModSettings();
+            Debug.logHarness("AUTORUN: probe inGame=" + inGame() + " settings=" + (ds != null)
+                    + " cmd=" + (ds == null ? null : ds.getAutoRunCommand()));
+        }
         // S192: re-arm once per rerolled world. A reroll (ResetSignal) ends the old task with
         // phase DONE and creates a fresh world, but the command used to fire only once per
         // client launch: live run fix3 sat idle in the new world until DEADMAN exited with 87.

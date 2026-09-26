@@ -64,7 +64,7 @@ package adris.altoclef.benchmark;
 //$$         Thread t = new Thread(() -> {
 //$$             try {
 //$$                 if (mode.equalsIgnoreCase("travel")) travel(mc, origin, opt, Math.max(1, reps));
-//$$                 else search(mc, origin, opt, Math.max(1, reps));
+//$$                 else for (String sweep : (opt == null ? "-" : opt).split(";")) search(mc, origin, sweep, Math.max(1, reps));
 //$$             } catch (Throwable e) {
 //$$                 Debug.logHarness("PATHBENCH failed: " + e);
 //$$                 e.printStackTrace();
@@ -117,7 +117,7 @@ package adris.altoclef.benchmark;
 //$$         csv.println("setting,value,goal,dx,dz,dist,rep,result,ms,nodes,pathLen,costTicks");
 //$$         try {
 //$$             for (String v : values) {
-//$$                 if (key != null) SettingsUtil.parseAndApply(BaritoneAPI.getSettings(), key, v);
+//$$                 if (key != null) SettingsUtil.parseAndApply(BaritoneAPI.getSettings(), key.toLowerCase(Locale.ROOT), v);
 //$$                 long sumMs = 0, sumNodes = 0; double sumCost = 0; int ok = 0, n = 0;
 //$$                 for (int gi = 0; gi < goals.size(); gi++) {
 //$$                     BlockPos g = goals.get(gi);
@@ -146,7 +146,7 @@ package adris.altoclef.benchmark;
 //$$                         key == null ? "baseline" : key + "=" + v, ok, n, sumMs / (double) n, sumNodes / (double) n, ok == 0 ? 0 : sumCost / ok));
 //$$             }
 //$$         } finally {
-//$$             if (key != null) SettingsUtil.parseAndApply(BaritoneAPI.getSettings(), key, original);
+//$$             if (key != null) SettingsUtil.parseAndApply(BaritoneAPI.getSettings(), key.toLowerCase(Locale.ROOT), original);
 //$$             csv.close();
 //$$         }
 //$$     }

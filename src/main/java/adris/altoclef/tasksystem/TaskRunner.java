@@ -37,6 +37,16 @@ public class TaskRunner {
                 maxChain = chain;
             }
         }
+        if (maxChain != cachedCurrentTaskChain) {
+            // Chain switches were invisible in logs; preemptions could only be guessed at.
+            String leaf = "";
+            if (maxChain != null && !maxChain.getTasks().isEmpty()) {
+                var ts = maxChain.getTasks();
+                leaf = " task=" + ts.get(ts.size() - 1).getClass().getSimpleName();
+            }
+            System.out.println("TENORCLEF: [CHAIN] " + (cachedCurrentTaskChain == null ? "none" : cachedCurrentTaskChain.getName())
+                    + " -> " + (maxChain == null ? "none" : maxChain.getName()) + " pri=" + maxPriority + leaf);
+        }
         if (cachedCurrentTaskChain != null && maxChain != cachedCurrentTaskChain) {
             cachedCurrentTaskChain.onInterrupt(maxChain);
         }

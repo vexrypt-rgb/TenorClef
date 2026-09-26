@@ -1010,7 +1010,12 @@ public class ModernSpeedrunTask extends Task {
                 return stick(new EnterNetherPortalTask(Dimension.NETHER));
             }
             if (deathLock == 0) recraftPause = 20 * 3;
-            return stick(new DeathRecycleTask());
+            if (!DeathRecycleTask.graveVisible()) {
+                T2History.note("WHY death: no grave drops in view, skip recycle");
+                deathLock = 0;
+            } else {
+                return stick(new DeathRecycleTask());
+            }
         }
 
         if (WorldHelper.getCurrentDimension() == Dimension.END) {

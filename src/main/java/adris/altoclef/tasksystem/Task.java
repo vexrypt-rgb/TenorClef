@@ -28,6 +28,14 @@ public abstract class Task {
     /** Last recovery decision from absorb / failWithRecovery (Phase 6). */
     private RecoveryDecision lastRecovery = null;
 
+    /**
+     * True while {@link #explicitResult} is a copy of a child's outcome rather than
+     * something this task decided. Absorbed state is derived, so it must follow the
+     * child: when the child recovers (RUNNING/SUCCESS) the parent's copied failure is
+     * dropped instead of sticking forever.
+     */
+    private boolean absorbedFromChild = false;
+
     /** Wall-clock ms when this run started (0 = never started). Observability only. */
     private long startMillis = 0;
 
@@ -37,6 +45,12 @@ public abstract class Task {
             Debug.logInternal("Task START: " + this);
             active = true;
             startMillis = System.currentTimeMillis();
+            // A restarted instance must not report its previous run's FAILURE/CANCELLED/SUCCESS.
+            // lastFailure is kept so failWithRecovery can still count retries across runs.
+            if (explicitResult != null && explicitResult != TaskResult.RUNNING) {
+                explicitResult = TaskResult.RUNNING;
+            }
+            absorbedFromChild = false;
             onStart();
             first = false;
             stopped = false;
@@ -98,6 +112,7 @@ public abstract class Task {
         explicitResult = null;
         lastFailure = null;
         lastRecovery = null;
+        absorbedFromChild = false;
     }
 
     public void stop() {
@@ -216,6 +231,7 @@ public abstract class Task {
     }
 
     protected void succeed() {
+        this.absorbedFromChild = false;
         this.explicitResult = TaskResult.SUCCESS;
         this.lastFailure = null;
         LiveBenchmarkSession.noteTaskResult(TaskResult.SUCCESS);
@@ -233,6 +249,7 @@ public abstract class Task {
         if (failure == null) {
             failure = new TaskFailure(FailureReason.UNKNOWN, "", false);
         }
+        this.absorbedFromChild = false;
         this.lastFailure = failure;
         this.explicitResult = failure.toResult();
         LiveBenchmarkSession.noteFailure(failure.getReason());
@@ -253,6 +270,7 @@ public abstract class Task {
         }
         TaskFailure seed = new TaskFailure(reason, message, true, prior);
         RecoveryManager.Applied applied = getRecoveryManager().apply(seed);
+        this.absorbedFromChild = false;
         this.lastRecovery = applied.getDecision();
         this.lastFailure = applied.getFailure();
         this.explicitResult = applied.getResult();
@@ -260,6 +278,7 @@ public abstract class Task {
     }
 
     protected void blocked(FailureReason reason, String message) {
+        this.absorbedFromChild = false;
         this.lastFailure = new TaskFailure(reason, message, true);
         this.explicitResult = TaskResult.BLOCKED;
     }
@@ -274,9 +293,20 @@ public abstract class Task {
         TaskResult childExplicit = child.getExplicitResult();
         TaskResult childEffective = child.getLastResult();
         TaskResult childForAbsorb = childExplicit != null ? childExplicit : childEffective;
-        if (!TaskResultMapper.shouldAbsorbChild(explicitResult, childForAbsorb)) {
+        if (absorbedFromChild && TaskResultMapper.childRecovered(childForAbsorb)) {
+            // The child we copied a failure from is running again / succeeded: drop the stale copy.
+            absorbedFromChild = false;
+            explicitResult = TaskResult.RUNNING;
+            lastFailure = null;
+            lastRecovery = null;
             return;
         }
+        // An absorbed result is not this task's own decision, so a newer child outcome may replace it.
+        TaskResult parentForAbsorb = absorbedFromChild ? null : explicitResult;
+        if (!TaskResultMapper.shouldAbsorbChild(parentForAbsorb, childForAbsorb)) {
+            return;
+        }
+        absorbedFromChild = true;
         TaskFailure childFail = child.getLastFailure();
         // Phase 6: structured failures get RecoveryManager enrichment.
         // If the child already called failWithRecovery, trust its decision;

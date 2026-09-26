@@ -4,6 +4,7 @@ import adris.altoclef.AltoClef;
 import adris.altoclef.Debug;
 import adris.altoclef.tasks.movement.GetOutOfWaterTask;
 import adris.altoclef.tasks.movement.GetToBlockTask;
+import adris.altoclef.tasksystem.FailureReason;
 import adris.altoclef.tasksystem.Task;
 import net.minecraft.util.math.BlockPos;
 
@@ -66,6 +67,7 @@ public class WaterBailTask extends Task {
         AltoClef mod = AltoClef.getInstance();
         ticks++;
         if (mod.getPlayer() == null || mod.getWorld() == null) {
+            fail(FailureReason.PRECONDITION_FAILED, "water-bail: no player/world", false);
             done = true;
             return null;
         }
@@ -77,6 +79,10 @@ public class WaterBailTask extends Task {
         if (dryTicks >= DRY_TICKS || ticks > MAX_TICKS) {
             T2Log.warn("E10", "water-bail end ticks=" + ticks + " dry=" + dryTicks
                     + " wet=" + wet + (ticks > MAX_TICKS ? " TIMEOUT" : ""));
+            // Only "dry for DRY_TICKS" is a real exit; running out the clock still wet is a failure.
+            if (dryTicks < DRY_TICKS) {
+                fail(FailureReason.TIMEOUT, "water-bail timed out still wet after " + ticks + " ticks", false);
+            }
             done = true;
             return null;
         }

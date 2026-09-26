@@ -63,6 +63,11 @@ public final class TaskResultMapper {
         return false;
     }
 
+    /** Child outcome that should clear a failure the parent previously copied from it. */
+    public static boolean childRecovered(TaskResult childResult) {
+        return childResult == null || childResult == TaskResult.RUNNING || childResult == TaskResult.SUCCESS;
+    }
+
     /**
      * Pick failure to store when absorbing a child.
      */

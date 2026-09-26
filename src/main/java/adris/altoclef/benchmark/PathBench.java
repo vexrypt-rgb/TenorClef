@@ -335,6 +335,7 @@ package adris.altoclef.benchmark;
 //$$     /** Real shipwrecks from the seed: start 20 blocks off at the water surface, Baritone swims to a chest and opens it. */
 //$$     private static void wreck(MinecraftClient mc, BlockPos origin, int count) throws Exception {
 //$$         IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
+//$$         BaritoneAPI.getSettings().chatDebug.value = true;
 //$$         long limitTicks = Long.getLong("tenorclef.pathbench.travelTicks", 20L * 120);
 //$$         int[][] dirs = {{0, 0}, {800, 0}, {-800, 0}, {0, 800}, {0, -800}, {800, 800}, {-800, -800}, {800, -800}};
 //$$         PrintWriter csv = open("wreck_baritone");
@@ -361,7 +362,14 @@ package adris.altoclef.benchmark;
 //$$                 BlockPos chest = found[0], start = found[1];
 //$$                 Debug.logHarness("PATHBENCH wreck " + wi + " chest=" + chest.toShortString() + " start=" + start.toShortString());
 //$$                 teleport(mc, start);
-//$$                 Thread.sleep(3000);
+//$$                 // Far teleports: the client player is frozen until its chunks arrive.
+//$$                 for (int i = 0; i < 200; i++) {
+//$$                     boolean all = mc.submit(() -> { for (int cx = -3; cx <= 3; cx++) for (int cz = -3; cz <= 3; cz++) if (!mc.world.getChunkManager().isChunkLoaded((start.getX() >> 4) + cx, (start.getZ() >> 4) + cz)) return false; return true; }).get();
+//$$                     if (all) break;
+//$$                     Thread.sleep(100);
+//$$                 }
+//$$                 Thread.sleep(2000);
+//$$                 teleport(mc, start);
 //$$                 long t0 = worldTime(mc);
 //$$                 mc.execute(() -> baritone.getCustomGoalProcess().setGoalAndPath(new baritone.api.pathing.goals.GoalGetToBlock(chest)));
 //$$                 double startD = eyeDist(mc, chest), bestD = startD; long bestAt = 0;

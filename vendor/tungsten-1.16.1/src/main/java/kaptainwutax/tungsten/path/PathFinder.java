@@ -87,7 +87,7 @@ public class PathFinder {
 	
 	/** Max search time before emitting bestSoFar and continuing. Default: 112s (normal goto).
 	 *  Set lower (e.g. 2000) for follow-entity to get fast partial paths. */
-	public long searchTimeoutMs = 112000L;
+	public long searchTimeoutMs = Long.getLong("tungsten.searchTimeoutMs", 112000L);
 	/** Minimum path length (nodes) required before a timeout partial-path can be emitted.
 	 *  Default: 46 (~2.3s). Set lower (e.g. 5) for follow-entity close-range. */
 	public int minPathSizeForTimeout = 46;

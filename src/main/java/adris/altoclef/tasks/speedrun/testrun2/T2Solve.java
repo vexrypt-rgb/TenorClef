@@ -27,6 +27,7 @@ public final class T2Solve {
 
     private static String lastFix = "";
     private static int cool;
+    private static int calcGrace;
     private static int sameXz;
     private static int lastX = Integer.MIN_VALUE;
     private static int lastZ;
@@ -123,12 +124,25 @@ public final class T2Solve {
             ground = mod.getPlayer().isOnGround();
             wet = mod.getPlayer().isTouchingWater() || mod.getPlayer().isSubmergedInWater();
         } catch (Throwable ignored) {}
+        // S271: s267t spawned in plains with trees ~178 blocks off; each Baritone search took
+        // 5s+ and S140 swapped the child after 8s "same xz", discarding the path every time —
+        // the bot never left spawn. Standing still while a search is in progress is not a stall
+        // (bounded: at most 20s of such grace per stand).
+        boolean calculating = false;
+        try {
+            calculating = mod.getClientBaritone().getPathingBehavior().getInProgress().isPresent();
+        } catch (Throwable ignored) {}
         if (x == lastX && z == lastZ) {
-            sameXz++;
+            if (calculating && calcGrace < 20 * 20) {
+                calcGrace++;
+            } else {
+                sameXz++;
+            }
             if (ground != lastGround) flips++;
         } else {
             sameXz = 0;
             flips = 0;
+            calcGrace = 0;
         }
         lastX = x;
         lastZ = z;

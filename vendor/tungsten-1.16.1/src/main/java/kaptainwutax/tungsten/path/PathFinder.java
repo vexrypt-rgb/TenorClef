@@ -78,6 +78,10 @@ public class PathFinder {
 	private static final double T_BN = tune("bn", 40);
 	private static final double T_DEDUPE = tune("dedupe", 0.294);
 	private static final double T_DROP = tune("drop", 1.5);
+	// Plan-while-walking: hand the path found so far to the executor every T_WINDOW block nodes
+	// and keep searching from its end, instead of planning the whole route before moving.
+	private static final boolean WINDOWED = Boolean.getBoolean("tungsten.windowed");
+	private static final int T_WINDOW = (int) tune("window", 4);
 	protected static AtomicInteger NEXT_CLOSEST_BLOCKNODE_IDX = new AtomicInteger(1);
 	protected static AtomicInteger numNodesConsidered = new AtomicInteger(0);
 	
@@ -240,6 +244,7 @@ public class PathFinder {
 	    openSet.insert(this.start);
 	    closed.clear();
 	    java.util.Arrays.fill(REJ, 0);
+	    int commitIdx = NEXT_CLOSEST_BLOCKNODE_IDX.get();
 	    dbgLoggedFirstChildren.set(false);
 	    dbgLoggedZeroDisp.set(false);
 
@@ -268,6 +273,27 @@ public class PathFinder {
 	        	REJ[6]++;
 //	        	Debug.logMessage("Skipped");
 	            continue;
+	        }
+
+	        if (WINDOWED && blockPath.isPresent()) {
+	        	int idx = NEXT_CLOSEST_BLOCKNODE_IDX.get();
+	        	if (idx < commitIdx) commitIdx = idx; // block path was replaced
+	        	boolean execHungry = !TungstenModDataContainer.EXECUTOR.isRunning()
+	        			|| TungstenModDataContainer.EXECUTOR.getPath().size() - TungstenModDataContainer.EXECUTOR.getCurrentTick() < 40;
+	        	if (next.agent.onGround && idx >= commitIdx + T_WINDOW && idx < blockPath.get().size() - 1 && execHungry) {
+	        		List<Node> prefix = constructPath(next);
+	        		if (prefix.size() > 3) {
+	        			executePath(prefix);
+	        			commitIdx = idx;
+	        			this.start = initializeStartNode(next, target);
+	        			bestHeuristicSoFar = initializeBestHeuristics(this.start);
+	        			clearParentsForBestSoFar(this.start);
+	        			openSet = new BinaryHeapOpenSet();
+	        			openSet.insert(this.start);
+	        			closed.clear();
+	        			continue;
+	        		}
+	        	}
 	        }
 
 	

@@ -63,7 +63,8 @@ package adris.altoclef.benchmark;
 //$$         BlockPos origin = mc.player.getBlockPos();
 //$$         Thread t = new Thread(() -> {
 //$$             try {
-//$$                 if (mode.equalsIgnoreCase("swim")) swim(mc, origin, Math.max(1, reps));
+//$$                 if (mode.equalsIgnoreCase("wreck")) wreck(mc, origin, Math.max(1, reps));
+//$$                 else if (mode.equalsIgnoreCase("swim")) swim(mc, origin, Math.max(1, reps));
 //$$                 else if (mode.equalsIgnoreCase("travel")) for (String m : (opt == null ? "-" : opt).split("[;+]")) travel(mc, origin, m, Math.max(1, reps));
 //$$                 else for (String sweep : (opt == null ? "-" : opt).split("[;+]")) search(mc, origin, sweep, Math.max(1, reps));
 //$$             } catch (Throwable e) {
@@ -266,6 +267,7 @@ package adris.altoclef.benchmark;
 //$$     /** Glass tank of water high above origin; Baritone must reach 3D goals inside it (floor, mid-depth, surface). */
 //$$     private static void swim(MinecraftClient mc, BlockPos origin, int reps) throws Exception {
 //$$         IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
+//$$         BaritoneAPI.getSettings().chatDebug.value = true;
 //$$         int R = 12, H = 12, by = 200, ox = origin.getX(), oz = origin.getZ();
 //$$         java.util.concurrent.CompletableFuture<Void> built = new java.util.concurrent.CompletableFuture<>();
 //$$         mc.getServer().execute(() -> {
@@ -299,6 +301,8 @@ package adris.altoclef.benchmark;
 //$$                         double d = dist3(mc, g);
 //$$                         if (firstMove < 0 && Math.abs(d - startD) > 0.5) firstMove = el;
 //$$                         if (d < 1.5) { result = "GOAL"; break; }
+//$$                         if (mc.player.isDead()) { result = "DIED"; break; }
+//$$                         if (el % 20 == 0) { Object cur = baritone.getPathingBehavior().getCurrent(); Debug.logHarness(String.format(Locale.ROOT, "SWIM t=%d pos=%.1f,%.1f,%.1f d=%.1f seg=%s", el, mc.player.getX(), mc.player.getY(), mc.player.getZ(), d, cur == null ? "none" : ((baritone.api.pathing.path.IPathExecutor) cur).getPath().movements().get(Math.min(((baritone.api.pathing.path.IPathExecutor) cur).getPosition(), ((baritone.api.pathing.path.IPathExecutor) cur).getPath().movements().size() - 1)).getClass().getSimpleName())); }
 //$$                         if (d < bestD - 1.0) { bestD = d; bestAt = el; }
 //$$                         if (el - bestAt > 400) { result = "STALLED"; break; }
 //$$                         if (el > 40 && !baritone.getCustomGoalProcess().isActive()) { result = "STOPPED"; break; }
@@ -326,6 +330,87 @@ package adris.altoclef.benchmark;
 //$$         return Math.sqrt(dx * dx + dy * dy + dz * dz);
 //$$     }
 //$$
+//$$     // ---- wreck -------------------------------------------------------------------------
+//$$
+//$$     /** Real shipwrecks from the seed: start 20 blocks off at the water surface, Baritone swims to a chest and opens it. */
+//$$     private static void wreck(MinecraftClient mc, BlockPos origin, int count) throws Exception {
+//$$         IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
+//$$         long limitTicks = Long.getLong("tenorclef.pathbench.travelTicks", 20L * 120);
+//$$         int[][] dirs = {{0, 0}, {800, 0}, {-800, 0}, {0, 800}, {0, -800}, {800, 800}, {-800, -800}, {800, -800}};
+//$$         PrintWriter csv = open("wreck_baritone");
+//$$         csv.println("wreck,x,y,z,startDist,result,ticks,endDist,opened,items");
+//$$         int ok = 0, n = 0;
+//$$         try {
+//$$             for (int wi = 0; wi < Math.min(count, dirs.length); wi++) {
+//$$                 BlockPos from = origin.add(dirs[wi][0], 0, dirs[wi][1]);
+//$$                 BlockPos[] found = mc.getServer().submit(() -> {
+//$$                     net.minecraft.server.world.ServerWorld w = mc.getServer().getOverworld();
+//$$                     BlockPos wp = w.locateStructure(net.minecraft.world.gen.feature.StructureFeature.SHIPWRECK, from, 50, false);
+//$$                     if (wp == null) return null;
+//$$                     BlockPos best = null;
+//$$                     for (int cx = -2; cx <= 2; cx++) for (int cz = -2; cz <= 2; cz++)
+//$$                         for (net.minecraft.block.entity.BlockEntity be : w.getChunk((wp.getX() >> 4) + cx, (wp.getZ() >> 4) + cz).getBlockEntities().values())
+//$$                             if (be instanceof net.minecraft.block.entity.ChestBlockEntity && (best == null || be.getPos().getSquaredDistance(wp) < best.getSquaredDistance(wp))) best = be.getPos();
+//$$                     if (best == null) return null;
+//$$                     int sx = best.getX() + 20, sz = best.getZ();
+//$$                     w.getChunk(sx >> 4, sz >> 4);
+//$$                     int sy = w.getTopY(Heightmap.Type.MOTION_BLOCKING, sx, sz);
+//$$                     return new BlockPos[]{best, new BlockPos(sx, sy, sz)};
+//$$                 }).get();
+//$$                 if (found == null) { Debug.logHarness("PATHBENCH wreck " + wi + ": no chest found near " + from.toShortString()); continue; }
+//$$                 BlockPos chest = found[0], start = found[1];
+//$$                 Debug.logHarness("PATHBENCH wreck " + wi + " chest=" + chest.toShortString() + " start=" + start.toShortString());
+//$$                 teleport(mc, start);
+//$$                 Thread.sleep(3000);
+//$$                 long t0 = worldTime(mc);
+//$$                 mc.execute(() -> baritone.getCustomGoalProcess().setGoalAndPath(new baritone.api.pathing.goals.GoalGetToBlock(chest)));
+//$$                 double startD = eyeDist(mc, chest), bestD = startD; long bestAt = 0;
+//$$                 String result = "TIMEOUT";
+//$$                 while (true) {
+//$$                     Thread.sleep(25);
+//$$                     long el = worldTime(mc) - t0;
+//$$                     double d = eyeDist(mc, chest);
+//$$                     if (mc.player == null || mc.player.isDead()) { result = "DIED"; break; }
+//$$                     if (el % 20 == 0) Debug.logHarness(String.format(Locale.ROOT, "WRECK t=%d pos=%.1f,%.1f,%.1f d=%.1f air=%d", el, mc.player.getX(), mc.player.getY(), mc.player.getZ(), d, mc.player.getAir()));
+//$$                     if (d < bestD - 1.0) { bestD = d; bestAt = el; }
+//$$                     if (!baritone.getCustomGoalProcess().isActive() && el > 40) { result = d < 4.5 ? "GOAL" : "STOPPED"; break; }
+//$$                     if (el - bestAt > 600) { result = "STALLED"; break; }
+//$$                     if (el > limitTicks) break;
+//$$                 }
+//$$                 mc.execute(() -> baritone.getPathingBehavior().cancelEverything());
+//$$                 long ticks = worldTime(mc) - t0;
+//$$                 double end = eyeDist(mc, chest);
+//$$                 boolean opened = false; int items = -1;
+//$$                 if (result.equals("GOAL") || end < 4.5) {
+//$$                     mc.execute(() -> mc.interactionManager.interactBlock(mc.player, mc.world, net.minecraft.util.Hand.MAIN_HAND,
+//$$                             new net.minecraft.util.hit.BlockHitResult(net.minecraft.util.math.Vec3d.ofCenter(chest), net.minecraft.util.math.Direction.UP, chest, false)));
+//$$                     Thread.sleep(1500);
+//$$                     opened = mc.player.currentScreenHandler != mc.player.playerScreenHandler;
+//$$                     if (opened) {
+//$$                         items = 0;
+//$$                         for (int i = 0; i < 27; i++) if (!mc.player.currentScreenHandler.getSlot(i).getStack().isEmpty()) items++;
+//$$                         mc.execute(() -> mc.player.closeHandledScreen());
+//$$                     }
+//$$                 }
+//$$                 if (mc.player != null && mc.player.isDead()) mc.execute(() -> mc.player.requestRespawn());
+//$$                 csv.printf(Locale.ROOT, "%d,%d,%d,%d,%.1f,%s,%d,%.2f,%s,%d%n", wi, chest.getX(), chest.getY(), chest.getZ(), startD, result, ticks, end, opened, items);
+//$$                 csv.flush();
+//$$                 n++;
+//$$                 if (opened) ok++;
+//$$                 Thread.sleep(1000);
+//$$             }
+//$$         } finally {
+//$$             csv.close();
+//$$         }
+//$$         Debug.logHarness(String.format(Locale.ROOT, "PATHBENCH SUMMARY mode=wreck opened=%d/%d", ok, n));
+//$$     }
+//$$
+//$$     private static double eyeDist(MinecraftClient mc, BlockPos b) {
+//$$         if (mc.player == null) return 1e9;
+//$$         double dx = mc.player.getX() - (b.getX() + 0.5), dy = mc.player.getEyeY() - (b.getY() + 0.5), dz = mc.player.getZ() - (b.getZ() + 0.5);
+//$$         return Math.sqrt(dx * dx + dy * dy + dz * dz);
+//$$     }
+//$$
 //$$     private static boolean startBaritone(MinecraftClient mc, IBaritone b, BlockPos g) {
 //$$         mc.execute(() -> b.getCustomGoalProcess().setGoalAndPath(new GoalBlock(g)));
 //$$         return true;
@@ -333,12 +418,15 @@ package adris.altoclef.benchmark;
 //$$
 //$$     private static void teleport(MinecraftClient mc, BlockPos p) throws InterruptedException {
 //$$         if (mc.getServer() == null || mc.player == null) return;
+//$$         if (mc.player.isDead()) { mc.execute(() -> mc.player.requestRespawn()); Thread.sleep(2000); }
 //$$         java.util.UUID id = mc.player.getUuid();
 //$$         mc.getServer().execute(() -> {
 //$$             ServerPlayerEntity sp = mc.getServer().getPlayerManager().getPlayer(id);
 //$$             if (sp != null) {
 //$$                 sp.setVelocity(0, 0, 0);
 //$$                 sp.fallDistance = 0;
+//$$                 sp.setAir(sp.getMaxAir());
+//$$                 sp.setHealth(sp.getMaxHealth());
 //$$                 sp.networkHandler.requestTeleport(p.getX() + 0.5, p.getY(), p.getZ() + 0.5, sp.yaw, sp.pitch);
 //$$             }
 //$$         });

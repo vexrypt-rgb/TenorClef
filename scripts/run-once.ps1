@@ -38,7 +38,9 @@ param(
   [string]$JavaHome = 'C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot',
   [string]$Tag = 'run',
   [int]$TimeoutSec = 600,
-  [int]$MaxRunSec = 0
+  [int]$MaxRunSec = 0,
+  [string]$Command = 'testrun2',
+  [string]$Mover = 'baritone'
 )
 
 $ErrorActionPreference = 'Continue'
@@ -92,14 +94,14 @@ foreach ($f in @($TopSettings, $WorldSettings)) {
   $obj = $null
   if (Test-Path $f) { try { $obj = Get-Content -Raw $f | ConvertFrom-Json } catch { $obj = $null } }
   if (-not $obj) { $obj = [pscustomobject]@{} }
-  foreach ($kv in @{ idleCommand=''; speedrunMoverPreference='baritone'; autoLoadWorld=$true; autoRunCommand='testrun2' }.GetEnumerator()) {
+  foreach ($kv in @{ idleCommand=''; speedrunMoverPreference=$Mover; autoLoadWorld=$true; autoRunCommand=$Command }.GetEnumerator()) {
     if ($obj.PSObject.Properties.Name -contains $kv.Key) { $obj.$($kv.Key) = $kv.Value }
     else { $obj | Add-Member -NotePropertyName $kv.Key -NotePropertyValue $kv.Value -Force }
   }
   $enc = New-Object System.Text.UTF8Encoding($false)
   [System.IO.File]::WriteAllText($f, ($obj | ConvertTo-Json -Depth 40), $enc)
 }
-Write-Host "settings: both files set (autoLoadWorld=true, autoRunCommand=testrun2)" -ForegroundColor DarkGray
+Write-Host "settings: both files set (autoLoadWorld=true, autoRunCommand=$Command, mover=$Mover)" -ForegroundColor DarkGray
 
 # ---- 5. launch -----------------------------------------------------------------
 Write-Host "launching :1.16.1:runClient (log -> $RunLog)" -ForegroundColor Cyan

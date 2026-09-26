@@ -1127,6 +1127,14 @@ public class ModernSpeedrunTask extends Task {
             usedCloser = false;
             closer = null;
             if (phase != Phase.PORTAL && phaseTicks >= 40) setPhase(Phase.PORTAL);
+            // S261: this shortcut skipped portal()'s S228 food stock. s259t respawned, walked
+            // back in with food=0 twice and died in the fortress both times.
+            if (food(mod) < 8 && !starveHunt) {
+                starveHunt = true;
+                T2Log.force("S261", "food=" + food(mod) + " - stocking before walk-in");
+            }
+            if (starveHunt && food(mod) >= 20) starveHunt = false;
+            if (starveHunt) return new adris.altoclef.tasks.resources.CollectFoodTask(20);
             T2History.note("WHY walk-in: portal + iron pick");
             return stick(new EnterNetherPortalTask(Dimension.NETHER));
         }

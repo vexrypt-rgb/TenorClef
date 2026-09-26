@@ -342,6 +342,18 @@ package adris.altoclef.benchmark;
 //$$         csv.println("wreck,x,y,z,startDist,result,ticks,endDist,opened,items");
 //$$         // Pathing test, not combat: drowned in the wrecks would otherwise decide the result.
 //$$         mc.getServer().submit(() -> mc.getServer().setDifficulty(net.minecraft.world.Difficulty.PEACEFUL, true)).get();
+//$$         if (!"false".equals(System.getProperty("tenorclef.wreckgear"))) {
+//$$             // Diver's kit: diamond tools + Aqua Affinity, so hull planks can be mined underwater.
+//$$             mc.getServer().submit(() -> {
+//$$                 net.minecraft.server.command.ServerCommandSource src = mc.getServer().getCommandSource();
+//$$                 for (String cmd : new String[]{
+//$$                         "give @a diamond_pickaxe{Enchantments:[{id:efficiency,lvl:5}]}",
+//$$                         "give @a diamond_axe{Enchantments:[{id:efficiency,lvl:5}]}",
+//$$                         "give @a diamond_shovel{Enchantments:[{id:efficiency,lvl:5}]}",
+//$$                         "replaceitem entity @a armor.head diamond_helmet{Enchantments:[{id:aqua_affinity,lvl:1}]}"})
+//$$                     mc.getServer().getCommandManager().execute(src, cmd);
+//$$             }).get();
+//$$         }
 //$$         int ok = 0, n = 0;
 //$$         try {
 //$$             for (int wi = 0; wi < Math.min(count, dirs.length); wi++) {
@@ -370,6 +382,24 @@ package adris.altoclef.benchmark;
 //$$                     if (all) break;
 //$$                     Thread.sleep(100);
 //$$                 }
+//$$                 if (Boolean.getBoolean("tenorclef.wreckmap")) {
+//$$                     net.minecraft.server.world.ServerWorld sw = mc.getServer().getOverworld();
+//$$                     for (int y = chest.getY() + 3; y >= chest.getY() - 1; y--) {
+//$$                         StringBuilder sb = new StringBuilder("MAP y=" + y + " ");
+//$$                         for (int z = -4; z <= 4; z++) {
+//$$                             for (int x = -4; x <= 4; x++) {
+//$$                                 BlockPos q = chest.add(x, y - chest.getY(), z);
+//$$                                 net.minecraft.block.BlockState bs = sw.getBlockState(q);
+//$$                                 boolean wat = bs.getFluidState().isIn(net.minecraft.tag.FluidTags.WATER);
+//$$                                 char ch = q.equals(chest) ? 'C' : bs.isAir() ? '.' : bs.getBlock() == net.minecraft.block.Blocks.WATER ? '~'
+//$$                                         : bs.getCollisionShape(sw, q).isEmpty() ? (wat ? 'k' : ',') : (wat ? 'w' : '#');
+//$$                                 sb.append(ch);
+//$$                             }
+//$$                             sb.append('|');
+//$$                         }
+//$$                         Debug.logHarness(sb.toString());
+//$$                     }
+//$$                 }
 //$$                 Thread.sleep(2000);
 //$$                 teleport(mc, start);
 //$$                 long t0 = worldTime(mc);
@@ -381,10 +411,11 @@ package adris.altoclef.benchmark;
 //$$                     long el = worldTime(mc) - t0;
 //$$                     double d = eyeDist(mc, chest);
 //$$                     if (mc.player == null || mc.player.isDead()) { result = "DIED"; break; }
-//$$                     if (el % 20 == 0) Debug.logHarness(String.format(Locale.ROOT, "WRECK t=%d pos=%.1f,%.1f,%.1f d=%.1f air=%d", el, mc.player.getX(), mc.player.getY(), mc.player.getZ(), d, mc.player.getAir()));
+//$$                     if (el % 20 == 0) Debug.logHarness(String.format(Locale.ROOT, "WRECK t=%d pos=%.1f,%.1f,%.1f d=%.1f air=%d mv=%s", el, mc.player.getX(), mc.player.getY(), mc.player.getZ(), d, mc.player.getAir(), curMove()));
 //$$                     if (d < bestD - 1.0) { bestD = d; bestAt = el; }
 //$$                     if (!baritone.getCustomGoalProcess().isActive() && el > 40) { result = d < 4.5 ? "GOAL" : "STOPPED"; break; }
-//$$                     if (el - bestAt > 600) { result = "STALLED"; break; }
+//$$                     if (d < 4.5 && el % 5 == 0 && mc.submit(() -> seesBlock(mc, chest)).get()) { mc.execute(() -> baritone.getPathingBehavior().cancelEverything()); result = "GOAL"; break; }
+//$$                     if (el - bestAt > 1200) { result = "STALLED"; break; }
 //$$                     if (el > limitTicks) break;
 //$$                 }
 //$$                 mc.execute(() -> baritone.getPathingBehavior().cancelEverything());
@@ -392,6 +423,7 @@ package adris.altoclef.benchmark;
 //$$                 double end = eyeDist(mc, chest);
 //$$                 boolean opened = false; int items = -1;
 //$$                 if (result.equals("GOAL") || end < 4.5) {
+//$$                     clearAbove(mc, chest);
 //$$                     mc.execute(() -> mc.interactionManager.interactBlock(mc.player, mc.world, net.minecraft.util.Hand.MAIN_HAND,
 //$$                             new net.minecraft.util.hit.BlockHitResult(net.minecraft.util.math.Vec3d.ofCenter(chest), net.minecraft.util.math.Direction.UP, chest, false)));
 //$$                     Thread.sleep(1500);
@@ -424,6 +456,45 @@ package adris.altoclef.benchmark;
 //$$     private static boolean startBaritone(MinecraftClient mc, IBaritone b, BlockPos g) {
 //$$         mc.execute(() -> b.getCustomGoalProcess().setGoalAndPath(new GoalBlock(g)));
 //$$         return true;
+//$$     }
+//$$
+//$$     /** A chest with a solid block on top won't open: mine that block out first (best hotbar tool). */
+//$$     private static void clearAbove(MinecraftClient mc, BlockPos chest) throws Exception {
+//$$         BlockPos up = chest.up();
+//$$         for (int t = 0; t < 400; t++) {
+//$$             boolean done = mc.submit(() -> {
+//$$                 net.minecraft.block.BlockState bs = mc.world.getBlockState(up);
+//$$                 if (bs.getCollisionShape(mc.world, up).isEmpty()) return true;
+//$$                 int best = mc.player.inventory.selectedSlot; float bestSp = 0;
+//$$                 for (int i = 0; i < 9; i++) { float sp = mc.player.inventory.getStack(i).getMiningSpeedMultiplier(bs); if (sp > bestSp) { bestSp = sp; best = i; } }
+//$$                 mc.player.inventory.selectedSlot = best;
+//$$                 net.minecraft.util.math.Vec3d eye = mc.player.getCameraPosVec(1f);
+//$$                 double dx = up.getX() + 0.5 - eye.x, dy = up.getY() + 0.5 - eye.y, dz = up.getZ() + 0.5 - eye.z;
+//$$                 mc.player.yaw = (float) (Math.toDegrees(Math.atan2(dz, dx)) - 90);
+//$$                 mc.player.pitch = (float) -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)));
+//$$                 mc.interactionManager.updateBlockBreakingProgress(up, net.minecraft.util.math.Direction.DOWN);
+//$$                 mc.player.swingHand(net.minecraft.util.Hand.MAIN_HAND);
+//$$                 return false;
+//$$             }).get();
+//$$             if (done) break;
+//$$             Thread.sleep(10);
+//$$         }
+//$$     }
+//$$
+//$$     private static boolean seesBlock(MinecraftClient mc, BlockPos b) {
+//$$         net.minecraft.util.math.Vec3d eye = mc.player.getCameraPosVec(1f);
+//$$         net.minecraft.util.hit.BlockHitResult r = mc.world.rayTrace(new net.minecraft.world.RayTraceContext(eye, new net.minecraft.util.math.Vec3d(b.getX() + 0.5, b.getY() + 0.5, b.getZ() + 0.5),
+//$$                 net.minecraft.world.RayTraceContext.ShapeType.OUTLINE, net.minecraft.world.RayTraceContext.FluidHandling.NONE, mc.player));
+//$$         return r != null && r.getBlockPos().equals(b);
+//$$     }
+//$$
+//$$     private static String curMove() {
+//$$         try {
+//$$             baritone.api.pathing.path.IPathExecutor ex = baritone.api.BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().getCurrent();
+//$$             if (ex == null) return "none";
+//$$             baritone.api.pathing.movement.IMovement m = ex.getPath().movements().get(ex.getPosition());
+//$$             return m.getClass().getSimpleName().replace("Movement", "") + m.getSrc().toShortString() + ">" + m.getDest().toShortString() + "[" + net.minecraft.client.MinecraftClient.getInstance().world.getBlockState(m.getDest()).toString().replace("Block{minecraft:", "").replace("}", "") + "]";
+//$$         } catch (Exception e) { return "?"; }
 //$$     }
 //$$
 //$$     private static void teleport(MinecraftClient mc, BlockPos p) throws InterruptedException {

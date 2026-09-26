@@ -142,6 +142,7 @@ public class PathFinder {
 	
 	// Rejects simulated states that touch or hover over lava/fire at any point of the move.
 	private boolean isInHazard(Node n, WorldView world) {
+		if (Boolean.getBoolean("tungsten.noHazard")) return false;
 		Agent a = n.agent;
 		if (a.isInLava()) return true;
 		net.minecraft.util.math.Box b = a.box;

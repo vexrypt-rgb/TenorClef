@@ -77,6 +77,29 @@ public class ModernSpeedrunTask extends Task {
     private boolean lavaGuardAdded;
 
     /** True for a Nether block with lava above or beside it: breaking it lets the lava flow in. */
+    /**
+     * S263: breaking gold blocks within sight of a piglin without gold armor turns the group
+     * hostile. s260t mined nether gold ore next to one at full hp and was killed in 3s.
+     */
+    private static boolean angersPiglin(BlockPos pos) {
+        try {
+            if (WorldHelper.getCurrentDimension() != Dimension.NETHER) return false;
+            AltoClef mod = AltoClef.getInstance();
+            var b = mod.getWorld().getBlockState(pos).getBlock();
+            if (b != Blocks.NETHER_GOLD_ORE && b != Blocks.GILDED_BLACKSTONE && b != Blocks.GOLD_BLOCK) return false;
+            for (var st : mod.getPlayer().getArmorItems()) {
+                if (st != null && (st.getItem() == Items.GOLDEN_HELMET || st.getItem() == Items.GOLDEN_CHESTPLATE
+                        || st.getItem() == Items.GOLDEN_LEGGINGS || st.getItem() == Items.GOLDEN_BOOTS)) return false;
+            }
+            var ps = mod.getEntityTracker().getTrackedEntities(net.minecraft.entity.mob.PiglinEntity.class);
+            if (ps == null) return false;
+            for (var e : ps) {
+                if (e != null && e.isAlive() && e.getBlockPos().isWithinDistance(pos, 16)) return true;
+            }
+        } catch (Throwable ignored) {}
+        return false;
+    }
+
     private static boolean holdsBackLava(BlockPos pos) {
         try {
             if (WorldHelper.getCurrentDimension() != Dimension.NETHER) return false;
@@ -441,6 +464,7 @@ public class ModernSpeedrunTask extends Task {
         if (!lavaGuardAdded) {
             lavaGuardAdded = true;
             AltoClef.getInstance().getBehaviour().avoidBlockBreaking(ModernSpeedrunTask::holdsBackLava);
+            AltoClef.getInstance().getBehaviour().avoidBlockBreaking(ModernSpeedrunTask::angersPiglin);
         }
         if (sessionLive && phase != Phase.DONE) {
             T2Log.warn("E80", "parent onStart ignored, still ph=" + phase + " t=" + SpeedrunClock.now());

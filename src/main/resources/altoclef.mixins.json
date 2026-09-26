@@ -18,6 +18,7 @@
     "PersistentProjectileEntityAccessor",
     "PortalManagerAccessor",
     "SelectWorldScreenAccessor",
+    "ServerTickWarpMixin",
     "SlotClickMixin",
     "WorldBlockModifiedMixin",
     "WorldListWidgetAccessor"
@@ -28,6 +29,7 @@
     "ChatInputMixin",
     "ChatInputSuggestorMixin",
     "ChatReadMixin",
+    "ClientTimerWarpMixin",
     "ClientBlockBreakMixin",
     "ClientOpenScreenMixin",
     "ClientTickMixin",
@@ -36,6 +38,7 @@
     "LoadChunkMixin",
     "MixinLocalPlayer",
     "PlayerCollidesWithEntityMixin",
+    "RenderTickCounterAccessor",
     "SimpleOptionMixin"
   ],
   "injectors": {

@@ -337,6 +337,8 @@ package adris.altoclef.benchmark;
 //$$         IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
 //$$         BaritoneAPI.getSettings().chatDebug.value = true;
 //$$         long limitTicks = Long.getLong("tenorclef.pathbench.travelTicks", 20L * 120);
+//$$         long ptm = Long.getLong("tenorclef.wrecktimeout", 0);
+//$$         if (ptm > 0) { BaritoneAPI.getSettings().primaryTimeoutMS.value = ptm; BaritoneAPI.getSettings().failureTimeoutMS.value = ptm * 4; }
 //$$         int[][] dirs = {{0, 0}, {800, 0}, {-800, 0}, {0, 800}, {0, -800}, {800, 800}, {-800, -800}, {800, -800}};
 //$$         PrintWriter csv = open("wreck_baritone");
 //$$         csv.println("wreck,x,y,z,startDist,result,ticks,endDist,opened,items");
@@ -392,7 +394,8 @@ package adris.altoclef.benchmark;
 //$$                                 net.minecraft.block.BlockState bs = sw.getBlockState(q);
 //$$                                 boolean wat = bs.getFluidState().isIn(net.minecraft.tag.FluidTags.WATER);
 //$$                                 char ch = q.equals(chest) ? 'C' : bs.isAir() ? '.' : bs.getBlock() == net.minecraft.block.Blocks.WATER ? '~'
-//$$                                         : bs.getCollisionShape(sw, q).isEmpty() ? (wat ? 'k' : ',') : (wat ? 'w' : '#');
+//$$                                         : bs.getCollisionShape(sw, q).isEmpty() ? (wat ? 'k' : ',') : wat ? 'w'
+//$$                                         : bs.getBlock() instanceof net.minecraft.block.FallingBlock ? 's' : bs.getMaterial() == net.minecraft.block.Material.WOOD ? 'o' : '#';
 //$$                                 sb.append(ch);
 //$$                             }
 //$$                             sb.append('|');
@@ -424,6 +427,9 @@ package adris.altoclef.benchmark;
 //$$                 boolean opened = false; int items = -1;
 //$$                 if (result.equals("GOAL") || end < 4.5) {
 //$$                     clearAbove(mc, chest);
+//$$                     // Swim descent holds sneak; sneak + use with a tool in hand doesn't open containers.
+//$$                     mc.execute(() -> { baritone.getInputOverrideHandler().clearAllKeys(); mc.options.keySneak.setPressed(false); });
+//$$                     for (int i = 0; i < 20 && mc.player.isSneaking(); i++) Thread.sleep(50);
 //$$                     Object ar = mc.submit(() -> mc.interactionManager.interactBlock(mc.player, mc.world, net.minecraft.util.Hand.MAIN_HAND,
 //$$                             new net.minecraft.util.hit.BlockHitResult(net.minecraft.util.math.Vec3d.ofCenter(chest), net.minecraft.util.math.Direction.UP, chest, false))).get();
 //$$                     Debug.logHarness("PATHBENCH open " + ar + " above=" + mc.world.getBlockState(chest.up()) + " at=" + mc.world.getBlockState(chest).getBlock() + " sneak=" + mc.player.isSneaking());

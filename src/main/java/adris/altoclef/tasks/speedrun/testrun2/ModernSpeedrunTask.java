@@ -2079,13 +2079,6 @@ public class ModernSpeedrunTask extends Task {
                 // 2 min because the climb was dropped the moment y reached 48. A climb that
                 // makes no height for 30s is abandoned for 60s so the gold can still be mined.
                 int ny = mod.getPlayer().getBlockY();
-                // S250: s250t's S202 "mine here for 90s" dug from y=51 to y=36 and a hoglin
-                // knocked it into the lava sea (y=31). Below 40 the helm is not worth it.
-                if (netherClimbCooldown > 0 && ny < 40) {
-                    helmLatched = true;
-                    T2Log.force("S250", "helm gold dig reached y=" + ny + " - too near lava, proceeding without helm");
-                    return null;
-                }
                 if (netherClimbCooldown > 0) netherClimbCooldown--;
                 boolean climbing = active instanceof adris.altoclef.tasks.movement.GetToYTask
                         && !active.isFinished();

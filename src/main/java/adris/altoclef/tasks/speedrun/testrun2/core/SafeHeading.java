@@ -12,7 +12,7 @@ public final class SafeHeading {
     /** Turn offsets tried in order; the first is the historical +70°. */
     static final float[] TURNS = {70f, -70f, 140f, -140f, 180f};
     /** Blocks ahead that must be walkable. A 2s walk nudge covers ~4-8 blocks. */
-    static final int LOOKAHEAD = 4;
+    static final int LOOKAHEAD = 9;
     /** Largest drop accepted per step: 3 blocks is fall-damage free. */
     static final int MAX_DROP = 3;
 
@@ -47,8 +47,12 @@ public final class SafeHeading {
             Cell feet = terrain.at(cx, feetY, cz);
             if (feet == Cell.LAVA || terrain.at(cx, feetY + 1, cz) == Cell.LAVA) return false;
             if (feet == Cell.SOLID) {
-                // A wall (or a step) ends the walk here; the bot bumps, it does not fall.
-                return true;
+                // A wall ends the walk; a one-block step does not (the bot steps/jumps up and
+                // keeps going), so keep probing from the higher floor. s263t fell y71->30 into
+                // Nether lava after a step was taken as "safe" without looking past it.
+                if (terrain.at(cx, feetY + 1, cz) != Cell.OPEN) return true;
+                feetY++;
+                continue;
             }
             boolean ground = false;
             for (int k = 1; k <= MAX_DROP + 1; k++) {

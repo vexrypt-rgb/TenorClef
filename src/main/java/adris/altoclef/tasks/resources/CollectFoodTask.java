@@ -238,6 +238,7 @@ public class CollectFoodTask extends Task {
             }
             // Hay blocks
             Task hayTaskBlock = this.pickupBlockTaskOrNull(mod, Blocks.HAY_BLOCK, Items.HAY_BLOCK, 300);
+            if (hayTaskBlock != null && hayStalled(mod)) hayTaskBlock = null;
             if (hayTaskBlock != null) {
                 setDebugState("Collecting Hay");
                 currentResourceTask = hayTaskBlock;
@@ -359,6 +360,33 @@ public class CollectFoodTask extends Task {
      * Returns a task that mines a block and picks up its output.
      * Returns null if task cannot reasonably run.
      */
+    // S270: s266t stood still "Collecting Hay" for ~10 min (DestroyBlockTask made no progress,
+    // S200 wander reset it each time) until a zombie killed it. If the nearest bale has not
+    // yielded hay in 30s, mark it unreachable so food collection moves on.
+    private BlockPos hayTarget;
+    private long hayTargetSinceMs;
+    private int hayCountAtTarget;
+
+    private boolean hayStalled(AltoClef mod) {
+        Optional<BlockPos> near = mod.getBlockScanner().getNearestBlock(mod.getPlayer().getPos(), WorldHelper::canBreak, Blocks.HAY_BLOCK);
+        if (near.isEmpty()) return false;
+        int have = mod.getItemStorage().getItemCount(Items.HAY_BLOCK);
+        long now = System.currentTimeMillis();
+        if (!near.get().equals(hayTarget) || have > hayCountAtTarget) {
+            hayTarget = near.get();
+            hayTargetSinceMs = now;
+            hayCountAtTarget = have;
+            return false;
+        }
+        if (now - hayTargetSinceMs > 30_000) {
+            Debug.logMessage("S270 hay bale " + hayTarget.toShortString() + " no progress 30s - marking unreachable");
+            mod.getBlockScanner().requestBlockUnreachable(hayTarget, 0);
+            hayTarget = null;
+            return true;
+        }
+        return false;
+    }
+
     private Task pickupBlockTaskOrNull(AltoClef mod, Block blockToCheck, Item itemToGrab, Predicate<BlockPos> accept, double maxRange) {
         Predicate<BlockPos> acceptPlus = (blockPos) -> {
             if (!WorldHelper.canBreak(blockPos)) return false;

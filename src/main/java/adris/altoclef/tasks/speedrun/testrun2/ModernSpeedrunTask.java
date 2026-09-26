@@ -640,6 +640,15 @@ public class ModernSpeedrunTask extends Task {
             var st = inv.getStack(i);
             items = items * 31 + st.getCount() * 1009 + net.minecraft.item.Item.getRawId(st.getItem());
         }
+        // S242: while a furnace is open, the ingots pile up in ITS output slot, not the player's
+        // inventory (s243t fired at iron 5/10). Fold the open screen's slots in too.
+        var sh = mod.getPlayer().currentScreenHandler;
+        if (sh != null && sh != mod.getPlayer().playerScreenHandler) {
+            for (var slot : sh.slots) {
+                var st = slot.getStack();
+                items = items * 31 + st.getCount() * 1009 + net.minecraft.item.Item.getRawId(st.getItem());
+            }
+        }
 
         if (wdEscape != null) {
             if (--wdEscapeTicks > 0 && !wdEscape.isFinished()) return wdEscape;
@@ -666,10 +675,10 @@ public class ModernSpeedrunTask extends Task {
                 : new TimeoutWanderTask(24);
         wdEscapeTicks = ESCAPE_TICKS;
         wdTicks = 0;
-        active = null;
         T2Log.warn("S200", "no progress " + (limit / 20) + "s ph=" + phase + " @" + p.toShortString()
                 + " child=" + (active == null ? "-" : active.getClass().getSimpleName())
                 + " -> " + wdEscape.getClass().getSimpleName());
+        active = null;
         return wdEscape;
     }
 

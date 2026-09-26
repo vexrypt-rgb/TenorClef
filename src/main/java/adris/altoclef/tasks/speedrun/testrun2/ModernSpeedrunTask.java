@@ -1222,7 +1222,11 @@ public class ModernSpeedrunTask extends Task {
 
         // S231: the closer latch overrode food/water needs on alternate ticks (s230: FLIP
         // CollectFood<->Construct x1297 then WaterBail<->Construct). Let those finish first.
-        boolean closerYields = starveHunt || (active instanceof WaterBailTask && !active.isFinished());
+        // S233: s232 showed the same flip vs CraftInInventory, HolePillar, CollectFlint. The
+        // closer bypasses stick(), so it must yield to ANY live non-Construct child, not a list.
+        boolean closerYields = starveHunt
+                || (active != null && active != closer && !(active instanceof ConstructNetherPortalBucketTask)
+                    && !active.isFinished());
         if (usedCloser && closer != null && phase == Phase.PORTAL && !closerYields) {
             T2History.tick(mod, phase.name(), closer);
             return closer;

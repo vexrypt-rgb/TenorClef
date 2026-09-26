@@ -151,7 +151,12 @@ public abstract class ResourceTask extends Task implements ITaskCanForce {
 
                 double range = getPickupRange(mod);
                 Optional<ItemEntity> closest = mod.getEntityTracker().getClosestItemDrop(mod.getPlayer().getPos(), itemTargets);
-                if (range < 0 || (closest.isPresent() && closest.get().isInRange(mod.getPlayer(), range)) || (pickupTask.isActive() && !pickupTask.isFinished())) {
+                // S252: unlimited range sent a 2.7hp respawn 60 blocks through night skeletons to its death drops.
+                if (mod.getPlayer().getHealth() <= 8 && (range < 0 || range > 12)) {
+                    range = 12;
+                    if (closest.isEmpty() || !closest.get().isInRange(mod.getPlayer(), range)) return onResourceTick(mod);
+                }
+                if (range < 0 ||(closest.isPresent() && closest.get().isInRange(mod.getPlayer(), range)) || (pickupTask.isActive() && !pickupTask.isFinished())) {
                     setDebugState("Picking up");
                     return pickupTask;
                 }

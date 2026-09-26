@@ -634,7 +634,12 @@ public class ModernSpeedrunTask extends Task {
         BlockPos p = mod.getPlayer().getBlockPos();
         int items = 0;
         var inv = mod.getPlayer().getInventory();
-        for (int i = 0; i < inv.size(); i++) items += inv.getStack(i).getCount();
+        // S241: fingerprint item types, not just the total. Smelting swaps ore for ingots 1:1, so
+        // the plain count never moved and s242t was "rescued" out of the furnace at 9/10 iron.
+        for (int i = 0; i < inv.size(); i++) {
+            var st = inv.getStack(i);
+            items = items * 31 + st.getCount() * 1009 + net.minecraft.item.Item.getRawId(st.getItem());
+        }
 
         if (wdEscape != null) {
             if (--wdEscapeTicks > 0 && !wdEscape.isFinished()) return wdEscape;

@@ -1588,7 +1588,10 @@ public class ModernSpeedrunTask extends Task {
         }
         // S201: phase leaves BOOTSTRAP once any pick exists, so the sword check lives here too.
         if (mod.getItemStorage().getItemCount(Items.STONE_PICKAXE) >= 1 && mod.getItemStorage().getItemCount(Items.STONE_SWORD) < 1
-                && mod.getItemStorage().getItemCount(Items.IRON_SWORD) < 1 && mod.getItemStorage().getItemCount(Items.COBBLESTONE) >= 2) {
+                && mod.getItemStorage().getItemCount(Items.IRON_SWORD) < 1 && mod.getItemStorage().getItemCount(Items.COBBLESTONE) >= 2
+                // S244: needs a stick. s245t had 0 sticks/planks/logs; the table recipe never finished
+                // and E92 closed it every 3s for 45s (x17 flip) until S200 wandered off.
+                && (mod.getItemStorage().getItemCount(Items.STICK) >= 1 || totalPlanks(mod) >= 2 || totalLogs(mod) >= 1)) {
             T2Log.force("S201", "craft stone sword");
             return TaskCatalogue.getItemTask(Items.STONE_SWORD, 1);
         }

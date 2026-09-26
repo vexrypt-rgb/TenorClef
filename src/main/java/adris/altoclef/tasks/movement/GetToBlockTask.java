@@ -86,7 +86,11 @@ public class GetToBlockTask extends CustomBaritoneGoalTask implements ITaskRequi
         if (legStartMs == 0) {
             boolean standable = world.getBlockState(_position).getMaterial().isReplaceable()
                     && world.getBlockState(_position.up()).getMaterial().isReplaceable();
-            legTungsten = primary && !tungstenGaveUp && !isPortal && standable
+            // S247: Tungsten's physics search has no lava avoidance. s247t and s248t both walked
+            // into the Nether lava sea (y~31) on Tungsten legs to a blaze spawner. Baritone there.
+            boolean nether = adris.altoclef.util.helpers.WorldHelper.getCurrentDimension()
+                    == adris.altoclef.util.Dimension.NETHER;
+            legTungsten = primary && !tungstenGaveUp && !isPortal && standable && !nether
                     && adris.altoclef.movement.MoverStats.preferTungsten();
             legStartMs = System.currentTimeMillis();
             legBlocks = Math.sqrt(mod.getPlayer().getBlockPos().getSquaredDistance(_position)) - 16;

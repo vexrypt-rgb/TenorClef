@@ -2318,7 +2318,19 @@ public class ModernSpeedrunTask extends Task {
 
     private Task offsetWalk(AltoClef mod) {
         BlockPos here = mod.getPlayer().getBlockPos();
+        // S277: the fixed +8,+6 offset walked s276t into a lake bed (dest y=56 under water) and it
+        // drowned. Try the four rotations and take the first whose surface column is not water.
+        int[][] offs = {{8, 6}, {-6, 8}, {-8, -6}, {6, -8}};
         BlockPos dest = here.add(8, 0, 6);
+        for (int[] o : offs) {
+            BlockPos c = here.add(o[0], 0, o[1]);
+            try {
+                BlockPos top = mod.getWorld().getTopPosition(net.minecraft.world.Heightmap.Type.MOTION_BLOCKING, c);
+                if (!mod.getWorld().getFluidState(top.down()).isEmpty() || !mod.getWorld().getFluidState(c).isEmpty()) continue;
+            } catch (Throwable ignored) {}
+            dest = c;
+            break;
+        }
         T2History.note("WHY E99: GetToBlock " + dest.getX() + "," + dest.getZ());
         try {
             return new GetToBlockTask(dest);
@@ -3019,8 +3031,10 @@ public class ModernSpeedrunTask extends Task {
     private boolean inWater(AltoClef mod) {
         try {
             boolean head = mod.getPlayer().isSubmergedInWater();
+            // S277: bobbing at a lake surface surfaces the head for a tick and reset the streak, so
+            // E10 never fired while s276t sank and drowned. Only leaving the water resets it.
             if (head) wetStreak++;
-            else wetStreak = 0;
+            else if (!mod.getPlayer().isTouchingWater()) wetStreak = 0;
             return wetStreak >= 20;
         } catch (Throwable t) {
             wetStreak = 0;

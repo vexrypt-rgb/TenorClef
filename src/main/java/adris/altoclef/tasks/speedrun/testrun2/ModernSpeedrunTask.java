@@ -1421,7 +1421,12 @@ public class ModernSpeedrunTask extends Task {
             if (woodPause <= 0) McCompat.setMove(false, false);
         }
         boolean hasTable = mod.getItemStorage().getItemCount(Items.CRAFTING_TABLE) >= 1;
-        try { hasTable = hasTable || mod.getBlockScanner().anyFound(Blocks.CRAFTING_TABLE); } catch (Throwable ignored) {}
+        // S257: only a NEARBY table counts. s256t respawned and walked 100 blocks back to the
+        // death-site table (night, skeletons) three times in a row; 4 more logs is cheaper.
+        try {
+            hasTable = hasTable || mod.getBlockScanner().getNearestBlock(mod.getPlayer().getPos(), Blocks.CRAFTING_TABLE)
+                    .map(t -> t.isWithinDistance(mod.getPlayer().getPos(), 32)).orElse(false);
+        } catch (Throwable ignored) {}
         // S238: only go to the table once we can pay for the pick (3 planks + 2 sticks). s235
         // respawned with logs=0, and CraftInTable paced around the old table with nothing to craft.
         int plankEq = totalPlanks(mod) + totalLogs(mod) * 4;

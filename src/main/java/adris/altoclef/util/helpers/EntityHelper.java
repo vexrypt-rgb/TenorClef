@@ -41,6 +41,14 @@ public class EntityHelper {
             if (mob instanceof EndermanEntity enderman) {
                 return enderman.isAngry();
             }
+            // S276: hoglins are not HostileEntity and isAttacking() is not synced to the client, so an
+            // adult hoglin never counted as angry. s275t was killed by one (13.75 hp -> 0 in 4s, danger=-).
+            if (mob instanceof HoglinEntity hoglin) {
+                return hoglin.isAdult();
+            }
+            if (mob instanceof ZoglinEntity) {
+                return true;
+            }
             if (mob instanceof ZombifiedPiglinEntity zombifiedPiglin) {
                 return zombifiedPiglin.isAttacking();
             }

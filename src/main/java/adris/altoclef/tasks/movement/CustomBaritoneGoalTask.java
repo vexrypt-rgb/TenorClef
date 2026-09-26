@@ -110,6 +110,7 @@ public abstract class CustomBaritoneGoalTask extends Task implements ITaskRequir
         }
         checker.reset();
         stuckCheck.reset();
+        aborted = false;
     }
 
     @Override
@@ -185,6 +186,7 @@ public abstract class CustomBaritoneGoalTask extends Task implements ITaskRequir
                         if (d.isTerminal()) {
                             Debug.logMessage("Progress retries exhausted, aborting goal.");
                             checker.reset();
+                            aborted = true; // S268: terminal decision must end the task, not loop "Try 6/4"
                             return null;
                         }
                         Debug.logMessage("Failed to make progress on goal, wandering (" + d + ").");
@@ -195,6 +197,7 @@ public abstract class CustomBaritoneGoalTask extends Task implements ITaskRequir
                             "No progress toward goal; wander declined");
                     if (d.isTerminal()) {
                         Debug.logMessage("NO_PATH retries exhausted for goal.");
+                            aborted = true; // S268: terminal decision must end the task, not loop "Try 6/4"
                         return null;
                     }
                     checker.reset();
@@ -215,8 +218,12 @@ public abstract class CustomBaritoneGoalTask extends Task implements ITaskRequir
         return null;
     }
 
+    /** S268: s265t kept re-pathing a blacklisted block (Try 6/4) for 45s after ABORT, then died to a creeper. */
+    protected boolean aborted;
+
     @Override
     public boolean isFinished() {
+        if (aborted) return true;
         AltoClef mod = AltoClef.getInstance();
         if (cachedGoal == null) {
             cachedGoal = newGoal(mod);

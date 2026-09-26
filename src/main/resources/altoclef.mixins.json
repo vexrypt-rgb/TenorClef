@@ -27,6 +27,7 @@
     "AutoWorldCreateMixin",
     "AutoWorldLoadMixin",
     "ChatInputMixin",
+    "ClientAdvancementManagerAccessor",
     "ChatInputSuggestorMixin",
     "ChatReadMixin",
     "ClientTimerWarpMixin",

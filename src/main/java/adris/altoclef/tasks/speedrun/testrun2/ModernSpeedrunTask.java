@@ -1239,6 +1239,9 @@ public class ModernSpeedrunTask extends Task {
                 || (active != null && active != closer && !(active instanceof ConstructNetherPortalBucketTask)
                     && !active.isFinished());
         if (usedCloser && closer != null && phase == Phase.PORTAL && !closerYields) {
+            // S240: record the closer as the live child. Leaving a finished Craft/HolePillar in
+            // `active` made T2Brain log it every other tick: fake FLIP x100 lines in s240t.
+            active = closer;
             T2History.tick(mod, phase.name(), closer);
             return closer;
         }
@@ -1909,8 +1912,10 @@ public class ModernSpeedrunTask extends Task {
         if (starveHunt) return new adris.altoclef.tasks.resources.CollectFoodTask(20);
         // S221: helmlatch run: helm craft in the Nether had no table or planks, wandered 45s+
         // and got shot by piglins twice. Carry a table through the portal.
-        if (needsNetherTable(mod)
-                && !(active instanceof ConstructNetherPortalBucketTask && !active.isFinished())) {
+        // S239: no Construct exemption. s240t flipped CraftInInventory<->Construct x100: a live
+        // Construct skipped this branch, the table craft took the slot back, repeat. The table is
+        // a few seconds of crafting; the portal build resumes after.
+        if (needsNetherTable(mod)) {
             T2History.note("WHY portal: carry crafting table for nether helm");
             return TaskCatalogue.getItemTask(Items.CRAFTING_TABLE, 1);
         }

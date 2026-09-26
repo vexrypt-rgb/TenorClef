@@ -390,6 +390,8 @@ public class AltoClef implements ModInitializer {
         getClientBaritoneSettings().allowOvershootDiagonalDescend.value = true;
         getClientBaritoneSettings().allowInventory.value = true;
         getClientBaritoneSettings().allowParkour.value = false;
+        // s269t/s270t: path computed but never executed; -Dtenorclef.baritoneDebug=true surfaces PathExecutor cancel/pause reasons.
+        if (Boolean.getBoolean("tenorclef.baritoneDebug")) getClientBaritoneSettings().chatDebug.value = true;
         getClientBaritoneSettings().allowParkourAscend.value = false;
         getClientBaritoneSettings().allowParkourPlace.value = false;
         getClientBaritoneSettings().allowDiagonalDescend.value = false;

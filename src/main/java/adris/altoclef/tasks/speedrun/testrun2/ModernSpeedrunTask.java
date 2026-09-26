@@ -2410,8 +2410,11 @@ public class ModernSpeedrunTask extends Task {
         if (swapPair) {
             swapCoolTicks = SWAP_COOL_TICKS;
         }
+        // S246: s246t sat wet at spd=0 for 60s in PORTAL; S102 asked for WaterBailTask
+        // every 6s and this pin handed Construct back each time. The bail must win.
         if (active instanceof ConstructNetherPortalBucketTask && !active.isFinished()
                 && !(wanted instanceof EnterNetherPortalTask)
+                && !(wanted instanceof WaterBailTask)
                 && !(wanted instanceof HolePillarTask)) {
             return active;
         }

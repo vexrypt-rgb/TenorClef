@@ -54,7 +54,7 @@ import javax.swing.*;
 public class PathFinder {
 
 	
-	ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+	// (child processing is sequential now; no per-node thread pool)
 	public AtomicBoolean active = new AtomicBoolean(false);
 	public AtomicBoolean stop = new AtomicBoolean(false);
 	public Thread thread = null;
@@ -105,15 +105,18 @@ public class PathFinder {
             try {
                 // Skip startup delays in aggressive close-range mode
                 if (searchTimeoutMs > 500) {
+                    boolean waited = false;
+                    // Poll 50ms (was 500ms) and only settle when we actually waited for landing.
                     while (!player.isOnGround() && !player.isTouchingWater()) {
+                        waited = true;
                         if (stop.get()) break;
                         try {
-                            Thread.sleep(500);
+                            Thread.sleep(50);
                         } catch(Exception e) {
                             e.printStackTrace();
                         }
                     }
-                    Thread.sleep(500);
+                    if (waited) Thread.sleep(150);
                 }
                 NEXT_CLOSEST_BLOCKNODE_IDX.set(1);
                 if (blockPath.isPresent()) {
@@ -909,193 +912,39 @@ public class PathFinder {
 //				e.printStackTrace();
 //			}
 			
-			Queue<Node> validChildren = new ConcurrentLinkedQueue<>();
-
+			// Sequential filter + insert. The old per-child executor fan-out cost more in task
+			// overhead than the work itself, dropped whole chunks on one "too close" hit, and
+			// queued >25-child batches into the wrong list so they were never inserted.
+			List<Node> validChildren = new ArrayList<>(children.size());
 			BlockNode lastBlockNode = blockPath.get().get(Math.max(0, bnIdx - 1));
 			BlockNode nextBlockNode = blockPath.get().get(bnIdx);
-	        double closestBlockVolume = BlockShapeChecker.getShapeVolume(nextBlockNode.getBlockPos().down(), world);
-	        boolean isSmallBlock = closestBlockVolume > 0 && closestBlockVolume < 1;
-			
-			List<Callable<Void>> tasks = new ArrayList<>();
-			
-			if (children.size() > 5) {
-				Node[][] chunks = ArrayChunkSplitter.splitArrayIntoChunksOfX(children.toArray(new Node[children.size()]), children.size()/5);
-				
-				for (int i = 0; i < chunks.length; i++) {
-					Node[] nodes = chunks[i];
-					tasks.add(() -> {
-						for (int j = 0; j < nodes.length; j++) {
-							Node child = nodes[j];
-							if (stop.get()) return null;
-					    	if (Thread.currentThread().isInterrupted()) return null;
-							
-							// Check if this child is too close to any already accepted child
-						    for (Node other : validChildren) {
-						    	if (Thread.currentThread().isInterrupted()) return null;
-						        double distance = other.agent.getPos().distanceTo(child.agent.getPos());
-				
-						        boolean bothClimbing = other.agent.isClimbing(world) && child.agent.isClimbing(world);
-						        boolean bothNotClimbing = !other.agent.isClimbing(world) && !child.agent.isClimbing(world);
-				
-						        if ((bothClimbing && distance < 0.03) || (bothNotClimbing && distance < 0.294) || (isSmallBlock && distance < 0.2)) {
-						            return null; // too close to existing child
-						        }
-						    }
-							
-							boolean skip = filterChidren(child, lastBlockNode, nextBlockNode, isSmallBlock, world);
-							
-							if (skip || checkForFallDamage(child, world)) {
-								return null;
-							}
-							
-							validChildren.add(child);
-						}
-						return null;
-					});
-				}
-				
-			} else {
-				tasks = children.stream().map(child -> (Callable<Void>) () -> {
-					if (stop.get()) return null;
-			    	if (Thread.currentThread().isInterrupted()) return null;
-					
-					// Check if this child is too close to any already accepted child
-				    for (Node other : validChildren) {
-				    	if (Thread.currentThread().isInterrupted()) return null;
-				        double distance = other.agent.getPos().distanceTo(child.agent.getPos());
-		
-				        boolean bothClimbing = other.agent.isClimbing(world) && child.agent.isClimbing(world);
-				        boolean bothNotClimbing = !other.agent.isClimbing(world) && !child.agent.isClimbing(world);
-		
-				        if ((bothClimbing && distance < 0.03) || (bothNotClimbing && distance < 0.294) || (isSmallBlock && distance < 0.2)) {
-				            return null; // too close to existing child
-				        }
-				    }
-					
-					boolean skip = filterChidren(child, lastBlockNode, nextBlockNode, isSmallBlock, world);
-					
-					if (skip || checkForFallDamage(child, world)) {
-						return null;
-					}
-					
-					validChildren.add(child);
-					return null;
-				}).collect(Collectors.toList());
-			}
-			
-//			for (Iterator iterator = tasks.iterator(); iterator.hasNext();) {
-//				Callable<Void> callable = (Callable<Void>) iterator.next();
-//				try {
-//					callable.call();
-//				} catch (Exception e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}
-			
-			try {
-				List<Future<Void>> futures = executor.invokeAll(tasks);
-				
-				for (Future<Void> future : futures) {
-					if (!future.isDone()) {
-						Thread.sleep(50);
+			double closestBlockVolume = BlockShapeChecker.getShapeVolume(nextBlockNode.getBlockPos().down(), world);
+			boolean isSmallBlock = closestBlockVolume > 0 && closestBlockVolume < 1;
+			for (Node child : children) {
+				if (stop.get()) return false;
+				Vec3d cp = child.agent.getPos();
+				boolean childClimbing = child.agent.isClimbing(world);
+				boolean tooClose = false;
+				for (Node other : validChildren) {
+					double distance = other.agent.getPos().distanceTo(cp);
+					boolean otherClimbing = other.agent.isClimbing(world);
+					if ((otherClimbing && childClimbing && distance < 0.03)
+							|| (!otherClimbing && !childClimbing && distance < 0.294)
+							|| (isSmallBlock && distance < 0.2)) {
+						tooClose = true;
+						break;
 					}
 				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+				if (tooClose) continue;
+				if (filterChidren(child, lastBlockNode, nextBlockNode, isSmallBlock, world) || checkForFallDamage(child, world)) continue;
+				validChildren.add(child);
 			}
-			
-			Object openSetLock = new Object();  // if openSet is not thread-safe
-			
-			List<Callable<Void>> processingTasks = new ArrayList<>();
-					
-			if (validChildren.size() > 25) {
-				Node[][] chunks = ArrayChunkSplitter.splitArrayIntoChunksOfX(validChildren.toArray(new Node[validChildren.size()]), children.size()/25);
-				
-				for (int i = 0; i < chunks.length; i++) {
-					Node[] nodes = chunks[i];
-					tasks.add(() -> {
-						for (int j = 0; j < nodes.length; j++) {
-							Node child = nodes[j];
-							if (stop.get()) return null;
-					    	if (Thread.currentThread().isInterrupted()) return null;
-					        updateNode(world, parent, child, target, TARGET, blockPath.get(), closed);
-		
-					        synchronized (openSetLock) {
-					            if (child.isOpen()) {
-					                openSet.update(child);
-					            } else {
-					                openSet.insert(child);
-					            }
-					        }
-
-					        // Update best heuristic safely
-					        synchronized (bestHeuristicSoFar) {
-					            if (!updateBestSoFar(child, target, bestHeuristicSoFar)) {
-					                failing.set(false);
-					            }
-					        }
-						}
-						return null;
-					});
-				}
-				
-			} else {
-		
-				processingTasks = validChildren.stream()
-				    .map(child -> (Callable<Void>) () -> {
-						if (stop.get()) return null;
-				    	if (Thread.currentThread().isInterrupted()) return null;
-				        updateNode(world, parent, child, target, TARGET, blockPath.get(), closed);
-	
-				        synchronized (openSetLock) {
-				            if (child.isOpen()) {
-				                openSet.update(child);
-				            } else {
-				                openSet.insert(child);
-				            }
-				        }
-	
-				        // Update best heuristic safely
-				        synchronized (bestHeuristicSoFar) {
-				            if (!updateBestSoFar(child, target, bestHeuristicSoFar)) {
-				                failing.set(false);
-				            }
-				        }
-	
-				        // Optional: render node for debugging
-//				         RenderHelper.renderNode(child);
-	
-				        return null;
-				    })
-				    .collect(Collectors.toList());
-
+			for (Node child : validChildren) {
+				updateNode(world, parent, child, target, TARGET, blockPath.get(), closed);
+				if (child.isOpen()) openSet.update(child);
+				else openSet.insert(child);
+				if (!updateBestSoFar(child, target, bestHeuristicSoFar)) failing.set(false);
 			}
-
-//			for (Iterator iterator = processingTasks.iterator(); iterator.hasNext();) {
-//				Callable<Void> callable = (Callable<Void>) iterator.next();
-//				try {
-//					callable.call();
-//				} catch (Exception e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}
-			
-		    try {
-				List<Future<Void>> futures = executor.invokeAll(processingTasks);
-				
-				for (Future<Void> future : futures) {
-					if (!future.isDone()) {
-						Thread.sleep(50);
-					}
-				}
-				
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-				
 //			for (Node child : validChildren) {
 //				updateNode(world, parent, child, target, blockPath.get(), closed);
 //				

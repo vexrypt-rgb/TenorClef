@@ -42,7 +42,10 @@ public class SafeRandomShimmyTask extends Task {
 
         baritone.getInputOverrideHandler().setInputForceState(Input.SNEAK, true);
         baritone.getInputOverrideHandler().setInputForceState(Input.MOVE_FORWARD, true);
-        baritone.getInputOverrideHandler().setInputForceState(Input.CLICK_LEFT, true);
+        // S259: never dig in the Nether. s257t shimmied out of the arrival portal while
+        // left-clicking, mined its own floor and dropped into lava at y=44.
+        boolean nether = adris.altoclef.util.helpers.WorldHelper.getCurrentDimension() == adris.altoclef.util.Dimension.NETHER;
+        baritone.getInputOverrideHandler().setInputForceState(Input.CLICK_LEFT, !nether);
         return null;
     }
 

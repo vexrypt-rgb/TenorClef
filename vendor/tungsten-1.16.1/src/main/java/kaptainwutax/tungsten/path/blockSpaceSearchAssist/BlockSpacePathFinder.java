@@ -106,6 +106,7 @@ public class BlockSpacePathFinder {
 			if (closed.contains(next)) continue;
 			
 			closed.add(next);
+			numNodes++;
 			if(isPathComplete(next, target, failing)) {
 				TungstenModRenderContainer.RENDERERS.clear();
 				List<BlockNode> path = generatePath(next, world);
@@ -118,7 +119,7 @@ public class BlockSpacePathFinder {
 			if(TungstenModRenderContainer.RENDERERS.size() > 3000) {
 				TungstenModRenderContainer.RENDERERS.clear();
 			}
-			 RenderHelper.renderPathSoFar(next);
+			if ((numNodes & 15) == 0) RenderHelper.renderPathSoFar(next);
 			
 			for(BlockNode child : next.getChildren(world, goal, generateDeep)) {
 				if (TungstenModDataContainer.PATHFINDER.stop.get()) return Optional.empty();

@@ -85,6 +85,14 @@ public class ModernSpeedrunTask extends Task {
             for (BlockPos n : new BlockPos[]{pos.up(), pos.add(0, 0, -1), pos.add(0, 0, 1), pos.add(1, 0, 0), pos.add(-1, 0, 0)}) {
                 if (w.getBlockState(n).getBlock() == Blocks.LAVA) return true;
             }
+            // S260: s258t mined out its floor chasing gold and fell 5 blocks into lava. Refuse a
+            // break that opens a drop onto lava within 4 blocks below.
+            for (int k = 1; k <= 4; k++) {
+                BlockPos d = pos.add(0, -k, 0);
+                var st = w.getBlockState(d);
+                if (st.getBlock() == Blocks.LAVA) return true;
+                if (!st.isAir()) break;
+            }
         } catch (Throwable ignored) {}
         return false;
     }

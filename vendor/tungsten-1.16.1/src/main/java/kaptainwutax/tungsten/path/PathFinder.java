@@ -68,6 +68,16 @@ public class PathFinder {
 	private static final double minimumImprovement = -500;
 	private static Optional<List<BlockNode>> blockPath = Optional.empty();
 	protected static final double MIN_DIST_PATH = 1.8;
+	// Search knobs, overridable with -Dtungsten.tune.<name>=<value> for the PathBench tuner.
+	private static double tune(String k, double d) {
+		String v = System.getProperty("tungsten.tune." + k);
+		try { return v == null ? d : Double.parseDouble(v); } catch (NumberFormatException e) { return d; }
+	}
+	private static final double T_XZ = tune("xz", 1.3);
+	private static final double T_DIST = tune("dist", 2.8);
+	private static final double T_BN = tune("bn", 40);
+	private static final double T_DEDUPE = tune("dedupe", 0.294);
+	private static final double T_DROP = tune("drop", 1.5);
 	protected static AtomicInteger NEXT_CLOSEST_BLOCKNODE_IDX = new AtomicInteger(1);
 	protected static AtomicInteger numNodesConsidered = new AtomicInteger(0);
 	
@@ -529,7 +539,7 @@ public class PathFinder {
 	}
 	
 	private static double computeHeuristic(Vec3d position, boolean onGround, Vec3d target, Vec3d realTarget) {
-		double xzMultiplier = 1.3;
+		double xzMultiplier = T_XZ;
 	    double dx = (position.x - target.x)*xzMultiplier;
 	    double dy = 0;
 	    if (target.y != Double.MIN_VALUE) {
@@ -537,8 +547,8 @@ public class PathFinder {
 		    if (!onGround || dy < 1.6 && dy > -1.6) dy = 0;
 	    }
 	    double dz = (position.z - target.z)*xzMultiplier;
-	    return (Math.sqrt(dx * dx + dy * dy + dz * dz) * 2.8
-	    		 + (((blockPath.isPresent() ? blockPath.get().size() - NEXT_CLOSEST_BLOCKNODE_IDX.get() : 0)) * 40)
+	    return (Math.sqrt(dx * dx + dy * dy + dz * dz) * T_DIST
+	    		 + (((blockPath.isPresent() ? blockPath.get().size() - NEXT_CLOSEST_BLOCKNODE_IDX.get() : 0)) * T_BN)
 	    		+ (DistanceCalculator.getEuclideanDistance(position, realTarget) * 0.2)
 	    		);
 	}
@@ -859,7 +869,7 @@ public class PathFinder {
     	double refY = Math.min(nextBlockNode.getPos(true).getY(), lastBlockNode.getPos(true).getY());
     	if (isSmallBlock) return child.agent.getPos().getY() < (refY - 1);
 
-    	return child.agent.getPos().getY() < (refY - 1.5);
+    	return child.agent.getPos().getY() < (refY - T_DROP);
 //    	return false;
     }
 
@@ -952,7 +962,7 @@ public class PathFinder {
 					double distance = other.agent.getPos().distanceTo(cp);
 					boolean otherClimbing = validClimbing.get(vi);
 					if ((otherClimbing && childClimbing && distance < 0.03)
-							|| (!otherClimbing && !childClimbing && distance < 0.294)
+							|| (!otherClimbing && !childClimbing && distance < T_DEDUPE)
 							|| (isSmallBlock && distance < 0.2)) {
 						tooClose = true;
 						break;

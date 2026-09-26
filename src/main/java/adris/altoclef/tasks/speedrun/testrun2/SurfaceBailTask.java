@@ -215,6 +215,7 @@ public class SurfaceBailTask extends Task {
 
         if (sky(mod) >= 13 && y >= 63 && ticks > 20) {
             done = true;
+            succeed();
             return null;
         }
         // S265: out of the cave but under leaves/overhang (s262t: y=63 sky=4..6 for 90s, bail
@@ -222,6 +223,7 @@ public class SurfaceBailTask extends Task {
         if (!underground(mod) && sky(mod) >= 4 && y >= 60 && noClimb > 60) {
             T2Log.force("S265", "surfaced under cover y=" + y + " sky=" + sky(mod));
             done = true;
+            succeed();
             return null;
         }
         // S168: a bail that has not gained a single block of altitude in STUCK_GIVEUP_TICKS is

@@ -1,7 +1,9 @@
 package adris.altoclef.tasks.speedrun.testrun2;
 
 import adris.altoclef.AltoClef;
+import adris.altoclef.tasksystem.FailureReason;
 import adris.altoclef.tasksystem.Task;
+import adris.altoclef.tasksystem.TaskResult;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 
@@ -35,6 +37,7 @@ public class StepOffTableTask extends Task {
         // Finish as soon as we are off the table — do not keep walking/jumping.
         if (!onTable()) {
             done = true;
+            succeed();
             McCompat.setMove(false, false);
             return null;
         }
@@ -43,7 +46,10 @@ public class StepOffTableTask extends Task {
         if (ticks == 20) McCompat.setYaw(startYaw + 180f);
         if (ticks == 40) McCompat.setYaw(startYaw + 270f);
         // Longer timeout if still standing on the table (was 40 → endless reopen thrash).
-        if (ticks >= 20 * 5) done = true;
+        if (ticks >= 20 * 5) {
+            done = true;
+            fail(FailureReason.TIMEOUT, "still on table after 5s", false);
+        }
         return null;
     }
 

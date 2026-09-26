@@ -1654,6 +1654,13 @@ public class ModernSpeedrunTask extends Task {
     }
 
     private Task iron(AltoClef mod) {
+        // S264: s261t wore out both picks tunnelling E70 offset-walks underground, then spent
+        // 25 min offset-walking into solid stone with 11 unsmeltable ore. No pick = get one first.
+        if (mod.getItemStorage().getItemCount(Items.WOODEN_PICKAXE) < 1 && mod.getItemStorage().getItemCount(Items.STONE_PICKAXE) < 1
+                && mod.getItemStorage().getItemCount(Items.IRON_PICKAXE) < 1) {
+            T2History.note("WHY iron: no pickaxe left - craft stone pick");
+            return TaskCatalogue.getItemTask(Items.STONE_PICKAXE, 1);
+        }
         // `ironN` = total metal stock: ingots PLUS unmelted ore (RAW_IRON preprocesses to
         // IRON_ORE on 1.16.1). This is deliberately NOT the same thing as the `iron=` field
         // in the logs, which is ingots only — see trap 9 in the project memory.
@@ -2761,7 +2768,9 @@ public class ModernSpeedrunTask extends Task {
             // unreachable ore (-164,58,56) for 90s+. Only real iron progress resets the window.
             return stick(iron(mod));
         }
-        if (ironStill == 20 * 12) {
+        boolean noPick = mod.getItemStorage().getItemCount(Items.WOODEN_PICKAXE) < 1 && mod.getItemStorage().getItemCount(Items.STONE_PICKAXE) < 1
+                && mod.getItemStorage().getItemCount(Items.IRON_PICKAXE) < 1;
+        if (ironStill == 20 * 12 && !noPick) {
             T2Log.warn("E70", "iron frozen 12s @" + x + "," + z + " — walk");
             McCompat.cancelPathing();
             adris.altoclef.tasks.speedrun.testrun2.core.T2Input.noJump();

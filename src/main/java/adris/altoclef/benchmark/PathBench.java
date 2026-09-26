@@ -438,7 +438,12 @@ package adris.altoclef.benchmark;
 //$$                 sp.networkHandler.requestTeleport(p.getX() + 0.5, p.getY(), p.getZ() + 0.5, sp.yaw, sp.pitch);
 //$$             }
 //$$         });
-//$$         Thread.sleep(1500);
+//$$         // Poll for arrival instead of a fixed sleep: under warp a fixed wait is many game ticks of sinking.
+//$$         for (int i = 0; i < 60; i++) {
+//$$             Thread.sleep(25);
+//$$             if (mc.player != null && mc.player.squaredDistanceTo(p.getX() + 0.5, p.getY(), p.getZ() + 0.5) < 1.0) break;
+//$$         }
+//$$         Thread.sleep(50);
 //$$     }
 //$$
 //$$     private static long worldTime(MinecraftClient mc) {

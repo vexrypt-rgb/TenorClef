@@ -36,6 +36,7 @@ public class CollectBlazeRodsTask extends ResourceTask {
     // Why was this here???
     //private Entity _toKill;
     private BlockPos _foundBlazeSpawner = null;
+    private boolean _retreating = false;
 
     public CollectBlazeRodsTask(int count) {
         super(Items.BLAZE_ROD, count);
@@ -71,9 +72,15 @@ public class CollectBlazeRodsTask extends ResourceTask {
             if (toKill.isPresent()) {
                 // S253: s253t burned 14 -> 3.5hp vs two blazes and died; only 5+ blazes ever triggered a retreat.
                 int blazes = mod.getEntityTracker().getTrackedEntities(BlazeEntity.class).size();
-                if (mod.getPlayer().getHealth() <= TOO_LITTLE_HEALTH_BLAZE &&
+                // S278: s277t retreated at 5.6hp, re-engaged at 10.6 and was knocked back to 4 within
+                // seconds, burning its food on regen until a fireball killed it. Once retreating,
+                // stay away until hp is back to 16.
+                float hp = mod.getPlayer().getHealth();
+                if (hp >= 16) _retreating = false;
+                if (_retreating || hp <= TOO_LITTLE_HEALTH_BLAZE &&
                         (blazes >= TOO_MANY_BLAZES || blazes >= 2 || mod.getPlayer().isOnFire()
-                                || mod.getPlayer().getHealth() <= 6)) {
+                                || hp <= 6)) {
+                    _retreating = true;
                     setDebugState("Running away as there are too many blazes nearby.");
                     return new RunAwayFromHostilesTask(15 * 2, true);
                 }

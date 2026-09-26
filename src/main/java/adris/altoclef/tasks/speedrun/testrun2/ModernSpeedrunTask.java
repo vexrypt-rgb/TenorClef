@@ -1659,6 +1659,12 @@ public class ModernSpeedrunTask extends Task {
             T2History.note("WHY iron: no pickaxe left - craft stone pick");
             return TaskCatalogue.getItemTask(Items.STONE_PICKAXE, 1);
         }
+        // S275: pickPhase() moves to IRON the moment a wooden pick exists, so bootstrap's stone-pick
+        // step never ran. s274t broke two wooden picks digging to iron and was still in BOOTSTRAP at 6 min.
+        if (mod.getItemStorage().getItemCount(Items.STONE_PICKAXE) < 1 && mod.getItemStorage().getItemCount(Items.IRON_PICKAXE) < 1) {
+            T2History.note("WHY iron: upgrade wooden pick to stone");
+            return TaskCatalogue.getItemTask(Items.STONE_PICKAXE, 1);
+        }
         // `ironN` = total metal stock: ingots PLUS unmelted ore (RAW_IRON preprocesses to
         // IRON_ORE on 1.16.1). This is deliberately NOT the same thing as the `iron=` field
         // in the logs, which is ingots only — see trap 9 in the project memory.

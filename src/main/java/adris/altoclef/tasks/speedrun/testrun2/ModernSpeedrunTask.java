@@ -1348,6 +1348,12 @@ public class ModernSpeedrunTask extends Task {
         Phase next;
         if (mod.getItemStorage().getItemCount(Items.WOODEN_PICKAXE) >= 1 || mod.getItemStorage().getItemCount(Items.STONE_PICKAXE) >= 1) {
             next = Phase.IRON;
+            // S249: LOOT existed but nothing ever routed to it; s250t spawned 85 blocks from a
+            // village and walked past it to mine. Detour for chests once a pick is in hand.
+            if (!lootGaveUp && WorldHelper.getCurrentDimension() == Dimension.OVERWORLD
+                    && (phase == Phase.LOOT || closestLootChest(mod).isPresent())) {
+                next = Phase.LOOT;
+            }
         } else {
             next = Phase.BOOTSTRAP;
         }
@@ -1544,6 +1550,12 @@ public class ModernSpeedrunTask extends Task {
 
     private Task loot(AltoClef mod) {
         lootTicks++;
+        if (lootTicks > LOOT_MAX_TICKS || looted.size() >= SpeedrunOpt.LOOT_MAX_CHESTS) {
+            lootGaveUp = true;
+            T2History.note("WHY loot done — cap reached, go IRON");
+            setPhase(Phase.IRON);
+            return iron(mod);
+        }
         Optional<BlockPos> chest = closestLootChest(mod);
         if (chest.isPresent() && looted.size() < SpeedrunOpt.LOOT_MAX_CHESTS) {
             BlockPos pos = chest.get();

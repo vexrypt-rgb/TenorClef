@@ -854,9 +854,12 @@ public class PathFinder {
 
     	if (nextBlockNode.isDoingLongJump(world)) return child.agent.getBlockPos().getY() < nextBlockNode.getBlockPos().getY()-1;
 
-    	if (isSmallBlock) return child.agent.getPos().getY() < (nextBlockNode.getPos(true).getY()-1);
+    	// Measure against the lower of the last/next BlockNode: on uphill segments the next node
+    	// can sit 2+ blocks above the agent, which used to reject every reachable child.
+    	double refY = Math.min(nextBlockNode.getPos(true).getY(), lastBlockNode.getPos(true).getY());
+    	if (isSmallBlock) return child.agent.getPos().getY() < (refY - 1);
 
-    	return child.agent.getPos().getY() < (nextBlockNode.getPos(true).getY() - 1.5);
+    	return child.agent.getPos().getY() < (refY - 1.5);
 //    	return false;
     }
 

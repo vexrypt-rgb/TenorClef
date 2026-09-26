@@ -50,6 +50,54 @@ public class GetToBlockTask extends CustomBaritoneGoalTask implements ITaskRequi
         return true;
     }
 
+    private adris.altoclef.tasks.movement.TungstenGotoTask tungstenLeg;
+    private boolean tungstenGaveUp;
+    // Current long leg (> 16 blocks) being timed for MoverStats; legStartMs == 0 means none.
+    private long legStartMs;
+    private double legBlocks;
+    private boolean legTungsten;
+
+    private Task tungstenLeg(AltoClef mod, ClientWorld world, boolean isPortal) {
+        if (world == null || mod.getPlayer() == null) return null;
+        boolean far = !mod.getPlayer().getBlockPos().isWithinDistance(_position, 16);
+        if (legStartMs != 0 && !far) {
+            // Reached the handoff radius: score the leg with whichever mover drove it.
+            adris.altoclef.movement.MoverStats.record(legTungsten, (System.currentTimeMillis() - legStartMs) / 1000.0, legBlocks, false);
+            legStartMs = 0;
+        }
+        boolean primary;
+        try {
+            primary = adris.altoclef.util.helpers.TungstenHelper.isPrimary();
+        } catch (Throwable t) {
+            primary = false;
+        }
+        if (tungstenLeg != null && tungstenLeg.usedFallback()) {
+            // Give-up: every second of search/travel it burned counts against Tungsten.
+            if (legStartMs != 0) adris.altoclef.movement.MoverStats.record(true, (System.currentTimeMillis() - legStartMs) / 1000.0, legBlocks, true);
+            legStartMs = 0;
+            tungstenGaveUp = true;
+            tungstenLeg = null;
+            return null;
+        }
+        if (!far) {
+            tungstenLeg = null;
+            return null;
+        }
+        if (legStartMs == 0) {
+            boolean standable = world.getBlockState(_position).getMaterial().isReplaceable()
+                    && world.getBlockState(_position.up()).getMaterial().isReplaceable();
+            legTungsten = primary && !tungstenGaveUp && !isPortal && standable
+                    && adris.altoclef.movement.MoverStats.preferTungsten();
+            legStartMs = System.currentTimeMillis();
+            legBlocks = Math.sqrt(mod.getPlayer().getBlockPos().getSquaredDistance(_position)) - 16;
+            // Only score Baritone legs when Tungsten is a real option, so the comparison is fair.
+            if (!legTungsten && !(primary && standable && !isPortal)) legStartMs = 0;
+        }
+        if (!legTungsten) return null;
+        if (tungstenLeg == null) tungstenLeg = new adris.altoclef.tasks.movement.TungstenGotoTask(_position);
+        return tungstenLeg;
+    }
+
     /** True once we have been isFinished for >10s while still being ticked (parent stuck). */
     private boolean staleFinished = false;
     private boolean staleFinishedWarned = false;
@@ -85,6 +133,12 @@ public class GetToBlockTask extends CustomBaritoneGoalTask implements ITaskRequi
             finishedTicks = 0;
             return new DefaultGoToDimensionTask(_dimension);
         }
+
+        // Tungsten (when it is the travel mover) owns long open-ground legs; Baritone keeps the
+        // last blocks, portals and non-standable targets (tables, ore) since Tungsten cannot
+        // mine or place. One Tungsten give-up hands this instance to Baritone for good.
+        Task tung = tungstenLeg(modEarly, world, isPortal);
+        if (tung != null) return tung;
 
         if (isFinished()) {
             finishedTicks++;

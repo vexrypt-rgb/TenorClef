@@ -147,6 +147,15 @@ public abstract class DoStuffInContainerTask extends Task {
         // TODO: Finish committing to optionals, this is ugly.
         cachedContainerPosition = nearest.get();
 
+        if (walkedIntoWater(mod, nearest.get())) {
+            // The only route to this container goes through water: WaterBail pulls us out,
+            // we walk straight back in (s233: 17 flips / 60s at a table across a pond).
+            mod.getBlockScanner().requestBlockUnreachable(nearest.get(), 0);
+            cachedContainerPosition = null;
+            setDebugState("Container route floods us, blacklisted " + nearest.get().toShortString());
+            return null;
+        }
+
         // Walk to it and open it
 
         // Wait for food
@@ -170,6 +179,29 @@ public abstract class DoStuffInContainerTask extends Task {
         }
         return openTableTask;
         //return new GetToBlockTask(nearest, true);
+    }
+
+    private static BlockPos waterTarget;
+    private static int waterEntries;
+    private static long waterFirstMs;
+    private static boolean wasWet;
+
+    /** True once heading to {@code target} has put us in water twice within 60s. */
+    private static boolean walkedIntoWater(AltoClef mod, BlockPos target) {
+        boolean wet = mod.getPlayer().isTouchingWater();
+        boolean entered = wet && !wasWet;
+        wasWet = wet;
+        if (!entered) return false;
+        long now = System.currentTimeMillis();
+        if (!target.equals(waterTarget) || now - waterFirstMs > 60_000) {
+            waterTarget = target;
+            waterEntries = 0;
+            waterFirstMs = now;
+        }
+        if (++waterEntries < 2) return false;
+        waterTarget = null;
+        waterEntries = 0;
+        return true;
     }
 
     public ItemTarget getContainerTarget() {

@@ -16,6 +16,7 @@ import adris.altoclef.util.helpers.ItemHelper;
 import adris.altoclef.util.helpers.StorageHelper;
 import adris.altoclef.util.slots.FurnaceSlot;
 import adris.altoclef.util.slots.Slot;
+import adris.altoclef.util.helpers.WorldHelper;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -344,6 +345,14 @@ public class SmeltInFurnaceTask extends ResourceTask {
                     !furnaceCache.fuelSlot.isEmpty() || !furnaceCache.materialSlot.isEmpty() ||
                     !furnaceCache.outputSlot.isEmpty()) {
                 return 9999999.0;
+            }
+            // Reuse a furnace we can already reach instead of placing another one. With 8+ cobble
+            // the cost below floors at 10, so any furnace >10 blocks away used to lose to a fresh
+            // placement and the bot littered furnaces. Same 40-block rule as CraftInTableTask.
+            java.util.Optional<BlockPos> known = mod.getBlockScanner().getNearestBlock(
+                    mod.getPlayer().getPos(), WorldHelper::canReach, Blocks.FURNACE);
+            if (known.isPresent() && known.get().isWithinDistance(mod.getPlayer().getPos(), 40)) {
+                return Double.POSITIVE_INFINITY;
             }
             if (mod.getItemStorage().getItemCount(Items.COBBLESTONE) > 8) {
                 double cost = 100.0 - 90.0 * (double) mod.getItemStorage().getItemCount(new Item[]{Items.COBBLESTONE}) / 8.0;

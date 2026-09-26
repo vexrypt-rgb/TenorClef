@@ -19,6 +19,8 @@ import adris.altoclef.tasks.speedrun.KillEnderDragonWithBedsTask;
 import adris.altoclef.tasks.speedrun.testrun2.combat.BlazePeekTask;
 import adris.altoclef.tasks.speedrun.testrun2.combat.FightNearbyTask;
 import adris.altoclef.tasksystem.Task;
+import adris.altoclef.tasksystem.TaskFailure;
+import adris.altoclef.tasksystem.TaskResult;
 import adris.altoclef.util.Dimension;
 import adris.altoclef.util.ItemTarget;
 import adris.altoclef.util.helpers.StorageHelper;
@@ -861,7 +863,7 @@ public class ModernSpeedrunTask extends Task {
         // CollectIronIngotTask<->WaterBailTask every tick for 60s+ at spd=0, S164 kept
         // pinning the collector, and WaterBailTask's 5s shore escalation never got to run.
         // WaterBailTask ends itself (1s dry, or MAX_TICKS), same contract as SurfaceBailTask.
-        if (active instanceof WaterBailTask && !active.isFinished()) {
+        if (active instanceof WaterBailTask && bailRunning(active)) {
             return active;
         }
         if (wanderHold > 0 && active instanceof TimeoutWanderTask && !active.isFinished()) {
@@ -1050,14 +1052,14 @@ public class ModernSpeedrunTask extends Task {
         if (deepBailTicks > 0) {
             // HolePillarTask is already exempt from the Construct pin in stick(), so this is
             // the one task that can actually take the slot and climb.
-            if (active instanceof HolePillarTask && !active.isFinished()) return active;
+            if (active instanceof HolePillarTask && bailRunning(active)) return active;
             // S198: HolePillarTask only climbs a 1x1 shaft. In an open cave (fix9: walls=3/3/4
             // at y=20) it finishes instantly and was re-created every tick for 3 minutes
             // while the bot drifted down to y=9. Outside a shaft, walk/tower to the sky.
             // S230: same instant-finish loop when HolePillar is on its give-up cool (s229: pillar
             // rose 4, gave up with cool=80, then Construct<->pillar swapped 20x/s at y=28).
             if (!HolePillar.boxed(mod) || HolePillar.givingUp()) {
-                if (active instanceof SurfaceBailTask && !active.isFinished()) return active;
+                if (active instanceof SurfaceBailTask && bailRunning(active)) return active;
                 T2Log.warn("S198", "deep bail " + (HolePillar.givingUp() ? "pillar giving up cool=" + HolePillar.failCoolLeft() : "not boxed") + " - surface bail instead of pillar");
                 return stick(new SurfaceBailTask());
             }
@@ -1171,12 +1173,12 @@ public class ModernSpeedrunTask extends Task {
         if (pickCraftLock) forceSurface = false;
         if (forceSurface && WorldHelper.getCurrentDimension() == Dimension.OVERWORLD) {
             forceSurfaceTicks++;
-            if (active instanceof SurfaceBailTask && !active.isFinished()) {
+            if (active instanceof SurfaceBailTask && bailRunning(active)) {
                 return active;
             }
             return stick(new SurfaceBailTask());
         }
-        if (active instanceof SurfaceBailTask && !active.isFinished()) {
+        if (active instanceof SurfaceBailTask && bailRunning(active)) {
             return active;
         }
         Task unstick = unstickCraft(mod);
@@ -1659,7 +1661,7 @@ public class ModernSpeedrunTask extends Task {
             woodForSticksTicks = 0;
         }
         if (recraftPause > 0) recraftPause--;
-        if (active instanceof SurfaceBailTask && !active.isFinished()) {
+        if (active instanceof SurfaceBailTask && bailRunning(active)) {
             return active;
         }
         if (SurfaceBailTask.underground(mod) && !(active instanceof SurfaceBailTask)) {
@@ -2157,6 +2159,25 @@ public class ModernSpeedrunTask extends Task {
     }
 
     /** Reuse the live child unless the replacement is a different kind of work. */
+    private Task lastReportedBail;
+
+    /**
+     * Running check for the bail children. isFinished() is only a lifecycle signal: a bail
+     * that gave up is finished too. Read the real outcome from getLastResult() and log it
+     * once per instance, so a give-up shows up as FAILURE instead of passing for success.
+     */
+    private boolean bailRunning(Task t) {
+        if (!t.isFinished()) return true;
+        if (t != lastReportedBail) {
+            lastReportedBail = t;
+            TaskResult r = t.getLastResult();
+            TaskFailure why = t.getLastFailure();
+            T2History.note("OUTCOME " + t.getClass().getSimpleName() + "=" + r
+                    + (why == null ? "" : " " + why.getReason() + " " + why.getMessage()));
+        }
+        return false;
+    }
+
     private Task stick(Task wanted) {
         if (wanted == null) return null;
 
@@ -2308,7 +2329,7 @@ public class ModernSpeedrunTask extends Task {
                 return active;
             }
         }
-        if (active instanceof SurfaceBailTask && !active.isFinished()
+        if (active instanceof SurfaceBailTask && bailRunning(active)
                 && !(wanted instanceof EnterNetherPortalTask)) {
             return active;
         }

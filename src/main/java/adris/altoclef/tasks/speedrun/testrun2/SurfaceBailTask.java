@@ -4,6 +4,7 @@ import adris.altoclef.AltoClef;
 import adris.altoclef.Debug;
 import adris.altoclef.tasks.movement.GetToBlockTask;
 import adris.altoclef.tasks.movement.TimeoutWanderTask;
+import adris.altoclef.tasksystem.FailureReason;
 import adris.altoclef.tasksystem.Task;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
@@ -198,6 +199,7 @@ public class SurfaceBailTask extends Task {
         ticks++;
         AltoClef mod = AltoClef.getInstance();
         if (mod.getPlayer() == null) {
+            fail(FailureReason.PRECONDITION_FAILED, "surface-bail: no player", false);
             done = true;
             return null;
         }
@@ -236,6 +238,8 @@ public class SurfaceBailTask extends Task {
                     + " sky=" + sky(mod) + " dead=" + (deadTicks / 20) + "s"
                     + " giveUp=" + giveUps
                     + (unrecoverable(mod) ? " unrecoverable" : "") + " - handing back to bootstrap");
+            fail(ticks > MAX_TICKS ? FailureReason.TIMEOUT : FailureReason.NO_PATH,
+                    "surface-bail gave up after " + (ticks / 20) + "s at y=" + y, false);
             done = true;
             return null;
         }

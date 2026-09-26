@@ -111,6 +111,20 @@ public class WaterBailTask extends Task {
                         + shore.getX() + "," + shore.getY() + "," + shore.getZ());
             }
         }
+        // S255: s254t stood ground=true in a portal-pit puddle, spd=0 for 20s; neither swimming nor
+        // the diagonal shore path moved it. With a spare bucket, just pick the source up.
+        if (noProgressTicks > SHORE_AFTER_TICKS * 2
+                && mod.getItemStorage().hasItem(net.minecraft.item.Items.BUCKET)) {
+            BlockPos feet = mod.getPlayer().getBlockPos();
+            for (BlockPos p : new BlockPos[]{feet, feet.up(), feet.add(1, 0, 0), feet.add(-1, 0, 0),
+                    feet.add(0, 0, 1), feet.add(0, 0, -1), feet.down()}) {
+                var fs = mod.getWorld().getFluidState(p);
+                if (fs.isStill() && fs.getFluid().matchesType(net.minecraft.fluid.Fluids.WATER)) {
+                    T2Log.force("S255", "water bail stuck - scooping source at " + p.toShortString());
+                    return new adris.altoclef.tasks.construction.ClearLiquidTask(p);
+                }
+            }
+        }
         if (shoreTask != null) return shoreTask;
 
         return new GetOutOfWaterTask();

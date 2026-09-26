@@ -261,6 +261,8 @@ public class Node {
 	    for (boolean forward : new boolean[]{true, false}) {
 	        for (boolean right : new boolean[]{true, false}) {
 	            for (boolean left : new boolean[]{true, false}) {
+	                // right+left cancel out: same motion as neither, so it only duplicated simulations.
+	                if (right && left) continue;
 //	                for (boolean sneak : new boolean[]{false, true}) {
 	                    for (float yaw = fromYaw; yaw < toYaw; yaw += 22.5 + Math.random()) {
 	                        for (boolean sprint : new boolean[]{true, false}) {
@@ -306,8 +308,6 @@ public class Node {
 	            if (newNode.agent.touchingWater && (sneak || jump) && newNode.agent.getBlockPos().getY() == nextBlockNode.getBlockPos().getY()) return;
 	            if (newNode.agent.touchingWater && jump && newNode.agent.getBlockPos().getY() > nextBlockNode.getBlockPos().getY()) return;
 	            if (!sneak) {
-	            	boolean isBelowClosedTrapDoor = BlockStateChecker.isClosedBottomTrapdoor(world.getBlockState(nextBlockNode.getBlockPos().down()));
-	        	    boolean shouldAllowWalkingOnLowerBlock = !world.getBlockState(agent.getBlockPos().up(2)).isAir() && nextBlockNode.getPos(true).distanceTo(agent.getPos()) < 3;
 //	        	    double minY = isBelowClosedTrapDoor ? nextBlockNode.getPos(true).y - 1 : nextBlockNode.getBlockPos().getY() - (shouldAllowWalkingOnLowerBlock ? 1.3 : 0.3);
 		            for (int j = 0; j < ((!jump) && !newNode.agent.isClimbing(world) ? 1 : 10); j++) {
 //		                if (newNode.agent.getPos().y <= minY && !newNode.agent.isClimbing(world) || !isMoving) break;

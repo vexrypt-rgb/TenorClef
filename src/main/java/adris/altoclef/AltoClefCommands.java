@@ -75,7 +75,8 @@ public class AltoClefCommands {
                 new HeadlessCommand(),
                 new ZeroCycleCommand(),
                 new GroundZeroCommand(),
-                new WarpCommand()
+                new WarpCommand(),
+                new PathBenchCommand()
         );
     }
 }

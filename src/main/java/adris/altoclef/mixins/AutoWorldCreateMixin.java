@@ -121,7 +121,7 @@ public class AutoWorldCreateMixin {
     //$$                 name,
     //$$                 levelInfo,
     //$$                 RegistryTracker.create(),
-    //$$                 GeneratorOptions.getDefaultOptions());
+    //$$                 seededOptions());
     //$$         Debug.logHarness("AUTOWORLD: create call returned — waiting for join");
     //$$     } catch (Throwable t) {
     //$$         Debug.logHarness("AUTOWORLD: create failed: " + t);
@@ -129,6 +129,17 @@ public class AutoWorldCreateMixin {
     //$$         AutoWorldState.setCreated(false);
     //$$         AutoWorldState.setDelay(20 * 10);
     //$$     }
+    //$$ }
+    //$$
+    //$$ // -Dtenorclef.seed=N pins the world seed so benchmarks (e.g. @pathbench) replay the same terrain.
+    //$$ private static GeneratorOptions seededOptions() {
+    //$$     GeneratorOptions def = GeneratorOptions.getDefaultOptions();
+    //$$     String seed = System.getProperty("tenorclef.seed");
+    //$$     if (seed == null || seed.isEmpty()) return def;
+    //$$     long v;
+    //$$     try { v = Long.parseLong(seed.trim()); } catch (NumberFormatException e) { v = seed.trim().hashCode(); }
+    //$$     Debug.logHarness("AUTOWORLD: fixed seed " + v);
+    //$$     return def.withHardcore(false, java.util.OptionalLong.of(v));
     //$$ }
     //#endif
 }

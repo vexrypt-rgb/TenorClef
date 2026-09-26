@@ -165,7 +165,19 @@ public final class T2History {
                 + " pick=" + pick + " buck=" + buck
                 + " iron=" + iron + " ore=" + ironOre
                 + " rods=" + rods + " pearls=" + pearls + " eyes=" + eyes
-                + " hp=" + (mod.getPlayer() == null ? -1 : (int) mod.getPlayer().getHealth());
+                + " hp=" + (mod.getPlayer() == null ? -1f : mod.getPlayer().getHealth())
+                + " hun=" + (mod.getPlayer() == null ? -1 : mod.getPlayer().getHungerManager().getFoodLevel())
+                + " fire=" + (mod.getPlayer() != null && mod.getPlayer().isOnFire())
+                + " food=" + foodCount(mod);
+    }
+
+    private static int foodCount(AltoClef mod) {
+        try {
+            return mod.getFoodChain().hasFood() ? (int) mod.getItemStorage().getItemStacksPlayerInventory(false).stream()
+                    .filter(st -> st.getItem().isFood()).mapToInt(net.minecraft.item.ItemStack::getCount).sum() : 0;
+        } catch (Throwable t) {
+            return -1;
+        }
     }
 
     private static String mobs(AltoClef mod) {

@@ -340,6 +340,8 @@ package adris.altoclef.benchmark;
 //$$         int[][] dirs = {{0, 0}, {800, 0}, {-800, 0}, {0, 800}, {0, -800}, {800, 800}, {-800, -800}, {800, -800}};
 //$$         PrintWriter csv = open("wreck_baritone");
 //$$         csv.println("wreck,x,y,z,startDist,result,ticks,endDist,opened,items");
+//$$         // Pathing test, not combat: drowned in the wrecks would otherwise decide the result.
+//$$         mc.getServer().submit(() -> mc.getServer().setDifficulty(net.minecraft.world.Difficulty.PEACEFUL, true)).get();
 //$$         int ok = 0, n = 0;
 //$$         try {
 //$$             for (int wi = 0; wi < Math.min(count, dirs.length); wi++) {

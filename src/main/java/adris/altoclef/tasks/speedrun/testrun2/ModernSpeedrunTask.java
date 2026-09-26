@@ -1054,9 +1054,11 @@ public class ModernSpeedrunTask extends Task {
             // S198: HolePillarTask only climbs a 1x1 shaft. In an open cave (fix9: walls=3/3/4
             // at y=20) it finishes instantly and was re-created every tick for 3 minutes
             // while the bot drifted down to y=9. Outside a shaft, walk/tower to the sky.
-            if (!HolePillar.boxed(mod)) {
+            // S230: same instant-finish loop when HolePillar is on its give-up cool (s229: pillar
+            // rose 4, gave up with cool=80, then Construct<->pillar swapped 20x/s at y=28).
+            if (!HolePillar.boxed(mod) || HolePillar.givingUp()) {
                 if (active instanceof SurfaceBailTask && !active.isFinished()) return active;
-                T2Log.warn("S198", "deep bail not boxed - surface bail instead of pillar");
+                T2Log.warn("S198", "deep bail " + (HolePillar.givingUp() ? "pillar giving up cool=" + HolePillar.failCoolLeft() : "not boxed") + " - surface bail instead of pillar");
                 return stick(new SurfaceBailTask());
             }
             return stick(new HolePillarTask());

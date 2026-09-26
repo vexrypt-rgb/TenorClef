@@ -53,10 +53,21 @@ public final class T2History {
                     || lastChild.contains("Enter") && (childName.contains("Construct") || childName.contains("Surface"))
                     || lastChild.contains("Surface") && childName.contains("Enter")
                     || lastChild.contains("GetTo") && childName.contains("Construct");
-            if (!portalNoise) {
-                push("CHILD " + lastChild + " -> " + childName
-                        + " " + snapshot(mod, phase, x, y, z));
+            // A->B->A ping-pong: count it instead of printing 20 CHILD lines a second.
+            boolean flip = childName.equals(prevChild);
+            if (flip) {
+                if (flipCount++ == 0) flipStartTick = ticks;
+                if (flipCount % 100 == 0) push("FLIP " + lastChild + "<->" + childName + " x" + flipCount + "/"
+                        + (ticks - flipStartTick) / 20 + "s " + snapshot(mod, phase, x, y, z));
+            } else {
+                if (flipCount > 0) push("FLIP ended x" + flipCount);
+                flipCount = 0;
+                if (!portalNoise) {
+                    push("CHILD " + lastChild + " -> " + childName
+                            + " " + snapshot(mod, phase, x, y, z));
+                }
             }
+            prevChild = lastChild;
             lastChild = childName;
         }
         int dx = x - lastX, dy = y - lastY, dz = z - lastZ;

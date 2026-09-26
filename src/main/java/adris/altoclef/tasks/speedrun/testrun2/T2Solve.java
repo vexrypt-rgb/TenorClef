@@ -174,6 +174,13 @@ public final class T2Solve {
                 // A slow GUI gets a long, bounded budget and is NEVER closed by a same-xz
                 // test, because standing still is the *correct* behaviour there.
                 boolean slow = slowGui();
+                // S245: the 30s budget is for a furnace that is NOT working. s246t smelted 1 ingot
+                // per 10s and was closed at 5/10, then walkTurn() carried it off a 37-block drop.
+                // Any change in the screen's slots (ore down, ingot up) restarts the budget.
+                if (slow) {
+                    int sig = screenSig(mod);
+                    if (sig != slowSig) { slowSig = sig; guiAge = 0; }
+                }
                 boolean stuck = slow
                         ? (guiAge > 20 * 30)                                   // 30s of smelting
                         : (!wet && (flips >= 4 || sameXz > 20 * 4 || guiAge > 20 * 12));
@@ -183,7 +190,8 @@ public final class T2Solve {
                                     + " age=" + (guiAge / 20) + "s child=" + childName);
                     McCompat.closeScreen();
                     adris.altoclef.tasks.speedrun.testrun2.core.T2Input.noJump();
-                    adris.altoclef.tasks.speedrun.testrun2.core.T2Input.walkTurn();
+                    // A furnace is not jump-thrash; a blind walk from it is how s246t fell.
+                    if (!slow) adris.altoclef.tasks.speedrun.testrun2.core.T2Input.walkTurn();
                     cancelPath(mod);
                     guiAge = 0;
                     flips = 0;
@@ -538,6 +546,20 @@ public final class T2Solve {
         } catch (Throwable t) {
             return true;
         }
+    }
+
+    private static int slowSig;
+
+    private static int screenSig(AltoClef mod) {
+        int h = 0;
+        try {
+            var sh = mod.getPlayer().currentScreenHandler;
+            for (var slot : sh.slots) {
+                var st = slot.getStack();
+                h = h * 31 + st.getCount() * 1009 + net.minecraft.item.Item.getRawId(st.getItem());
+            }
+        } catch (Throwable ignored) {}
+        return h;
     }
 
     private static boolean guiOpen() {

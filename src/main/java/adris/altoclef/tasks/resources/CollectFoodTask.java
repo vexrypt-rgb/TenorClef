@@ -177,6 +177,10 @@ public class CollectFoodTask extends Task {
             currentResourceTask = null;
         }
 
+        // S272: the cached-task early return below skipped hayStalled() forever (s268t: 25 min on one bale).
+        if (currentResourceTask != null && "Collecting Hay".equals(getDebugState()) && hayStalled(mod)) {
+            currentResourceTask = null;
+        }
         if (currentResourceTask != null && currentResourceTask.isActive() && !currentResourceTask.isFinished() && !currentResourceTask.thisOrChildAreTimedOut()) {
             return currentResourceTask;
         }

@@ -122,6 +122,11 @@ public class TungstenGotoTask extends Task {
         return false;
     }
 
+    /** True once Tungsten gave up and travel was handed to Baritone. */
+    public boolean usedFallback() {
+        return failed;
+    }
+
     @Override
     protected String toDebugString() {
         return "TungstenGoto " + target.toShortString();

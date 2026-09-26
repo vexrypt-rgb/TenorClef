@@ -52,6 +52,7 @@ public class AltoClefCommands {
                 new ScanCommand(),
                 new GiveCommand(),
                 new TungstenGotoCommand(),
+                new TungstenSelfTestCommand(),
                 new BuildSchematicCommand(),
                 new T2CoreCommand(),
                 new Testrun2Command(),

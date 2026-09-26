@@ -82,6 +82,8 @@ public class WaterBailTask extends Task {
             // Only "dry for DRY_TICKS" is a real exit; running out the clock still wet is a failure.
             if (dryTicks < DRY_TICKS) {
                 fail(FailureReason.TIMEOUT, "water-bail timed out still wet after " + ticks + " ticks", false);
+            } else {
+                succeed();
             }
             done = true;
             return null;

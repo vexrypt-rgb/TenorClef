@@ -174,7 +174,7 @@ public final class T2History {
     private static int foodCount(AltoClef mod) {
         try {
             return mod.getFoodChain().hasFood() ? (int) mod.getItemStorage().getItemStacksPlayerInventory(false).stream()
-                    .filter(st -> st.getItem().isFood()).mapToInt(net.minecraft.item.ItemStack::getCount).sum() : 0;
+                    .filter(adris.altoclef.multiversion.item.ItemVer::isFood).mapToInt(net.minecraft.item.ItemStack::getCount).sum() : 0;
         } catch (Throwable t) {
             return -1;
         }

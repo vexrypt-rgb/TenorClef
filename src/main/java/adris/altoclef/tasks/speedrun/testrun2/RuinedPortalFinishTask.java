@@ -6,7 +6,9 @@ import adris.altoclef.TaskCatalogue;
 import adris.altoclef.tasks.InteractWithBlockTask;
 import adris.altoclef.tasks.construction.PlaceBlockTask;
 import adris.altoclef.tasks.movement.GetToBlockTask;
+import adris.altoclef.tasksystem.FailureReason;
 import adris.altoclef.tasksystem.Task;
+import adris.altoclef.tasksystem.TaskResult;
 import adris.altoclef.util.ItemTarget;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.Items;
@@ -62,9 +64,16 @@ public class RuinedPortalFinishTask extends Task {
         this.seed = seed.toImmutable();
     }
 
-    /** True once this instance has proven it cannot finish the frame. */
+    /** True once this instance has proven it cannot finish the frame (outcome FAILURE). */
     public boolean gaveUp() {
-        return done && !finished;
+        return done && getLastResult() == TaskResult.FAILURE;
+    }
+
+    /** Every non-lit exit is a failure, not a finish: isFinished() only means "stopped". */
+    private void giveUp(FailureReason reason, String because) {
+        why = because;
+        done = true;
+        fail(reason, "ruined portal: " + because, false);
     }
 
     private boolean finished;
@@ -86,13 +95,11 @@ public class RuinedPortalFinishTask extends Task {
     protected Task onTick() {
         AltoClef mod = AltoClef.getInstance();
         if (mod == null || mod.getPlayer() == null || mod.getWorld() == null) {
-            why = "no-world";
-            done = true;
+            giveUp(FailureReason.PRECONDITION_FAILED, "no-world");
             return null;
         }
         if (++ticks >= MAX_TICKS) {
-            why = "timeout " + (MAX_TICKS / 20) + "s";
-            done = true;
+            giveUp(FailureReason.TIMEOUT, "timeout " + (MAX_TICKS / 20) + "s");
             T2Log.warn("S177", "ruined portal unfinished after " + (MAX_TICKS / 20)
                     + "s (" + why + ") — falling back to the bucket build");
             return null;
@@ -103,6 +110,7 @@ public class RuinedPortalFinishTask extends Task {
             why = "portal exists";
             finished = true;
             done = true;
+            succeed();
             return null;
         }
 
@@ -112,16 +120,14 @@ public class RuinedPortalFinishTask extends Task {
                 setDebugState("crafting flint and steel for ruined portal");
                 return TaskCatalogue.getItemTask(Items.FLINT_AND_STEEL, 1);
             }
-            why = "no igniter";
-            done = true;
+            giveUp(FailureReason.RESOURCE_MISSING, "no igniter");
             T2Log.warn("S177", "no flint and steel available — falling back to the bucket build");
             return null;
         }
 
         // Locate the frame once. Recomputing every tick re-paths and thrash-reads the world.
         if (frameOrigin == null && !findFrame(mod)) {
-            why = "no usable frame";
-            done = true;
+            giveUp(FailureReason.TARGET_UNAVAILABLE, "no usable frame");
             T2Log.warn("S177", "obsidian at " + seed.getX() + "," + seed.getY() + ","
                     + seed.getZ() + " is not a usable portal frame — falling back");
             return null;
@@ -148,8 +154,7 @@ public class RuinedPortalFinishTask extends Task {
         // Frame complete — light it. The ignition point is the bottom-inside block.
         BlockPos ignite = interiorBottom(mod);
         if (ignite == null) {
-            why = "no interior";
-            done = true;
+            giveUp(FailureReason.TARGET_UNAVAILABLE, "no interior");
             T2Log.warn("S177", "frame has no clear interior to ignite");
             return null;
         }

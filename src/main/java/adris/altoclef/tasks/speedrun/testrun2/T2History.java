@@ -168,7 +168,20 @@ public final class T2History {
                 + " hp=" + (mod.getPlayer() == null ? -1f : mod.getPlayer().getHealth())
                 + " hun=" + (mod.getPlayer() == null ? -1 : mod.getPlayer().getHungerManager().getFoodLevel())
                 + " fire=" + (mod.getPlayer() != null && mod.getPlayer().isOnFire())
-                + " food=" + foodCount(mod);
+                + " food=" + foodCount(mod)
+                + bstate(mod);
+    }
+
+    /** ip=interaction paused (blocks break/place), bp=Baritone pathing, calc=search in progress. s269t sat 20 min in a 1x1 hole. */
+    private static String bstate(AltoClef mod) {
+        try {
+            var pb = mod.getClientBaritone().getPathingBehavior();
+            return " ip=" + mod.getExtraBaritoneSettings().isInteractionPaused()
+                    + " bp=" + pb.isPathing() + " calc=" + pb.getInProgress().isPresent()
+                    + " goal=" + mod.getClientBaritone().getCustomGoalProcess().isActive();
+        } catch (Throwable t) {
+            return " ip=?";
+        }
     }
 
     private static int foodCount(AltoClef mod) {

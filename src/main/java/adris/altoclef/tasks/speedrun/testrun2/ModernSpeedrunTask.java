@@ -2076,6 +2076,13 @@ public class ModernSpeedrunTask extends Task {
         return new ConstructNetherPortalBucketTask();
     }
 
+    private static boolean lavaNear(net.minecraft.world.World w, BlockPos p) {
+        for (int dx = -1; dx <= 1; dx++) for (int dy = -1; dy <= 1; dy++) for (int dz = -1; dz <= 1; dz++) {
+            if (w.getBlockState(p.add(dx, dy, dz)).getBlock() == net.minecraft.block.Blocks.LAVA) return true;
+        }
+        return false;
+    }
+
     private Task nether(AltoClef mod) {
         int rods = mod.getItemStorage().getItemCount(Items.BLAZE_ROD);
         int pearls = mod.getItemStorage().getItemCount(Items.ENDER_PEARL);
@@ -2088,8 +2095,13 @@ public class ModernSpeedrunTask extends Task {
             for (BlockPos c : new BlockPos[]{me.add(1,0,0), me.add(-1,0,0), me.add(0,0,1), me.add(0,0,-1),
                     me.add(2,0,0), me.add(-2,0,0), me.add(0,0,2), me.add(0,0,-2)}) {
                 var w = mod.getWorld();
+                // S269: s265t died 1s after arrival stepping out next to lava. The 2-block
+                // candidates also need a safe cell in between, and no lava beside the floor.
+                BlockPos mid = new BlockPos((me.getX() + c.getX()) / 2, c.getY(), (me.getZ() + c.getZ()) / 2);
                 if (w.getBlockState(c).isAir() && w.getBlockState(c.up()).isAir()
-                        && w.getBlockState(c.down()).isSolidBlock(w, c.down())) {
+                        && w.getBlockState(c.down()).isSolidBlock(w, c.down())
+                        && !lavaNear(w, c) && (c.getManhattanDistance(me) < 2 || (!lavaNear(w, mid)
+                        && w.getBlockState(mid.down()).isSolidBlock(w, mid.down())))) {
                     T2History.note("WHY nether: step out of arrival portal");
                     return new GetToBlockTask(c);
                 }

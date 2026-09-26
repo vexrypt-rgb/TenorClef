@@ -424,10 +424,11 @@ package adris.altoclef.benchmark;
 //$$                 boolean opened = false; int items = -1;
 //$$                 if (result.equals("GOAL") || end < 4.5) {
 //$$                     clearAbove(mc, chest);
-//$$                     mc.execute(() -> mc.interactionManager.interactBlock(mc.player, mc.world, net.minecraft.util.Hand.MAIN_HAND,
-//$$                             new net.minecraft.util.hit.BlockHitResult(net.minecraft.util.math.Vec3d.ofCenter(chest), net.minecraft.util.math.Direction.UP, chest, false)));
-//$$                     Thread.sleep(1500);
-//$$                     opened = mc.player.currentScreenHandler != mc.player.playerScreenHandler;
+//$$                     Object ar = mc.submit(() -> mc.interactionManager.interactBlock(mc.player, mc.world, net.minecraft.util.Hand.MAIN_HAND,
+//$$                             new net.minecraft.util.hit.BlockHitResult(net.minecraft.util.math.Vec3d.ofCenter(chest), net.minecraft.util.math.Direction.UP, chest, false))).get();
+//$$                     Debug.logHarness("PATHBENCH open " + ar + " above=" + mc.world.getBlockState(chest.up()) + " at=" + mc.world.getBlockState(chest).getBlock() + " sneak=" + mc.player.isSneaking());
+//$$                     for (int i = 0; i < 30 && !opened; i++) { Thread.sleep(100); opened = mc.player.currentScreenHandler != mc.player.playerScreenHandler; }
+//$$                     Debug.logHarness("PATHBENCH screen " + mc.currentScreen + " opened=" + opened);
 //$$                     if (opened) {
 //$$                         items = 0;
 //$$                         for (int i = 0; i < 27; i++) if (!mc.player.currentScreenHandler.getSlot(i).getStack().isEmpty()) items++;

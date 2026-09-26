@@ -2036,6 +2036,20 @@ public class ModernSpeedrunTask extends Task {
         int pearls = mod.getItemStorage().getItemCount(Items.ENDER_PEARL);
         int gold = mod.getItemStorage().getItemCount(Items.GOLD_INGOT) + mod.getItemStorage().getItemCount(Items.GOLD_BLOCK) * 9
                 + mod.getItemStorage().getItemCount(Items.GOLD_NUGGET) / 9;
+        // S259: interaction is paused inside a portal, so gold mining from the arrival portal
+        // does nothing until WorldSurvivalChain's shimmy fires. Walk to a safe floor first.
+        if (WorldHelper.isInNetherPortal()) {
+            BlockPos me = mod.getPlayer().getBlockPos();
+            for (BlockPos c : new BlockPos[]{me.add(1,0,0), me.add(-1,0,0), me.add(0,0,1), me.add(0,0,-1),
+                    me.add(2,0,0), me.add(-2,0,0), me.add(0,0,2), me.add(0,0,-2)}) {
+                var w = mod.getWorld();
+                if (w.getBlockState(c).isAir() && w.getBlockState(c.up()).isAir()
+                        && w.getBlockState(c.down()).isSolidBlock(w, c.down())) {
+                    T2History.note("WHY nether: step out of arrival portal");
+                    return new GetToBlockTask(c);
+                }
+            }
+        }
         // Never time out the helm. 40s skip was sending us to a fortress
         // unarmored, then mining gold over lava.
         if (!wearingGold(mod)) {

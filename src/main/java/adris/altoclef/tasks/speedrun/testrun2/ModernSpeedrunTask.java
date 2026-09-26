@@ -2009,12 +2009,14 @@ public class ModernSpeedrunTask extends Task {
             T2Log.force("S218", "hun=" + hun + " hp=" + hp + " no food - hunting before portal");
         }
         // S228: the Nether has no easy food, so never enter it with a thin buffer; top up to 20.
-        if (food(mod) < 8 && !starveHunt) {
+        // S274: food() is a hunger-point score, not items. s273t entered with score ~20 (3 cooked
+        // items), ate all 3 within 45s of arriving, then fought at hp=8 with food=0. Stock 40.
+        if (food(mod) < 16 && !starveHunt) {
             starveHunt = true;
             T2Log.force("S228", "food=" + food(mod) + " - stocking before Nether");
         }
-        if (starveHunt && food(mod) >= 20) starveHunt = false;
-        if (starveHunt) return new adris.altoclef.tasks.resources.CollectFoodTask(20);
+        if (starveHunt && food(mod) >= 40) starveHunt = false;
+        if (starveHunt) return new adris.altoclef.tasks.resources.CollectFoodTask(40);
         // S221: helmlatch run: helm craft in the Nether had no table or planks, wandered 45s+
         // and got shot by piglins twice. Carry a table through the portal.
         // S239: no Construct exemption. s240t flipped CraftInInventory<->Construct x100: a live

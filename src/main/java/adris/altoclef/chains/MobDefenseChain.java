@@ -235,7 +235,8 @@ public class MobDefenseChain extends SingleTaskChain {
 
         // Run away if a weird mob is close by.
         Optional<Entity> universallyDangerous = getUniversallyDangerousMob(mod);
-        if (universallyDangerous.isPresent() && mod.getPlayer().getHealth() <= 10) {
+        // S276: a hoglin hits for ~6; waiting until hp<=10 left one or two hits of margin.
+        if (universallyDangerous.isPresent() && mod.getPlayer().getHealth() <= 14) {
             runAwayTask = new RunAwayFromHostilesTask(DANGER_KEEP_DISTANCE, true);
             setTask(runAwayTask);
             return 70;

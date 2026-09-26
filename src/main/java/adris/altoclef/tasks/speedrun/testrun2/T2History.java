@@ -202,6 +202,8 @@ public final class T2History {
             if (h != null) list.addAll(h);
             var sl = mod.getEntityTracker().getTrackedEntities(net.minecraft.entity.mob.SlimeEntity.class);
             if (sl != null) list.addAll(sl);
+            var hg = mod.getEntityTracker().getTrackedEntities(net.minecraft.entity.mob.HoglinEntity.class);
+            if (hg != null) list.addAll(hg);
             if (list.isEmpty() || mod.getPlayer() == null) return "mobs=none";
             var me = mod.getPlayer().getPos();
             int n = 0;

@@ -215,7 +215,7 @@ package adris.altoclef.benchmark;
 //$$                     long firstMove = -1;
 //$$                     double startD = dist(mc, g);
 //$$                     String result = started ? "TIMEOUT" : "NOSTART";
-//$$                     double bestD = startD; long bestAt = 0;
+//$$                     double bestD = startD; long bestAt = 0; long lastReq = 0;
 //$$                     while (started) {
 //$$                         Thread.sleep(25);
 //$$                         long el = worldTime(mc) - t0;
@@ -225,9 +225,9 @@ package adris.altoclef.benchmark;
 //$$                         if (d < bestD - 1.0) { bestD = d; bestAt = el; }
 //$$                         if (stallTicks > 0 && el - bestAt > stallTicks) { result = "STALLED"; break; }
 //$$                         boolean active = !mover.equals("baritone") ? TungstenMovement.isPathing() : baritone.getCustomGoalProcess().isActive();
-//$$                         if (!active && el > 40) {
-//$$                             if (mover.equals("tungsten") && el < limitTicks) { TungstenMovement.requestPathTo(g); continue; }
-//$$                             if (mover.equals("guided") && el < limitTicks) { startGuided(mc, baritone, g); continue; }
+//$$                         if (!active && el - lastReq > 40) {
+//$$                             if (mover.equals("tungsten") && el < limitTicks) { TungstenMovement.requestPathTo(g); lastReq = el; continue; }
+//$$                             if (mover.equals("guided") && el < limitTicks) { startGuided(mc, baritone, g); lastReq = el; continue; }
 //$$                             result = "STOPPED"; break;
 //$$                         }
 //$$                         if (el > limitTicks) break;

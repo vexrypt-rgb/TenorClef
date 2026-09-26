@@ -1868,8 +1868,13 @@ public class ModernSpeedrunTask extends Task {
             starveHunt = true;
             T2Log.force("S218", "hun=" + hun + " hp=" + hp + " no food - hunting before portal");
         }
-        if (starveHunt && food(mod) >= 10) starveHunt = false;
-        if (starveHunt) return new adris.altoclef.tasks.resources.CollectFoodTask(10);
+        // S228: the Nether has no easy food, so never enter it with a thin buffer; top up to 20.
+        if (food(mod) < 8 && !starveHunt) {
+            starveHunt = true;
+            T2Log.force("S228", "food=" + food(mod) + " - stocking before Nether");
+        }
+        if (starveHunt && food(mod) >= 20) starveHunt = false;
+        if (starveHunt) return new adris.altoclef.tasks.resources.CollectFoodTask(20);
         // S221: helmlatch run: helm craft in the Nether had no table or planks, wandered 45s+
         // and got shot by piglins twice. Carry a table through the portal.
         if (mod.getItemStorage().getItemCount(Items.GOLDEN_HELMET) < 1 && !wearingGold(mod)

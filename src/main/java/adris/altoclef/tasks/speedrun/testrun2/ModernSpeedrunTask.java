@@ -1360,7 +1360,11 @@ public class ModernSpeedrunTask extends Task {
         }
         boolean hasTable = mod.getItemStorage().getItemCount(Items.CRAFTING_TABLE) >= 1;
         try { hasTable = hasTable || mod.getBlockScanner().anyFound(Blocks.CRAFTING_TABLE); } catch (Throwable ignored) {}
-        if (hasTable && mod.getItemStorage().getItemCount(Items.WOODEN_PICKAXE) < 1 && mod.getItemStorage().getItemCount(Items.STONE_PICKAXE) < 1) {
+        // S238: only go to the table once we can pay for the pick (3 planks + 2 sticks). s235
+        // respawned with logs=0, and CraftInTable paced around the old table with nothing to craft.
+        int plankEq = totalPlanks(mod) + totalLogs(mod) * 4;
+        boolean pickAffordable = plankEq >= 5 || (plankEq >= 3 && mod.getItemStorage().getItemCount(Items.STICK) >= 2);
+        if (hasTable && pickAffordable && mod.getItemStorage().getItemCount(Items.WOODEN_PICKAXE) < 1 && mod.getItemStorage().getItemCount(Items.STONE_PICKAXE) < 1) {
             T2History.note("WHY bootstrap: table exists — wooden pick, not more logs");
             return TaskCatalogue.getItemTask(Items.WOODEN_PICKAXE, 1);
         }
@@ -2324,7 +2328,10 @@ public class ModernSpeedrunTask extends Task {
         if (blazeSearchLive && blazeSearchTicks > 0
                 && wanted instanceof CollectBlazeRodsTask
                 && !(active instanceof EnterNetherPortalTask)
-                && !(active instanceof HolePillarTask)) {
+                && !(active instanceof HolePillarTask)
+                // S237: only hold a child that IS the search. s235 latched while the stale
+                // EquipArmorTask (helm already on) owned the slot and pinned it for 20s.
+                && (active instanceof CollectBlazeRodsTask || active instanceof TimeoutWanderTask)) {
             blazeSearchTicks--;
             if (active != null) {
                 T2History.tick(AltoClef.getInstance(), phase.name(), active);

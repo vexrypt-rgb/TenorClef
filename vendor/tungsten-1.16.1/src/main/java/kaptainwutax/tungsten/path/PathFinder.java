@@ -138,7 +138,7 @@ public class PathFinder {
                 }
                 search(world, target, player);
             } catch(Exception e) {
-                e.printStackTrace();
+                System.err.println("[PathFinder] search crashed: " + e); for (StackTraceElement st : e.getStackTrace()) System.err.println("  at " + st);
             }
 
             active.set(false);

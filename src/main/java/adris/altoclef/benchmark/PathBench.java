@@ -217,7 +217,7 @@ package adris.altoclef.benchmark;
 //$$     }
 //$$
 //$$     private static boolean startBaritone(MinecraftClient mc, IBaritone b, BlockPos g) {
-//$$         mc.execute(() -> b.getCustomGoalProcess().setGoalAndPath(new GoalBlock(g.up())));
+//$$         mc.execute(() -> b.getCustomGoalProcess().setGoalAndPath(new GoalBlock(g)));
 //$$         return true;
 //$$     }
 //$$

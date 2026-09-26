@@ -73,6 +73,7 @@ public class ModernSpeedrunTask extends Task {
     private Task active;
     private Task closer;
     private int lootTicks;
+    private boolean swordGaveUp;
     private boolean lavaGuardAdded;
 
     /** True for a Nether block with lava above or beside it: breaking it lets the lava flow in. */
@@ -1629,7 +1630,7 @@ public class ModernSpeedrunTask extends Task {
             return null;
         }
         // S201: phase leaves BOOTSTRAP once any pick exists, so the sword check lives here too.
-        if (mod.getItemStorage().getItemCount(Items.STONE_PICKAXE) >= 1 && mod.getItemStorage().getItemCount(Items.STONE_SWORD) < 1
+        if (!swordGaveUp && mod.getItemStorage().getItemCount(Items.STONE_PICKAXE) >= 1 && mod.getItemStorage().getItemCount(Items.STONE_SWORD) < 1
                 && mod.getItemStorage().getItemCount(Items.IRON_SWORD) < 1 && mod.getItemStorage().getItemCount(Items.COBBLESTONE) >= 2
                 // S244: needs a stick. s245t had 0 sticks/planks/logs; the table recipe never finished
                 // and E92 closed it every 3s for 45s (x17 flip) until S200 wandered off.
@@ -2770,6 +2771,7 @@ public class ModernSpeedrunTask extends Task {
         if (phase == Phase.IRON && !dark && ironN < 3 && mod.getItemStorage().getItemCount(Items.IRON_PICKAXE) < 1 && craftStuck >= 20 * 6) {
             T2Log.warn("E92", "craft table with 0 iron — mine first");
             T2History.note("WHY E92: close table, collect iron");
+            swordGaveUp = true; // S258: s257t flipped S201<->E92 for 45s
             craftStuck = 0;
             forceSurface = false;
             pickCraftLock = false;

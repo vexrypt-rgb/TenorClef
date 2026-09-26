@@ -129,6 +129,7 @@ public class ModernSpeedrunTask extends Task {
     private int goldHelmTicks;
     private int helmGoldHuntTicks;
     private boolean starveHunt;
+    private int starveDoneTicks;
     private boolean helmLatched;
     private Object helmLife = null;
     /** S193 nether climb hysteresis: stall counter, best Y reached, and give-up cooldown. */
@@ -1151,12 +1152,12 @@ public class ModernSpeedrunTask extends Task {
             if (phase != Phase.PORTAL && phaseTicks >= 40) setPhase(Phase.PORTAL);
             // S261: this shortcut skipped portal()'s S228 food stock. s259t respawned, walked
             // back in with food=0 twice and died in the fortress both times.
-            if (food(mod) < 8 && !starveHunt) {
+            if (food(mod) < 16 && !starveHunt) {
                 starveHunt = true;
                 T2Log.force("S261", "food=" + food(mod) + " - stocking before walk-in");
             }
-            if (starveHunt && food(mod) >= 20) starveHunt = false;
-            if (starveHunt) return new adris.altoclef.tasks.resources.CollectFoodTask(20);
+            if (starveHunt && food(mod) >= 40) { starveHunt = false; T2Log.force("S279", "walk-in food hunt done food=" + food(mod)); }
+            if (starveHunt) return new adris.altoclef.tasks.resources.CollectFoodTask(40);
             T2History.note("WHY walk-in: portal + iron pick");
             return stick(new EnterNetherPortalTask(Dimension.NETHER));
         }
@@ -2021,7 +2022,17 @@ public class ModernSpeedrunTask extends Task {
             starveHunt = true;
             T2Log.force("S228", "food=" + food(mod) + " - stocking before Nether");
         }
-        if (starveHunt && food(mod) >= 40) starveHunt = false;
+        // S279: s278t's hunt ended at 5:01 with food=0 (one-tick score read during a craft GUI, cursor
+        // slot counted). Require 2s of a real stock before ending the hunt, and say why.
+        if (starveHunt && food(mod) >= 40) {
+            if (++starveDoneTicks >= 40) {
+                starveHunt = false;
+                starveDoneTicks = 0;
+                T2Log.force("S279", "food hunt done food=" + food(mod));
+            }
+        } else {
+            starveDoneTicks = 0;
+        }
         if (starveHunt) return new adris.altoclef.tasks.resources.CollectFoodTask(40);
         // S221: helmlatch run: helm craft in the Nether had no table or planks, wandered 45s+
         // and got shot by piglins twice. Carry a table through the portal.

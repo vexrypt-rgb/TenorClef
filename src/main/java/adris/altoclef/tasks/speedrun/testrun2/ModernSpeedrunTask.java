@@ -1995,7 +1995,12 @@ public class ModernSpeedrunTask extends Task {
         if (!wearingGold(mod)) {
             goldHelmTicks++;
             T2History.note("WHY nether: gold helm on head before fortress");
-            if (mod.getItemStorage().getItemCount(Items.GOLDEN_HELMET) >= 1 && goldHelmTicks > 20 * 6) {
+            // S243: time the equip from when the helm is IN HAND, not from when the craft began.
+            // s243t crafted it after 9s of goldHelmTicks and latched "worn" the same tick, then
+            // fought blazes bare-headed with the helm in its pocket.
+            if (mod.getItemStorage().getItemCount(Items.GOLDEN_HELMET) >= 1) helmHeldTicks++;
+            else helmHeldTicks = 0;
+            if (mod.getItemStorage().getItemCount(Items.GOLDEN_HELMET) >= 1 && helmHeldTicks > 20 * 6) {
                 // S207: helm in hand but equip never "registers" -- it was on the head in fix20.
                 // Latch as worn so we stop looping EquipArmorTask.
                 helmLatched = true;
@@ -2005,7 +2010,7 @@ public class ModernSpeedrunTask extends Task {
             } else if (mod.getItemStorage().getItemCount(Items.GOLDEN_HELMET) >= 1) {
                 // S206. fix20: EquipArmorTask sat 40s on "Equipping armor" after a
                 // table craft. Every 2s, close any screen and shift-click the helm on.
-                if (goldHelmTicks % 40 == 20) {
+                if (helmHeldTicks % 40 == 20) {
                     try {
                         adris.altoclef.util.helpers.StorageHelper.closeScreen();
                         var slots = mod.getItemStorage().getSlotsWithItemPlayerInventory(false, Items.GOLDEN_HELMET);
@@ -2909,6 +2914,8 @@ public class ModernSpeedrunTask extends Task {
     }
 
     /** Piglins stay neutral only if gold is ON the body, not in the bag. */
+    private int helmHeldTicks;
+
     private boolean wearingGold(AltoClef mod) {
         try {
             var p = mod.getPlayer();

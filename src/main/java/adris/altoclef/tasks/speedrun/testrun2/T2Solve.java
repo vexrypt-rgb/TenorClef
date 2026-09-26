@@ -363,7 +363,12 @@ public final class T2Solve {
         }
 
         // 5. Jump in place - walk. Do not pillar a tunnel.
-        if (!wet && !digging && flips >= 6 && sameXz > 20 * 2 && !"BOOTSTRAP".equals(phase)
+        // S256: s255t dug toward a y=9 lava lake and this pillar fired 4x in 60s, lifting the bot
+        // out of its own shaft each time (Construct<->HolePillar loop, 3 min, then a skeleton).
+        BlockPos deep = adris.altoclef.tasks.construction.compound.ConstructNetherPortalBucketTask.deepTarget;
+        boolean descendingToLake = "PORTAL".equals(phase) && deep != null && y > deep.getY()
+                && Math.abs(x - deep.getX()) + Math.abs(z - deep.getZ()) <= 24;
+        if (!wet && !digging && !descendingToLake && flips >= 6 && sameXz > 20 * 2 && !"BOOTSTRAP".equals(phase)
                 && !childName.contains("StepOff") && !walking) {
             // S147 guard applies here too - this is the second S130 arming site.
             if (HolePillar.stickyBlocked(mod) || HolePillar.hopBlocked(mod, sameXz)) {

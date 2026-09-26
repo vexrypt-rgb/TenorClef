@@ -494,6 +494,7 @@ public class ConstructNetherPortalBucketTask extends Task {
         if (nearestLake != null) {
             Debug.logMessage("T2 [" + T2Codes.S165_SURFACE_LAKE + "] lava lake at y="
                     + nearestLake.getY() + " (surface, safe)");
+            deepTarget = null;
             return nearestLake;
         }
         if (deepestFallback != null && deepLakeFirstSeenMs == 0) deepLakeFirstSeenMs = System.currentTimeMillis();
@@ -501,20 +502,26 @@ public class ConstructNetherPortalBucketTask extends Task {
         // very deep ones (y~9) earned the 3 min wait; a mid-depth lake is fine after 45s.
         if (midLake != null && System.currentTimeMillis() - deepLakeFirstSeenMs >= 45_000) {
             Debug.logMessage("T2 [S248] mid-depth lava lake at y=" + midLake.getY() + " accepted");
+            deepTarget = null;
             return midLake;
         }
         if (deepestFallback != null && System.currentTimeMillis() - deepLakeFirstSeenMs < 180_000) {
             // S216: a deep lake (helmcap: y=9) cost 35min - a dark shaft then a stuck pillar-out. Keep
             // exploring the surface for up to 3 min before accepting one.
             Debug.logMessage("T2 [S216] deep lava lake at y=" + deepestFallback.getY() + " ignored, surface search first");
+            deepTarget = null;
             return null;
         }
         if (deepestFallback != null) {
             Debug.logMessage("T2 [" + T2Codes.S165_SURFACE_LAKE + "] only a deep lava lake at y="
                     + deepestFallback.getY() + " - expect a long dark shaft");
         }
+        deepTarget = deepestFallback;
         return deepestFallback;
     }
+
+    /** S256: the deep lake the portal build committed to (null if none). Pit solvers stand aside near it. */
+    public static volatile BlockPos deepTarget;
 
     private int getNumberOfBlocksAdjacent(HashSet<BlockPos> alreadyExplored, BlockPos start) {
         Queue<BlockPos> queue = new ArrayDeque<>();

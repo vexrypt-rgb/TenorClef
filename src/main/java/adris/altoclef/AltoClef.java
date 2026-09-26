@@ -393,6 +393,9 @@ public class AltoClef implements ModInitializer {
         getClientBaritoneSettings().allowParkourAscend.value = false;
         getClientBaritoneSettings().allowParkourPlace.value = false;
         getClientBaritoneSettings().allowDiagonalDescend.value = false;
+        // @pathbench (seed 12345, 16-goal ring, 2 rounds): 4.5 vs default 3.563 cut A* time
+        // 3-5x (52.8->17.6ms, 6506->2725 nodes) with 100% goal rate and +0.3-1% path cost.
+        getClientBaritoneSettings().costHeuristic.value = 4.5;
         getClientBaritoneSettings().allowDiagonalAscend.value = false;
         getClientBaritoneSettings().blocksToAvoid.value = new LinkedList<>(List.of(Blocks.FLOWERING_AZALEA, Blocks.AZALEA,
                 Blocks.POWDER_SNOW, Blocks.BIG_DRIPLEAF, Blocks.BIG_DRIPLEAF_STEM, Blocks.CAVE_VINES,

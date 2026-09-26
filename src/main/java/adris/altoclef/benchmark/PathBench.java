@@ -64,7 +64,7 @@ package adris.altoclef.benchmark;
 //$$         Thread t = new Thread(() -> {
 //$$             try {
 //$$                 if (mode.equalsIgnoreCase("travel")) travel(mc, origin, opt, Math.max(1, reps));
-//$$                 else for (String sweep : (opt == null ? "-" : opt).split(";")) search(mc, origin, sweep, Math.max(1, reps));
+//$$                 else for (String sweep : (opt == null ? "-" : opt).split("[;+]")) search(mc, origin, sweep, Math.max(1, reps));
 //$$             } catch (Throwable e) {
 //$$                 Debug.logHarness("PATHBENCH failed: " + e);
 //$$                 e.printStackTrace();
@@ -123,7 +123,7 @@ package adris.altoclef.benchmark;
 //$$                     BlockPos g = goals.get(gi);
 //$$                     Goal goal = new GoalXZ(g.getX(), g.getZ());
 //$$                     for (int r = 0; r < reps; r++) {
-//$$                         CalculationContext ctx = new CalculationContext(baritone, true);
+//$$                         CalculationContext ctx = mc.submit(() -> new CalculationContext(baritone, true)).get(); // BlockStateInterface must be built on the client thread
 //$$                         AStarPathFinder pf = new AStarPathFinder(origin.getX(), origin.getY(), origin.getZ(), goal, new Favoring(null, ctx), ctx);
 //$$                         long t0 = System.nanoTime();
 //$$                         PathCalculationResult res = pf.calculate(timeout, timeout);

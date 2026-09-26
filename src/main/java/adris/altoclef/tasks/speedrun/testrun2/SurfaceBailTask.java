@@ -217,6 +217,13 @@ public class SurfaceBailTask extends Task {
             done = true;
             return null;
         }
+        // S265: out of the cave but under leaves/overhang (s262t: y=63 sky=4..6 for 90s, bail
+        // never "finished" because sky<13). Open to the sky and not climbing = surfaced.
+        if (!underground(mod) && sky(mod) >= 4 && y >= 60 && noClimb > 60) {
+            T2Log.force("S265", "surfaced under cover y=" + y + " sky=" + sky(mod));
+            done = true;
+            return null;
+        }
         // S168: a bail that has not gained a single block of altitude in STUCK_GIVEUP_TICKS is
         // not "still climbing", it is failing, and waiting the full MAX_TICKS (120s) to say so
         // is how run T burned five minutes. Baritone was logging "Failed exploring" every two

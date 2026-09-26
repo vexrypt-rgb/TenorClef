@@ -526,18 +526,19 @@ public class PathFinder {
 	    		);
 	}
 	
-	private static void updateNode(WorldView world, Node current, Node child, Vec3d target, Vec3d realTarget, List<BlockNode> blockPath, Set<Vec3d> closed) {
+	private static void updateNode(WorldView world, Node current, Node child, Vec3d target, Vec3d realTarget, List<BlockNode> blockPath, Set<Vec3d> closed,
+			Vec3d nextPosOnLadder, int nextBlockY, boolean nextIsWater) {
 	    Vec3d childPos = child.agent.getPos();
 
 	    double collisionScore = 0;
 	    double tentativeCost = child.cost + 1; // Assuming uniform cost for each step
 	    if (child.agent.horizontalCollision && child.agent.getPos().distanceTo(target) > 3) {
-	        collisionScore += 25 + (Math.abs(0.3 - child.agent.velZ) + Math.abs(0.3 - child.agent.velX)) * (child.agent.blockY <= blockPath.get(NEXT_CLOSEST_BLOCKNODE_IDX.get()).getBlockPos().getY() ? 2 : 1);
+	        collisionScore += 25 + (Math.abs(0.3 - child.agent.velZ) + Math.abs(0.3 - child.agent.velX)) * (child.agent.blockY <= nextBlockY ? 2 : 1);
 	    }
 	    
 	    if (child.agent.touchingWater) {
 //	    	collisionScore = 20000^20;
-	    	if (BlockStateChecker.isAnyWater(world.getBlockState(blockPath.get(NEXT_CLOSEST_BLOCKNODE_IDX.get()).getBlockPos()))) collisionScore -= 20;
+	    	if (nextIsWater) collisionScore -= 20;
 //	    	else collisionScore += 2000;
 	    	
 	    } else {
@@ -563,7 +564,7 @@ public class PathFinder {
 	    double estimatedCostToGoal = /*computeHeuristic(childPos, child.agent.onGround, target) - 200 +*/ collisionScore;
 	    if (blockPath != null) {
 //	    		updateNextClosestBlockNodeIDX(blockPath, child, closed);
-		    	Vec3d posToGetTo = BlockPosShifter.getPosOnLadder(blockPath.get(NEXT_CLOSEST_BLOCKNODE_IDX.get()), world);
+		    	Vec3d posToGetTo = nextPosOnLadder;
 		    	
 		    	if (child.agent.getPos().squaredDistanceTo(target) <= 2.0D) {
 		    		posToGetTo = target;
@@ -916,6 +917,7 @@ public class PathFinder {
 			// overhead than the work itself, dropped whole chunks on one "too close" hit, and
 			// queued >25-child batches into the wrong list so they were never inserted.
 			List<Node> validChildren = new ArrayList<>(children.size());
+			List<Boolean> validClimbing = new ArrayList<>(children.size());
 			BlockNode lastBlockNode = blockPath.get().get(Math.max(0, bnIdx - 1));
 			BlockNode nextBlockNode = blockPath.get().get(bnIdx);
 			double closestBlockVolume = BlockShapeChecker.getShapeVolume(nextBlockNode.getBlockPos().down(), world);
@@ -925,9 +927,10 @@ public class PathFinder {
 				Vec3d cp = child.agent.getPos();
 				boolean childClimbing = child.agent.isClimbing(world);
 				boolean tooClose = false;
-				for (Node other : validChildren) {
+				for (int vi = 0; vi < validChildren.size(); vi++) {
+					Node other = validChildren.get(vi);
 					double distance = other.agent.getPos().distanceTo(cp);
-					boolean otherClimbing = other.agent.isClimbing(world);
+					boolean otherClimbing = validClimbing.get(vi);
 					if ((otherClimbing && childClimbing && distance < 0.03)
 							|| (!otherClimbing && !childClimbing && distance < 0.294)
 							|| (isSmallBlock && distance < 0.2)) {
@@ -938,9 +941,16 @@ public class PathFinder {
 				if (tooClose) continue;
 				if (filterChidren(child, lastBlockNode, nextBlockNode, isSmallBlock, world) || checkForFallDamage(child, world)) continue;
 				validChildren.add(child);
+				validClimbing.add(childClimbing);
 			}
+			// Per-expansion constants: these only depend on the current BlockNode, so resolve them once
+			// instead of once per child (each was a world/block-state lookup).
+			BlockNode hNode = blockPath.get().get(Math.min(Math.max(NEXT_CLOSEST_BLOCKNODE_IDX.get(), 0), blockPath.get().size() - 1));
+			Vec3d nextPosOnLadder = BlockPosShifter.getPosOnLadder(hNode, world);
+			int nextBlockY = hNode.getBlockPos().getY();
+			boolean nextIsWater = BlockStateChecker.isAnyWater(world.getBlockState(hNode.getBlockPos()));
 			for (Node child : validChildren) {
-				updateNode(world, parent, child, target, TARGET, blockPath.get(), closed);
+				updateNode(world, parent, child, target, TARGET, blockPath.get(), closed, nextPosOnLadder, nextBlockY, nextIsWater);
 				if (child.isOpen()) openSet.update(child);
 				else openSet.insert(child);
 				if (!updateBestSoFar(child, target, bestHeuristicSoFar)) failing.set(false);

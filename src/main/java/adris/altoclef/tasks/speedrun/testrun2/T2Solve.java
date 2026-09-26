@@ -420,6 +420,15 @@ public final class T2Solve {
             // only way to break a collector's re-path loop from outside.
             if (!portalWork && !"PORTAL".equals(phase) && !"BOOTSTRAP".equals(phase)) {
                 s100Escalations++;
+                // S267: s264t — CollectBlazeRodsTask was retreating at hp 7-10 (RunAwayFromHostiles,
+                // jumping against cover while regenerating). S144 swapped it for a wander that walked
+                // straight back into the blazes: "burnt to a crisp". A low-hp retreat is not a stall.
+                if (s100Escalations >= 2 && mod.getPlayer().getHealth() < 14
+                        && !mod.getEntityTracker().getTrackedEntities(net.minecraft.entity.mob.HostileEntity.class).isEmpty()) {
+                    act("S267", "low-hp retreat, keep " + childName + " (no wander swap) hp=" + mod.getPlayer().getHealth());
+                    s100Escalations = 0;
+                    return null;
+                }
                 if (s100Escalations >= 2) {
                     act("S144", "jump-stuck collector — replace " + childName
                             + " with wander (esc=" + s100Escalations + ")");

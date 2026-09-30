@@ -56,6 +56,9 @@ final class T2MenuLook {
         if (tab == 3) {
             g.drawText(net.minecraft.client.MinecraftClient.getInstance().textRenderer, "API key / URL / model / bind", s.contentX, s.footerT - 74, C_MUTED, false);
         }
+        if (tab == 6) {
+            T2MenuSwarm.paint(s, g);
+        }
         if (tab == 4) {
             long now = System.currentTimeMillis();
             String head = "time lost to faults: "
@@ -96,7 +99,7 @@ final class T2MenuLook {
                 continue;
             }
             boolean danger = "t2panic".equals(cmd) || "stop".equals(cmd);
-            boolean primary = "SAVECFG".equals(cmd);
+            boolean primary = "SAVECFG".equals(cmd) || "SW:SAVE".equals(cmd);
             boolean close = cmd == null;
             int bg = hover ? C_BTN_HOVER : C_BTN;
             if (primary) bg = hover ? 0xFFFFD58A : C_ACCENT;

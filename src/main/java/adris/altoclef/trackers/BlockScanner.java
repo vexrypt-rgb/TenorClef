@@ -43,8 +43,9 @@ public class BlockScanner {
     private Dimension scanDimension = Dimension.OVERWORLD;
     private World scanWorld = null;
 
-    private boolean scanning = false;
-    private boolean forceStop = false;
+    private volatile boolean scanning = false;
+    private volatile boolean forceStop = false;
+    private volatile Thread scanThread;
 
 
     public BlockScanner(AltoClef mod) {
@@ -256,6 +257,12 @@ public class BlockScanner {
     }
 
     public void reset() {
+        // A background rescan iterates scannedBlocks/scannedChunks; clearing them from the main
+        // thread mid-scan threw ConcurrentModificationException. Let the scan thread clear instead.
+        if (scanning && Thread.currentThread() != scanThread) {
+            forceStop = true;
+            return;
+        }
         trackedBlocks.clear();
         scannedBlocks.clear();
         scannedChunks.clear();
@@ -291,16 +298,21 @@ public class BlockScanner {
 
         scanning = true;
         forceStop = false;
-        new Thread(() -> {
+        scanThread = new Thread(() -> {
             try {
                 rescan(Integer.MAX_VALUE, Integer.MAX_VALUE);
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
+                if (forceStop) {
+                    reset();
+                    forceStop = false;
+                }
                 rescanTimer.reset();
                 scanning = false;
             }
-        }).start();
+        });
+        scanThread.start();
     }
 
     private void scanCloseBlocks() {

@@ -54,7 +54,8 @@ public class Butler {
             String sender = evt.senderName();
             MessageType messageType = evt.messageType();
             String receiver = mod.getPlayer().getName().getString();
-            if (sender != null && !Objects.equals(sender, receiver) && shouldAccept(messageType)) {
+            // System messages (advancements, command errors) have no sender on 1.16; answering them loops.
+            if (sender != null && !sender.isEmpty() && !Objects.equals(sender, receiver) && shouldAccept(messageType)) {
                 String wholeMessage = sender + " " + receiver + " " + message;
                 if (debug) {
                     Debug.logMessage("RECEIVED WHISPER: \"" + wholeMessage + "\".");

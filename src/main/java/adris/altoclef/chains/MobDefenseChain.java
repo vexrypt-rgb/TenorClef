@@ -202,6 +202,7 @@ public class MobDefenseChain extends SingleTaskChain {
 
     @Override
     public float getPriority() {
+        if (adris.altoclef.tasks.pvp.PvpTask.anyActive()) return 0;
         float before = cachedLastPriority;
         why = "?";
         float inner = getPriorityInner();

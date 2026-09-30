@@ -101,6 +101,11 @@ final class T2MenuActions {
             rebuild(s);
             return;
         }
+        if (cmd != null && cmd.startsWith("SW:")) {
+            T2MenuSwarm.run(s, cmd.substring(3));
+            rebuild(s);
+            return;
+        }
         if ("SAVECFG".equals(cmd)) {
             saveFields(s);
             return;

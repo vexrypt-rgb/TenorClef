@@ -231,7 +231,11 @@ public abstract class CustomBaritoneGoalTask extends Task implements ITaskRequir
 
     @Override
     public boolean isFinished() {
-        if (aborted) return true;
+        return aborted || isInGoal();
+    }
+
+    /** World check only: is the player standing in the goal? Unlike isFinished(), false after an abort. */
+    protected boolean isInGoal() {
         AltoClef mod = AltoClef.getInstance();
         if (cachedGoal == null) {
             cachedGoal = newGoal(mod);

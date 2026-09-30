@@ -152,15 +152,34 @@ public class MLGBucketFallChain extends SingleTaskChain implements ITaskOverride
         return doingChorusFruit;
     }
 
+    private boolean clutchLatched;
+
     public boolean isFalling(AltoClef mod) {
         if (!mod.getModSettings().shouldAutoMLGBucket()) {
             return false;
         }
         if (mod.getPlayer().isSwimming() || mod.getPlayer().isTouchingWater() || mod.getPlayer().isOnGround() || mod.getPlayer().isClimbing()) {
             // We're grounded.
+            clutchLatched = false;
             return false;
         }
         double ySpeed = mod.getPlayer().getVelocity().y;
-        return ySpeed < -0.7;
+        if (ySpeed >= -0.7) return false;
+        // Fall damage starts past 3 blocks. A 1-block step-down also reaches -0.7 and
+        // used to pour water mid-task, so only clutch when the whole fall would hurt.
+        if (!clutchLatched) clutchLatched = mod.getPlayer().fallDistance + dropBelow(mod, 6) > 4;
+        return clutchLatched;
+    }
+
+    private static double dropBelow(AltoClef mod, int max) {
+        BlockPos feet = mod.getPlayer().getBlockPos();
+        for (int i = 1; i <= max; i++) {
+            BlockPos p = feet.down(i);
+            if (!mod.getWorld().getBlockState(p).getCollisionShape(mod.getWorld(), p).isEmpty()
+                    || !mod.getWorld().getFluidState(p).isEmpty()) {
+                return mod.getPlayer().getY() - (p.getY() + 1);
+            }
+        }
+        return max;
     }
 }

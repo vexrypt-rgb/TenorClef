@@ -16,7 +16,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ClientPlayerInteractionManager.class)
 public final class ClientInteractWithBlockMixin {
     @Inject(
-            method = "interactBlock",
+            
+//#if MC >= 260000
+//$$ method = "useItemOn",
+//#else
+method = "interactBlock",
+//#endif
+
             at = @At("HEAD")
     )
 

@@ -16,12 +16,12 @@ public abstract class MixinLocalPlayer extends AbstractClientPlayerEntity {
         super(world, profile);
     }
 
-    @Inject(method = "getPitch", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "getPitch", at = @At("RETURN"), cancellable = true, require = 0)
     public void getPitch(float tickDelta, CallbackInfoReturnable<Float> cir) {
         cir.setReturnValue(super.getPitch(tickDelta));
     }
 
-    @Inject(method = "getYaw", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "getYaw", at = @At("RETURN"), cancellable = true, require = 0)
     public void getYaw(float tickDelta, CallbackInfoReturnable<Float> cir) {
         cir.setReturnValue(super.getYaw(tickDelta));
     }

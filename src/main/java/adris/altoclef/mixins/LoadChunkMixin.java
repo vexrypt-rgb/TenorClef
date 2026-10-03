@@ -35,10 +35,18 @@ public class LoadChunkMixin {
      * @param ci       The callback info returnable object.
      */
     @Inject(
-            method = "loadChunkFromPacket",
+            
+//#if MC >= 260000
+//$$ method = "replaceWithPacketData",
+//#else
+method = "loadChunkFromPacket",
+//#endif
+
             at = @At("RETURN")
     )
-    //#if MC >= 11800
+    //#if MC >= 260000
+    //$$ private void onLoadChunk(CallbackInfoReturnable<net.minecraft.world.level.chunk.LevelChunk> cir) {
+    //#elseif MC >= 11800
     private void onLoadChunk(int x, int z, PacketByteBuf buf, NbtCompound nbt, Consumer<net.minecraft.network.packet.s2c.play.ChunkData.BlockEntityVisitor> consumer, CallbackInfoReturnable<WorldChunk> cir) {
     //#elseif MC >= 11701
     //$$ private void onLoadChunk(int x, int z, net.minecraft.world.biome.source.BiomeArray biomes, PacketByteBuf buf, NbtCompound nbt, BitSet bitSet, CallbackInfoReturnable<WorldChunk> cir) {
@@ -56,7 +64,13 @@ public class LoadChunkMixin {
      * @param ci  The callback info object.
      */
     @Inject(
-            method = "unload",
+            
+//#if MC >= 260000
+//$$ method = "drop",
+//#else
+method = "unload",
+//#endif
+
             at = @At("TAIL")
     )
     //#if MC > 12001

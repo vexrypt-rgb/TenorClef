@@ -14,8 +14,13 @@ public class PlayerCollidesWithEntityMixin {
 
     // Determines a collision between items/EXP orbs/other objects within "pickup" range.
     @Redirect(
+//#if MC >= 260000
+//$$            method = "touch",
+//$$            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;playerTouch(Lnet/minecraft/world/entity/player/Player;)V")
+//#else
             method = "collideWithEntity",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onPlayerCollision(Lnet/minecraft/entity/player/PlayerEntity;)V")
+//#endif
     )
     private void onCollideWithEntity(Entity self, PlayerEntity player) {
         // TODO: Less hard-coded manual means of enforcing client side access

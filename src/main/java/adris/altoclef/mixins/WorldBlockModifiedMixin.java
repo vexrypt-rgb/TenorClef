@@ -21,7 +21,11 @@ public class WorldBlockModifiedMixin {
     }
 
     @Inject(
+//#if MC >= 260000
+//$$            method = "setBlocksDirty",
+//#else
             method = "onBlockChanged",
+//#endif
             at = @At("HEAD")
     )
     public void onBlockWasChanged(BlockPos pos, BlockState oldBlock, BlockState newBlock, CallbackInfo ci) {

@@ -21,3 +21,4 @@ out/
 
 # Personal machine overrides (java.home, larger jvmargs, etc.)
 gradle.properties.local
+!libs/baritone-unoptimized-fabric-ostinato-26.3.jar

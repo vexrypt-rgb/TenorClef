@@ -16,7 +16,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(MessageHandler.class)
 public final class ChatReadMixin {
     @Inject(
-            method = "onChatMessage",
+            
+//#if MC >= 260000
+//$$ method = "handlePlayerChatMessage",
+//#else
+method = "onChatMessage",
+//#endif
+
             at = @At("HEAD")
     )
     private void onChatMessage(SignedMessage message, GameProfile sender, MessageType.Parameters params, CallbackInfo ci) {

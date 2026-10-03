@@ -22,7 +22,13 @@ public final class ClientBlockBreakMixin {
     private static int _breakCancelFrames;
 
     @Inject(
-            method = "updateBlockBreakingProgress",
+            
+//#if MC >= 260000
+//$$ method = "continueDestroyBlock",
+//#else
+method = "updateBlockBreakingProgress",
+//#endif
+
             at = @At("HEAD")
     )
     private void onBreakUpdate(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> ci) {
@@ -34,7 +40,13 @@ public final class ClientBlockBreakMixin {
     }
 
     @Inject(
-            method = "cancelBlockBreaking",
+            
+//#if MC >= 260000
+//$$ method = "stopDestroyBlock",
+//#else
+method = "cancelBlockBreaking",
+//#endif
+
             at = @At("HEAD")
     )
     private void cancelBlockBreaking(CallbackInfo ci) {

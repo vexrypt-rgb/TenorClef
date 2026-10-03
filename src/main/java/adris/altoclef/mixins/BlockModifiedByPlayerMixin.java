@@ -20,7 +20,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class BlockModifiedByPlayerMixin {
 
     @Inject(
-            method = "onBreak",
+            
+//#if MC >= 260000
+//$$ method = "playerWillDestroy",
+//#else
+method = "onBreak",
+//#endif
+
             at = @At("HEAD")
     )
     //#if MC>12002

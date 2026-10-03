@@ -95,12 +95,24 @@ public abstract class ChatInputSuggestorMixin {
         return currentStr.substring(index);
     }
 
-    @Inject(method = "refresh", at = @At("HEAD"))
+    @Inject(
+//#if MC >= 260000
+//$$ method = "updateCommandInfo",
+//#else
+method = "refresh",
+//#endif
+ at = @At("HEAD"))
     public void injectRefresh(CallbackInfo ci) {
         parseCache.clear();
     }
 
-    @Inject(method = "provideRenderText", at = @At("HEAD"), cancellable = true)
+    @Inject(
+//#if MC >= 260000
+//$$ method = "formatChat",
+//#else
+method = "provideRenderText",
+//#endif
+ at = @At("HEAD"), cancellable = true)
     public void inj(String original, int firstCharacterIndex, CallbackInfoReturnable<net.minecraft.text.OrderedText> cir) {
         String full = this.textField.getText();
 

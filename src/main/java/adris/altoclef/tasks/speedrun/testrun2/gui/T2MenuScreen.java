@@ -72,14 +72,22 @@ public class T2MenuScreen extends Screen {
 
     // TEMPORARY showcase tab: commands added since the vexrypt/Ostinato work began.
     private static final String[][] TAB_SHOW_L = {
+            {"Everything  all demos in a row", "show everything"},
             {"parkour  4/3/2-gap run", "show parkour"},
             {"swim  surface lanes", "show swim"},
             {"dive  roofed + air pocket", "show dive"},
             {"boat  place, sail, collect", "show boat"},
+            {"ladder  climb a tower", "show ladder"},
+            {"melee  4 zombies, sword + shield", "show melee"},
+            {"ranged  3 skeletons, bow", "show ranged"},
+            {"horde  mixed mobs, full kit", "show horde"},
     };
     private static final String[][] TAB_SHOW_R = {
             {"kinematic  slalom", "show kinematic"},
             {"physics  sim-driven slalom", "show physics"},
+            {"pillar  build a tower", "show pillar"},
+            {"bridge  span a void gap", "show bridge"},
+            {"tunnel  mine through", "show tunnel"},
             {"off  stop demo", "show off"},
             {"stop", "stop"},
     };

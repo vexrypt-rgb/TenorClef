@@ -339,6 +339,14 @@ public class AltoClef implements ModInitializer {
         if (autoRunFired || !inGame()) {
             return;
         }
+        // A world saved with a dead player boots to the death screen; respawn so the run isn't stuck on it.
+        if (getPlayer().getHealth() <= 0) {
+            if (autoRunProbe++ % 40 == 0) {
+                getPlayer().requestRespawn();
+                MinecraftClient.getInstance().setScreen(null);
+            }
+            return;
+        }
         // Fully qualified: this file imports baritone.api.Settings, which shadows
         // adris.altoclef.Settings (see getModSettings() declaring the full name too).
         adris.altoclef.Settings s = getModSettings();
@@ -351,7 +359,7 @@ public class AltoClef implements ModInitializer {
         }
         if (autoRunDelay < 0) {
             // Give trackers/scanner a moment to populate before the task starts.
-            autoRunDelay = 20 * 5;
+            autoRunDelay = 20 * Integer.getInteger("tenorclef.autorun.delay", 5);
             // logInternal (not logMessage): logMessage routes to the in-game chat HUD
             // once a player exists, so harness greps of latest.log would miss it.
             Debug.logHarness("AUTORUN: armed '" + cmd + "' (firing in 5s)");

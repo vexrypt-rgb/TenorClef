@@ -73,6 +73,13 @@ final class T2MenuLook {
                 ly += 11;
             }
         }
+        if (tab == T2SigilTab.ID) {
+            net.minecraft.client.font.TextRenderer tr = net.minecraft.client.MinecraftClient.getInstance().textRenderer;
+            g.drawText(tr, trim(s, T2SigilTab.summary(), s.contentW), s.contentX, s.contentY, C_ACCENT, false);
+            g.drawText(tr, trim(s, T2SigilTab.status(), s.contentW), s.contentX, s.contentY + 12, C_TEXT, false);
+            String[] lab = T2SigilTab.fieldLabels();
+            for (int i = 0; i < lab.length; i++) g.drawText(tr, lab[i], s.contentX, s.contentY + 29 + i * 16, C_MUTED, false);
+        }
         paintHits(s, g, mx, my, 0);
     }
 

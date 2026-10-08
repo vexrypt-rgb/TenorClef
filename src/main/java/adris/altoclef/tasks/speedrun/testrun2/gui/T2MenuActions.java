@@ -78,6 +78,10 @@ final class T2MenuActions {
             rebuild(s);
             return;
         }
+        if (cmd != null && cmd.startsWith("SIG:")) {
+            T2SigilTab.run(s, cmd.substring(4));
+            return;
+        }
         if (cmd != null && cmd.startsWith("DROP:")) {
             if (cmd.endsWith("PROV")) {
                 s.dropProv = !s.dropProv;

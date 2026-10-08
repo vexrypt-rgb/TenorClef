@@ -72,6 +72,7 @@ public class AltoClefCommands {
                 new DjCommand(),
                 new ButlerCommand(),
                 new FleetCommand(),
+                new SealCommand(),
                 new HeadlessCommand(),
                 new ZeroCycleCommand(),
                 new GroundZeroCommand(),

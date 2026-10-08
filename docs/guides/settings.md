@@ -62,5 +62,5 @@ the defaults for `@testrun` flags.
 | Flag | Effect |
 | --- | --- |
 | `-Dtenorclef.swarm.log=true` | log swarm ledger events on the leader |
-| `-Dtenorclef.swarm.tp="x y z"` | teleport on `@swarm local`/`djoin` (use open ground) |
+| `-Dtenorclef.swarm.tp="x y z"` | teleport on `@swarm local` (use open ground) |
 | `-Dostinato.simbench=…` | Ostinato simulation benchmark (see Ostinato guides) |

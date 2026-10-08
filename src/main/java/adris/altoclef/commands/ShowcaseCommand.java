@@ -134,7 +134,7 @@ public class ShowcaseCommand extends Command {
                         try {
                             BlockPos at = mc.player.getBlockPos();
                             goal[0] = build(mod, demo, cmds,
-                                    idx == 0 ? at : at.east(COURSE_GAP), airY);
+                                    idx == 0 ? at : at.add(COURSE_GAP, 0, 0), airY);
                         } catch (CommandException e) {
                             mod.log("Showcase everything: " + e.getMessage());
                             return;

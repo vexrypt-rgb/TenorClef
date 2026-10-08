@@ -14,7 +14,7 @@ on:
         required: false
         default: ''
       ostinato_asset:
-        description: 'Ostinato v1.0.1 release asset to stage for a non-released node'
+        description: 'Ostinato v1.1.4 release asset to stage for a non-released node'
         required: false
         default: 'ostinato-mc1.21.11-unoptimized-fabric-1.17.0.jar'
       task:
@@ -53,7 +53,7 @@ jobs:
         if: matrix.node != '1.21.4' && matrix.node != '1.16.1'
         run: |
           curl -fsSL -o "libs/baritone-unoptimized-fabric-ostinato-${{ matrix.node }}.jar" \
-            "https://github.com/vexrypt-rgb/Ostinato/releases/download/v1.0.1/${{ inputs.ostinato_asset || 'ostinato-mc1.21.11-unoptimized-fabric-1.17.0.jar' }}"
+            "https://github.com/vexrypt-rgb/Ostinato/releases/download/v1.1.4/${{ inputs.ostinato_asset || 'ostinato-mc1.21.11-unoptimized-fabric-1.17.0.jar' }}"
           ls -la libs
       - name: Compile ${{ matrix.node }}
         run: |

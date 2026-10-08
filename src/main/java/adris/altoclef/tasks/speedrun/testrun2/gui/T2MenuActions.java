@@ -17,6 +17,12 @@ final class T2MenuActions {
 
     static void rebuild(T2MenuScreen s) {
         MinecraftClient mc = MinecraftClient.getInstance();
+        // init(client, w, h) does not drop the old widgets: stale text fields would keep focus and input.
+        try {
+            Method clear = Screen.class.getDeclaredMethod("clearChildren");
+            clear.setAccessible(true);
+            clear.invoke(s);
+        } catch (Throwable ignored) {}
         if (mc != null) {
             try {
                 Screen.class.getMethod("init", MinecraftClient.class, int.class, int.class)
@@ -30,20 +36,19 @@ final class T2MenuActions {
     static void attach(T2MenuScreen s, Object btn) {
         if (btn == null) return;
         Class<?> c = s.getClass();
-        while (c != null && c != Object.class) {
-            for (Method m : c.getDeclaredMethods()) {
-                if (m.getParameterCount() != 1) continue;
-                String n = m.getName();
-                if (!n.equals("addButton") && !n.equals("addDrawableChild") && !n.equals("addSelectableChild")) {
-                    continue;
+        // getDeclaredMethods() order is unspecified: try the drawable adders before addSelectableChild,
+        // which registers the widget for input but never draws it (an invisible text field).
+        for (String want : new String[]{"addDrawableChild", "addButton", "addSelectableChild"}) {
+            for (Class<?> k = c; k != null && k != Object.class; k = k.getSuperclass()) {
+                for (Method m : k.getDeclaredMethods()) {
+                    if (m.getParameterCount() != 1 || !m.getName().equals(want)) continue;
+                    try {
+                        m.setAccessible(true);
+                        m.invoke(s, btn);
+                        return;
+                    } catch (Throwable ignored) {}
                 }
-                try {
-                    m.setAccessible(true);
-                    m.invoke(s, btn);
-                    return;
-                } catch (Throwable ignored) {}
             }
-            c = c.getSuperclass();
         }
         try {
             Field f = null;
@@ -76,6 +81,14 @@ final class T2MenuActions {
             s.dropProv = false;
             s.dropModel = false;
             rebuild(s);
+            return;
+        }
+        if (cmd != null && cmd.startsWith("CMP:")) {
+            T2CompositionTab.run(s, cmd.substring(4));
+            return;
+        }
+        if (cmd != null && cmd.startsWith("SIG:")) {
+            T2SigilTab.run(s, cmd.substring(4));
             return;
         }
         if (cmd != null && cmd.startsWith("DROP:")) {

@@ -73,6 +73,16 @@ final class T2MenuLook {
                 ly += 11;
             }
         }
+        if (tab == T2SigilTab.ID) {
+            net.minecraft.client.font.TextRenderer tr = net.minecraft.client.MinecraftClient.getInstance().textRenderer;
+            g.drawText(tr, trim(s, T2SigilTab.summary(), s.contentW), s.contentX, s.contentY, C_ACCENT, false);
+            g.drawText(tr, trim(s, T2SigilTab.status(), s.contentW), s.contentX, s.contentY + 12, C_TEXT, false);
+            String[] lab = T2SigilTab.fieldLabels();
+            for (int i = 0; i < lab.length; i++) g.drawText(tr, lab[i], s.contentX, s.contentY + 29 + i * 16, C_MUTED, false);
+        }
+        if (tab == T2CompositionTab.ID) {
+            T2CompositionTab.paint(s, g);
+        }
         paintHits(s, g, mx, my, 0);
     }
 
@@ -95,8 +105,12 @@ final class T2MenuLook {
                         on ? C_TEXT : C_MUTED, false);
                 continue;
             }
-            boolean danger = "t2panic".equals(cmd) || "stop".equals(cmd);
-            boolean primary = "SAVECFG".equals(cmd);
+            if (cmd != null && cmd.startsWith("CMP:sel:")) {
+                T2CompositionTab.paintRow(g, b, label, cmd, hover);
+                continue;
+            }
+            boolean danger = "t2panic".equals(cmd) || "stop".equals(cmd) || "CMP:stop".equals(cmd);
+            boolean primary = "SAVECFG".equals(cmd) || "CMP:perform".equals(cmd);
             boolean close = cmd == null;
             int bg = hover ? C_BTN_HOVER : C_BTN;
             if (primary) bg = hover ? 0xFFFFD58A : C_ACCENT;

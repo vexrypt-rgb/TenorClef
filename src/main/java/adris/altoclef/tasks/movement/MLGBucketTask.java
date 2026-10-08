@@ -164,6 +164,7 @@ public class MLGBucketTask extends Task {
             return placeMLGBucketTask(mod, willLandOn.get());
         } else {
             setDebugState("Wait for it...");
+            Debug.logHarness("MLG wait y=" + String.format("%.2f", mod.getPlayer().getY()) + " noLandingBlock");
             // We must trigger jump as soon as we enter a "climbable" object
             mod.getInputControls().release(Input.JUMP);
             return null;
@@ -191,6 +192,9 @@ public class MLGBucketTask extends Task {
 
         IPlayerContext ctx = mod.getClientBaritone().getPlayerContext();
         Optional<Rotation> reachable = RotationUtils.reachableCenter(ctx.player(), toPlaceOn, ctx.playerController().getBlockReachDistance(), false);
+        Debug.logHarness("MLG y=" + String.format("%.2f", mod.getPlayer().getY()) + " vy=" + String.format("%.2f", mod.getPlayer().getVelocity().y)
+                + " target=" + toPlaceOn.toShortString() + " block=" + mod.getWorld().getBlockState(toPlaceOn).getBlock()
+                + " reachable=" + reachable.isPresent() + " water=" + mod.getItemStorage().hasItem(Items.WATER_BUCKET));
         if (reachable.isPresent()) {
             setDebugState("Performing MLG");
             LookHelper.lookAt(reachable.get());
@@ -218,7 +222,20 @@ public class MLGBucketTask extends Task {
                 setDebugState("NOT LOOKING CORRECTLY!");
             }
         } else {
-            setDebugState("Waiting to reach target block...");
+            // At terminal-ish speed (~2 blocks/tick) the reach check only passes the tick
+            // before impact, so falls kept ending with no click. Pre-aim at the landing
+            // face and click every tick once it is close: the bucket's own raycast
+            // (5 blocks) places as soon as it connects, and a miss is a no-op.
+            setDebugState("Pre-aiming MLG");
+            Vec3d face = new Vec3d(toPlaceOn.getX() + 0.5, toPlaceOn.getY() + 1, toPlaceOn.getZ() + 0.5);
+            LookHelper.lookAt(mod, face);
+            double dist = mod.getPlayer().getPos().add(0, mod.getPlayer().getStandingEyeHeight(), 0).distanceTo(face);
+            if (dist < 5.5 && !mod.getWorld().getDimension().ultrawarm()
+                    && mod.getSlotHandler().forceEquipItem(Items.WATER_BUCKET)) {
+                Debug.logHarness("MLG preaim click dist=" + String.format("%.2f", dist));
+                placedPos = willLandIn;
+                mod.getInputControls().tryPress(Input.CLICK_RIGHT);
+            }
         }
         return null;
     }

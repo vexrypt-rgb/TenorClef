@@ -44,6 +44,11 @@ public class PlaceObsidianBucketTask extends Task {
 
     private BlockPos _currentCastTarget;
     private BlockPos _currentDestroyTarget;
+    // Portal bench pool1 gap1 rep1: one cast block (65,123,-105) failed to place for ~900 ticks
+    // (four slow blacklist tries) before the frame was abandoned. Cap time per cast target.
+    private static final double CAST_STALL_SECONDS = 20;
+    private final adris.altoclef.util.time.TimerGame _castStallTimer = new adris.altoclef.util.time.TimerGame(CAST_STALL_SECONDS);
+    private BlockPos _castStallTarget;
 
     public PlaceObsidianBucketTask(BlockPos pos) {
         _pos = pos;
@@ -145,6 +150,15 @@ public class PlaceObsidianBucketTask extends Task {
             if (WorldHelper.isSolidBlock(_currentCastTarget)) {
                 _currentCastTarget = null;
             } else {
+                if (!_currentCastTarget.equals(_castStallTarget)) {
+                    _castStallTarget = _currentCastTarget;
+                    _castStallTimer.reset();
+                } else if (_castStallTimer.elapsed()) {
+                    Debug.logHarness("CAST stall obsidian=" + _pos.toShortString() + " castTarget=" + _currentCastTarget.toShortString() + " - giving up on frame block");
+                    mod.getBlockScanner().requestBlockUnreachable(_pos, 0);
+                    _castStallTimer.reset();
+                    return new TimeoutWanderTask(5);
+                }
                 return new PlaceBlockTask(_currentCastTarget,
                         Arrays.stream(ItemHelper.itemsToBlocks(mod.getModSettings().getThrowawayItems(mod))).filter((b)-> !Arrays.stream(ItemHelper.itemsToBlocks(ItemHelper.LEAVES)).toList().contains(b)).toArray(Block[]::new)
                 );
@@ -170,6 +184,7 @@ public class PlaceObsidianBucketTask extends Task {
             if (!WorldHelper.isSolidBlock(castPos)) {
                 _currentCastTarget = castPos;
                 Debug.logInternal("Building cast frame...");
+                Debug.logHarness("CAST obsidian=" + _pos.toShortString() + " castTarget=" + castPos.toShortString());
                 return null;
             }
         }

@@ -68,6 +68,8 @@ package adris.altoclef.benchmark;
 //$$                 else if (mode.equalsIgnoreCase("flow")) flow(mc, origin, Math.max(1, reps));
 //$$                 else if (mode.equalsIgnoreCase("boat")) boat(mc, origin, Math.max(1, reps));
 //$$                 else if (mode.equalsIgnoreCase("cliff")) cliff(mc, origin, Math.max(1, reps));
+//$$                 else if (mode.equalsIgnoreCase("portal")) portal(mc, origin, Math.max(1, reps));
+//$$                 else if (mode.equalsIgnoreCase("fall")) fall(mc, origin, Math.max(1, reps));
 //$$                 else if (mode.equalsIgnoreCase("swim")) swim(mc, origin, Math.max(1, reps));
 //$$                 else if (mode.equalsIgnoreCase("elytra")) elytra(mc, origin, opt, Math.max(1, reps));
 //$$                 else if (mode.equalsIgnoreCase("travel")) for (String m : (opt == null ? "-" : opt).split("[;+]")) travel(mc, origin, m, Math.max(1, reps));
@@ -108,7 +110,13 @@ package adris.altoclef.benchmark;
 //$$
 //$$     private static int surfaceY(MinecraftClient mc, int x, int z) {
 //$$         int y = mc.world.getTopY(Heightmap.Type.MOTION_BLOCKING, x, z);
-//$$         if (y > 0) return y;
+//$$         if (y > 0) {
+//$$             // MOTION_BLOCKING counts leaves; drop through canopies so goals sit on the ground.
+//$$             BlockPos.Mutable q = new BlockPos.Mutable(x, y - 1, z);
+//$$             while (q.getY() > 0 && (mc.world.getBlockState(q).getBlock() instanceof net.minecraft.block.LeavesBlock
+//$$                     || mc.world.getBlockState(q).getCollisionShape(mc.world, q).isEmpty())) q.move(0, -1, 0);
+//$$             return q.getY() + 1;
+//$$         }
 //$$         BlockPos.Mutable p = new BlockPos.Mutable(x, 255, z);
 //$$         while (p.getY() > 0 && mc.world.getBlockState(p).getCollisionShape(mc.world, p).isEmpty()) p.move(0, -1, 0);
 //$$         return p.getY() + 1;
@@ -200,7 +208,27 @@ package adris.altoclef.benchmark;
 //$$     private static void travel(MinecraftClient mc, BlockPos origin, String opt, int reps) throws Exception {
 //$$         String mover = opt == null || opt.equals("-") ? "baritone" : opt.toLowerCase(Locale.ROOT);
 //$$         IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
+//$$         // Spawn drifts a few blocks between runs, which moved every goal. Pin the ring centre (x,z) so goal N is the
+//$$         // same block each run; "spawn" restores the old behaviour. Default is the first leaf-free baseline's origin.
+//$$         String pin = System.getProperty("tenorclef.pathbench.origin", "65,-110").trim();
+//$$         if (!pin.equalsIgnoreCase("spawn")) {
+//$$             String[] xz = pin.split(",");
+//$$             int px = Integer.parseInt(xz[0].trim()), pz = Integer.parseInt(xz[1].trim());
+//$$             teleport(mc, new BlockPos(px, 200, pz)); // load the column before reading its surface
+//$$             Thread.sleep(1000);
+//$$             int py;
+//$$             try { py = mc.submit(() -> surfaceY(mc, px, pz)).get(); } catch (Exception e) { py = surfaceY(mc, px, pz); }
+//$$             origin = new BlockPos(px, py, pz);
+//$$             teleport(mc, origin);
+//$$             Debug.logHarness("PATHBENCH travel origin pinned at " + origin.toShortString());
+//$$         }
 //$$         List<BlockPos> goals = ring(mc, origin);
+//$$         // Mob kills were the only travel misses once goals were fixed; they measure luck, not pathing.
+//$$         // Run peaceful by default (-Dtenorclef.pathbench.peaceful=false keeps mobs) and restore afterwards.
+//$$         net.minecraft.world.Difficulty prevDifficulty = mc.getServer().getSaveProperties().getDifficulty();
+//$$         boolean peaceful = Boolean.parseBoolean(System.getProperty("tenorclef.pathbench.peaceful", "true"));
+//$$         if (peaceful) mc.getServer().submit(() -> mc.getServer().setDifficulty(net.minecraft.world.Difficulty.PEACEFUL, true)).get();
+//$$         Debug.logHarness("PATHBENCH travel difficulty=" + (peaceful ? "peaceful" : prevDifficulty.getName()));
 //$$         long limitTicks = Long.getLong("tenorclef.pathbench.travelTicks", 20L * 90);
 //$$         // End a trial early once it stops getting closer; 0 disables.
 //$$         long stallTicks = Long.getLong("tenorclef.pathbench.stallTicks", 400L);
@@ -215,9 +243,12 @@ package adris.altoclef.benchmark;
 //$$         BaritoneAPI.getSettings().movementBackend.value = mover.equals("ostinato") ? "tungsten" : "baritone";
 //$$         BaritoneAPI.getSettings().kinematicTravel.value = mover.equals("kinematic");
 //$$         BaritoneAPI.getSettings().physicsTravel.value = mover.equals("physics");
+//$$         // surface movement faults (e.g. M01 kinematic hand-back); the default sink discards them
+//$$         java.util.function.BiConsumer<String, String> prevFault = BaritoneAPI.getSettings().movementFault.value;
+//$$         BaritoneAPI.getSettings().movementFault.value = (code, evidence) -> Debug.logHarness("PATHBENCH FAULT " + code + " " + evidence);
 //$$         PrintWriter csv = open("travel_" + mover);
 //$$         csv.println("mover,goal,dx,dz,dist,rep,result,ticks,endDist,firstMoveTicks");
-//$$         int ok = 0, n = 0, moved = 0; long sumTicks = 0, sumFirst = 0; double sumEnd = 0;
+//$$         int ok = 0, n = 0, moved = 0, missDied = 0; long sumTicks = 0, sumFirst = 0; double sumEnd = 0;
 //$$         try {
 //$$             for (int gi = 0; gi < goals.size(); gi++) {
 //$$                 if (!only.isEmpty() && !only.contains(gi)) continue;
@@ -225,18 +256,41 @@ package adris.altoclef.benchmark;
 //$$                 for (int r = 0; r < reps; r++) {
 //$$                     teleport(mc, origin);
 //$$                     long t0 = worldTime(mc);
+//$$                     if (!peaceful && mc.world != null && mc.player != null) { // world state that can differ between trials when mobs are on
+//$$                         int hostiles = mc.world.getEntities(net.minecraft.entity.mob.HostileEntity.class, mc.player.getBoundingBox().expand(32), e -> true).size();
+//$$                         Debug.logHarness(String.format(Locale.ROOT, "PATHBENCH TRIALSTATE goal=%d rep=%d timeOfDay=%d hostiles32=%d", gi, r, mc.world.getTimeOfDay() % 24000, hostiles));
+//$$                     }
 //$$                     boolean started = mover.equals("tungsten") ? TungstenMovement.requestPathTo(g) : mover.equals("guided") ? startGuided(mc, baritone, g) : startBaritone(mc, baritone, g);
 //$$                     long firstMove = -1;
+//$$                     long kin0 = kinTicks(), kinAtBest = kin0; // attributes a stall to the kinematic controller or to Baritone
 //$$                     double startD = dist(mc, g);
 //$$                     String result = started ? "TIMEOUT" : "NOSTART";
 //$$                     double bestD = startD; long bestAt = 0; long lastReq = 0; double lastD = startD; long lastMoveAt = 0;
+//$$                     // -Dtenorclef.pathbench.trace=x,z logs every poll while the player is within 3 blocks of (x, z)
+//$$                     String tr = System.getProperty("tenorclef.pathbench.trace");
+//$$                     double[] trace = tr == null ? null : java.util.Arrays.stream(tr.split(",")).mapToDouble(Double::parseDouble).toArray();
+//$$                     // -Dtenorclef.pathbench.route=N logs a breadcrumb every N ticks so routes can be compared across runs
+//$$                     long routeEvery = Long.getLong("tenorclef.pathbench.route", 0L), lastRoute = -1;
+//$$                     int deaths = 0; boolean wasDead = false; // mob kills are bench noise, not a mover fault; count them so misses can be attributed
 //$$                     while (started) {
 //$$                         Thread.sleep(25);
 //$$                         long el = worldTime(mc) - t0;
+//$$                         boolean dead = mc.player == null || mc.player.isDead();
+//$$                         if (dead && !wasDead) deaths++;
+//$$                         wasDead = dead;
 //$$                         double d = dist(mc, g);
 //$$                         if (firstMove < 0 && Math.abs(d - startD) > 0.5) firstMove = el;
 //$$                         if (d < 2.0) { result = "GOAL"; break; }
-//$$                         if (d < bestD - 1.0) { bestD = d; bestAt = el; }
+//$$                         if (trace != null && mc.player != null && Math.abs(mc.player.getX() - trace[0]) < 3 && Math.abs(mc.player.getZ() - trace[1]) < 3) {
+//$$                             net.minecraft.util.math.Vec3d v = mc.player.getVelocity();
+//$$                             Debug.logHarness(String.format(Locale.ROOT, "PATHBENCH TRACE t=%d pos=%.2f,%.2f,%.2f vel=%.2f,%.2f,%.2f ground=%s hcoll=%s yaw=%.0f %s",
+//$$                                     el, mc.player.getX(), mc.player.getY(), mc.player.getZ(), v.x, v.y, v.z, mc.player.isOnGround(), mc.player.horizontalCollision, mc.player.yaw, execState(baritone)));
+//$$                         }
+//$$                         if (routeEvery > 0 && mc.player != null && el / routeEvery != lastRoute) {
+//$$                             lastRoute = el / routeEvery;
+//$$                             Debug.logHarness(String.format(Locale.ROOT, "PATHBENCH ROUTE t=%d age=%d food=%d sprint=%s pos=%.1f,%.1f,%.1f d=%.1f %s", el, mc.player.age, mc.player.getHungerManager().getFoodLevel(), mc.player.isSprinting(), mc.player.getX(), mc.player.getY(), mc.player.getZ(), d, execState(baritone)));
+//$$                         }
+//$$                         if (d < bestD - 1.0) { bestD = d; bestAt = el; kinAtBest = kinTicks(); }
 //$$                         if (stallTicks > 0 && el - bestAt > stallTicks) { result = "STALLED"; break; }
 //$$                         if (Math.abs(d - lastD) > 0.3) { lastD = d; lastMoveAt = el; }
 //$$                         if (!viaCustom && idleTicks > 0 && firstMove >= 0 && el - lastMoveAt > idleTicks && el - lastReq > idleTicks && el < limitTicks) {
@@ -252,6 +306,18 @@ package adris.altoclef.benchmark;
 //$$                         }
 //$$                         if (el > limitTicks) break;
 //$$                     }
+//$$                     // -Dtenorclef.pathbench.tail=N keeps the path running N ticks after the trial ends and logs each poll (for faults after the goal)
+//$$                     long tail = Long.getLong("tenorclef.pathbench.tail", 0L), tailEnd = worldTime(mc) + tail;
+//$$                     while (tail > 0 && worldTime(mc) < tailEnd && mc.player != null) {
+//$$                         Thread.sleep(25);
+//$$                         net.minecraft.util.math.Vec3d v = mc.player.getVelocity();
+//$$                         Debug.logHarness(String.format(Locale.ROOT, "PATHBENCH TAIL t=%d pos=%.2f,%.2f,%.2f vel=%.2f,%.2f,%.2f ground=%s hcoll=%s %s",
+//$$                                 worldTime(mc) - t0, mc.player.getX(), mc.player.getY(), mc.player.getZ(), v.x, v.y, v.z, mc.player.isOnGround(), mc.player.horizontalCollision, execState(baritone)));
+//$$                     }
+//$$                     boolean activeAtEnd =!viaCustom ? TungstenMovement.isPathing() : baritone.getCustomGoalProcess().isActive();
+//$$                     long kinNow = kinTicks();
+//$$                     boolean pathAtEnd = viaCustom && baritone.getPathingBehavior().hasPath();
+//$$                     boolean calcAtEnd = viaCustom && baritone.getPathingBehavior().getInProgress().isPresent();
 //$$                     if (!viaCustom) TungstenMovement.cancel();
 //$$                     else mc.execute(() -> baritone.getPathingBehavior().cancelEverything());
 //$$                     long ticks = worldTime(mc) - t0;
@@ -259,8 +325,12 @@ package adris.altoclef.benchmark;
 //$$                     csv.printf(Locale.ROOT, "%s,%d,%d,%d,%d,%d,%s,%d,%.2f,%d%n", mover, gi, g.getX() - origin.getX(), g.getZ() - origin.getZ(),
 //$$                             (int) Math.round(Math.sqrt(g.getSquaredDistance(origin))), r, result, ticks, end, firstMove);
 //$$                     csv.flush();
+//$$                     // Per-trial diagnostics so a stall can be located after the fact (CSV lacks position/progress history).
+//$$                     BlockPos endPos = mc.player == null ? BlockPos.ORIGIN : mc.player.getBlockPos();
+//$$                     Debug.logHarness(String.format(Locale.ROOT, "PATHBENCH TRIAL mover=%s goal=%d rep=%d result=%s ticks=%d target=%s end=%s endDist=%.1f bestDist=%.1f bestAt=%d lastMoveAt=%d firstMove=%d activeAtEnd=%s pathAtEnd=%s calcAtEnd=%s kinDriven=%d kinSinceBest=%d deaths=%d",
+//$$                             mover, gi, r, result, ticks, g.toShortString() + "(" + (mc.world == null ? "?" : mc.world.getBlockState(g.down()).getBlock().getTranslationKey()) + ")", endPos.toShortString(), end, bestD, bestAt, lastMoveAt, firstMove, activeAtEnd, pathAtEnd, calcAtEnd, kinNow - kin0, kinNow - kinAtBest, deaths));
 //$$                     n++;
-//$$                     if (result.equals("GOAL")) { ok++; sumTicks += ticks; }
+//$$                     if (result.equals("GOAL")) { ok++; sumTicks += ticks; } else if (deaths > 0) missDied++;
 //$$                     if (firstMove >= 0) { moved++; sumFirst += firstMove; }
 //$$                     sumEnd += end;
 //$$                     Thread.sleep(500);
@@ -270,10 +340,12 @@ package adris.altoclef.benchmark;
 //$$             BaritoneAPI.getSettings().movementBackend.value = "baritone";
 //$$             BaritoneAPI.getSettings().kinematicTravel.value = false;
 //$$             BaritoneAPI.getSettings().physicsTravel.value = false;
+//$$             BaritoneAPI.getSettings().movementFault.value = prevFault;
+//$$             if (peaceful) mc.getServer().submit(() -> mc.getServer().setDifficulty(prevDifficulty, true));
 //$$             csv.close();
 //$$         }
-//$$         Debug.logHarness(String.format(Locale.ROOT, "PATHBENCH SUMMARY mode=travel mover=%s goalRate=%d/%d avgGoalTicks=%.0f avgFirstMoveTicks=%.1f avgEndDist=%.1f",
-//$$                 mover, ok, n, ok == 0 ? 0 : sumTicks / (double) ok, moved == 0 ? -1 : sumFirst / (double) moved, n == 0 ? 0 : sumEnd / n));
+//$$         Debug.logHarness(String.format(Locale.ROOT, "PATHBENCH SUMMARY mode=travel mover=%s goalRate=%d/%d avgGoalTicks=%.0f avgFirstMoveTicks=%.1f avgEndDist=%.1f missesAfterDeath=%d",
+//$$                 mover, ok, n, ok == 0 ? 0 : sumTicks / (double) ok, moved == 0 ? -1 : sumFirst / (double) moved, n == 0 ? 0 : sumEnd / n, missDied));
 //$$     }
 //$$
 //$$     // ---- flow --------------------------------------------------------------------------
@@ -364,6 +436,8 @@ package adris.altoclef.benchmark;
 //$$     private static void column(MinecraftClient mc, BlockPos origin, int reps) throws Exception {
 //$$         IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
 //$$         BaritoneAPI.getSettings().chatDebug.value = true;
+//$$         // doorCourse: no columns, one oak door carried; the only air is a door pocket (Ostinato allowDoorAirPockets).
+//$$         boolean doorCourse = Boolean.getBoolean("tenorclef.pathbench.doorCourse");
 //$$         int L = 120, by = 100, ox = origin.getX(), oz = origin.getZ();
 //$$         java.util.concurrent.CompletableFuture<Void> built = new java.util.concurrent.CompletableFuture<>();
 //$$         mc.getServer().execute(() -> {
@@ -372,25 +446,43 @@ package adris.altoclef.benchmark;
 //$$                 boolean wall = x < 0 || x > L || Math.abs(z) > 1 || y < by || y > by + 3;
 //$$                 w.setBlockState(new BlockPos(ox + x, y, oz + z), wall ? net.minecraft.block.Blocks.GLASS.getDefaultState() : net.minecraft.block.Blocks.WATER.getDefaultState(), 2);
 //$$             }
-//$$             w.setBlockState(new BlockPos(ox + 40, by - 1, oz), net.minecraft.block.Blocks.MAGMA_BLOCK.getDefaultState(), 3);
-//$$             w.setBlockState(new BlockPos(ox + 80, by - 1, oz), net.minecraft.block.Blocks.SOUL_SAND.getDefaultState(), 3);
+//$$             if (!doorCourse) {
+//$$                 w.setBlockState(new BlockPos(ox + 40, by - 1, oz), net.minecraft.block.Blocks.MAGMA_BLOCK.getDefaultState(), 3);
+//$$                 w.setBlockState(new BlockPos(ox + 80, by - 1, oz), net.minecraft.block.Blocks.SOUL_SAND.getDefaultState(), 3);
+//$$             }
 //$$             built.complete(null);
 //$$         });
 //$$         built.get();
 //$$         Thread.sleep(3000);
 //$$         BlockPos start = new BlockPos(ox + 1, by + 1, oz), g = new BlockPos(ox + L - 1, by, oz), mag = new BlockPos(ox + 40, by - 1, oz);
 //$$         Debug.logHarness("PATHBENCH column cells magma=" + mc.world.getBlockState(mag.up(2)).getBlock() + " soul=" + mc.world.getBlockState(mag.add(40, 2, 0)).getBlock());
-//$$         PrintWriter csv = open("column_baritone");
-//$$         csv.println("rep,result,ticks,minAir,minHealth,onMagma,onMagmaUnsneaked,colTicks");
+//$$         PrintWriter csv = open(doorCourse ? "door_baritone" : "column_baritone");
+//$$         csv.println("rep,result,ticks,minAir,minHealth,onMagma,onMagmaUnsneaked,colTicks,doorTicks,doorsLeft,doorBlocksLeft");
 //$$         int ok = 0, n = 0;
 //$$         try {
 //$$             for (int r = 0; r < reps; r++) {
 //$$                 teleport(mc, start);
 //$$                 mc.execute(() -> { mc.player.setAir(120); mc.player.setHealth(20); });
+//$$                 if (doorCourse) {
+//$$                     java.util.concurrent.CompletableFuture<Void> inv = new java.util.concurrent.CompletableFuture<>();
+//$$                     mc.getServer().execute(() -> {
+//$$                         net.minecraft.server.world.ServerWorld w = mc.getServer().getOverworld();
+//$$                         for (int x = 0; x <= L; x++) for (int z = -1; z <= 1; z++) for (int y = by; y <= by + 3; y++) {
+//$$                             BlockPos q = new BlockPos(ox + x, y, oz + z);
+//$$                             if (!w.getBlockState(q).isOf(net.minecraft.block.Blocks.WATER)) w.setBlockState(q, net.minecraft.block.Blocks.WATER.getDefaultState(), 2);
+//$$                         }
+//$$                         w.getEntities(net.minecraft.entity.ItemEntity.class, new net.minecraft.util.math.Box(ox - 2, by - 2, oz - 3, ox + L + 2, by + 5, oz + 3), e -> true).forEach(net.minecraft.entity.Entity::remove);
+//$$                         net.minecraft.server.network.ServerPlayerEntity sp = mc.getServer().getPlayerManager().getPlayerList().get(0);
+//$$                         sp.inventory.clear();
+//$$                         sp.inventory.insertStack(new net.minecraft.item.ItemStack(net.minecraft.item.Items.OAK_DOOR, 1));
+//$$                         inv.complete(null);
+//$$                     });
+//$$                     inv.get();
+//$$                 }
 //$$                 Thread.sleep(200);
 //$$                 long t0 = worldTime(mc), last = -1;
 //$$                 startBaritone(mc, baritone, g);
-//$$                 int minAir = 300, onMagma = 0, bad = 0, col = 0; float minHp = 20;
+//$$                 int minAir = 300, onMagma = 0, bad = 0, col = 0, doorT = 0; float minHp = 20;
 //$$                 String result = "TIMEOUT";
 //$$                 while (true) {
 //$$                     Thread.sleep(25);
@@ -401,13 +493,17 @@ package adris.altoclef.benchmark;
 //$$                     minHp = Math.min(minHp, mc.player.getHealth());
 //$$                     if (mc.world.getBlockState(mc.player.getBlockPos().down()).getBlock() == net.minecraft.block.Blocks.MAGMA_BLOCK && mc.player.isOnGround()) { onMagma++; if (!mc.player.isSneaking()) bad++; }
 //$$                     if (mc.world.getBlockState(new BlockPos(mc.player.getCameraPosVec(1))).getBlock() == net.minecraft.block.Blocks.BUBBLE_COLUMN) col++;
+//$$                     if (mc.world.getBlockState(new BlockPos(mc.player.getCameraPosVec(1))).getBlock() instanceof net.minecraft.block.DoorBlock) doorT++;
 //$$                     if (dist3(mc, g) < 1.5) { result = "GOAL"; break; }
 //$$                     if (mc.player.isDead()) { result = "DIED"; break; }
 //$$                     if (el % 40 == 0) Debug.logHarness(String.format(Locale.ROOT, "COLUMN t=%d x=%.1f y=%.1f air=%d hp=%.0f", el, mc.player.getX() - ox, mc.player.getY(), mc.player.getAir(), mc.player.getHealth()));
 //$$                     if (el > 20 * 120) break;
 //$$                 }
 //$$                 mc.execute(() -> baritone.getPathingBehavior().cancelEverything());
-//$$                 csv.printf(Locale.ROOT, "%d,%s,%d,%d,%.0f,%d,%d,%d%n", r, result, worldTime(mc) - t0, minAir, minHp, onMagma, bad, col);
+//$$                 int doorsLeft = mc.player.inventory.count(net.minecraft.item.Items.OAK_DOOR), doorBlocks = 0;
+//$$                 for (int x = 0; x <= L; x++) for (int z = -1; z <= 1; z++) for (int y = by; y <= by + 3; y++)
+//$$                     if (mc.world.getBlockState(new BlockPos(ox + x, y, oz + z)).getBlock() instanceof net.minecraft.block.DoorBlock) doorBlocks++;
+//$$                 csv.printf(Locale.ROOT, "%d,%s,%d,%d,%.0f,%d,%d,%d,%d,%d,%d%n", r, result, worldTime(mc) - t0, minAir, minHp, onMagma, bad, col, doorT, doorsLeft, doorBlocks);
 //$$                 csv.flush();
 //$$                 n++;
 //$$                 if (result.equals("GOAL")) ok++;
@@ -419,6 +515,190 @@ package adris.altoclef.benchmark;
 //$$         }
 //$$         Debug.logHarness(String.format(Locale.ROOT, "PATHBENCH SUMMARY mode=column goalRate=%d/%d", ok, n));
 //$$     }
+//$$
+//$$    // ---- portal ------------------------------------------------------------------------
+//$$
+//$$    /**
+//$$     * Fall clutch in isolation: drop from H blocks above a stone floor holding one water bucket
+//$$     * (in the main inventory, like a real run) and no user task. SAFE when the player lands alive.
+//$$     */
+//$$    private static void fall(MinecraftClient mc, BlockPos origin, int reps) throws Exception {
+//$$        int ox = origin.getX() + 40, oz = origin.getZ(), by = 100;
+//$$        PrintWriter csv = open("fall");
+//$$        csv.println("height,rep,result,ticks,hpLost");
+//$$        int ok = 0, n = 0;
+//$$        try {
+//$$            for (int H : new int[]{12, 25, 45}) {
+//$$                for (int r = 0; r < reps; r++) {
+//$$                    java.util.concurrent.CompletableFuture<Void> built = new java.util.concurrent.CompletableFuture<>();
+//$$                    mc.getServer().execute(() -> {
+//$$                        net.minecraft.server.world.ServerWorld w = mc.getServer().getOverworld();
+//$$                        for (int x = -6; x <= 6; x++) for (int z = -6; z <= 6; z++) for (int y = by - 2; y <= by + 60; y++) {
+//$$                            net.minecraft.block.BlockState st = y < by ? net.minecraft.block.Blocks.STONE.getDefaultState() : net.minecraft.block.Blocks.AIR.getDefaultState();
+//$$                            w.setBlockState(new BlockPos(ox + x, y, oz + z), st, 2);
+//$$                        }
+//$$                        ServerPlayerEntity sp = mc.getServer().getPlayerManager().getPlayerList().get(0);
+//$$                        sp.inventory.clear();
+//$$                        sp.inventory.setStack(20, new net.minecraft.item.ItemStack(net.minecraft.item.Items.WATER_BUCKET));
+//$$                        sp.setHealth(sp.getMaxHealth());
+//$$                        sp.getHungerManager().setFoodLevel(20);
+//$$                        built.complete(null);
+//$$                    });
+//$$                    built.get();
+//$$                    // Chains only tick while a user task runs (TaskRunner.active); real play always has one.
+//$$                    mc.execute(() -> adris.altoclef.AltoClef.getInstance().runUserTask(new adris.altoclef.tasks.movement.IdleTask()));
+//$$                    Thread.sleep(1500);
+//$$                    teleport(mc, new BlockPos(ox, by + H, oz));
+//$$                    long t0 = worldTime(mc);
+//$$                    String result = "TIMEOUT";
+//$$                    while (true) {
+//$$                        Thread.sleep(25);
+//$$                        long el = worldTime(mc) - t0;
+//$$                        if (mc.player.isDead() || mc.player.getHealth() <= 0) { result = "DIED"; break; }
+//$$                        if (el > 10 && mc.player.isOnGround() || el > 10 && mc.player.isTouchingWater()) { Thread.sleep(500); result = mc.player.isDead() ? "DIED" : "SAFE"; break; }
+//$$                        if (el > 20 * 15) break;
+//$$                    }
+//$$                    float lost = 20 - mc.player.getHealth();
+//$$                    long ticks = worldTime(mc) - t0;
+//$$                    csv.printf(Locale.ROOT, "%d,%d,%s,%d,%.1f%n", H, r, result, ticks, lost);
+//$$                    csv.flush();
+//$$                    Debug.logHarness(String.format(Locale.ROOT, "FALL H=%d rep=%d result=%s ticks=%d hpLost=%.1f", H, r, result, ticks, lost));
+//$$                    n++;
+//$$                    if (result.equals("SAFE")) ok++;
+//$$                    if (result.equals("DIED")) { mc.execute(() -> mc.player.requestRespawn()); Thread.sleep(3000); }
+//$$                    Thread.sleep(1000);
+//$$                }
+//$$            }
+//$$        } finally {
+//$$            csv.close();
+//$$        }
+//$$        Debug.logHarness("PATHBENCH SUMMARY mode=fall safe=" + ok + "/" + n);
+//$$    }
+//$$
+//$$    /**
+//$$     * Nether-portal bucket build in isolation: a flat stone pad at y=120 with a 5x5 lava pool and a
+//$$     * 3x3 water pool, rebuilt each trial. Kit: iron pickaxe, 2 buckets, flint and steel, 32 cobblestone. Runs
+//$$     * ConstructNetherPortalBucketTask; GOAL when a nether portal block appears on the pad.
+//$$     */
+//$$    private static void portal(MinecraftClient mc, BlockPos origin, int reps) throws Exception {
+//$$        int ox = origin.getX(), oz = origin.getZ(), y0 = 120; // sky pad: no natural water/lava/caves under it
+//$$        PrintWriter csv = open("portal");
+//$$        csv.println("rep,result,ticks,lastState,lastLineState");
+//$$        int ok = 0, n = 0; long sumTicks = 0;
+//$$        try {
+//$$            for (int r = 0; r < reps; r++) {
+//$$                java.util.concurrent.CompletableFuture<Void> built = new java.util.concurrent.CompletableFuture<>();
+//$$                final int r0 = r;
+//$$                mc.getServer().execute(() -> {
+//$$                    net.minecraft.server.world.ServerWorld w = mc.getServer().getOverworld();
+//$$                    for (int x = -16; x <= 26; x++) for (int z = -14; z <= 14; z++) {
+//$$                        for (int y = y0 - 3; y <= y0 + 10; y++) {
+//$$                            net.minecraft.block.BlockState st = y < y0 ? net.minecraft.block.Blocks.STONE.getDefaultState() : net.minecraft.block.Blocks.AIR.getDefaultState();
+//$$                            if (y == y0 - 1 && x >= 8 && x <= 12 && Math.abs(z) <= 2) st = net.minecraft.block.Blocks.LAVA.getDefaultState();
+//$$                            if (y == y0 - 1 && x >= -9 && x <= -7 && Math.abs(z) <= 1) st = net.minecraft.block.Blocks.WATER.getDefaultState();
+//$$                            // Bedrock rim: an open sky-pad edge is a 50-block drop real terrain never has (trace rep0 died walking off it).
+//$$                            if ((x == -16 || x == 26 || Math.abs(z) == 14) && y >= y0 && y <= y0 + 3) st = net.minecraft.block.Blocks.BEDROCK.getDefaultState();
+//$$                            w.setBlockState(new BlockPos(ox + x, y, oz + z), st, 2);
+//$$                        }
+//$$                    }
+//$$                    // Seed 12345 has natural lava below the pad (y=52, y=71) that the task preferred over the pad pool.
+//$$                    // Replace all lava within 64 blocks below the pad with stone so the pad pool is the only lake.
+//$$                    if (r0 == 0) for (int x = -64; x <= 64; x++) for (int z = -64; z <= 64; z++) for (int y = 1; y < y0 - 3; y++) {
+//$$                        BlockPos lp = new BlockPos(ox + x, y, oz + z);
+//$$                        if (w.getBlockState(lp).getBlock() == net.minecraft.block.Blocks.LAVA) w.setBlockState(lp, net.minecraft.block.Blocks.STONE.getDefaultState(), 2);
+//$$                    }
+//$$                    w.getEntities(net.minecraft.entity.ItemEntity.class, new net.minecraft.util.math.Box(ox - 64, 0, oz - 64, ox + 64, y0 + 11, oz + 64), e -> true).forEach(net.minecraft.entity.Entity::remove);
+//$$                    ServerPlayerEntity sp = mc.getServer().getPlayerManager().getPlayerList().get(0);
+//$$                    sp.inventory.clear();
+//$$                    sp.inventory.insertStack(new net.minecraft.item.ItemStack(net.minecraft.item.Items.IRON_PICKAXE));
+//$$                    sp.inventory.insertStack(new net.minecraft.item.ItemStack(net.minecraft.item.Items.BUCKET, 2));
+//$$                    sp.inventory.insertStack(new net.minecraft.item.ItemStack(net.minecraft.item.Items.FLINT_AND_STEEL));
+//$$                    sp.inventory.insertStack(new net.minecraft.item.ItemStack(net.minecraft.item.Items.COBBLESTONE, 32)); // cast-frame throwaways: PORTAL phase arrives with cobble
+//$$                    built.complete(null);
+//$$                });
+//$$                built.get();
+//$$                teleport(mc, new BlockPos(ox, y0, oz));
+//$$                // Fresh scanner per rep: its blacklist and cached positions otherwise carry over from the previous rep.
+//$$                mc.execute(() -> adris.altoclef.AltoClef.getInstance().getBlockScanner().reset());
+//$$                // Wait until the scanner knows the pad lava; 1.5s was not enough and the task picked a natural lake below.
+//$$                final BlockPos padLava = new BlockPos(ox + 10, y0 - 1, oz);
+//$$                boolean seen = false;
+//$$                for (int i = 0; i < 200 && !seen; i++) {
+//$$                    Thread.sleep(100);
+//$$                    seen = adris.altoclef.AltoClef.getInstance().getBlockScanner().getKnownLocations(net.minecraft.block.Blocks.LAVA).stream().anyMatch(p -> p.isWithinDistance(padLava, 3));
+//$$                }
+//$$                Debug.logHarness("PORTAL rep=" + r + " origin=" + ox + "," + y0 + "," + oz + " pool=x" + (ox + 8) + ".." + (ox + 12) + ",y" + (y0 - 1) + ",z" + (oz - 2) + ".." + (oz + 2) + " scannerSawPadLava=" + seen);
+//$$                adris.altoclef.tasks.construction.compound.ConstructNetherPortalBucketTask task = new adris.altoclef.tasks.construction.compound.ConstructNetherPortalBucketTask();
+//$$                mc.execute(() -> adris.altoclef.AltoClef.getInstance().runUserTask(task));
+//$$                long t0 = worldTime(mc), last = -1;
+//$$                String result = "TIMEOUT", state = "", lastLogged = "", lastChain = "", lastHazard = "";
+//$$                int lavaBuckets = 0; long traceUntil = -1;
+//$$                while (true) {
+//$$                    Thread.sleep(25);
+//$$                    long el = worldTime(mc) - t0;
+//$$                    if (el == last) continue;
+//$$                    last = el;
+//$$                    String ds = task.getDebugState();
+//$$                    if (ds != null) state = ds;
+//$$                    if (!state.equals(lastLogged)) { Debug.logHarness("PORTAL t=" + el + " state=" + state); lastLogged = state; }
+//$$                    StringBuilder chain = new StringBuilder();
+//$$                    for (adris.altoclef.tasksystem.Task c = task.getSub(); c != null && chain.length() < 400; c = c.getSub()) chain.append(c.getClass().getSimpleName()).append('>');
+//$$                    if (!chain.toString().equals(lastChain)) { Debug.logHarness("PORTAL t=" + el + " chain=" + chain); lastChain = chain.toString(); }
+//$$                    // Per-tick trace from each lava pickup until lava entry (or 60 ticks): which movement puts us in the pool?
+//$$                    int lb = mc.player.inventory.count(net.minecraft.item.Items.LAVA_BUCKET);
+//$$                    if (lb > lavaBuckets) traceUntil = el + 60;
+//$$                    lavaBuckets = lb;
+//$$                    if (el <= traceUntil) {
+//$$                        String mv = "none";
+//$$                        try {
+//$$                            baritone.api.pathing.path.IPathExecutor ex = baritone.api.BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().getCurrent();
+//$$                            if (ex != null && ex.getPosition() < ex.getPath().movements().size()) {
+//$$                                baritone.api.pathing.movement.IMovement m = ex.getPath().movements().get(ex.getPosition());
+//$$                                mv = m.getClass().getSimpleName() + " " + m.getSrc().toShortString() + "->" + m.getDest().toShortString();
+//$$                            }
+//$$                        } catch (Throwable ignored) { mv = "err"; }
+//$$                        net.minecraft.util.math.Vec3d v = mc.player.getVelocity();
+//$$                        Debug.logHarness(String.format(Locale.ROOT, "TICK t=%d xyz=%.2f,%.2f,%.2f vel=%.2f,%.2f,%.2f ground=%b fwd=%b sneak=%b lava=%b mv=%s chain=%s", el, mc.player.getX(), mc.player.getY(), mc.player.getZ(), v.x, v.y, v.z, mc.player.isOnGround(), mc.options.keyForward.isPressed(), mc.options.keySneak.isPressed(), mc.player.isInLava(), mv, chain));
+//$$                        if (mc.player.isInLava()) traceUntil = -1;
+//$$                    }
+//$$                    if (mc.player.isOnFire() || mc.player.isInLava() || mc.player.getHealth() < 20) {
+//$$                        String hz = String.format(Locale.ROOT, "hp=%.0f fire=%b lava=%b pos=%s", mc.player.getHealth(), mc.player.isOnFire(), mc.player.isInLava(), mc.player.getBlockPos().toShortString());
+//$$                        if (!hz.equals(lastHazard)) { Debug.logHarness("PORTAL t=" + el + " " + hz + " chain=" + chain); lastHazard = hz; }
+//$$                    }
+//$$                    if (el % 200 == 0) {
+//$$                        int lavaLeft = 0, obsInPool = 0;
+//$$                        for (int x = 8; x <= 12; x++) for (int z = -2; z <= 2; z++) {
+//$$                            net.minecraft.block.BlockState bs = mc.world.getBlockState(new BlockPos(ox + x, y0 - 1, oz + z));
+//$$                            if (bs.getFluidState().isStill() && bs.getFluidState().getFluid() == net.minecraft.fluid.Fluids.LAVA) lavaLeft++;
+//$$                            if (bs.getBlock() == net.minecraft.block.Blocks.OBSIDIAN || bs.getBlock() == net.minecraft.block.Blocks.COBBLESTONE) obsInPool++;
+//$$                        }
+//$$                        Debug.logHarness(String.format(Locale.ROOT, "PORTAL t=%d pos=%s state=%s poolLava=%d poolSolid=%d", el, mc.player.getBlockPos().toShortString(), state, lavaLeft, obsInPool));
+//$$                    }
+//$$                    if (portalOnPad(mc, ox, y0, oz)) { result = "GOAL"; break; }
+//$$                    if (mc.player.isDead()) { result = "DIED"; break; }
+//$$                    if (el > 20 * 300) break;
+//$$                }
+//$$                long ticks = worldTime(mc) - t0;
+//$$                mc.execute(() -> adris.altoclef.AltoClef.getInstance().stopTasks());
+//$$                csv.printf(Locale.ROOT, "%d,%s,%d,\"%s\",\"%s\"%n", r, result, ticks, state.replace('"', '\''), lastLogged.replace('"', '\''));
+//$$                csv.flush();
+//$$                Debug.logHarness(String.format(Locale.ROOT, "PORTAL rep=%d result=%s ticks=%d state=%s", r, result, ticks, state));
+//$$                n++;
+//$$                if (result.equals("GOAL")) { ok++; sumTicks += ticks; }
+//$$                if (mc.player.isDead()) { mc.execute(() -> mc.player.requestRespawn()); Thread.sleep(2000); }
+//$$                Thread.sleep(1000);
+//$$            }
+//$$        } finally {
+//$$            csv.close();
+//$$        }
+//$$        Debug.logHarness(String.format(Locale.ROOT, "PATHBENCH SUMMARY mode=portal goalRate=%d/%d avgGoalTicks=%.0f", ok, n, ok == 0 ? 0.0 : (double) sumTicks / ok));
+//$$    }
+//$$
+//$$    private static boolean portalOnPad(MinecraftClient mc, int ox, int y0, int oz) {
+//$$        for (int x = -16; x <= 26; x++) for (int z = -14; z <= 14; z++) for (int y = y0 - 3; y <= y0 + 10; y++)
+//$$            if (mc.world.getBlockState(new BlockPos(ox + x, y, oz + z)).getBlock() == net.minecraft.block.Blocks.NETHER_PORTAL) return true;
+//$$        return false;
+//$$    }
 //$$
 //$$     // ---- swim --------------------------------------------------------------------------
 //$$
@@ -940,6 +1220,8 @@ package adris.altoclef.benchmark;
 //$$             if (sp != null) {
 //$$                 sp.setVelocity(0, 0, 0);
 //$$                 sp.fallDistance = 0;
+//$$                 sp.getHungerManager().setFoodLevel(20); // every trial starts fed: with mobs on, hunger drained to 0 by goal 15 and disabled sprint
+//$$                 sp.getHungerManager().setSaturationLevelClient(5.0f);
 //$$                 sp.setAir(sp.getMaxAir());
 //$$                 sp.setHealth(sp.getMaxHealth());
 //$$                 sp.networkHandler.requestTeleport(p.getX() + 0.5, p.getY(), p.getZ() + 0.5, sp.yaw, sp.pitch);
@@ -964,6 +1246,32 @@ package adris.altoclef.benchmark;
 //$$         if (mc.player == null) return 1e9;
 //$$         double dx = mc.player.getX() - (g.getX() + 0.5), dz = mc.player.getZ() - (g.getZ() + 0.5);
 //$$         return Math.sqrt(dx * dx + dz * dz);
+//$$     }
+//$$
+//$$     /** Ticks Ostinato's kinematic controller has driven the player; -1 if the class is absent. Read reflectively: it is not in the API jar. */
+//$$     private static String execState(IBaritone baritone) {
+//$$         Object ex = baritone.getPathingBehavior().getCurrent();
+//$$         if (ex == null) return "noexec";
+//$$         try {
+//$$             Object drv = ex.getClass().getMethod("getLastDriver").invoke(ex);
+//$$             java.lang.reflect.Field f = ex.getClass().getDeclaredField("ticksOnCurrent"); f.setAccessible(true);
+//$$             baritone.api.pathing.path.IPathExecutor pe = (baritone.api.pathing.path.IPathExecutor) ex; // read once; getCurrent() can change between calls
+//$$             int pos = pe.getPosition();
+//$$             java.util.List<? extends baritone.api.pathing.movement.IMovement> mvs = pe.getPath().movements();
+//$$             if (mvs.isEmpty()) return "drv=" + drv + " pos=" + pos + " toc=" + f.getInt(ex) + " mv=none";
+//$$             Object mv = mvs.get(Math.min(pos, mvs.size() - 1));
+//$$             return "drv=" + drv + " pos=" + pos + " toc=" + f.getInt(ex) + " mv=" + mv.getClass().getSimpleName() + " " + ((baritone.api.pathing.movement.IMovement) mv).getSrc() + "->" + ((baritone.api.pathing.movement.IMovement) mv).getDest();
+//$$         } catch (ReflectiveOperationException | RuntimeException e) {
+//$$             return "exec?" + e;
+//$$         }
+//$$     }
+//$$
+//$$     private static long kinTicks() {
+//$$         try {
+//$$             return Class.forName("baritone.pathing.kinematic.KinematicController").getField("drivenTicks").getLong(null);
+//$$         } catch (ReflectiveOperationException e) {
+//$$             return -1;
+//$$         }
 //$$     }
 //$$
 //$$     private static PrintWriter open(String tag) throws java.io.IOException {

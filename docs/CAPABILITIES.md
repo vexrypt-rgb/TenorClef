@@ -1,0 +1,7 @@
+# Capabilities
+
+| capability | owner | live path? | scenario | status | last evidence |
+|---|---|---|---|---|---|
+| Nether portal bucket build | TenorClef (ConstructNetherPortalBucketTask) | yes (speedrun PORTAL phase) | `@pathbench portal 3`, seed 12345, sky pad y=120 with 5x5 lava pool, natural lava wiped within 64 | partial | 1/3 (GOAL 1479t; DIED burned; TIMEOUT frame unreachable, pool drained). Before f11e38bb: 1/3, with one S211 false stall mid-build; after: 0 S211 fires in 3 reps |
+| BlockScanner reset during background rescan | TenorClef (BlockScanner) | yes (every task set) | `@pathbench portal 3` | unverified | ddcc34a2: 0 ConcurrentModificationException in 3 reps; historically 4 of 70 bench logs had one, so too rare to call fixed. Portal in same run 0/3 (DIED, TIMEOUT, DIED) |
+| Fall clutch (water bucket) | TenorClef (MLGBucketFallChain, MLGBucketTask) | yes (always-on chain) | `@pathbench fall 3` | verified | `@pathbench fall 3` (IdleTask running, drops of 12/25/45 onto stone): 9/9 SAFE, 0 HP lost, pre-aim click fired at 4.8-5.0 blocks every rep, bucket picked back up. With the chain inactive (first run of the bench, no task running) gave 3/9 (12 blocks safe but lost 8 HP; 25 and 45 died). Pre-fix portal history: 2 runs had 4 DIED "fell from a high place" at ~2 blocks/tick, reach check only true the tick before impact, no click. bd0d1452 (skip falls <4 blocks) alone: 0/3, 3 fall deaths. 24acf7be (pre-aim + click within 5.5): 1/3, 0 deaths, 2 TIMEOUT Collecting lava; no long fall occurred, so the pre-aim path never fired |

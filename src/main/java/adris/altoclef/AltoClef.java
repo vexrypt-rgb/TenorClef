@@ -183,6 +183,7 @@ public class AltoClef implements ModInitializer {
         slotHandler = new SlotHandler(this);
 
         butler = new Butler(this);
+        adris.altoclef.sigil.SigilService.get().warmUp();
 
         // Phase 3: facades over existing trackers + MovementEngineAdapter
         worldKnowledge = new AltoClefWorldKnowledge(this);

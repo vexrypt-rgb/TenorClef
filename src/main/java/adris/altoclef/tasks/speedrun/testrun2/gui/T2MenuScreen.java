@@ -88,6 +88,11 @@ public class T2MenuScreen extends Screen {
     Object urlBox;
     Object modelBox;
     Object bindBox;
+    Object cmpEdit;
+    Object cmpName;
+    Object sigName;
+    Object sigPaste;
+    Object sigMsg;
     boolean dropProv;
     boolean dropModel;
     int dropStart = Integer.MAX_VALUE;
@@ -164,7 +169,7 @@ public class T2MenuScreen extends Screen {
         if (tab == 1) return TAB_LINK_L;
         if (tab == 2) return TAB_MEDIA_L;
         if (tab == 3) return TAB_AGENT_L;
-        if (tab == 4) return new String[0][];
+        if (tab == 4 || tab == 6 || tab == 7) return new String[0][];
         if (tab == 5) return TAB_SHOW_L;
         return TAB_TASKS_L;
     }
@@ -173,14 +178,15 @@ public class T2MenuScreen extends Screen {
         if (tab == 1) return TAB_LINK_R;
         if (tab == 2) return TAB_MEDIA_R;
         if (tab == 3) return TAB_AGENT_R;
-        if (tab == 4) return new String[0][];
+        if (tab == 4 || tab == 6 || tab == 7) return new String[0][];
         if (tab == 5) return TAB_SHOW_R;
         return TAB_TASKS_R;
     }
 
     void layout() {
-        int pw = Math.min(560, Math.max(420, this.width - 32));
-        int ph = Math.min(tab == 3 ? 292 : 268, this.height - 16);
+        boolean wide = tab == T2CompositionTab.ID;
+        int pw = Math.min(wide ? 780 : 560, Math.max(420, this.width - 32));
+        int ph = Math.min(wide ? 420 : tab == 3 ? 292 : 268, this.height - 16);
         if (ph < 200) ph = Math.max(188, this.height - 16);
         px0 = (this.width - pw) / 2;
         py0 = (this.height - ph) / 2;
@@ -203,8 +209,8 @@ public class T2MenuScreen extends Screen {
         dropStart = Integer.MAX_VALUE;
         layout();
         T2MenuActions.attach(this, T2MenuActions.button(this, px1 - 22, py0 + 7, 14, 14, "x", null));
-        String[] nav = {"Tasks", "Link", "Media", "Agent", "Faults", "Showcase"};
-        int[] navId = {0, 1, 2, 3, 4, 5};
+        String[] nav = {"Tasks", "Link", "Media", "Agent", "Faults", "Showcase", "SIGIL", "Compose"};
+        int[] navId = {0, 1, 2, 3, 4, 5, 6, 7};
         int iy = headerB + 8;
         for (int i = 0; i < nav.length; i++) {
             T2MenuActions.attach(this, T2MenuActions.button(this, px0 + 6, iy, sideR - px0 - 12, 16, nav[i], "TAB:" + navId[i]));
@@ -214,6 +220,14 @@ public class T2MenuScreen extends Screen {
         String[][] R = tabRight();
         int colW = Math.max(80, (contentW - 8) / 2);
         int bh = 20;
+        if (tab == T2SigilTab.ID) {
+            T2SigilTab.layout(this);
+            return;
+        }
+        if (tab == T2CompositionTab.ID) {
+            T2CompositionTab.layout(this);
+            return;
+        }
         if (tab == 3) {
             AgentConfig cfg = AgentConfig.cached();
             AgentPresets.Preset preset = AgentPresets.byId(cfg.provider);

@@ -40,7 +40,7 @@ jobs:
         if: matrix.ostinato
         run: |
           curl -fsSL -o "libs/baritone-unoptimized-fabric-ostinato-${{ matrix.mc }}.jar" \
-            "https://github.com/vexrypt-rgb/Ostinato/releases/download/v1.0.1/${{ matrix.ostinato }}"
+            "https://github.com/vexrypt-rgb/Ostinato/releases/download/v1.0.8/${{ matrix.ostinato }}"
       - name: Build ${{ matrix.mc }}
         run: ./gradlew ${{ matrix.mc == '26.3' && '-Pwith26 -Porg.gradle.java.installations.fromEnv=JAVA_HOME_25_X64' || '' }} :${{ matrix.mc }}:build -x test --stacktrace
       - name: Collect jar

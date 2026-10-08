@@ -91,6 +91,7 @@ public class FoodChain extends SingleTaskChain {
     @Override
     public float getPriority() {
         AltoClef mod = AltoClef.getInstance();
+        if (adris.altoclef.tasks.pvp.PvpTask.anyActive()) return 0;
 
         if (WorldHelper.isInNetherPortal()) {
             stopEat();

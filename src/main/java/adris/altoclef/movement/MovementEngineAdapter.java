@@ -37,6 +37,13 @@ public final class MovementEngineAdapter {
     private static Method statusLineMethod;
     private static Method goalCustomMethod;
     private static Method pathResultAccepted;
+    private static Method pathResultBackend;
+    private static Method preferenceMethod;
+
+    /** Last travel dispatch, read by TravelTrace: the mover that took it, and whether it was not the preferred one. */
+    private static String lastBackend = "NONE";
+    private static boolean lastFellBack;
+    private static int dispatches;
 
     private MovementEngineAdapter() {}
 
@@ -68,6 +75,8 @@ public final class MovementEngineAdapter {
             statusLineMethod = engineCls.getMethod("statusLine");
             goalCustomMethod = goalCls.getMethod("custom", Goal.class);
             pathResultAccepted = pathResult.getMethod("isAccepted");
+            pathResultBackend = pathResult.getMethod("getBackend");
+            preferenceMethod = backends.getMethod("preference");
             classesPresent = true;
             engineDetail = "Ostinato MovementEngine classes present";
             Debug.logMessage("MovementEngineAdapter: " + engineDetail);
@@ -116,6 +125,9 @@ public final class MovementEngineAdapter {
                     Object mg = goalCustomMethod.invoke(null, goal);
                     Object result = goToGoalMethod.invoke(eng, mg);
                     if (accepted(result)) {
+                        dispatches++;
+                        lastBackend = String.valueOf(pathResultBackend.invoke(result));
+                        lastFellBack = !lastBackend.equals(requestedBackend());
                         return true;
                     }
                     Debug.logMessage("MovementEngineAdapter: engine declined; CustomGoalProcess fallback");
@@ -125,7 +137,33 @@ public final class MovementEngineAdapter {
             }
         }
         bari.getCustomGoalProcess().setGoalAndPath(goal);
+        dispatches++;
+        lastBackend = "CUSTOM_GOAL_PROCESS";
+        lastFellBack = classesPresent;
         return true;
+    }
+
+    /** Backend the engine would pick first (the preference setting), or NONE without an engine. */
+    public static String requestedBackend() {
+        if (!probeClasses()) return "NONE";
+        try {
+            return String.valueOf(preferenceMethod.invoke(null));
+        } catch (Throwable t) {
+            return "UNKNOWN";
+        }
+    }
+
+    /** Increments on every ensureGoalAndPath dispatch, so a trace can tell its own dispatches from stale ones. */
+    public static int dispatchCount() {
+        return dispatches;
+    }
+
+    public static String lastBackend() {
+        return lastBackend;
+    }
+
+    public static boolean lastFellBack() {
+        return lastFellBack;
     }
 
     /** Like ensureGoalAndPath but no-ops when already pathing/active. */

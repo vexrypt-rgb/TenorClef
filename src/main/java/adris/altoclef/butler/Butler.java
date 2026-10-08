@@ -5,12 +5,15 @@ import adris.altoclef.Debug;
 import adris.altoclef.eventbus.EventBus;
 import adris.altoclef.eventbus.events.ChatMessageEvent;
 import adris.altoclef.eventbus.events.TaskFinishedEvent;
+import adris.altoclef.sigil.SigilService;
 import adris.altoclef.ui.MessagePriority;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.message.MessageType;
 import net.minecraft.world.World;
 
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The butler system lets authorized players send commands to the bot to execute.
@@ -31,6 +34,9 @@ public class Butler {
     private final UserAuth userAuth;
 
     private String currentUser = null;
+
+    // Players whose latest command arrived sealed, and how to seal the answer back to them (SIGIL).
+    private final Map<String, SigilService.Sealed> sealedRoutes = new ConcurrentHashMap<>();
 
     // Utility variables for command logic
     private boolean commandInstantRan = false;
@@ -54,12 +60,16 @@ public class Butler {
             String sender = evt.senderName();
             MessageType messageType = evt.messageType();
             String receiver = mod.getPlayer().getName().getString();
-            if (sender != null && !Objects.equals(sender, receiver) && shouldAccept(messageType)) {
+            // System messages (advancements, command errors) have no sender on 1.16; answering them loops.
+            if (sender != null && !sender.isEmpty() && !Objects.equals(sender, receiver) && shouldAccept(messageType)) {
                 String wholeMessage = sender + " " + receiver + " " + message;
                 if (debug) {
                     Debug.logMessage("RECEIVED WHISPER: \"" + wholeMessage + "\".");
                 }
                 this.mod.getButler().receiveMessage(wholeMessage, receiver);
+            } else if (sender != null && !Objects.equals(sender, receiver)
+                    && ButlerConfig.getInstance().sigilAutoDecrypt && SigilService.looksSealed(message)) {
+                autoDecrypt(sender, message);
             }
         });
     }
@@ -86,7 +96,41 @@ public class Butler {
         }
     }
 
+    /** Public chat: show the plaintext locally if the keyring can open it. Never sent anywhere. */
+    private void autoDecrypt(String sender, String message) {
+        SigilService.get().open(sender, message, sealed -> {
+            String who = sealed.from().isEmpty() ? sender : sender + " (" + sealed.from() + ")";
+            Debug.logMessage("[SIGIL decrypted " + sealed.mode() + " " + sealed.label() + "] <" + who + "> " + sealed.plaintext());
+        }, why -> {
+            // Most tokens in chat are for circles we do not have; stay quiet unless debugging.
+            if (ButlerConfig.getInstance().whisperFormatDebug) Debug.logInternal("SIGIL auto-decrypt skipped: " + why);
+        });
+    }
+
     private void receiveWhisper(String username, String message) {
+        if (!message.startsWith(BUTLER_MESSAGE_START) && SigilService.looksSealed(message)) {
+            // Decrypt first, off the game thread; auth and command parsing see only the plaintext.
+            SigilService.get().open(username, message, sealed -> {
+                sealedRoutes.put(username, sealed);
+                handleWhisper(username, sealed.plaintext());
+            }, why -> {
+                if (ButlerConfig.getInstance().whisperFormatDebug) {
+                    Debug.logMessage("    Rejecting: sealed whisper from \"" + username + "\" could not be opened: " + why);
+                }
+            });
+            return;
+        }
+        if (!message.startsWith(BUTLER_MESSAGE_START) && ButlerConfig.getInstance().sigilRequireSealed) {
+            if (ButlerConfig.getInstance().whisperFormatDebug) {
+                Debug.logMessage("    Rejecting: \"" + username + "\" sent an unsealed whisper and sigilRequireSealed is on.");
+            }
+            return;
+        }
+        sealedRoutes.remove(username);
+        handleWhisper(username, message);
+    }
+
+    private void handleWhisper(String username, String message) {
 
         boolean debug = ButlerConfig.getInstance().whisperFormatDebug;
         // Ignore messages from other bots.
@@ -191,6 +235,13 @@ public class Butler {
     }
 
     private void sendWhisper(String username, String message, MessagePriority priority) {
-      mod.getMessageSender().enqueueWhisper(username, BUTLER_MESSAGE_START + message, priority);
+        SigilService.Sealed route = sealedRoutes.get(username);
+        if (route != null && ButlerConfig.getInstance().sigilReplySealed) {
+            // A sealed request gets a sealed answer, or none: never fall back to plaintext.
+            SigilService.get().sealReply(route, username, BUTLER_MESSAGE_START + message,
+                    line -> mod.getMessageSender().enqueueWhisper(username, line, priority));
+            return;
+        }
+        mod.getMessageSender().enqueueWhisper(username, BUTLER_MESSAGE_START + message, priority);
     }
 }

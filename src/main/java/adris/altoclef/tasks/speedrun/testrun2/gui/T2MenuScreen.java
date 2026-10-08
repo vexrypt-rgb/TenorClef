@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class T2MenuScreen extends Screen {
 
-    private static int tab;
+    private static int tab = Integer.getInteger("tenorclef.menu.tab", 0);
     private static int pendingOpen;
 
     static int tab() { return tab; }

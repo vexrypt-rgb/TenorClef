@@ -297,6 +297,7 @@ public class AltoClef implements ModInitializer {
                 threatMonitor.applyToGoalManager(gm);
             }
         }
+        adris.altoclef.swarm.SwarmRuntime.tick();
         taskRunner.tick();
 
         messageSender.tick();

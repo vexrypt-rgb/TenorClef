@@ -56,7 +56,11 @@ public final class FleetProtocol {
                     try {
                         var task = TaskCatalogue.getItemTask(item, n);
                         if (task != null && mod != null) {
-                            mod.runUserTask(task, () -> whisper(mod, from, "~ done " + item));
+                            mod.runUserTask(task, () -> {
+                                // Finishing is not succeeding: report done only if the items are really there.
+                                int have = new adris.altoclef.planner.CatalogueInventoryView(mod).getCount(item);
+                                whisper(mod, from, have >= n ? "~ done " + item : "~ fail " + item);
+                            });
                         } else {
                             whisper(mod, from, "~ fail " + item);
                         }
@@ -65,6 +69,7 @@ public final class FleetProtocol {
                     }
                 }
             }
+            case "s1" -> adris.altoclef.swarm.SwarmRuntime.onWire(from, body);
             case "done" -> Debug.logMessage("FLEET " + from + " done " + (p.length > 1 ? p[1] : ""));
             case "fail" -> Debug.logMessage("FLEET " + from + " fail " + (p.length > 1 ? p[1] : ""));
             default -> Debug.logMessage("FLEET " + from + " " + body);

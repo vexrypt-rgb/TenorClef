@@ -104,6 +104,22 @@ These replace the kinematic row above. Its lower score and higher tick count cam
 The averages only cover goals each mover reached. The bench origin moves between runs, so
 compare runs taken together. Single-rep runs are noisy; re-run with 3 reps before drawing conclusions.
 
+## User guides
+
+Step-by-step guides for every feature are in [docs/guides](docs/guides/README.md):
+
+- [Getting started](docs/guides/getting-started.md)
+- [Command reference](docs/guides/commands.md)
+- [Getting items and resources](docs/guides/items-and-resources.md)
+- [Travel and navigation](docs/guides/travel.md)
+- [Combat and survival](docs/guides/combat-and-survival.md)
+- [Speedruns and advancements](docs/guides/speedruns.md)
+- [Swarm, fleet and agents](docs/guides/swarm-and-fleet.md)
+- [Building and map art](docs/guides/building.md)
+- [Showcase courses](docs/guides/showcase.md)
+- [Settings](docs/guides/settings.md)
+- [Diagnostics and tools](docs/guides/diagnostics.md)
+
 ## Project guides
 
 - [Development / CI (Phase 1)](docs/DEVELOPMENT.md)

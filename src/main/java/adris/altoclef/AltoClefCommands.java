@@ -68,6 +68,7 @@ public class AltoClefCommands {
                 new T2DoctorCommand(),
                 new T2PanicCommand(),
                 new T2MenuCommand(),
+                new CompositionCommand(),
                 new MapArtCommand(),
                 new DjCommand(),
                 new ButlerCommand(),

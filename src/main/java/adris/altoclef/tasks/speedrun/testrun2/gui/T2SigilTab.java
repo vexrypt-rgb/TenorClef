@@ -92,7 +92,7 @@ final class T2SigilTab {
 
     private static void say(String m) { status = m; }
 
-    private static void clipboard(String text) {
+    static void clipboard(String text) {
         try {
             MinecraftClient mc = MinecraftClient.getInstance();
             Object kb = MinecraftClient.class.getField("keyboard").get(mc);

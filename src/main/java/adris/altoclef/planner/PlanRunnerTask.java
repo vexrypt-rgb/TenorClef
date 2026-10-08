@@ -39,9 +39,22 @@ public class PlanRunnerTask extends Task {
         setDebugState("plan start");
     }
 
+    /** A higher-priority chain (mob defense, survival) only suspends the plan; it must not cancel the goal. */
+    private boolean suspending;
+
+    @Override
+    public void interrupt(Task interruptTask) {
+        suspending = true;
+        try {
+            super.interrupt(interruptTask);
+        } finally {
+            suspending = false;
+        }
+    }
+
     @Override
     protected void onStop(Task interruptTask) {
-        if (executor != null && !executor.getStatus().isTerminal()) {
+        if (!suspending && executor != null && !executor.getStatus().isTerminal()) {
             executor.cancel();
         }
         stepTask = null;
@@ -202,6 +215,11 @@ public class PlanRunnerTask extends Task {
     @Override
     protected boolean isEqual(Task other) {
         if (other instanceof PlanRunnerTask o) {
+            // A finished run of the same goal must not shadow a fresh run: setTask would keep the dead one.
+            if (executor != o.executor && executor != null && o.executor != null
+                    && (executor.getStatus().isTerminal() || o.executor.getStatus().isTerminal())) {
+                return false;
+            }
             Goal a = executor != null ? executor.getGoal() : null;
             Goal b = o.executor != null ? o.executor.getGoal() : null;
             if (a == null || b == null) {

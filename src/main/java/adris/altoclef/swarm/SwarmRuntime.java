@@ -37,7 +37,11 @@ public final class SwarmRuntime {
         if (why != null) throw new IllegalStateException(why);
         if (!link.leads()) throw new IllegalStateException("you are not the lead of any roster group (lead= in swarm.txt)");
         link.onReceive(SwarmRuntime::onWire);
-        leader = new SwarmCoordinator((agent, m) -> link.send(agent, m));
+        // The link is one rate-limited chat line stream (0.5 lines/s, signed lines are bigger), so give replies room.
+        SwarmCoordinator.Config cfg = new SwarmCoordinator.Config();
+        cfg.heartbeatTimeoutMs = 40_000;
+        cfg.offerTimeoutMs = 30_000;
+        leader = new SwarmCoordinator((agent, m) -> link.send(agent, m), cfg);
         return leader;
     }
 
@@ -49,7 +53,7 @@ public final class SwarmRuntime {
         link.onReceive(SwarmRuntime::onWire);
         if (worker != null) worker.leave();
         leaderName = lead;
-        worker = new SwarmWorker(link.self(), caps, new AltoClefExecutor(mod), m -> link.send(lead, m), 5_000);
+        worker = new SwarmWorker(link.self(), caps, new AltoClefExecutor(mod), m -> link.send(lead, m), 12_000);
         worker.register(System.currentTimeMillis());
         return worker;
     }

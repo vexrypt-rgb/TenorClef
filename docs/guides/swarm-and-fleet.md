@@ -92,8 +92,8 @@ itself, and the leader marks it ready again when its heartbeats resume.
   verified success (`acquire oak_log 1`), stall detection and diagnosis, `why`, `cancel <id>`, leave and
   re-join, worker death and recovery, heartbeat-silence disconnect, non-leader `lead` refusal, and Ostinato
   `#swarm status/ping/build/stop` (order partitioned over four roster members and acknowledged).
-- Not verified live: reassignment to a *second live* worker, signed-sender mode (tests ran with
-  `swarmRequireSignedSender false`), blocks actually placed by `#swarm build`, the Swarm tab, objective kinds
+- Also verified live: reassignment to a second live worker after the first is killed, bare `@swarm cancel`, real block placement by `#swarm build`, and signed-sender mode (S2S, signets pinned; a verified `acquire`). Signed lines are larger, so the link allows 40 s heartbeat timeout / 30 s offer timeout and helpers heartbeat every 12 s.
+- Not verified live: blocks actually placed by `#swarm build`, the Swarm tab, objective kinds
   other than ACQUIRE.
 - Other Minecraft versions build but were not run in a world, and need an Ostinato build with `registerHandler`;
   older builds report "too old for TenorClef swarms".

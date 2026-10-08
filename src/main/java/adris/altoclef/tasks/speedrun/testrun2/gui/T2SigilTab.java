@@ -118,6 +118,7 @@ final class T2SigilTab {
         switch (act) {
             case "newcircle" -> {
                 if (name.isBlank()) { say("Give the circle a name first."); break; }
+                if (kr.circle(name) != null) { say("Circle " + name + " exists; replacing it would lose its passphrase. Pick another name."); break; }
                 String pass = paste.isBlank() ? Sigil.dicePhrase(5) : paste;
                 String n = name;
                 say("Deriving key for " + n + " ...");
@@ -129,6 +130,7 @@ final class T2SigilTab {
             }
             case "newsignet" -> {
                 if (name.isBlank()) { say("Give the signet a name first."); break; }
+                if (kr.signet(name) != null) { say("Signet " + name + " exists; its key would be replaced. Pick another name."); break; }
                 String n = name;
                 svc.async(() -> {
                     Sigil.Signet sg = kr.createSignet(n);

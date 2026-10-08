@@ -101,6 +101,9 @@ public class T2MenuScreen extends Screen {
     Object sigName;
     Object sigPaste;
     Object sigMsg;
+    Object swItem;
+    Object swCount;
+    Object swSchem;
     boolean dropProv;
     boolean dropModel;
     int dropStart = Integer.MAX_VALUE;
@@ -177,7 +180,7 @@ public class T2MenuScreen extends Screen {
         if (tab == 1) return TAB_LINK_L;
         if (tab == 2) return TAB_MEDIA_L;
         if (tab == 3) return TAB_AGENT_L;
-        if (tab == 4 || tab == 6 || tab == 7) return new String[0][];
+        if (tab == 4 || tab == 6 || tab == 7 || tab == 8) return new String[0][];
         if (tab == 5) return TAB_SHOW_L;
         return TAB_TASKS_L;
     }
@@ -186,7 +189,7 @@ public class T2MenuScreen extends Screen {
         if (tab == 1) return TAB_LINK_R;
         if (tab == 2) return TAB_MEDIA_R;
         if (tab == 3) return TAB_AGENT_R;
-        if (tab == 4 || tab == 6 || tab == 7) return new String[0][];
+        if (tab == 4 || tab == 6 || tab == 7 || tab == 8) return new String[0][];
         if (tab == 5) return TAB_SHOW_R;
         return TAB_TASKS_R;
     }
@@ -217,8 +220,8 @@ public class T2MenuScreen extends Screen {
         dropStart = Integer.MAX_VALUE;
         layout();
         T2MenuActions.attach(this, T2MenuActions.button(this, px1 - 22, py0 + 7, 14, 14, "x", null));
-        String[] nav = {"Tasks", "Link", "Media", "Agent", "Faults", "Showcase", "SIGIL", "Compose"};
-        int[] navId = {0, 1, 2, 3, 4, 5, 6, 7};
+        String[] nav = {"Tasks", "Link", "Media", "Agent", "Faults", "Showcase", "SIGIL", "Compose", "Swarm"};
+        int[] navId = {0, 1, 2, 3, 4, 5, 6, 7, 8};
         int iy = headerB + 8;
         for (int i = 0; i < nav.length; i++) {
             T2MenuActions.attach(this, T2MenuActions.button(this, px0 + 6, iy, sideR - px0 - 12, 16, nav[i], "TAB:" + navId[i]));
@@ -230,6 +233,10 @@ public class T2MenuScreen extends Screen {
         int bh = 20;
         if (tab == T2SigilTab.ID) {
             T2SigilTab.layout(this);
+            return;
+        }
+        if (tab == T2SwarmTab.ID) {
+            T2SwarmTab.layout(this);
             return;
         }
         if (tab == T2CompositionTab.ID) {

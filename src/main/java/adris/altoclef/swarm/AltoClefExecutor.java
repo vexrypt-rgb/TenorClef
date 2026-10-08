@@ -131,6 +131,21 @@ public final class AltoClefExecutor implements AssignmentExecutor {
 
     @Override
     public boolean alive() {
-        return mod.getPlayer() != null && mod.getPlayer().getHealth() > 0;
+        if (mod.getPlayer() == null) return false;
+        if (mod.getPlayer().getHealth() > 0) return true;
+        // A dead worker must come back or the leader never gets it again. DeathMenuChain only acts while a
+        // DeathScreen is up; this covers a client that is dead without one. Throttled, game thread only.
+        long now = System.currentTimeMillis();
+        if (now - lastRespawnTry > 3_000) {
+            lastRespawnTry = now;
+            net.minecraft.client.MinecraftClient mc = net.minecraft.client.MinecraftClient.getInstance();
+            if (mc.player != null) {
+                mc.player.requestRespawn();
+                mc.setScreen(null);
+            }
+        }
+        return false;
     }
+
+    private long lastRespawnTry;
 }

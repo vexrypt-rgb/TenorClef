@@ -5,8 +5,8 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * One swarm protocol message: {@code s1 <op> k=v k=v ...}. Plain text so it rides the existing
- * fleet whisper channel; values are percent-escaped so they never contain spaces or '='.
+ * One swarm protocol message: {@code s1 <op> k=v k=v ...}. Plain text carried as the body of one sealed
+ * Ostinato swarm message (see {@link SwarmLink}); values are percent-escaped so they never contain spaces or '='.
  * <ul>
  *   <li>agent to leader: reg, hb, accept, reject, prog, result, obs, bye</li>
  *   <li>leader to agent: offer, cancel</li>

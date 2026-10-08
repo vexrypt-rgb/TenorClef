@@ -107,7 +107,14 @@ public class Butler {
         });
     }
 
+    /** Ostinato swarm traffic: a single S1C/S2C/S2S token. The swarm link consumes these; the butler must not answer them. */
+    private static final java.util.regex.Pattern SWARM_TOKEN =
+            java.util.regex.Pattern.compile("\\s*S(?:1C|2C|2S)\\.[a-z0-9]{4}\\.[A-Za-z0-9_-]{38,}\\s*");
+
     private void receiveWhisper(String username, String message) {
+        if (SWARM_TOKEN.matcher(message).matches()) {
+            return;
+        }
         if (!message.startsWith(BUTLER_MESSAGE_START) && SigilService.looksSealed(message)) {
             // Decrypt first, off the game thread; auth and command parsing see only the plaintext.
             SigilService.get().open(username, message, sealed -> {

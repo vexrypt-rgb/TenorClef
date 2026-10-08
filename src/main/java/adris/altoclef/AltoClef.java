@@ -317,6 +317,8 @@ public class AltoClef implements ModInitializer {
     private Object autoRunWorld = null;
 
     private int autoRunProbe = 0;
+    // Separate from autoRunProbe, which the debug probe also bumps every call (the shared count never hit % 40 == 0).
+    private int autoRunRespawnTick = 0;
 
     private void maybeFireAutoRunCommand() {
         if (!autoRunFired && ++autoRunProbe % 200 == 1 && Boolean.getBoolean("tenorclef.autorun.debug")) {
@@ -342,7 +344,7 @@ public class AltoClef implements ModInitializer {
         }
         // A world saved with a dead player boots to the death screen; respawn so the run isn't stuck on it.
         if (getPlayer().getHealth() <= 0) {
-            if (autoRunProbe++ % 40 == 0) {
+            if (autoRunRespawnTick++ % 40 == 0) {
                 getPlayer().requestRespawn();
                 MinecraftClient.getInstance().setScreen(null);
             }

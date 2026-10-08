@@ -80,6 +80,22 @@ final class T2MenuLook {
             String[] lab = T2SigilTab.fieldLabels();
             for (int i = 0; i < lab.length; i++) g.drawText(tr, lab[i], s.contentX, s.contentY + 29 + i * 16, C_MUTED, false);
         }
+        if (tab == T2SwarmTab.ID) {
+            net.minecraft.client.font.TextRenderer tr = net.minecraft.client.MinecraftClient.getInstance().textRenderer;
+            int ly = s.contentY;
+            int maxLines = Math.max(1, (s.footerT - 62 - 14 - s.contentY) / 11);
+            java.util.List<String> ls = T2SwarmTab.lines();
+            for (int i = 0; i < ls.size() && i < maxLines; i++) {
+                g.drawText(tr, trim(s, ls.get(i), s.contentW), s.contentX, ly, i == 0 ? C_ACCENT : C_TEXT, false);
+                ly += 11;
+            }
+            int fy = s.footerT - 62;
+            g.drawText(tr, trim(s, T2SwarmTab.status(), s.contentW), s.contentX, fy - 12, C_MUTED, false);
+            String[] lab = T2SwarmTab.fieldLabels();
+            g.drawText(tr, lab[0], s.contentX, fy + 3, C_MUTED, false);
+            g.drawText(tr, lab[1], s.contentX + 62 + (s.contentW - 62) / 2, fy + 3, C_MUTED, false);
+            g.drawText(tr, lab[2], s.contentX, fy + 19, C_MUTED, false);
+        }
         if (tab == T2CompositionTab.ID) {
             T2CompositionTab.paint(s, g);
         }
@@ -109,7 +125,7 @@ final class T2MenuLook {
                 T2CompositionTab.paintRow(g, b, label, cmd, hover);
                 continue;
             }
-            boolean danger = "t2panic".equals(cmd) || "stop".equals(cmd) || "CMP:stop".equals(cmd);
+            boolean danger = "t2panic".equals(cmd) || "stop".equals(cmd) || "CMP:stop".equals(cmd) || "SWM:stop".equals(cmd);
             boolean primary = "SAVECFG".equals(cmd) || "CMP:perform".equals(cmd);
             boolean close = cmd == null;
             int bg = hover ? C_BTN_HOVER : C_BTN;

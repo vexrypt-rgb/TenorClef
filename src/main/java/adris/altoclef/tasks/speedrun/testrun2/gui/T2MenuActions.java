@@ -87,6 +87,10 @@ final class T2MenuActions {
             T2CompositionTab.run(s, cmd.substring(4));
             return;
         }
+        if (cmd != null && cmd.startsWith("SWM:")) {
+            T2SwarmTab.run(s, cmd.substring(4));
+            return;
+        }
         if (cmd != null && cmd.startsWith("SIG:")) {
             T2SigilTab.run(s, cmd.substring(4));
             return;

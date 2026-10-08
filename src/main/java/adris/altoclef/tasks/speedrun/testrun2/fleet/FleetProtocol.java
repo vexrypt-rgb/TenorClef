@@ -69,7 +69,6 @@ public final class FleetProtocol {
                     }
                 }
             }
-            case "s1" -> adris.altoclef.swarm.SwarmRuntime.onWire(from, body);
             case "done" -> Debug.logMessage("FLEET " + from + " done " + (p.length > 1 ? p[1] : ""));
             case "fail" -> Debug.logMessage("FLEET " + from + " fail " + (p.length > 1 ? p[1] : ""));
             default -> Debug.logMessage("FLEET " + from + " " + body);

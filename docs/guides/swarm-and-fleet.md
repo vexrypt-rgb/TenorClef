@@ -93,6 +93,7 @@ itself, and the leader marks it ready again when its heartbeats resume.
   re-join, worker death and recovery, heartbeat-silence disconnect, non-leader `lead` refusal, and Ostinato
   `#swarm status/ping/build/stop` (order partitioned over four roster members and acknowledged).
 - Also verified live: reassignment to a second live worker after the first is killed, bare `@swarm cancel`, real block placement by `#swarm build`, and signed-sender mode (S2S, signets pinned; a verified `acquire`). Signed lines are larger, so the link allows 40 s heartbeat timeout / 30 s offer timeout and helpers heartbeat every 12 s.
+- Link-down message verified live (swarmEnabled false gives a clear reason from lead/join/acquire).
 - Not verified live: clicking the Swarm tab buttons (the tab itself was seen rendering), objective kinds
   other than ACQUIRE.
 - Other Minecraft versions build but were not run in a world, and need an Ostinato build with `registerHandler`;

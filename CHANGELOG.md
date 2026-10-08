@@ -1,3 +1,11 @@
+# TenorClef 0.24.0
+
+Pairs with Ostinato v1.1.4.
+
+- Swarm system: `@swarm lead|join|acquire|status|why|cancel`. TenorClef decides what, Ostinato decides how. Assignments carry a lifecycle, agents a registry and capability scoring; every outcome is verified against inventory evidence, and `@swarm why <id>` explains it from the event ledger. Lost agents' work is requeued. Verified live with one and two clients.
+- `@goal`/swarm tasks survive Mob Defense interruptions (the goal used to be cancelled), and a retried goal no longer reuses the dead task of its previous run.
+- Showcase course offset works on 1.16.1.
+
 # TenorClef 0.23.3
 
 Pairs with Ostinato v1.0.8.

@@ -325,6 +325,7 @@ dependencies {
         def vendorLibs = (mcVersion == 11601) ? vendorLibs1161 : vendorLibsTip
         def nameOk = { String n ->
             if (n.contains('sources') || n.contains('dev') || n.contains('javadoc')) return false
+            if (project.hasProperty('noTungsten')) return false
             if (mcVersion == 11601) return n.contains('1.16.1') || n.contains('1161')
             // tip: reject 1.16.1 jars
             return !n.contains('1.16.1') && !n.contains('1161')

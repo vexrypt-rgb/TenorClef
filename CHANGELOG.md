@@ -1,3 +1,9 @@
+# TenorClef 0.25.2
+
+Pairs with Ostinato v1.18.0.
+
+- An empty `altoclef/altoclef_settings.json` (left behind when a crash interrupts a save) is now treated as defaults and rewritten, instead of failing every later launch.
+
 # TenorClef 0.25.1
 
 Pairs with Ostinato v1.18.0. Fixes the 1.16.1 and 26.3 jars of 0.25.0, which did not start. 1.21.4 and 1.21.11 are unchanged.

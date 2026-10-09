@@ -1,3 +1,11 @@
+# TenorClef 0.25.1
+
+Pairs with Ostinato v1.18.0. Fixes the 1.16.1 and 26.3 jars of 0.25.0, which did not start. 1.21.4 and 1.21.11 are unchanged.
+
+- **26.3**: two mixins no longer match 26.3's classes. The camera-angle hook is now optional (it was a no-op), and the chunk-load hook uses the 26.3 `ClientboundLevelChunkPacketData` signature, so chunk events work again.
+- **1.16.1**: the mixin config no longer claims Java 21 (downgraded builds declare Java 8/17), and the bundled downgrader API is updated to 1.2.2 so `System.getProperty` and other downgraded calls resolve.
+- Every release jar now joins a world and runs 45 s without a crash (smoke-tested with the released Ostinato jars; 1.16.1 on Java 8, the others on their own Java). Swarm features were not re-run in this smoke test.
+
 # TenorClef 0.25.0
 
 Pairs with Ostinato v1.18.0. The swarm needs this Ostinato: it uses the new `registerHandler` hook.

@@ -1,3 +1,10 @@
+# TenorClef 0.26.0
+
+Pairs with Ostinato v1.19.0.
+
+- **PvE**: hostile mobs are fought by Ostinato's new `#pve` process (mob profiles, shield guard, charging shooters, creeper clearance, running from Wardens and other mobs not worth fighting). `@pvp mobs` and the showcase combat demos use it. The 1.16.1 build has no PvE and still uses PvP for mobs.
+- The 1.21.11 and 26.3 jars are fetched from the Ostinato v1.19.0 release.
+
 # TenorClef 0.25.2
 
 Pairs with Ostinato v1.18.0.

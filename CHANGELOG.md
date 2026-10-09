@@ -1,3 +1,16 @@
+# TenorClef 0.25.0
+
+Pairs with Ostinato v1.18.0. The swarm needs this Ostinato: it uses the new `registerHandler` hook.
+
+- **The swarm now rides Ostinato's swarm link.** `@swarm` uses the same sealed, signed chat link and roster (`swarm.txt`, `lead=`) as `#swarm`, so there is one swarm, not two. `dlead`/`djoin` and the separate whisper transport are gone.
+- **Swarm tab in the TenorClef menu**: lead, join or leave the swarm, hand out gather and build jobs, and stop everything, with a plain-language status of every helper and job.
+- `@swarm cancel` with no id cancels every active job. `@swarm lead` is refused on a member that is not the roster leader.
+- Dead helpers respawn on their own (the autorun respawn counter bug is fixed) and report back to the leader.
+- Heartbeats are slower (12 s) and link timeouts wider (40 s / 30 s), so signed (S2S) mode stays inside the link's rate limit.
+- The Butler ignores swarm link traffic instead of answering "not authorized".
+- Verified live with three clients: assignment, verified completion, stall diagnosis, reassignment to a second helper after the first died, cancel, `#swarm build` placing blocks, and signed S2S mode. Clicking the Swarm tab buttons has not been tried by hand.
+- Guides rewritten: `docs/guides/swarm-and-fleet.md`.
+
 # TenorClef 0.24.0
 
 Pairs with Ostinato v1.1.4.

@@ -17,7 +17,8 @@ for the Minecraft versions Ostinato is built for:
 | --- | --- | --- | --- |
 | 1.21.4 | Primary | `main` (`libs/baritone-unoptimized-fabric-1.21.4.jar`) | Anarchy target; vanilla recipe-book crafting disabled (1.21.2+ servers do not sync recipes) |
 | 1.16.1 | Legacy | branch `1.16.1` (`libs/baritone-unoptimized-fabric-1.16.1.jar`) | Legacy pairing |
-| 1.21.11 | Experimental | branch `1.21.11` (built from source) | Not a release target |
+| 1.21.11 | Experimental | branch `1.21.11` (release jar `ostinato-mc1.21.11-unoptimized-fabric-1.18.0.jar`) | Released as experimental |
+| 26.3 | Experimental | branch `26.3` (release jar `ostinato-mc26.3-unoptimized-fabric-1.21.0.jar`) | Released as experimental |
 
 The other versions under `versions/` (1.21.1 down to 1.16.5) are only steps in the source
 preprocessor chain; they are not compiled or released. The complete, version-matched setup is in
@@ -60,7 +61,9 @@ Every build uses Ostinato, the AltoClef-compatible Baritone fork. On the modern 
 Tungsten is an optional travel backend; mining, building, and inventory operations use
 Ostinato's Baritone processes. Ostinato also carries the encrypted `#swarm` link for
 multi-bot groups, including coordinated region builds (`#swarm build`); see Ostinato's
-`docs/REGION_BUILD.md`.
+`docs/REGION_BUILD.md`. TenorClef's own swarm (`@swarm`, or the Swarm tab in the menu) uses that same
+link, so both need the Ostinato version named in the release notes; see the
+[swarm guide](docs/guides/swarm-and-fleet.md).
 
 When using an Ostinato-enabled pairing, its `movementBackend` setting selects
 `baritone`, `tungsten`, or `auto`; `auto` falls back to Baritone when Tungsten is not

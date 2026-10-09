@@ -20,8 +20,8 @@ jobs:
         include:
           - {mc: '1.21.4', java: '21'}
           - {mc: '1.16.1', java: '21'}
-          - {mc: '1.21.11', java: '21', ostinato: 'ostinato-mc1.21.11-unoptimized-fabric-1.17.0.jar', experimental: true}
-          - {mc: '26.3', java: '21', ostinato: 'ostinato-mc26.3-unoptimized-fabric-1.20.0.jar', experimental: true}
+          - {mc: '1.21.11', java: '21', ostinato: 'ostinato-mc1.21.11-unoptimized-fabric-1.18.0.jar', experimental: true}
+          - {mc: '26.3', java: '21', ostinato: 'ostinato-mc26.3-unoptimized-fabric-1.21.0.jar', experimental: true}
     continue-on-error: ${{ matrix.experimental == true }}
     runs-on: ubuntu-latest
     steps:
@@ -40,7 +40,7 @@ jobs:
         if: matrix.ostinato
         run: |
           curl -fsSL -o "libs/baritone-unoptimized-fabric-ostinato-${{ matrix.mc }}.jar" \
-            "https://github.com/vexrypt-rgb/Ostinato/releases/download/v1.1.4/${{ matrix.ostinato }}"
+            "https://github.com/vexrypt-rgb/Ostinato/releases/download/v1.18.0/${{ matrix.ostinato }}"
       - name: Build ${{ matrix.mc }}
         run: ./gradlew ${{ matrix.mc == '26.3' && '-Pwith26 -Porg.gradle.java.installations.fromEnv=JAVA_HOME_25_X64' || '' }} :${{ matrix.mc }}:build -x test --stacktrace
       - name: Collect jar

@@ -34,7 +34,7 @@ v0.24.0 a suspended `@goal` is not cancelled by the interruption.
 
 `@pvp` here hands the fight to the Ostinato PvP process: crit chaining, W-taps, hit selection, jump resets
 on knockback, strafing, axe against raised shields, shield against bows, a bow at range, golden apples and an
-offhand totem when low. Ostinato also has its own `#pvp <name>|players|hostiles|stats|enemies|clear`.
+offhand totem when low. Ostinato also has its own `#pvp <name>|players|stats|enemies|clear` for players and `#pve [hostiles|<mob id>|stats|clear]` for mobs (Ostinato 1.19.0+; `#pvp hostiles` now runs `#pve`). `@pvp mobs` uses PvE on Ostinato builds that have it.
 
 ## Falls and ladders
 `autoMLGBucket` uses a water bucket. Ostinato's `allowLadderClutch` (off by default) can instead place a

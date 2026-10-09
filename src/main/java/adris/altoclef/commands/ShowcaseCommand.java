@@ -101,7 +101,7 @@ public class ShowcaseCommand extends Command {
 
     /** Starts the demo's behaviour: a path to the goal pad, or the PvP process for combat demos. */
     private static void begin(AltoClef mod, String demo, BlockPos g) {
-        if (isCombat(demo)) mod.getClientBaritone().getCommandManager().execute("pvp hostiles");
+        if (isCombat(demo)) mod.getClientBaritone().getCommandManager().execute("pve hostiles");
         else mod.getClientBaritone().getCustomGoalProcess().setGoalAndPath(new GoalBlock(g.getX(), g.getY(), g.getZ()));
     }
 

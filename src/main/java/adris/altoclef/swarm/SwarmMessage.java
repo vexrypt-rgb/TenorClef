@@ -87,7 +87,8 @@ public final class SwarmMessage {
     private static String escape(String s) {
         StringBuilder b = new StringBuilder();
         for (char c : s.toCharArray()) {
-            if (c == '%' || c == ' ' || c == '=' || c == '\n') b.append('%').append(String.format("%02X", (int) c));
+            // decode splits on any whitespace, so every control character has to go, not only space and newline
+            if (c == '%' || c == '=' || c <= ' ') b.append('%').append(String.format("%02X", (int) c));
             else b.append(c);
         }
         return b.toString();
@@ -97,7 +98,7 @@ public final class SwarmMessage {
         StringBuilder b = new StringBuilder();
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
-            if (c == '%' && i + 2 < s.length() + 0) {
+            if (c == '%' && i + 2 < s.length()) {
                 try {
                     b.append((char) Integer.parseInt(s.substring(i + 1, i + 3), 16));
                     i += 2;

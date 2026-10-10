@@ -53,7 +53,7 @@ import java.util.Arrays;
  * 7. Build / enter Nether portal as fast as possible
  *
  * Important: If the only good chests are underwater, the bot ignores them and
- * falls back to surface iron â†’ portal. This avoids getting stuck swimming.
+ * falls back to surface iron -> portal. This avoids getting stuck swimming.
  *
  * This task is finished once we are in the Nether.
  */
@@ -693,7 +693,7 @@ public class EarlyOverworldSpeedrunTask extends Task {
      * - Prefer chests that have air or solid ground access
      *
      * If the only chests are underwater, we return empty and the bot
-     * continues with the surface iron â†’ portal route instead of drowning.
+     * continues with the surface iron -> portal route instead of drowning.
      */
     private Optional<BlockPos> findNearbySafeSurfaceChest() {
         Optional<BlockPos> chest = mod.getBlockScanner().getNearestBlock(

@@ -66,8 +66,10 @@ public final class SwarmWorker {
         String a = m.get("a");
         if (a == null) return;
         if (current != null) {
-            if (!current.equals(a)) uplink.send(SwarmMessage.of("reject", "a", a, "why", "busy"));
-            return; // a repeated offer for the work already held is harmless
+            // A repeated offer for the work already held means the leader lost track of it (missed accept, or it
+            // wrote this agent off and came back): say so again instead of letting the offer time out.
+            uplink.send(current.equals(a) ? SwarmMessage.of("accept", "a", a) : SwarmMessage.of("reject", "a", a, "why", "busy"));
+            return;
         }
         String item = m.get("item");
         if (item == null) {

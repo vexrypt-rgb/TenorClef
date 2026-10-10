@@ -5,10 +5,13 @@ import adris.altoclef.multiversion.CItems;
 import adris.altoclef.AltoClef;
 import adris.altoclef.Debug;
 import adris.altoclef.TaskCatalogue;
+import adris.altoclef.tasks.movement.GetToBlockTask;
 import adris.altoclef.tasks.speedrun.testrun2.McCompat;
 import adris.altoclef.tasks.speedrun.testrun2.T2Brain;
 import adris.altoclef.tasks.speedrun.testrun2.core.T2Sticky;
+import adris.altoclef.tasks.speedrun.testrun2.util.Place;
 import adris.altoclef.tasksystem.Task;
+import adris.altoclef.util.helpers.LookHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -70,14 +73,7 @@ public class GroundZeroTask extends Task {
         BlockPos feet = mod.getPlayer().getBlockPos();
         if (phase == Phase.GOTO) {
             if (Math.abs(feet.getX()) > 5 || Math.abs(feet.getZ()) > 5) {
-                try {
-                    Class<?> cl = Class.forName("adris.altoclef.tasks.movement.GetToBlockTask");
-                    Task w = (Task) cl.getConstructor(BlockPos.class).newInstance(new BlockPos(0, feet.getY(), 0));
-                    return sticky.keep("fountain", w);
-                } catch (Throwable t) {
-                    McCompat.setMove(true, false);
-                }
-                return null;
+                return sticky.keep("fountain", new GetToBlockTask(new BlockPos(0, feet.getY(), 0)));
             }
             McCompat.setMove(false, false);
             phase = Phase.CAGE;
@@ -87,11 +83,11 @@ public class GroundZeroTask extends Task {
             BlockPos a = feet.add(1, 1, 0);
             BlockPos b = feet.add(-1, 1, 0);
             if (mod.getWorld().getBlockState(a).isAir()) {
-                Task p = place(a, cageBlock());
+                Task p = Place.ifHeld(mod, a, cageBlock());
                 if (p != null) return sticky.keep("bar-a", p);
             }
             if (mod.getWorld().getBlockState(b).isAir()) {
-                Task p = place(b, cageBlock());
+                Task p = Place.ifHeld(mod, b, cageBlock());
                 if (p != null) return sticky.keep("bar-b", p);
             }
             phase = Phase.SHOT;
@@ -100,11 +96,7 @@ public class GroundZeroTask extends Task {
         if (phase == Phase.SHOT && !shot) {
             EndCrystalEntity crystal = nearestCrystal(mod);
             if (crystal != null) {
-                try {
-                    Class<?> look = Class.forName("adris.altoclef.util.helpers.LookHelper");
-                    look.getMethod("lookAt", AltoClef.class, Vec3d.class)
-                            .invoke(null, mod, crystal.getPos().add(0, 1, 0));
-                } catch (Throwable ignored) {}
+                LookHelper.lookAt(mod, crystal.getPos().add(0, 1, 0));
                 try {
                     var mc = net.minecraft.client.MinecraftClient.getInstance();
                     mc.interactionManager.attackEntity(mod.getPlayer(), crystal);
@@ -154,15 +146,6 @@ public class GroundZeroTask extends Task {
 
     private static Block cageBlock() {
         return Blocks.IRON_BARS;
-    }
-
-    private static Task place(BlockPos pos, Block block) {
-        try {
-            Class<?> cl = Class.forName("adris.altoclef.tasks.construction.PlaceBlockTask");
-            return (Task) cl.getConstructor(BlockPos.class, Block.class).newInstance(pos, block);
-        } catch (Throwable t) {
-            return null;
-        }
     }
 
     private static EndCrystalEntity nearestCrystal(AltoClef mod) {

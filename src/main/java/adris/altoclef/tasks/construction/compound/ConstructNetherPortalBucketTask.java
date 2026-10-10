@@ -126,6 +126,8 @@ public class ConstructNetherPortalBucketTask extends Task {
     private final TimerGame secondBucketIronStallTimer = new TimerGame(25);
     // S216b: static - onStart ran every few seconds and kept resetting a per-instance timer (deepgate: 33 min gated).
     private static long deepLakeFirstSeenMs = 0;
+    /** The world the clock above was started in; a different world starts the surface-first wait over. */
+    private static java.lang.ref.WeakReference<Object> deepLakeWorld = new java.lang.ref.WeakReference<>(null);
     private static final int MID_LAKE_Y = 25;
     private int secondBucketIronLast = -1;
     private Task secondBucketRelocate;
@@ -572,6 +574,11 @@ public class ConstructNetherPortalBucketTask extends Task {
                     + nearestLake.getY() + " (surface, safe)");
             deepTarget = null;
             return nearestLake;
+        }
+        if (deepLakeWorld.get() != mod.getWorld()) {
+            // Static so it survives this task being rebuilt, which also made it survive into the next world.
+            deepLakeWorld = new java.lang.ref.WeakReference<>(mod.getWorld());
+            deepLakeFirstSeenMs = 0;
         }
         if (deepestFallback != null && deepLakeFirstSeenMs == 0) deepLakeFirstSeenMs = System.currentTimeMillis();
         // S248: s249t wandered 2 min "Looking for lava lake" past lakes at y=33-34. Only the

@@ -858,7 +858,7 @@ public final class HolePillar {
             release();
             return false;
         }
-        // Stuck hopping at +1/+2 without a real escape â€” give up before infinite hold.
+        // Stuck hopping at +1/+2 without a real escape - give up before infinite hold.
         if (holding && step >= 50 && y < startY + 4) {
             logEnd(mod, "stuck-low step=" + step + " y=" + y + " startY=" + startY, 20 * 12);
             reset();

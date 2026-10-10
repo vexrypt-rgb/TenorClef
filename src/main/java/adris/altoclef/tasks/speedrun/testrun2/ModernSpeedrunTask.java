@@ -80,7 +80,6 @@ public class ModernSpeedrunTask extends Task {
     private Task closer;
     private int lootTicks;
     private boolean swordGaveUp;
-    private boolean lavaGuardAdded;
 
     /** True for a Nether block with lava above or beside it: breaking it lets the lava flow in. */
     /**
@@ -469,11 +468,11 @@ public class ModernSpeedrunTask extends Task {
     protected void onStart() {
         // S251: s250t mined out a block holding back nether lava and the flow killed it.
         // Baritone's pathing avoids fluid-adjacent breaks, but mine targets (gold ore) do not.
-        if (!lavaGuardAdded) {
-            lavaGuardAdded = true;
-            AltoClef.getInstance().getBehaviour().avoidBlockBreaking(ModernSpeedrunTask::holdsBackLava);
-            AltoClef.getInstance().getBehaviour().avoidBlockBreaking(ModernSpeedrunTask::angersPiglin);
-        }
+        // Pushed on every start and popped on every stop, so the guards neither pile up over repeated runs nor
+        // stay behind for whatever task runs next.
+        AltoClef.getInstance().getBehaviour().push();
+        AltoClef.getInstance().getBehaviour().avoidBlockBreaking(ModernSpeedrunTask::holdsBackLava);
+        AltoClef.getInstance().getBehaviour().avoidBlockBreaking(ModernSpeedrunTask::angersPiglin);
         if (sessionLive && phase != Phase.DONE) {
             T2Log.warn("E80", "parent onStart ignored, still ph=" + phase + " t=" + SpeedrunClock.now());
             T2History.note("onStart swallowed — keep " + phase);
@@ -2122,14 +2121,7 @@ public class ModernSpeedrunTask extends Task {
      * neither "Smelt" nor "Furnace".
      */
     private static boolean slowScreenOpen() {
-        try {
-            var mc = net.minecraft.client.MinecraftClient.getInstance();
-            if (mc == null || ScreenVer.current(mc) == null) return false;
-            String n = ScreenVer.current(mc).getClass().getSimpleName();
-            return n.contains("Furnace") || n.contains("Brew");
-        } catch (Throwable t) {
-            return false;
-        }
+        return McCompat.slowScreenOpen();
     }
 
     private Task portal(AltoClef mod) {
@@ -3376,6 +3368,7 @@ public class ModernSpeedrunTask extends Task {
 
     @Override
     protected void onStop(Task interruptTask) {
+        AltoClef.getInstance().getBehaviour().pop();
         try { TungstenHelper.stop(); } catch (Throwable ignored) {}
         adris.altoclef.tasks.speedrun.testrun2.core.T2Input.releaseAll();
         try { McCompat.cancelPathing(); } catch (Throwable ignored) {}

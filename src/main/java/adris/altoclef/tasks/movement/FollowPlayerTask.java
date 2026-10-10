@@ -2,8 +2,8 @@ package adris.altoclef.tasks.movement;
 
 import adris.altoclef.AltoClef;
 import adris.altoclef.tasksystem.Task;
+import adris.altoclef.util.helpers.WorldHelper;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.Optional;
@@ -42,7 +42,7 @@ public class FollowPlayerTask extends Task {
         Optional<PlayerEntity> player = mod.getEntityTracker().getPlayerEntity(_playerName);
         if (player.isEmpty()) {
             // Go to last location
-            return new GetToBlockTask(new BlockPos((int) target.x, (int) target.y, (int) target.z), false);
+            return new GetToBlockTask(WorldHelper.toBlockPos(target), false);
         }
         return new GetToEntityTask(player.get(), 2);
     }

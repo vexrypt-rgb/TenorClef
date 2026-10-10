@@ -6,6 +6,7 @@ import adris.altoclef.Debug;
 import adris.altoclef.tasks.speedrun.testrun2.McCompat;
 import adris.altoclef.tasks.speedrun.testrun2.SpeedrunOpt;
 import adris.altoclef.tasksystem.Task;
+import adris.altoclef.util.helpers.LookHelper;
 import adris.altoclef.util.helpers.TungstenHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
@@ -174,19 +175,7 @@ public class AnyWeaponCombatTask extends Task {
             }
         } catch (Throwable ignored) {}
         if (best == Items.AIR) return;
-        try {
-            Class<?> slots = Class.forName("adris.altoclef.util.helpers.StorageHelper");
-            // forceEquipItemToSlot / SlotHandler — try a few fork names
-            var handler = AltoClef.getInstance().getSlotHandler();
-            handler.getClass().getMethod("forceEquipItem", Item.class).invoke(handler, best);
-        } catch (Throwable t) {
-            try {
-                AltoClef.getInstance().getSlotHandler()
-                        .getClass()
-                        .getMethod("forceEquipItem", net.minecraft.item.Item[].class)
-                        .invoke(AltoClef.getInstance().getSlotHandler(), (Object) new Item[]{best});
-            } catch (Throwable ignored) {}
-        }
+        mod.getSlotHandler().forceEquipItem(best);
     }
 
     private boolean hasShield(AltoClef mod) {
@@ -198,10 +187,7 @@ public class AnyWeaponCombatTask extends Task {
     }
 
     private void raiseShield(AltoClef mod) {
-        try {
-            var handler = mod.getSlotHandler();
-            handler.getClass().getMethod("forceEquipItemToOffhand", Item.class).invoke(handler, Items.SHIELD);
-        } catch (Throwable ignored) {}
+        mod.getSlotHandler().forceEquipItemToOffhand(Items.SHIELD);
         try {
             var opts = mod.getPlayer().input;
             // 1.21 PlayerInput is a record; older is PlayerInput with holdingBackwards etc.
@@ -236,10 +222,7 @@ public class AnyWeaponCombatTask extends Task {
     }
 
     private void lookAt(AltoClef mod, Vec3d pos) {
-        try {
-            Class<?> look = Class.forName("adris.altoclef.util.helpers.LookHelper");
-            look.getMethod("lookAt", AltoClef.class, Vec3d.class).invoke(null, mod, pos);
-        } catch (Throwable ignored) {}
+        LookHelper.lookAt(mod, pos);
     }
 
     private void approach(AltoClef mod, LivingEntity e) {

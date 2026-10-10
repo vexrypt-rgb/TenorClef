@@ -567,7 +567,7 @@ public class MobDefenseChain extends SingleTaskChain {
                 if (damage > 0) {
                     canDealWith = Math.max(canDealWith, 2);
                 } else {
-                    // Fist/fallback Ã¢â‚¬â€ still try one zombie rather than infinite flee
+                    // Fist/fallback - still try one zombie rather than infinite flee
                     canDealWith = Math.max(canDealWith, 1);
                 }
                 // Prefer fighting zombies/spiders over fleeing when only melee hostiles

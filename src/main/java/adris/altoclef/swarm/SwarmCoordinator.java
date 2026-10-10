@@ -225,6 +225,8 @@ public final class SwarmCoordinator {
         for (Assignment a : new ArrayList<>(assignments.values())) {
             long held = now - a.stateSinceMs();
             if (a.state() == AssignmentState.ASSIGNED && held > cfg.offerTimeoutMs) {
+                // The agent may have taken the offer and only the accept was lost; do not leave it working unowned.
+                if (a.agentId() != null) outbox.send(a.agentId(), SwarmMessage.of("cancel", "a", a.id));
                 fail(a, FailureDiagnosis.offerTimeout(), now);
             } else if ((a.state() == AssignmentState.ACCEPTED || a.state() == AssignmentState.RUNNING)
                     && now - startOfHold(a) > cfg.runTimeoutMs) {
@@ -237,7 +239,7 @@ public final class SwarmCoordinator {
 
     private final Map<String, Long> heldSince = new LinkedHashMap<>();
 
-    private long startOfHold(Assignment a) { return heldSince.getOrDefault(a.id + "#" + a.attempts(), a.stateSinceMs()); }
+    private long startOfHold(Assignment a) { return heldSince.getOrDefault(a.id, a.stateSinceMs()); }
 
     // ---- failure and recovery ----
 
@@ -307,7 +309,7 @@ public final class SwarmCoordinator {
             ag.setAssignment(a.id);
             ag.setLifecycle(AgentLifecycle.BUSY);
             a.assign(ag.id, now);
-            heldSince.put(a.id + "#" + a.attempts(), now);
+            heldSince.put(a.id, now);
             ledger.add(now, Type.TASK_ASSIGNED, ag.id, a.id, c.why());
             outbox.send(ag.id, SwarmMessage.of("offer", "a", a.id, "item", a.objective.item, "n", String.valueOf(a.objective.count)));
         }

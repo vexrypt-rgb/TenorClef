@@ -32,20 +32,10 @@ public final class SurvivePlus {
         } catch (Throwable ignored) {}
         if (prefer == null) return;
         cool = 40;
-        try {
-            if (prefer == Items.TOTEM_OF_UNDYING) {
-                // offhand if the API exists; otherwise forceEquip
-                mod.getSlotHandler().getClass().getMethod("forceEquipItemToOffhand", Item.class)
-                        .invoke(mod.getSlotHandler(), prefer);
-            } else {
-                mod.getSlotHandler().getClass().getMethod("forceEquipItem", Item.class)
-                        .invoke(mod.getSlotHandler(), prefer);
-            }
-        } catch (Throwable t) {
-            try {
-                mod.getSlotHandler().getClass().getMethod("forceEquipItem", Item.class)
-                        .invoke(mod.getSlotHandler(), prefer);
-            } catch (Throwable ignored) {}
+        if (prefer == Items.TOTEM_OF_UNDYING) {
+            mod.getSlotHandler().forceEquipItemToOffhand(prefer);
+        } else {
+            mod.getSlotHandler().forceEquipItem(prefer);
         }
     }
 }

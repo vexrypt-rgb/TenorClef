@@ -50,9 +50,6 @@ final class T2SigilTab {
         s.sigName = T2MenuActions.textField(s, fx, cy, fw, 14, name);
         s.sigPaste = T2MenuActions.textField(s, fx, cy + 16, fw, 14, paste);
         s.sigMsg = T2MenuActions.textField(s, fx, cy + 32, fw, 14, message);
-        T2MenuActions.attach(s, s.sigName);
-        T2MenuActions.attach(s, s.sigPaste);
-        T2MenuActions.attach(s, s.sigMsg);
 
         ButlerConfig cfg = ButlerConfig.getInstance();
         int cols = 3;
@@ -69,11 +66,11 @@ final class T2SigilTab {
         int y = cy + 54;
         for (String[] r : rows) {
             for (int c = 0; c * 2 + 1 < r.length; c++) {
-                T2MenuActions.attach(s, T2MenuActions.button(s, s.contentX + c * (bw + 4), y, bw, 18, r[c * 2], r[c * 2 + 1]));
+                T2MenuActions.button(s, s.contentX + c * (bw + 4), y, bw, 18, r[c * 2], r[c * 2 + 1]);
             }
             y += 20;
         }
-        T2MenuActions.attach(s, T2MenuActions.button(s, s.px1 - 108, s.footerT + 2, 96, 18, "close", null));
+        T2MenuActions.button(s, s.px1 - 108, s.footerT + 2, 96, 18, "close", null);
     }
 
     private static String onOff(boolean b) { return b ? "on" : "off"; }
@@ -93,13 +90,8 @@ final class T2SigilTab {
     private static void say(String m) { status = m; }
 
     static void clipboard(String text) {
-        try {
-            MinecraftClient mc = MinecraftClient.getInstance();
-            Object kb = MinecraftClient.class.getField("keyboard").get(mc);
-            kb.getClass().getMethod("setClipboard", String.class).invoke(kb, text);
-        } catch (Throwable ignored) {
-            // no clipboard: the text is still in the status line
-        }
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc != null) mc.keyboard.setClipboard(text);
     }
 
     /** Next option, wrapping through "" (= automatic). */

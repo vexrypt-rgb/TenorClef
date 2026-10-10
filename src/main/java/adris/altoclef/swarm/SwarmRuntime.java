@@ -58,7 +58,8 @@ public final class SwarmRuntime {
         return worker;
     }
 
-    private static int loggedEvents;
+    /** Sequence number of the last ledger event echoed to chat; the ledger is capped, so an index would stall. */
+    private static long loggedSeq;
 
     /**
      * Single-client loopback for live verification: a leader and one worker in this process, wired
@@ -74,7 +75,7 @@ public final class SwarmRuntime {
                 m -> l.onMessage("local", SwarmMessage.decode(m.encode()), System.currentTimeMillis()), 2_000);
         worker = w[0];
         leaderName = "local";
-        loggedEvents = 0;
+        loggedSeq = 0;
         worker.register(System.currentTimeMillis());
         return leader;
     }
@@ -113,7 +114,11 @@ public final class SwarmRuntime {
             if (worker != null) worker.tick(now);
             if (leader != null && ("local".equals(leaderName) || Boolean.getBoolean("tenorclef.swarm.log"))) {
                 java.util.List<SwarmLedger.Event> all = leader.ledger().all();
-                for (; loggedEvents < all.size(); loggedEvents++) Debug.logMessage("SWARMEVT " + all.get(loggedEvents));
+                for (SwarmLedger.Event e : all) {
+                    if (e.seq() <= loggedSeq) continue;
+                    loggedSeq = e.seq();
+                    Debug.logMessage("SWARMEVT " + e);
+                }
             }
         } catch (Throwable t) {
             Debug.logWarning("SWARM tick: " + t);

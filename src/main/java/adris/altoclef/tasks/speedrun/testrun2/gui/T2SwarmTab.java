@@ -83,9 +83,6 @@ final class T2SwarmTab {
         s.swItem = T2MenuActions.textField(s, fx, fy, fw / 2 - 4, 14, item);
         s.swCount = T2MenuActions.textField(s, fx + fw / 2 + 36, fy, fw / 2 - 36, 14, count);
         s.swSchem = T2MenuActions.textField(s, fx, fy + 16, fw, 14, schematic);
-        T2MenuActions.attach(s, s.swItem);
-        T2MenuActions.attach(s, s.swCount);
-        T2MenuActions.attach(s, s.swSchem);
 
         int bw = (s.contentW - 8) / 3;
         String[][] rows = {
@@ -95,11 +92,11 @@ final class T2SwarmTab {
         int y = fy + 34;
         for (String[] r : rows) {
             for (int c = 0; c * 2 + 1 < r.length; c++) {
-                T2MenuActions.attach(s, T2MenuActions.button(s, s.contentX + c * (bw + 4), y, bw, 18, r[c * 2], r[c * 2 + 1]));
+                T2MenuActions.button(s, s.contentX + c * (bw + 4), y, bw, 18, r[c * 2], r[c * 2 + 1]);
             }
             y += 20;
         }
-        T2MenuActions.attach(s, T2MenuActions.button(s, s.px1 - 108, s.footerT + 2, 96, 18, "close", null));
+        T2MenuActions.button(s, s.px1 - 108, s.footerT + 2, 96, 18, "close", null);
     }
 
     private static void capture(T2MenuScreen s) {

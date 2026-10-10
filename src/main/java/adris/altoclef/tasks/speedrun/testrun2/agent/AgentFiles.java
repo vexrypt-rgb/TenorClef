@@ -56,8 +56,9 @@ public final class AgentFiles {
 
     /** First non-empty line, then rewrite the rest. */
     public static String takeInbox() {
-        ensure();
         try {
+            // Polled constantly and nearly always empty: no read and, below, no rewrite unless a line was taken.
+            if (Files.size(inbox()) == 0) return null;
             List<String> lines = Files.readAllLines(inbox(), StandardCharsets.UTF_8);
             String hit = null;
             StringBuilder rest = new StringBuilder();
@@ -69,7 +70,7 @@ public final class AgentFiles {
                     rest.append(t).append('\n');
                 }
             }
-            Files.writeString(inbox(), rest.toString(), StandardCharsets.UTF_8);
+            if (hit != null) Files.writeString(inbox(), rest.toString(), StandardCharsets.UTF_8);
             return hit;
         } catch (IOException e) {
             return null;
@@ -97,10 +98,9 @@ public final class AgentFiles {
      * Prefer this for a single structured drop from an external agent.
      */
     public static String takeRequestJson() {
-        ensure();
         try {
             Path p = request();
-            if (!Files.exists(p)) return null;
+            if (!Files.exists(p) || Files.size(p) == 0) return null;
             String raw = Files.readString(p, StandardCharsets.UTF_8).trim();
             Files.writeString(p, "", StandardCharsets.UTF_8);
             if (raw.isEmpty() || raw.startsWith("#")) return null;

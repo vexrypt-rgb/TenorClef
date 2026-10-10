@@ -1,10 +1,13 @@
 package adris.altoclef.tasks.speedrun.testrun2.gui;
 
-import adris.altoclef.multiversion.ScreenVer;
-
 import adris.altoclef.Debug;
+import adris.altoclef.multiversion.ScreenVer;
+import adris.altoclef.multiversion.TextVer;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.AbstractCommandBlockScreen;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 
 import java.util.ArrayList;
@@ -18,6 +21,8 @@ import java.util.List;
  * is painted and hit-tested here.
  */
 public class T2MenuScreen extends Screen {
+
+    private static final String TITLE = "TenorClef";
 
     private static int tab = Integer.getInteger("tenorclef.menu.tab", 0);
     private static int pendingOpen;
@@ -92,18 +97,20 @@ public class T2MenuScreen extends Screen {
             {"stop", "stop"},
     };
 
-    Object keyBox;
-    Object urlBox;
-    Object modelBox;
-    Object bindBox;
-    Object cmpEdit;
-    Object cmpName;
-    Object sigName;
-    Object sigPaste;
-    Object sigMsg;
-    Object swItem;
-    Object swCount;
-    Object swSchem;
+    TextFieldWidget keyBox;
+    TextFieldWidget urlBox;
+    TextFieldWidget modelBox;
+    TextFieldWidget bindBox;
+    TextFieldWidget cmpName;
+    TextFieldWidget sigName;
+    TextFieldWidget sigPaste;
+    TextFieldWidget sigMsg;
+    TextFieldWidget swItem;
+    TextFieldWidget swCount;
+    TextFieldWidget swSchem;
+    //#if MC >= 12002
+    private net.minecraft.client.gui.widget.EditBoxWidget editor;
+    //#endif
     boolean dropProv;
     boolean dropModel;
     int dropStart = Integer.MAX_VALUE;
@@ -114,7 +121,7 @@ public class T2MenuScreen extends Screen {
     int px0, py0, px1, py1, headerB, sideR, contentX, contentY, contentW, footerT;
 
     public T2MenuScreen() {
-        super(titleText());
+        super(TextVer.literal(TITLE));
     }
 
     public static void open() {
@@ -124,12 +131,7 @@ public class T2MenuScreen extends Screen {
         Runnable show = () -> {
             try {
                 if (ScreenVer.current(mc) instanceof T2MenuScreen) return;
-                T2MenuScreen screen = new T2MenuScreen();
-                try {
-                    mc.getClass().getMethod("openScreen", Screen.class).invoke(mc, screen);
-                } catch (NoSuchMethodException e) {
-                    mc.getClass().getMethod("setScreen", Screen.class).invoke(mc, screen);
-                }
+                mc.setScreen(new T2MenuScreen());
                 Debug.logMessage("T2MENU opened");
             } catch (Throwable t) {
                 Debug.logWarning("T2MENU open: " + t.getClass().getSimpleName() + " " + t.getMessage());
@@ -151,29 +153,15 @@ public class T2MenuScreen extends Screen {
         if (pendingOpen <= 0) return;
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc == null) return;
-        if (ScreenVer.current(mc) != null) {
-            String n = ScreenVer.current(mc).getClass().getSimpleName();
-            if (n.contains("Chat") || n.contains("Command")) return;
-            if (ScreenVer.current(mc) instanceof T2MenuScreen) {
-                pendingOpen = 0;
-                return;
-            }
+        Screen current = ScreenVer.current(mc);
+        // The command that queued the menu was typed into one of these; wait for it to close.
+        if (current instanceof ChatScreen || current instanceof AbstractCommandBlockScreen) return;
+        if (current instanceof T2MenuScreen) {
+            pendingOpen = 0;
+            return;
         }
         pendingOpen--;
         if (pendingOpen <= 0) open();
-    }
-
-    private static Text titleText() {
-        try {
-            return (Text) Text.class.getMethod("literal", String.class).invoke(null, "TenorClef");
-        } catch (Throwable t) {
-            try {
-                return (Text) Class.forName("net.minecraft.text.LiteralText")
-                        .getConstructor(String.class).newInstance("TenorClef");
-            } catch (Throwable t2) {
-                throw new IllegalStateException(t2);
-            }
-        }
     }
 
     private String[][] tabLeft() {
@@ -219,12 +207,12 @@ public class T2MenuScreen extends Screen {
         hitLab.clear();
         dropStart = Integer.MAX_VALUE;
         layout();
-        T2MenuActions.attach(this, T2MenuActions.button(this, px1 - 22, py0 + 7, 14, 14, "x", null));
+        T2MenuActions.button(this, px1 - 22, py0 + 7, 14, 14, "x", null);
         String[] nav = {"Tasks", "Link", "Media", "Agent", "Faults", "Showcase", "SIGIL", "Compose", "Swarm"};
         int[] navId = {0, 1, 2, 3, 4, 5, 6, 7, 8};
         int iy = headerB + 8;
         for (int i = 0; i < nav.length; i++) {
-            T2MenuActions.attach(this, T2MenuActions.button(this, px0 + 6, iy, sideR - px0 - 12, 16, nav[i], "TAB:" + navId[i]));
+            T2MenuActions.button(this, px0 + 6, iy, sideR - px0 - 12, 16, nav[i], "TAB:" + navId[i]);
             iy += 18;
         }
         String[][] L = tabLeft();
@@ -247,16 +235,16 @@ public class T2MenuScreen extends Screen {
             AgentConfig cfg = AgentConfig.cached();
             AgentPresets.Preset preset = AgentPresets.byId(cfg.provider);
             int top = contentY;
-            T2MenuActions.attach(this, T2MenuActions.button(this, contentX, top, colW, 18, "API  " + preset.label, "DROP:PROV"));
-            T2MenuActions.attach(this, T2MenuActions.button(this, contentX + colW + 8, top, colW, 18, "Model  " + cfg.model, "DROP:MODEL"));
+            T2MenuActions.button(this, contentX, top, colW, 18, "API  " + preset.label, "DROP:PROV");
+            T2MenuActions.button(this, contentX + colW + 8, top, colW, 18, "Model  " + cfg.model, "DROP:MODEL");
             int y = contentY + 44;
             for (String[] row : L) {
-                T2MenuActions.attach(this, T2MenuActions.button(this, contentX, y, colW, bh, row[0], row[1]));
+                T2MenuActions.button(this, contentX, y, colW, bh, row[0], row[1]);
                 y += 22;
             }
             y = contentY + 44;
             for (String[] row : R) {
-                T2MenuActions.attach(this, T2MenuActions.button(this, contentX + colW + 8, y, colW, bh, row[0], row[1]));
+                T2MenuActions.button(this, contentX + colW + 8, y, colW, bh, row[0], row[1]);
                 y += 22;
             }
             int fx = contentX;
@@ -266,25 +254,21 @@ public class T2MenuScreen extends Screen {
             urlBox = T2MenuActions.textField(this, fx, fy + 15, fw, 14, cfg.url);
             modelBox = T2MenuActions.textField(this, fx, fy + 30, fw / 2 - 4, 14, cfg.model);
             bindBox = T2MenuActions.textField(this, fx + fw / 2 + 4, fy + 30, fw / 2 - 4, 14, cfg.bind);
-            T2MenuActions.attach(this, keyBox);
-            T2MenuActions.attach(this, urlBox);
-            T2MenuActions.attach(this, modelBox);
-            T2MenuActions.attach(this, bindBox);
-            T2MenuActions.attach(this, T2MenuActions.button(this, px1 - 212, footerT + 2, 96, 18, "save api", "SAVECFG"));
-            T2MenuActions.attach(this, T2MenuActions.button(this, px1 - 108, footerT + 2, 96, 18, "close", null));
+            T2MenuActions.button(this, px1 - 212, footerT + 2, 96, 18, "save api", "SAVECFG");
+            T2MenuActions.button(this, px1 - 108, footerT + 2, 96, 18, "close", null);
             // Dropdowns last: hits paint in order and click-test in reverse, so they sit on top.
             dropStart = hits.size();
             if (dropProv) {
                 int py = top + 20;
                 for (AgentPresets.Preset p : AgentPresets.ALL) {
-                    T2MenuActions.attach(this, T2MenuActions.button(this, contentX, py, colW, 16, p.label, "PROV:" + p.id));
+                    T2MenuActions.button(this, contentX, py, colW, 16, p.label, "PROV:" + p.id);
                     py += 17;
                 }
             }
             if (dropModel) {
                 int py = top + 20;
                 for (String m : preset.models) {
-                    T2MenuActions.attach(this, T2MenuActions.button(this, contentX + colW + 8, py, colW, 16, m, "MODEL:" + m));
+                    T2MenuActions.button(this, contentX + colW + 8, py, colW, 16, m, "MODEL:" + m);
                     py += 17;
                 }
             }
@@ -292,15 +276,64 @@ public class T2MenuScreen extends Screen {
         }
         int y = contentY;
         for (String[] row : L) {
-            T2MenuActions.attach(this, T2MenuActions.button(this, contentX, y, colW, bh, row[0], row[1]));
+            T2MenuActions.button(this, contentX, y, colW, bh, row[0], row[1]);
             y += 22;
         }
         y = contentY;
         for (String[] row : R) {
-            T2MenuActions.attach(this, T2MenuActions.button(this, contentX + colW + 8, y, colW, bh, row[0], row[1]));
+            T2MenuActions.button(this, contentX + colW + 8, y, colW, bh, row[0], row[1]);
             y += 22;
         }
-        T2MenuActions.attach(this, T2MenuActions.button(this, px1 - 108, footerT + 2, 96, 18, "close", null));
+        T2MenuActions.button(this, px1 - 108, footerT + 2, 96, 18, "close", null);
+    }
+
+    /** Drops every widget and lays the current tab out again. */
+    void rebuild() {
+        //#if MC >= 11700
+        clearChildren();
+        //#else
+        //$$ children.clear();
+        //$$ buttons.clear();
+        //#endif
+        setFocused(null);
+        init();
+    }
+
+    TextFieldWidget addField(int x, int y, int w, int h, String value) {
+        TextFieldWidget box = new TextFieldWidget(MinecraftClient.getInstance().textRenderer, x, y, w, h, TextVer.literal(TITLE));
+        box.setMaxLength(256);
+        box.setText(value == null ? "" : value);
+        //#if MC >= 11700
+        return addDrawableChild(box);
+        //#else
+        //$$ return addButton(box);
+        //#endif
+    }
+
+    /** Adds the multi-line editor. False before 1.20.2, which has no such widget. */
+    boolean addEditor(int x, int y, int w, int h, String text) {
+        //#if MC >= 12111
+        //$$ editor = net.minecraft.client.gui.widget.EditBoxWidget.builder().x(x).y(y)
+        //$$         .build(MinecraftClient.getInstance().textRenderer, w, h, TextVer.literal(TITLE));
+        //#elseif MC >= 12002
+        Text title = TextVer.literal(TITLE);
+        editor = new net.minecraft.client.gui.widget.EditBoxWidget(MinecraftClient.getInstance().textRenderer, x, y, w, h, title, title);
+        //#endif
+        //#if MC >= 12002
+        editor.setText(text == null ? "" : text);
+        addDrawableChild(editor);
+        return true;
+        //#else
+        //$$ return false;
+        //#endif
+    }
+
+    String editorText() {
+        //#if MC >= 12002
+        return editor == null ? "" : editor.getText();
+        //#else
+        //$$ return "";
+        //#endif
     }
 
     public boolean shouldPause() {

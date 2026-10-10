@@ -2,6 +2,7 @@ package adris.altoclef.tasks.speedrun.testrun2.combat;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.CrossbowItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.math.Vec3d;
@@ -70,35 +71,17 @@ public final class BowLead {
     }
 
     public static boolean charged(ItemStack stack) {
-        if (!isCrossbow(stack)) return false;
-        try {
-            return (Boolean) Class.forName("net.minecraft.item.CrossbowItem")
-                    .getMethod("isCharged", ItemStack.class)
-                    .invoke(null, stack);
-        } catch (Throwable t) {
-            // 1.20.5+ dropped getOrCreateTag; fall back to component dump
-            try {
-                Object comps = stack.getClass().getMethod("getComponents").invoke(stack);
-                return String.valueOf(comps).toLowerCase().contains("charged");
-            } catch (Throwable t2) {
-                return false;
-            }
-        }
+        return isCrossbow(stack) && CrossbowItem.isCharged(stack);
     }
 
     public static boolean fireworkLoaded(ItemStack stack) {
         if (!isCrossbow(stack)) return false;
-        try {
-            Class<?> cb = Class.forName("net.minecraft.item.CrossbowItem");
-            return (Boolean) cb.getMethod("hasProjectile", ItemStack.class, net.minecraft.item.Item.class)
-                    .invoke(null, stack, Items.FIREWORK_ROCKET);
-        } catch (Throwable t) {
-            try {
-                Object comps = stack.getClass().getMethod("getComponents").invoke(stack);
-                return String.valueOf(comps).toLowerCase().contains("firework");
-            } catch (Throwable t2) {
-                return false;
-            }
-        }
+        //#if MC >= 12005
+        net.minecraft.component.type.ChargedProjectilesComponent loaded =
+                stack.get(net.minecraft.component.DataComponentTypes.CHARGED_PROJECTILES);
+        return loaded != null && loaded.contains(Items.FIREWORK_ROCKET);
+        //#else
+        //$$ return CrossbowItem.hasProjectile(stack, Items.FIREWORK_ROCKET);
+        //#endif
     }
 }

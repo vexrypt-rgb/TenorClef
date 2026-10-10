@@ -10,8 +10,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,7 +53,6 @@ final class T2CompositionTab {
         int edH = Math.max(40, Math.min(140, avail - 44 - 76));
 
         s.cmpName = T2MenuActions.textField(s, s.contentX, bodyY, listW, 14, nameText);
-        T2MenuActions.attach(s, s.cmpName);
         int ry = bodyY + 16;
         int rows = Math.max(1, (edH - 16) / 12);
         List<String> names = store.list();
@@ -64,9 +61,7 @@ final class T2CompositionTab {
             ry += 12;
         }
 
-        s.cmpEdit = editBox(s, edX, bodyY, edW, edH, source);
-        editorMissing = s.cmpEdit == null;
-        if (s.cmpEdit != null) T2MenuActions.attach(s, s.cmpEdit);
+        editorMissing = !s.addEditor(edX, bodyY, edW, edH, source);
 
         int by = bodyY + edH + 4;
         int bw = (s.contentW - 5 * 4) / 6;
@@ -88,40 +83,6 @@ final class T2CompositionTab {
         T2MenuActions.button(s, s.contentX + s.contentW - 15, paneTop + 1, 13, 11, ">", "CMP:next");
     }
 
-    /** Multi-line editor via reflection: builder on 1.21.11+, constructor on 1.20.2-1.21.x, absent before that. */
-    private static Object editBox(T2MenuScreen s, int x, int y, int w, int h, String text) {
-        try {
-            Object tr = T2MenuActions.textRenderer(s);
-            Class<?> ebw = Class.forName("net.minecraft.client.gui.widget.EditBoxWidget");
-            Object title = T2MenuActions.titleText();
-            Object box = null;
-            try {
-                Object b = ebw.getMethod("builder").invoke(null);
-                b = b.getClass().getMethod("x", int.class).invoke(b, x);
-                b = b.getClass().getMethod("y", int.class).invoke(b, y);
-                for (Method m : b.getClass().getMethods()) {
-                    if (m.getName().equals("build") && m.getParameterCount() == 4) {
-                        box = m.invoke(b, tr, w, h, title);
-                        break;
-                    }
-                }
-            } catch (NoSuchMethodException noBuilder) {
-                for (Constructor<?> c : ebw.getConstructors()) {
-                    Class<?>[] p = c.getParameterTypes();
-                    if (p.length == 7 && p[1] == int.class) {
-                        box = c.newInstance(tr, x, y, w, h, title, title);
-                        break;
-                    }
-                }
-            }
-            if (box == null) return null;
-            box.getClass().getMethod("setText", String.class).invoke(box, text == null ? "" : text);
-            return box;
-        } catch (Throwable t) {
-            return null;
-        }
-    }
-
     private static void select(String name) {
         try {
             source = svc().store().load(name);
@@ -134,7 +95,7 @@ final class T2CompositionTab {
     }
 
     private static void capture(T2MenuScreen s) {
-        if (s.cmpEdit != null) source = T2MenuActions.fieldText(s.cmpEdit);
+        if (!editorMissing) source = s.editorText();
         nameText = T2MenuActions.fieldText(s.cmpName);
     }
 

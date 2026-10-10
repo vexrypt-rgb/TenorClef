@@ -97,7 +97,12 @@ public final class AltoClefExecutor implements AssignmentExecutor {
             lastLog = now;
             adris.altoclef.Debug.logMessage("SWARM exec goal=" + st + " note=" + manager.getLastNote() + " idleFor=" + (now - lastMove) / 1000 + "s");
         }
-        if (now - lastMove > STALL_MS) return Status.failed("STALLED:" + st, evidence);
+        if (now - lastMove > STALL_MS) {
+            // The leader hands this work to someone else; a goal left running here would compete with them.
+            String reason = "STALLED:" + st;
+            cancel();
+            return Status.failed(reason, evidence);
+        }
         return Status.running(Math.min(99, have * 100 / objective.count));
     }
 

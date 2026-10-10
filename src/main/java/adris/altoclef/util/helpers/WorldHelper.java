@@ -85,11 +85,12 @@ public interface WorldHelper {
     }
 
     static Vec3i toVec3i(Vec3d pos) {
-        return new Vec3i((int) pos.getX(), (int) pos.getY(), (int) pos.getZ());
+        // floor, not a cast: a cast rounds toward zero and lands one block off at negative coordinates
+        return new Vec3i((int) Math.floor(pos.getX()), (int) Math.floor(pos.getY()), (int) Math.floor(pos.getZ()));
     }
 
     static BlockPos toBlockPos(Vec3d pos) {
-        return new BlockPos((int) pos.getX(), (int) pos.getY(), (int) pos.getZ());
+        return new BlockPos((int) Math.floor(pos.getX()), (int) Math.floor(pos.getY()), (int) Math.floor(pos.getZ()));
     }
 
     static boolean isSourceBlock(BlockPos pos, boolean onlyAcceptStill) {
@@ -384,8 +385,8 @@ public interface WorldHelper {
     }
 
     static Iterable<BlockPos> getBlocksTouchingBox(Box box) {
-        BlockPos min = new BlockPos((int) box.minX, (int) box.minY, (int) box.minZ);
-        BlockPos max = new BlockPos((int) box.maxX, (int) box.maxY, (int) box.maxZ);
+        BlockPos min = new BlockPos((int) Math.floor(box.minX), (int) Math.floor(box.minY), (int) Math.floor(box.minZ));
+        BlockPos max = new BlockPos((int) Math.floor(box.maxX), (int) Math.floor(box.maxY), (int) Math.floor(box.maxZ));
         return scanRegion(min, max);
     }
 

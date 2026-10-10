@@ -148,8 +148,7 @@ public final class T2Probe {
         try {
             var mc = MinecraftClient.getInstance();
             if (mc != null && ScreenVer.current(mc) != null) {
-                String sn = ScreenVer.current(mc).getClass().getSimpleName();
-                slowScreen = sn.contains("Furnace") || sn.contains("Brew");
+                slowScreen = McCompat.slowScreenOpen();
                 screen = !(ScreenVer.current(mc) instanceof net.minecraft.client.gui.screen.ChatScreen)
                         && !slowScreen;
             }

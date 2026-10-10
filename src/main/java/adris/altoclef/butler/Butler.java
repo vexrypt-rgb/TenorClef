@@ -119,7 +119,7 @@ public class Butler {
             // Decrypt first, off the game thread; auth and command parsing see only the plaintext.
             SigilService.get().open(username, message, sealed -> {
                 sealedRoutes.put(username, sealed);
-                handleWhisper(username, sealed.plaintext());
+                handleWhisper(username, sealed.plaintext(), true);
             }, why -> {
                 if (ButlerConfig.getInstance().whisperFormatDebug) {
                     Debug.logMessage("    Rejecting: sealed whisper from \"" + username + "\" could not be opened: " + why);
@@ -134,15 +134,17 @@ public class Butler {
             return;
         }
         sealedRoutes.remove(username);
-        handleWhisper(username, message);
+        handleWhisper(username, message, false);
     }
 
-    private void handleWhisper(String username, String message) {
+    private void handleWhisper(String username, String message, boolean sealed) {
 
         boolean debug = ButlerConfig.getInstance().whisperFormatDebug;
         // Ignore messages from other bots.
         if (message.startsWith(BUTLER_MESSAGE_START)) {
-            if (adris.altoclef.tasks.speedrun.testrun2.fleet.FleetProtocol.handle(username, message)) {
+            // Fleet lines carry commands too, so "sealed only" has to cover them as well as butler commands.
+            boolean fleetAllowed = sealed || !ButlerConfig.getInstance().sigilRequireSealed;
+            if (fleetAllowed && adris.altoclef.tasks.speedrun.testrun2.fleet.FleetProtocol.handle(username, message)) {
                 return;
             }
             if (debug) {

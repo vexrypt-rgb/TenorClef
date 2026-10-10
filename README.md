@@ -15,9 +15,9 @@ for the Minecraft versions Ostinato is built for:
 
 | Minecraft | Status | Ostinato | Notes |
 | --- | --- | --- | --- |
-| 1.21.4 | Primary | `main` (`libs/baritone-unoptimized-fabric-1.21.4.jar`) | Anarchy target; vanilla recipe-book crafting disabled (1.21.2+ servers do not sync recipes) |
+| 1.21.11 | Primary | `main` (`libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar`) | Default build target; CI runs the unit tests on it |
+| 1.21.4 | Supported | branch `1.21.4` (`libs/baritone-unoptimized-fabric-1.21.4.jar`) | Anarchy target; vanilla recipe-book crafting disabled (1.21.2+ servers do not sync recipes) |
 | 1.16.1 | Legacy | branch `1.16.1` (`libs/baritone-unoptimized-fabric-1.16.1.jar`) | Legacy pairing |
-| 1.21.11 | Experimental | branch `1.21.11` (release jar `ostinato-mc1.21.11-unoptimized-fabric-1.18.0.jar`) | Released as experimental |
 | 26.3 | Experimental | branch `26.3` (release jar `ostinato-mc26.3-unoptimized-fabric-1.21.0.jar`) | Released as experimental |
 
 The other versions under `versions/` (1.21.1 down to 1.16.5) are only steps in the source
@@ -43,16 +43,17 @@ AltoClef jar.
 TenorClef uses Java 21 for the current modern modules. On Windows run:
 
 ```bat
-gradlew.bat :1.21.4:build
+gradlew.bat :1.21.11:build
 ```
 
 On macOS or Linux run:
 
 ```sh
-./gradlew :1.21.4:build
+./gradlew :1.21.11:build
 ```
 
-For a version that depends on a local Ostinato build, follow the wiring guide first.
+`:1.21.4:build` and `:1.16.1:build` work the same way. For a version that depends on a local Ostinato
+build, follow the wiring guide first.
 The initial Gradle configuration can take a while because Minecraft is remapped.
 
 ## Movement backends

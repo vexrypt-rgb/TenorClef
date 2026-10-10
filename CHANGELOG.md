@@ -1,3 +1,16 @@
+# TenorClef 0.26.2
+
+Pairs with Ostinato v1.19.2. A second review pass: fixes only.
+
+- **Ostinato v1.19.2** underneath: items are pulled into the hotbar only when they are about to be held, the kinematic simulation follows soul sand, honey, Speed, Slowness, Jump Boost and Soul Speed, and no gap jumps are planned under Levitation or Slow Falling. See the Ostinato release notes.
+- **Server messages**: the bed task's "Respawn point set" check and the queue detector now read the lines the server writes through a typed event. The bed task listened for player chat, which a server message is not, and the queue detector looked the chat window up by name, which fails in a release jar.
+- **Compositions**: a failure that reaches the root in the tick it happens is given a few ticks to be answered by the task above it (another target, another route) before the run is failed.
+- **Plans**: a step that finished by giving up no longer advances the plan, and the BLOCKED a plan reports while its goal is paused ends with the pause.
+- **Swarm**: a worker whose leader restarted registers again when the leader asks who it is; a worker that dies drops its work instead of picking it up after the respawn in competition with whoever was handed it; a worker still busy with work that is over, or that was given to someone else while it was silent, is told to stop; leading again does not start a second coordinator; a fleet request that arrives while another task runs is answered "busy" instead of replacing it.
+- **Menu**: text fields hold 2048 characters, so a long key or token is not cut short and saved back that way.
+- The "script" test hook follows a file with one thread, not one per call.
+- Checked by the unit tests and by compiling 1.21.11, 1.21.4 and 1.16.1 against the Ostinato v1.19.2 jars. Nothing in this release was played live.
+
 # TenorClef 0.26.1
 
 Pairs with Ostinato v1.19.1. A review pass over the fork's own code: fixes only, no new features.

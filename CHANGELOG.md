@@ -1,3 +1,26 @@
+# TenorClef 0.26.1
+
+Pairs with Ostinato v1.19.1. A review pass over the fork's own code: fixes only, no new features.
+
+- **Features that only worked in the dev environment now work in the release jars.** A lot of the newer code looked Minecraft classes and methods up by name at run time; a release jar is remapped, so every such lookup failed quietly. It is now ordinary compiled code on every version:
+  - the TenorClef menu opens and closes, and its text fields, composition editor and copy-to-clipboard work (the editor needs 1.20.2 or newer);
+  - the Segno split overlay draws (once a run clock has started);
+  - `@headless` applies its options;
+  - block placement in `@mapart`, `@groundzero` and `@escape`;
+  - the unstick and nudge routines really press forward and jump, and turning, closing a screen and item, block and biome lookups work;
+  - furnace, brewing stand and container screens are recognised, so the stall watchdog stands down while the bot smelts;
+  - crossbow charge and firework detection, weapon damage for weapons outside the built-in table, and the zero-cycle's dragon perch, dragon head and bed checks;
+  - schematic builds start, pause and finish through Ostinato's builder API.
+- **Tasks**: a parent task that took over a failed child's result no longer keeps reporting that failure after it moves on to something else.
+- **Positions**: converting a position to a block now rounds down instead of toward zero, which was one block off at negative coordinates (following a player, projectile walls, block boxes); the "looking at an interactable block" check uses the block that was hit instead of the hit point.
+- **End fight**: the dragon-breath cells the path planner reads from its own thread are swapped in whole instead of being cleared and refilled under it.
+- **Swarm**: a stalled worker cancels its goal before reporting the stall; a repeated offer for work already held is accepted again instead of timing out; a timed-out offer is cancelled on the helper; the chat echo of ledger events no longer stops once the ledger is full; control characters in message values are escaped.
+- **Butler**: "sealed only" now also covers fleet command lines, not just butler commands.
+- **Watchdog**: the deadman switch only exits the game and re-installs the driver in unattended runs (`autoRunCommand` / `autoLoadWorld`); with a person at the keyboard it never restarts a stopped run or closes the game.
+- The nether-portal lake timer no longer carries over into the next world.
+- Removed stray backup files from the source tree.
+- Checked by the unit tests and by compiling 1.16.1, 1.21.4, 1.21.11 and 26.3. Nothing in this release was played live, and the versions between 1.16.5 and 1.21.1 were not compiled.
+
 # TenorClef 0.26.0
 
 Pairs with Ostinato v1.19.0.

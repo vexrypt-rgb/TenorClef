@@ -43,6 +43,15 @@ class SwarmRuntimeLinkTest {
     }
 
     @Test
+    void leadingAgainKeepsTheRunningCoordinator() {
+        SwarmRuntime.useLink(new FakeLink());
+        SwarmCoordinator leader = SwarmRuntime.lead(null);
+        SwarmRuntime.onWire("bob", "crew", SwarmMessage.of("reg", "caps", Capability.encode(EnumSet.allOf(Capability.class))).encode());
+        assertSame(leader, SwarmRuntime.lead(null));
+        assertNotNull(SwarmRuntime.leader().agent("bob"), "the registered helper is still known");
+    }
+
+    @Test
     void leadingFailsWithAReasonWhenTheLinkIsDown() {
         FakeLink link = new FakeLink();
         link.problem = "Ostinato swarm link is not running";

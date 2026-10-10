@@ -301,7 +301,8 @@ public class T2MenuScreen extends Screen {
 
     TextFieldWidget addField(int x, int y, int w, int h, String value) {
         TextFieldWidget box = new TextFieldWidget(MinecraftClient.getInstance().textRenderer, x, y, w, h, TextVer.literal(TITLE));
-        box.setMaxLength(256);
+        // Above any key or token a field holds: a value cut here would be saved back cut.
+        box.setMaxLength(2048);
         box.setText(value == null ? "" : value);
         //#if MC >= 11700
         return addDrawableChild(box);

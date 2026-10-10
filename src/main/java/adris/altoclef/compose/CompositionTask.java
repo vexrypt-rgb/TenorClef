@@ -13,6 +13,14 @@ public class CompositionTask extends Task {
     private final CompositionRun run;
     private Task built;
 
+    /**
+     * Ticks the root may hold a failure before the run is failed. A failure reaches the root in the tick it
+     * happens, before the task above the failed one has answered it (another target, another route); that answer
+     * comes on its next tick and clears the copy held here.
+     */
+    private static final int FAILURE_GRACE_TICKS = 10;
+    private int failedTicks;
+
     public CompositionTask(AltoClef mod, Composition composition, CompositionRun run) {
         this.mod = mod;
         this.composition = composition;
@@ -38,17 +46,22 @@ public class CompositionTask extends Task {
         CompositionService.INSTANCE.pollMovement(mod, run);
 
         Task sub = getSub();
-        if (sub != null && sub.isFinished() && sub.getLastResult() == TaskResult.SUCCESS) {
+        boolean finished = sub != null && sub.isFinished();
+        if (finished && sub.getLastResult() == TaskResult.SUCCESS) {
             run.closeAll();
             run.finish(CompositionRun.State.SUCCEEDED, CompositionRun.FailureKind.NONE, "", null);
             return; // the chain sees isFinished() next tick and ends the user task
         }
-        if (getExplicitResult() == TaskResult.FAILURE) {
-            TaskFailure f = getLastFailure();
-            run.finish(CompositionRun.State.FAILED, CompositionRun.FailureKind.TASK_FAILURE,
-                    f != null ? f.toString() : "task failed", null);
-            CompositionService.INSTANCE.afterTerminal(mod, run);
+        if (getExplicitResult() != TaskResult.FAILURE) {
+            failedTicks = 0;
+            return;
         }
+        // The built task ending on a failure is final; one still running gets the grace.
+        if (!finished && ++failedTicks < FAILURE_GRACE_TICKS) return;
+        TaskFailure f = getLastFailure();
+        run.finish(CompositionRun.State.FAILED, CompositionRun.FailureKind.TASK_FAILURE,
+                f != null ? f.toString() : "task failed", null);
+        CompositionService.INSTANCE.afterTerminal(mod, run);
     }
 
     @Override
@@ -59,6 +72,7 @@ public class CompositionTask extends Task {
             throw new CompositionBuildException(e);
         }
         if (built == null) throw new IllegalStateException("Composition.build returned null");
+        failedTicks = 0;
     }
 
     @Override

@@ -66,6 +66,21 @@ class CompositionRunTest {
     }
 
     @Test
+    void failureTheTaskAboveAnswersDoesNotFailTheRun() {
+        CompositionRun run = new CompositionRun("answered");
+        Task doomed = Kit.failWith(FailureReason.RESOURCE_MISSING, "no iron here");
+        Task other = Kit.forever("elsewhere");
+        Task picker = new TimedTask("picker", -1, null) {
+            @Override protected Task onTick() {
+                return doomed.getLastResult() == TaskResult.FAILURE ? other : doomed;
+            }
+        };
+        CompositionTask t = root(run, m -> picker);
+        for (int i = 0; i < 60 && !run.terminal(); i++) t.tick(CHAIN);
+        assertEquals(State.PERFORMING, run.state(), "the picker moved on to another child");
+    }
+
+    @Test
     void exceptionInTickIsRuntimeException() {
         CompositionRun run = new CompositionRun("boom");
         Task bomb = new TimedTask("bomb", -1, null) {

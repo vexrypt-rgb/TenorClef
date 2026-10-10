@@ -17,9 +17,6 @@ public final class FleetProtocol {
 
     public static final String TAG = "~ ";
 
-    private static String lastAssign;
-    private static int lastCount;
-
     private FleetProtocol() {}
 
     /** @return true if consumed (not a normal butler reject). */
@@ -49,10 +46,13 @@ public final class FleetProtocol {
                 String kind = p[1];
                 String item = p[2];
                 int n = p.length >= 4 ? parse(p[3], 1) : 1;
-                lastAssign = item;
-                lastCount = n;
                 Debug.logMessage("FLEET " + from + " assigned " + kind + " " + item + " x" + n);
                 if ("get".equals(kind)) {
+                    // Whatever runs here was asked for first; a second request does not get to replace it.
+                    if (mod != null && mod.getUserTaskChain().isActive() && !mod.getUserTaskChain().isRunningIdleTask()) {
+                        whisper(mod, from, "~ fail " + item + " busy");
+                        return true;
+                    }
                     try {
                         var task = TaskCatalogue.getItemTask(item, n);
                         if (task != null && mod != null) {

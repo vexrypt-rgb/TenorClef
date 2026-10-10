@@ -120,7 +120,11 @@ public final class SwarmCoordinator {
 
     private void heartbeat(String id, SwarmMessage m, long now) {
         AgentInfo a = agents.get(id);
-        if (a == null) return; // must register first
+        if (a == null) {
+            // It joined a leader that has since restarted and does not know to register again.
+            outbox.send(id, SwarmMessage.of("who"));
+            return;
+        }
         a.touch(now);
         if (m.get("x") != null) a.setPosition(m.getDouble("x", 0), m.getDouble("y", 0), m.getDouble("z", 0));
         a.setHealth((float) m.getDouble("hp", a.health()));
@@ -135,6 +139,14 @@ public final class SwarmCoordinator {
             ledger.add(now, Type.AGENT_READY, id, null, "back after " + "silence");
         }
         String claimed = m.get("a");
+        if (claimed != null) {
+            Assignment c = assignments.get(claimed);
+            // Still at work on something that is over or is now someone else's (it was written off while silent).
+            // Work that is merely waiting for an agent is left alone: it may be handed straight back.
+            if (c == null || c.state().isTerminal() || (c.agentId() != null && !id.equals(c.agentId()))) {
+                outbox.send(id, SwarmMessage.of("cancel", "a", claimed));
+            }
+        }
         Assignment held = a.assignmentId() == null ? null : assignments.get(a.assignmentId());
         if (held != null && (held.state() == AssignmentState.ACCEPTED || held.state() == AssignmentState.RUNNING)
                 && !held.id.equals(claimed) && now - held.stateSinceMs() > cfg.abandonGraceMs) {

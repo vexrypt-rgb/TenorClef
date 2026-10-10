@@ -30,7 +30,7 @@
 
 | MC module | Ostinato jar (sole source) | Tungsten | CI gate |
 |----|----------|----------|---------|
-| 1.21.1 / 1.21 | Published Baritone artifact (`../Ostinato/dist` ignored) | Optional | **Required** (compile + unit tests) |
+| 1.21.1 / 1.21 | Published Baritone artifact (`../Ostinato/dist` ignored) | Optional | None (preprocess node only; no CI job builds it) |
 | 1.21.11 (primary) | Ostinato `main` → `libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar` (a jar in `../Ostinato/dist` is preferred) | Optional | **Required** (compile + unit tests) |
 | 1.21.4 | Ostinato `1.21.4` → `libs/baritone-unoptimized-fabric-1.21.4.jar` | Optional | **Required** (compile + unit tests) |
 | 1.16.1 | Ostinato `1.16.1` → `libs/baritone-unoptimized-fabric-1.16.1.jar` (kinematic backend lives here) | Optional (`vendor/tungsten-1.16.1`) | **Required** (compile) |

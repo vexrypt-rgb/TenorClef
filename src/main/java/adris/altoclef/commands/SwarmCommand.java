@@ -28,6 +28,9 @@ public class SwarmCommand extends Command {
                 new StringArg("arg2", ""));
     }
 
+    /** The thread following a script file for the "script" test hook, if one was started. */
+    private static Thread script;
+
     @Override
     protected void call(AltoClef mod, ArgParser parser) throws CommandException {
         String action = parser.get(String.class).toLowerCase();
@@ -73,11 +76,16 @@ public class SwarmCommand extends Command {
                             }
                         } catch (InterruptedException e) {
                             return;
+                        } catch (NumberFormatException e) {
+                            adris.altoclef.Debug.logWarning("SCRIPT bad wait: " + line);
                         }
                     }
                     }
                 }, "swarm-script");
                 t.setDaemon(true);
+                // One follower at a time: a second one on the same file would run every line twice.
+                if (script != null) script.interrupt();
+                script = t;
                 t.start();
             }
             case "host" -> {

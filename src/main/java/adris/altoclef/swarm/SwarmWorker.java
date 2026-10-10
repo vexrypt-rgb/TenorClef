@@ -51,6 +51,7 @@ public final class SwarmWorker {
     public synchronized void onMessage(SwarmMessage m, long now) {
         switch (m.op) {
             case "offer" -> offered(m);
+            case "who" -> register(now); // the leader does not know us (it restarted)
             case "cancel" -> {
                 if (current != null && current.equals(m.get("a"))) {
                     executor.cancel();
@@ -102,6 +103,13 @@ public final class SwarmWorker {
         }
         if (current == null) return;
 
+        if (!executor.alive()) {
+            // Death ends the work here: the leader hands it on, and a goal picked up again after the respawn
+            // would compete with whoever got it.
+            executor.cancel();
+            finish("FAILED", Map.of(), "DIED");
+            return;
+        }
         AssignmentExecutor.Status s = executor.poll();
         switch (s.phase()) {
             case RUNNING -> {

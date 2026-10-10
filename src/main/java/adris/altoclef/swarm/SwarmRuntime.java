@@ -17,12 +17,18 @@ public final class SwarmRuntime {
     private static SwarmCoordinator leader;
     private static SwarmWorker worker;
     private static String leaderName;
+    /** The leader is the single-client loopback of {@link #local}, not one that leads over the link. */
+    private static boolean loopback;
 
     private SwarmRuntime() {}
 
-    /** Replace the link (tests). */
+    /** Replace the link (tests). Roles held over the old link end with it. */
     public static synchronized void useLink(SwarmLink l) {
         link = l;
+        leader = null;
+        worker = null;
+        leaderName = null;
+        loopback = false;
     }
 
     public static SwarmLink link() { return link; }
@@ -37,6 +43,9 @@ public final class SwarmRuntime {
         if (why != null) throw new IllegalStateException(why);
         if (!link.leads()) throw new IllegalStateException("you are not the lead of any roster group (lead= in swarm.txt)");
         link.onReceive(SwarmRuntime::onWire);
+        // Leading again must not start over: the helpers are registered with the coordinator that is running.
+        if (leader != null && !loopback) return leader;
+        loopback = false;
         // The link is one rate-limited chat line stream (0.5 lines/s, signed lines are bigger), so give replies room.
         SwarmCoordinator.Config cfg = new SwarmCoordinator.Config();
         cfg.heartbeatTimeoutMs = 40_000;
@@ -75,6 +84,7 @@ public final class SwarmRuntime {
                 m -> l.onMessage("local", SwarmMessage.decode(m.encode()), System.currentTimeMillis()), 2_000);
         worker = w[0];
         leaderName = "local";
+        loopback = true;
         loggedSeq = 0;
         worker.register(System.currentTimeMillis());
         return leader;

@@ -207,6 +207,55 @@ class SwarmCoordinatorTest {
     }
 
     @Test
+    void workerThatDiesGivesItsWorkBack() {
+        Node a1 = join("a", Capability.CAN_MINE);
+        a1.exec.script = FakeExecutor.Script.STALL;
+        Assignment t = submit("oak_log", 2, 5);
+        sim.run(2, 500);
+        assertEquals(t.id, a1.worker.currentAssignment());
+        a1.exec.alive = false;
+        sim.step(100); // before the next heartbeat could tell the leader
+        assertNull(a1.worker.currentAssignment());
+        assertTrue(a1.exec.cancelled, "the goal must not run on after the respawn");
+        assertNotEquals("a", t.agentId());
+        assertFalse(t.excluded().contains("a"), "dying is not the agent's fault");
+    }
+
+    @Test
+    void restartedLeaderGetsItsAgentsBack() {
+        Node a1 = join("a", Capability.CAN_MINE);
+        a1.exec.script = FakeExecutor.Script.STALL;
+        submit("oak_log", 2, 5);
+        sim.run(2, 500);
+        assertNotNull(a1.worker.currentAssignment());
+        setUp(); // a new coordinator that has never heard of "a"
+        clock = 10_000;
+        sim.run(3, 500);
+        assertNotNull(leader.agent("a"), "an unknown heartbeat is answered with a request to register");
+        assertNull(a1.worker.currentAssignment(), "work the new leader knows nothing about is called off");
+    }
+
+    @Test
+    void agentBackFromSilenceDropsWorkThatWasHandedOn() {
+        Node a1 = join("a", Capability.CAN_MINE);
+        a1.exec.script = FakeExecutor.Script.STALL;
+        Node b = join("b", Capability.CAN_MINE);
+        b.exec.script = FakeExecutor.Script.STALL;
+        Assignment t = submit("oak_log", 2, 5);
+        String first = t.agentId();
+        Node silent = nodes.get(first);
+        sim.run(2, 500);
+        sim.offline.add(first);
+        sim.run(14, 500); // written off, the work goes to the other one
+        assertNotEquals(first, t.agentId());
+        assertNotNull(t.agentId());
+        sim.offline.remove(first);
+        sim.run(3, 500);
+        assertNull(silent.worker.currentAssignment());
+        assertTrue(silent.exec.cancelled);
+    }
+
+    @Test
     void capabilityMismatchSkipsUnqualifiedAgent() {
         join("a", Capability.CAN_CRAFT);
         join("b", Capability.CAN_FIGHT);

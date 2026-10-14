@@ -46,6 +46,8 @@ method = "loadChunkFromPacket",
     )
     //#if MC >= 260000
     //$$ private void onLoadChunk(CallbackInfoReturnable<net.minecraft.world.level.chunk.LevelChunk> cir) {
+    //#elseif MC >= 12111
+    //$$ private void onLoadChunk(int x, int z, PacketByteBuf buf, java.util.Map<?, ?> heightmaps, Consumer<net.minecraft.network.packet.s2c.play.ChunkData.BlockEntityVisitor> consumer, CallbackInfoReturnable<WorldChunk> cir) {
     //#elseif MC >= 11800
     private void onLoadChunk(int x, int z, PacketByteBuf buf, NbtCompound nbt, Consumer<net.minecraft.network.packet.s2c.play.ChunkData.BlockEntityVisitor> consumer, CallbackInfoReturnable<WorldChunk> cir) {
     //#elseif MC >= 11701

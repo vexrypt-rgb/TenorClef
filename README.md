@@ -20,10 +20,11 @@ for the Minecraft versions Ostinato is built for:
 
 | Minecraft | Status | Ostinato | Notes |
 | --- | --- | --- | --- |
+| 1.21.11 | Primary | `main` (`libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar`) | Default build target; CI runs the unit tests on it |
+| 1.21.4 | Supported | branch `1.21.4` (`libs/baritone-unoptimized-fabric-1.21.4.jar`) | Anarchy target; vanilla recipe-book crafting disabled (1.21.2+ servers do not sync recipes) |
 | 26.3 | Experimental, tested in-game | branch `26.3` (`libs/baritone-unoptimized-fabric-ostinato-26.3.jar`) | Java 25; opt-in via `-Pwith26`; the only version tested after the port |
-| 1.21.4 | Primary | `main` (`libs/baritone-unoptimized-fabric-1.21.4.jar`) | Anarchy target; vanilla recipe-book crafting disabled (1.21.2+ servers do not sync recipes) |
 | 1.16.1 | Legacy | branch `1.16.1` (`libs/baritone-unoptimized-fabric-1.16.1.jar`) | Legacy pairing |
-| 1.21.11 | Experimental | branch `1.21.11` (built from source) | Not a release target |
+| 26.3 | Experimental | branch `26.3` (release jar `ostinato-mc26.3-unoptimized-fabric-1.21.0.jar`) | Released as experimental |
 
 The other versions under `versions/` (1.21.1 down to 1.16.5) are only steps in the source
 preprocessor chain; they are not compiled or released. The complete, version-matched setup is in
@@ -91,16 +92,17 @@ AltoClef jar.
 TenorClef uses Java 21 for the current modern modules. On Windows run:
 
 ```bat
-gradlew.bat :1.21.4:build
+gradlew.bat :1.21.11:build
 ```
 
 On macOS or Linux run:
 
 ```sh
-./gradlew :1.21.4:build
+./gradlew :1.21.11:build
 ```
 
-For a version that depends on a local Ostinato build, follow the wiring guide first.
+`:1.21.4:build` and `:1.16.1:build` work the same way. For a version that depends on a local Ostinato
+build, follow the wiring guide first.
 The initial Gradle configuration can take a while because Minecraft is remapped.
 
 ## Movement backends
@@ -109,7 +111,9 @@ Every build uses Ostinato, the AltoClef-compatible Baritone fork. On the modern 
 Tungsten is an optional travel backend; mining, building, and inventory operations use
 Ostinato's Baritone processes. Ostinato also carries the encrypted `#swarm` link for
 multi-bot groups, including coordinated region builds (`#swarm build`); see Ostinato's
-`docs/REGION_BUILD.md`.
+`docs/REGION_BUILD.md`. TenorClef's own swarm (`@swarm`, or the Swarm tab in the menu) uses that same
+link, so both need the Ostinato version named in the release notes; see the
+[swarm guide](docs/guides/swarm-and-fleet.md).
 
 When using an Ostinato-enabled pairing, its `movementBackend` setting selects
 `baritone`, `tungsten`, or `auto`; `auto` falls back to Baritone when Tungsten is not
@@ -152,6 +156,22 @@ These replace the kinematic row above. Its lower score and higher tick count cam
 
 The averages only cover goals each mover reached. The bench origin moves between runs, so
 compare runs taken together. Single-rep runs are noisy; re-run with 3 reps before drawing conclusions.
+
+## User guides
+
+Step-by-step guides for every feature are in [docs/guides](docs/guides/README.md):
+
+- [Getting started](docs/guides/getting-started.md)
+- [Command reference](docs/guides/commands.md)
+- [Getting items and resources](docs/guides/items-and-resources.md)
+- [Travel and navigation](docs/guides/travel.md)
+- [Combat and survival](docs/guides/combat-and-survival.md)
+- [Speedruns and advancements](docs/guides/speedruns.md)
+- [Swarm, fleet and agents](docs/guides/swarm-and-fleet.md)
+- [Building and map art](docs/guides/building.md)
+- [Showcase courses](docs/guides/showcase.md)
+- [Settings](docs/guides/settings.md)
+- [Diagnostics and tools](docs/guides/diagnostics.md)
 
 ## Project guides
 

@@ -2,14 +2,15 @@ package adris.altoclef.tasks.speedrun.testrun2.util;
 
 import adris.altoclef.AltoClef;
 import adris.altoclef.Debug;
+import adris.altoclef.eventbus.EventBus;
+import adris.altoclef.eventbus.events.GameMessageEvent;
 import net.minecraft.client.MinecraftClient;
 
-import java.util.List;
 import java.util.Locale;
 
 /**
  * 2b2t (and similar) queue: do not path, mine, or build until the
- * real world is loaded. Detected from chat + idle timeouts.
+ * real world is loaded. Detected from the server's chat lines + idle timeouts.
  */
 public final class QueueWatch {
 
@@ -17,9 +18,8 @@ public final class QueueWatch {
     private static boolean announced;
     private static int lastQueueTick;
     private static int tick;
-    private static int lastChatScan;
     private static int worldTicks;
-    private static String lastNewest = "";
+    private static boolean listening;
 
     private QueueWatch() {}
 
@@ -32,7 +32,10 @@ public final class QueueWatch {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc == null) return;
 
-        scanChat(mc);
+        if (!listening) {
+            listening = true;
+            EventBus.subscribe(GameMessageEvent.class, evt -> onServerLine(evt.message));
+        }
 
         if (queued) {
             worldTicks = 0;
@@ -53,57 +56,27 @@ public final class QueueWatch {
         else worldTicks = 0;
     }
 
-    private static void scanChat(MinecraftClient mc) {
-        if (tick - lastChatScan < 10) return;
-        lastChatScan = tick;
-        try {
-            Object hud = mc.inGameHud;
-            if (hud == null) return;
-            Object chat = null;
-            try { chat = hud.getClass().getMethod("getChatHud").invoke(hud); } catch (Throwable ignored) {}
-            if (chat == null) {
-                try { chat = hud.getClass().getField("chatHud").get(hud); } catch (Throwable ignored) {}
-            }
-            if (chat == null) return;
-            List<?> lines = null;
-            for (String m : new String[]{"getVisibleMessages", "getMessages", "getMessageHistory"}) {
-                try {
-                    Object o = chat.getClass().getMethod(m).invoke(chat);
-                    if (o instanceof List<?> l) {
-                        lines = l;
-                        break;
-                    }
-                } catch (Throwable ignored) {}
-            }
-            if (lines == null) {
-                for (var f : chat.getClass().getDeclaredFields()) {
-                    if (List.class.isAssignableFrom(f.getType())) {
-                        f.setAccessible(true);
-                        Object o = f.get(chat);
-                        if (o instanceof List<?> l && !l.isEmpty()) {
-                            lines = l;
-                            break;
-                        }
-                    }
-                }
-            }
-            if (lines == null || lines.isEmpty()) return;
-            String newest = strip(String.valueOf(lines.get(lines.size() - 1)));
-            if (newest.equals(lastNewest)) return;
-            lastNewest = newest;
-            String s = newest.toLowerCase(Locale.ROOT);
-            if (s.contains("position in queue") || s.contains("in queue:")
-                    || s.contains("queue position")
-                    || (s.contains("estimated time") && s.contains("queue"))) {
-                queued = true;
-                lastQueueTick = tick;
-            }
-            if (s.contains("connecting to the server") || s.contains("sending you to")
-                    || s.contains("you are being sent") || s.contains("entering the server")
-                    || s.contains("connected to the server")) {
-                release("chat");
-            }
-        } catch (Throwable ignored) {}
+    /** A line the server wrote in chat. */
+    static void onServerLine(String line) {
+        if (line == null) return;
+        String s = strip(line).toLowerCase(Locale.ROOT);
+        if (isQueueLine(s)) {
+            queued = true;
+            lastQueueTick = tick;
+        }
+        if (isJoinLine(s)) release("chat");
+    }
+
+    static boolean isQueueLine(String s) {
+        return s.contains("position in queue") || s.contains("in queue:")
+                || s.contains("queue position")
+                || (s.contains("estimated time") && s.contains("queue"));
+    }
+
+    static boolean isJoinLine(String s) {
+        return s.contains("connecting to the server") || s.contains("sending you to")
+                || s.contains("you are being sent") || s.contains("entering the server")
+                || s.contains("connected to the server");
     }
 
     private static boolean looksLikeWorld(AltoClef mod) {

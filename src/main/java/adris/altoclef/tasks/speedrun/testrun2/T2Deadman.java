@@ -80,6 +80,7 @@ public final class T2Deadman {
 
     private static volatile boolean started = false;
     private static volatile boolean armed = false;
+    private static volatile boolean unattended = false;
     private static Thread thread;
 
     private T2Deadman() {}
@@ -138,6 +139,13 @@ public final class T2Deadman {
         if (!started) {
             // Nothing to compare yet. The driver beats for the first time only once it is
             // running, and the client ticks from the very first frame.
+            return;
+        }
+        if (!unattended) {
+            // Interactive: a client tick is all the progress there is to prove. No latch detection.
+            long now = System.currentTimeMillis();
+            lastProgressAt = now;
+            currentTickBeganAt = now;
             return;
         }
         // S214: another chain (mob defense, food, MLG...) legitimately owns this tick, so the
@@ -248,7 +256,22 @@ public final class T2Deadman {
      * {@code onStart()}.
      */
     public static void arm() {
-        armed = true;
+        unattended = isUnattended();
+        armed = unattended;
+    }
+
+    /**
+     * True for runs started by {@code autoRunCommand} / {@code autoLoadWorld}, which is how every harness run
+     * starts. Only those get the fatal exit and the driver re-install: with a person at the keyboard a silent
+     * driver means they stopped the run or left the world, and neither may restart it or kill their game.
+     */
+    private static boolean isUnattended() {
+        try {
+            adris.altoclef.Settings s = AltoClef.getInstance().getModSettings();
+            return s.shouldAutoLoadWorld() || !s.getAutoRunCommand().isEmpty();
+        } catch (Throwable t) {
+            return false;
+        }
     }
 
     public static void disarm() {

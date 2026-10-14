@@ -2,11 +2,13 @@ package adris.altoclef.mixins;
 
 import adris.altoclef.eventbus.EventBus;
 import adris.altoclef.eventbus.events.ChatMessageEvent;
+import adris.altoclef.eventbus.events.GameMessageEvent;
 import adris.altoclef.multiversion.MessageTypeVer;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.network.message.MessageHandler;
 import net.minecraft.network.message.MessageType;
 import net.minecraft.network.message.SignedMessage;
+import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -32,5 +34,13 @@ method = "onChatMessage",
         ChatMessageEvent evt = new ChatMessageEvent(message.getContent().getString(), sender.getName(), MessageTypeVer.getMessageType(params));
         //#endif
         EventBus.publish(evt);
+    }
+
+    @Inject(
+            method = "onGameMessage",
+            at = @At("HEAD")
+    )
+    private void onGameMessage(Text message, boolean overlay, CallbackInfo ci) {
+        if (!overlay) EventBus.publish(new GameMessageEvent(message.getString()));
     }
 }

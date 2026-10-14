@@ -1,22 +1,24 @@
 package adris.altoclef.tasks.speedrun.testrun2.combat;
 
 import adris.altoclef.multiversion.CItems;
-import adris.altoclef.multiversion.CBlocks;
 
 import adris.altoclef.AltoClef;
 import adris.altoclef.Debug;
 import adris.altoclef.TaskCatalogue;
+import adris.altoclef.tasks.movement.GetToBlockTask;
+import adris.altoclef.tasks.movement.ThrowEnderPearlSimpleProjectileTask;
 import adris.altoclef.tasks.speedrun.testrun2.McCompat;
 import adris.altoclef.tasks.speedrun.testrun2.T2Brain;
 import adris.altoclef.tasks.speedrun.testrun2.core.T2Sticky;
 import adris.altoclef.tasksystem.Task;
-import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
@@ -35,7 +37,6 @@ public class ZeroCycleTask extends Task {
     private int ticks;
     private boolean done;
     private BlockPos node;
-    private int pearlHold;
 
     @Override
     protected void onStart() {
@@ -105,19 +106,9 @@ public class ZeroCycleTask extends Task {
                 int pearls = 0;
                 try { pearls = mod.getItemStorage().getItemCount(Items.ENDER_PEARL); } catch (Throwable ignored) {}
                 if (pearls > 0 && d > 16) {
-                    Task pearl = pearlTo(node);
-                    if (pearl != null) return sticky.keep("pearl", pearl);
-                    throwPearl(mod, node);
-                    pearlHold++;
-                    try {
-                        var opts = net.minecraft.client.MinecraftClient.getInstance().options;
-                        opts.useKey.setPressed(pearlHold <= 3);
-                    } catch (Throwable ignored) {}
-                    return null;
+                    return sticky.keep("pearl", new ThrowEnderPearlSimpleProjectileTask(node));
                 }
-                Task w = walk(node);
-                if (w != null) return sticky.keep("climb", w);
-                return null;
+                return sticky.keep("climb", new GetToBlockTask(node));
             }
             McCompat.setMove(false, false);
             phase = Phase.SETUP;
@@ -171,53 +162,8 @@ public class ZeroCycleTask extends Task {
         return new BlockPos(c.getX() + 2, c.getY() - 1, c.getZ() + 2);
     }
 
-    private static Task pearlTo(BlockPos dest) {
-        String[] names = {
-                "adris.altoclef.tasks.movement.ThrowEnderPearlSimpleProjectileTask",
-                "adris.altoclef.tasks.misc.ThrowEnderPearlTask"
-        };
-        for (String n : names) {
-            try {
-                return (Task) Class.forName(n).getConstructor(BlockPos.class).newInstance(dest);
-            } catch (Throwable ignored) {}
-        }
-        return walk(dest);
-    }
-
-    private static void throwPearl(AltoClef mod, BlockPos dest) {
-        try {
-            mod.getSlotHandler().getClass().getMethod("forceEquipItem", Item.class)
-                    .invoke(mod.getSlotHandler(), Items.ENDER_PEARL);
-            Class<?> look = Class.forName("adris.altoclef.util.helpers.LookHelper");
-            look.getMethod("lookAt", AltoClef.class, Vec3d.class)
-                    .invoke(null, mod, new Vec3d(dest.getX() + 0.5, dest.getY() + 1, dest.getZ() + 0.5));
-            net.minecraft.client.MinecraftClient.getInstance().options.useKey.setPressed(true);
-        } catch (Throwable ignored) {}
-    }
-
-    private static Task walk(BlockPos pos) {
-        try {
-            return (Task) Class.forName("adris.altoclef.tasks.movement.GetToBlockTask")
-                    .getConstructor(BlockPos.class).newInstance(pos);
-        } catch (Throwable t) {
-            return null;
-        }
-    }
-
-    private static Task placeBed(BlockPos on) {
-        try {
-            return (Task) Class.forName("adris.altoclef.tasks.construction.PlaceBlockTask")
-                    .getConstructor(BlockPos.class, Block.class).newInstance(on, CBlocks.WHITE_BED);
-        } catch (Throwable t) {
-            return null;
-        }
-    }
-
     private static void equipBed(AltoClef mod) {
-        try {
-            mod.getSlotHandler().getClass().getMethod("forceEquipItem", Item.class)
-                    .invoke(mod.getSlotHandler(), CItems.WHITE_BED);
-        } catch (Throwable ignored) {}
+        mod.getSlotHandler().forceEquipItem(CItems.WHITE_BED);
     }
 
     private static EnderDragonEntity dragon(AltoClef mod) {
@@ -232,22 +178,11 @@ public class ZeroCycleTask extends Task {
 
     /** Punching this pillar's crystal fails the zero. */
     private static void handsOffCrystal() {
-        try {
-            var mc = net.minecraft.client.MinecraftClient.getInstance();
-            Object hit = null;
-            try { hit = mc.getClass().getField("targetedEntity").get(mc); } catch (Throwable ignored) {}
-            if (hit == null) {
-                try { hit = mc.getClass().getField("crosshairTarget").get(mc); } catch (Throwable ignored) {}
-            }
-            boolean crystal = hit instanceof EndCrystalEntity;
-            if (!crystal && hit != null) {
-                try {
-                    Object e = hit.getClass().getMethod("getEntity").invoke(hit);
-                    crystal = e instanceof EndCrystalEntity;
-                } catch (Throwable ignored) {}
-            }
-            if (crystal) mc.options.attackKey.setPressed(false);
-        } catch (Throwable ignored) {}
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.crosshairTarget instanceof EntityHitResult
+                && ((EntityHitResult) mc.crosshairTarget).getEntity() instanceof EndCrystalEntity) {
+            mc.options.attackKey.setPressed(false);
+        }
     }
 
     @Override

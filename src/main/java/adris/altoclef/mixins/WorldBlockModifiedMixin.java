@@ -23,6 +23,8 @@ public class WorldBlockModifiedMixin {
     @Inject(
 //#if MC >= 260000
 //$$            method = "setBlocksDirty",
+//#elseif MC >= 12111
+//$$            method = "onBlockStateChanged",
 //#else
             method = "onBlockChanged",
 //#endif

@@ -44,7 +44,8 @@ public class ConfigHelper {
     private static <T> T getConfig(String path, Supplier<T> getDefault, Class<T> classToLoad) {
         T result = getDefault.get();
         File loadFrom = getConfigFile(path);
-        if (!loadFrom.exists()) {
+        // A crash mid-write leaves a zero-byte file; there is nothing of the user's to protect, so rewrite the defaults.
+        if (!loadFrom.exists() || loadFrom.length() == 0) {
             saveConfig(path, result);
             return result;
         }

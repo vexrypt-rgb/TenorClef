@@ -11,7 +11,13 @@ import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.Dimension;
 import adris.altoclef.util.helpers.WorldHelper;
 import net.minecraft.block.Blocks;
+import adris.altoclef.tasks.speedrun.testrun2.gui.T2MenuScreen;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ChatScreen;
+import net.minecraft.client.gui.screen.DeathScreen;
+import net.minecraft.client.gui.screen.GameMenuScreen;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.entity.mob.PiglinEntity;
 import net.minecraft.item.Items;
 import net.minecraft.util.math.BlockPos;
@@ -224,7 +230,7 @@ public final class T2Solve {
         guiAge = 0;
 
         // Only when jump-stuck ON the table. A standing wooden-pick craft
-        // is same-XZ for >2s on purpose â€” do not cancel it.
+        // is same-XZ for >2s on purpose - do not cancel it.
         if (tableUnder(mod) && flips >= 4 && !wet
                 && !childName.contains("StepOff")) {
             act("S108", "step off table @" + x + "," + y + "," + z);
@@ -477,7 +483,7 @@ public final class T2Solve {
             return null;
         }
 
-        // 5. Lava and no water during construct â€” log only. Do not swap the child.
+        // 5. Lava and no water during construct - log only. Do not swap the child.
         if (count(mod, Items.LAVA_BUCKET) >= 1 && count(mod, Items.WATER_BUCKET) < 1
                 && ("PORTAL".equals(phase) || childName.contains("Construct"))) {
             act("S105", "need water (overlay only, not swapping construct)");
@@ -492,7 +498,7 @@ public final class T2Solve {
             return null;
         }
 
-        // 7. Piglin, no gold â€” log only. Replacing the tunnel with @get helm is how escape dies.
+        // 7. Piglin, no gold - log only. Replacing the tunnel with @get helm is how escape dies.
         if (WorldHelper.getCurrentDimension() == Dimension.NETHER
                 && count(mod, Items.GOLDEN_HELMET) < 1
                 && piglinNear(mod)
@@ -503,7 +509,7 @@ public final class T2Solve {
 
         // 8. Null child in a live phase
         if (child == null && "PORTAL".equals(phase)) {
-            act("S111", "portal child missing â€” parent must set construct");
+            act("S111", "portal child missing - parent must set construct");
             return null;
         }
 
@@ -566,30 +572,11 @@ public final class T2Solve {
      * is wrong. Treating them alike is what produced the furnace spin.
      */
     private static boolean slowGui() {
-        try {
-            var mc = MinecraftClient.getInstance();
-            if (mc == null || ScreenVer.current(mc) == null) return false;
-            String n = ScreenVer.current(mc).getClass().getSimpleName();
-            return n.contains("Furnace") || n.contains("Brew");
-        } catch (Throwable t) {
-            return false;
-        }
+        return McCompat.slowScreenOpen();
     }
 
     private static boolean workGui() {
-        try {
-            var mc = MinecraftClient.getInstance();
-            if (mc == null || ScreenVer.current(mc) == null) return false;
-            String n = ScreenVer.current(mc).getClass().getSimpleName();
-            return n.contains("Craft") || n.contains("Inventor") || n.contains("Furnace")
-                    || n.contains("Anvil") || n.contains("Chest") || n.contains("Barrel")
-                    || n.contains("Shulker") || n.contains("Hopper") || n.contains("Merchant")
-                    || n.contains("Enchant") || n.contains("Brew") || n.contains("Smith")
-                    || n.contains("Grind") || n.contains("Loom") || n.contains("Container")
-                    || n.contains("Handled");
-        } catch (Throwable t) {
-            return true;
-        }
+        return McCompat.containerScreenOpen();
     }
 
     private static int slowSig;
@@ -607,18 +594,9 @@ public final class T2Solve {
     }
 
     private static boolean guiOpen() {
-        try {
-            var mc = MinecraftClient.getInstance();
-            if (mc == null || ScreenVer.current(mc) == null) return false;
-            String n = ScreenVer.current(mc).getClass().getSimpleName();
-            if (n.contains("Chat") || n.contains("T2Menu") || n.contains("GameMenu")
-                    || n.contains("Death") || n.contains("Title") || n.contains("Pause")) {
-                return false;
-            }
-            return true;
-        } catch (Throwable t) {
-            return false;
-        }
+        Screen screen = McCompat.currentScreen();
+        return screen != null && !(screen instanceof ChatScreen || screen instanceof T2MenuScreen
+                || screen instanceof GameMenuScreen || screen instanceof DeathScreen || screen instanceof TitleScreen);
     }
 
     private static boolean tableUnder(AltoClef mod) {

@@ -6,6 +6,7 @@ import adris.altoclef.TaskCatalogue;
 import adris.altoclef.tasks.speedrun.testrun2.McCompat;
 import adris.altoclef.tasks.speedrun.testrun2.T2Brain;
 import adris.altoclef.tasks.speedrun.testrun2.core.T2Sticky;
+import adris.altoclef.tasks.speedrun.testrun2.util.Place;
 import adris.altoclef.tasksystem.Task;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -115,27 +116,12 @@ public class MapArtTask extends Task {
                 cell++;
                 return null;
             }
-            Task place = placeBlock(pos, item);
+            Task place = Place.ifHeld(mod, pos, net.minecraft.block.Block.getBlockFromItem(item));
             if (place != null) return sticky.keep("p" + cell, place);
             cell++;
             return null;
         }
         return null;
-    }
-
-    private static Task placeBlock(BlockPos pos, Item item) {
-        try {
-            Class<?> cls = Class.forName("adris.altoclef.tasks.construction.PlaceBlockTask");
-            net.minecraft.block.Block block = net.minecraft.block.Block.getBlockFromItem(item);
-            try {
-                return (Task) cls.getConstructor(BlockPos.class, net.minecraft.block.Block.class)
-                        .newInstance(pos, block);
-            } catch (NoSuchMethodException e) {
-                return (Task) cls.getConstructor(BlockPos.class).newInstance(pos);
-            }
-        } catch (Throwable t) {
-            return null;
-        }
     }
 
     private static int count(AltoClef mod, Item item) {

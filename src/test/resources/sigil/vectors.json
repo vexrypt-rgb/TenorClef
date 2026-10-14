@@ -1,0 +1,303 @@
+{
+ "circle": {
+  "name": "Night.Watch",
+  "slug": "nigh",
+  "passphrase": "correct horse battery staple",
+  "fp": "prpy"
+ },
+ "alice": {
+  "name": "Alice",
+  "short": "n9dd",
+  "pk": "AthS-CyTiefeIHPCC3btKKwPZPtPRdnRoNSfs7FE76UI",
+  "sk_pem": "-----BEGIN PRIVATE KEY-----\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgG3nacXDTB1HwRLJF\nacax3O4yBDVhHDMeeiyEUphNTvShRANCAATYUvgsk4nn3iBzwgt27SisD2T7T0XZ\n0aDUn7OxRO+lCMz6ymlQlfEe3p+jhErZZd1Jj2rpJGtkaiNYK5g38q3Y\n-----END PRIVATE KEY-----\n"
+ },
+ "bob": {
+  "name": "Bob",
+  "short": "mkmb",
+  "pk": "Ak2B3E9JQFxBbDSOQLGZ3e9z09a_rRL-vlZzYwaXDNHM",
+  "sk_pem": "-----BEGIN PRIVATE KEY-----\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg2a4XLJEOuXYYdXi1\nRgF2xfI6ZvPOBydqO+EAhnkCUjihRANCAARNgdxPSUBcQWw0jkCxmd3vc9PWv60S\n/r5Wc2MGlwzRzIJDpNdvVaD9EwmGezqmDeUBZGwP8VTh3j4O6msu5Ixo\n-----END PRIVATE KEY-----\n"
+ },
+ "announce_circle": "S1+CIRCLE.nigh.Night_Watch.fpprpy",
+ "announce_alice": "S1+PK.Alice.n9dd.AthS-CyTiefeIHPCC3btKKwPZPtPRdnRoNSfs7FE76UI",
+ "speak": "leather llama",
+ "vectors": [
+  {
+   "kind": "C",
+   "compact": false,
+   "plaintext": "hello",
+   "lines": [
+    "S1C.nigh.vIw7YPEEbqSh7i3URtlofASMk7OwzNN__UvSQeqI53rC #x"
+   ]
+  },
+  {
+   "kind": "K",
+   "compact": false,
+   "plaintext": "hello",
+   "lines": [
+    "S1K.mkmb.n9dd.BZejM6sWubtPLdmxwoo2rUa-HV8l5aaKoZRQpczCu5HX"
+   ]
+  },
+  {
+   "kind": "E",
+   "compact": false,
+   "plaintext": "hello",
+   "lines": [
+    "S1E.mkmb.Ardk9e_QsY3BXLr7Yurki0PijLyMdLFrlqdvDbVySQUnQcaatL3kMTwFfmE_8-gkp1PSIIwPXzoFhceR4XQ687_p"
+   ]
+  },
+  {
+   "kind": "C",
+   "compact": true,
+   "plaintext": "hello",
+   "lines": [
+    "S1C.nigh.s-yue6NOHCkUP_EX8xcxOr04FuAUVemOL4lMxEnSZMKa #x"
+   ]
+  },
+  {
+   "kind": "K",
+   "compact": true,
+   "plaintext": "hello",
+   "lines": [
+    "S1K.mkmb.n9dd.Ja7V-2UC-3zhe5FE9ZFoDriDber8GsrbkRGfgO8K-W6P"
+   ]
+  },
+  {
+   "kind": "E",
+   "compact": true,
+   "plaintext": "hello",
+   "lines": [
+    "S1E.mkmb.AmxsWfXe1yqBXIu4KgZ2xMn_7S4qgSxLxeY01sh1xkdZucHwJRQEhmy7tZ3lPe60ihhWJlqMa4b9gompyYr1DV00"
+   ]
+  },
+  {
+   "kind": "C",
+   "compact": false,
+   "plaintext": "follow me to 100 64 -200",
+   "lines": [
+    "S1C.nigh.z6PG_cigDEzibf9KhP8LPfmb39XpMTl3iCGyu2R39boe_CquLR_rcMnLHhbOjrKu84zFEg #x"
+   ]
+  },
+  {
+   "kind": "K",
+   "compact": false,
+   "plaintext": "follow me to 100 64 -200",
+   "lines": [
+    "S1K.mkmb.n9dd.bRjhuMdPDXut2-xxgTlgTkMKmJ8H3_BXEOy1IlQNPyxEVSYUsqVmmtpm-1S3dbMdv--DQQ"
+   ]
+  },
+  {
+   "kind": "E",
+   "compact": false,
+   "plaintext": "follow me to 100 64 -200",
+   "lines": [
+    "S1E.mkmb.AxS9bg8DLAsYOGrvws7SgufFVWCOju5dMOD6L_JOOM5_PZamY2BjVPFsn9javyWGW8aTFMgb-25fwf8AjcDLzOIx-dIF7QqQxxj-MFnwwwsJslOUww"
+   ]
+  },
+  {
+   "kind": "C",
+   "compact": true,
+   "plaintext": "follow me to 100 64 -200",
+   "lines": [
+    "S1C.nigh.z.con4kmKZfoD-gAOfbd5wU6qR4k5yZu2vt4GbJHDR9_Vd859-SR1H0H-j #x"
+   ]
+  },
+  {
+   "kind": "K",
+   "compact": true,
+   "plaintext": "follow me to 100 64 -200",
+   "lines": [
+    "S1K.mkmb.n9dd.z.qWdGBm5cD1O5Y4sSuWL4UYm_gkY7XxDFnjDFpD2MrWtbKhMumTofI6oD"
+   ]
+  },
+  {
+   "kind": "E",
+   "compact": true,
+   "plaintext": "follow me to 100 64 -200",
+   "lines": [
+    "S1E.mkmb.z.Ag8YgTVQd3i5zcZ3HNnLAKgdwZgb1SwfosUibvSU9MIyKuA2LyLcCqPSNFVmkwaqAsqXd05CaMxhUsgSEvNAk7cRhXxUrZ0JLaPM"
+   ]
+  },
+  {
+   "kind": "C",
+   "compact": false,
+   "plaintext": "ünïcödé ☃ 😀 mixed",
+   "lines": [
+    "S1C.nigh.Td5Y6lOEvol9jn24MULOnPea5VH42NINn79xJ-D_GsQRDVDibhKtfpy4N1wIe6eTqoCr-Usr #x"
+   ]
+  },
+  {
+   "kind": "K",
+   "compact": false,
+   "plaintext": "ünïcödé ☃ 😀 mixed",
+   "lines": [
+    "S1K.mkmb.n9dd.Mgy_RpGTiXaDQOh29yW0PXUkJVRdBxLU_YT4rPCzzvnnXzgbRGElDH5zTKdVxLrIW5cdoHyP"
+   ]
+  },
+  {
+   "kind": "E",
+   "compact": false,
+   "plaintext": "ünïcödé ☃ 😀 mixed",
+   "lines": [
+    "S1E.mkmb.AyfvTt75uVQDhCLhl1ScLfLRNTCmE2O02Krd4q7-JYYg14lbRwbsUrKDHz0cFXcG7NW3Zk1qEw4RUFXlCiBVxELhpfMbiG5HuX-Lm5G-njR19ERippdH"
+   ]
+  },
+  {
+   "kind": "C",
+   "compact": true,
+   "plaintext": "ünïcödé ☃ 😀 mixed",
+   "lines": [
+    "S1C.nigh.fFrztuV5cr0Zx3ulVL0jsbWdVXHp3nqgWrL3Agp69cn1cQhMYXVCKT3z6XT-7bPT4_9nrUiF #x"
+   ]
+  },
+  {
+   "kind": "K",
+   "compact": true,
+   "plaintext": "ünïcödé ☃ 😀 mixed",
+   "lines": [
+    "S1K.mkmb.n9dd.iMruQmrdqny66JweeWjYHmDC_ljA0uDsD-ec4Ac8vHR75GJYXFkbNisnF6e6ETWHX8GSPNdt"
+   ]
+  },
+  {
+   "kind": "E",
+   "compact": true,
+   "plaintext": "ünïcödé ☃ 😀 mixed",
+   "lines": [
+    "S1E.mkmb.Ah61nWkfZm-a-YKzlSKuI-bcatyW-PHy3NAi3Bem1Ibz1T-GHVFqV4i4F3cny3bj-19yvRFDZVNRwRqW-SQj_zsu_3QHfmKvF-0-4zvT3FH48apoyaIl"
+   ]
+  },
+  {
+   "kind": "C",
+   "compact": false,
+   "plaintext": "the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress!",
+   "lines": [
+    "S1C.nigh.1/8.Ja7orcfoPmCJmYIQxOKT1ahL2ycM8IxF5nIojTxKXfQhQLrUJVSa65t8BKWFn38X0dG1Lho5faxoLi1G82mka8jl1KIf8GNn50GIbconEZ1AbgE2cINIBTO3AbdCDPO-xgH6B5XW_Bcut8TfEB_NcgqAc1K9G3jC3Kl-C3z57OVogPoTULVPjgCXbohFMfQ0qPEkRNavvsDaSiw_0PlEP3w45F511BrsD-wxpg #x",
+    "S1C.nigh.2/8.yzTecMG8JLufUL2tVjlAzFIzxOVoNxubesa2wGvzVHvXGjT_GcgU0k9Scws98J_JDwWIi-XLkqRdNlchxXWJxVcCpqUdePOXGfEq_iAEgApySlq5Uo5anwbcAdWb-iwjflaDhUvuW63CtazGcKKNXcB3EmNKPEKmZxFz_57c9ORQhiSG7N0zdYG1YP_bJXLhJvhvrmcsDyR9hFtCRqd0gNv_gQOWRxqnLAJWDA #x",
+    "S1C.nigh.3/8.7rMkTW-xBGpiaJjPcGlyi0AP-2BVoSyqTSgrLVvQceTDw0y2cRrUSh0JI9llVMiz-fCFoKbXHBsnzTWpzC99dEypMhZ1VIBaufynsqMFpj2WeZ5bm_JNIkzwOiBx0o1abKxFebtU6EeGTxUep8KMfrlzy_13M2E7_lNCYKZdhAf6my3ijyrrQ98IH1KmU4B2ckl9hgvJuDAqm_Z0J1_4BSLCQSiawPb1xE9v2g #x",
+    "S1C.nigh.4/8.eRlGC1sbrVD1pHkCTsZyGlwkv0_yJ7_NZALSe9KAnaeTvKck_mW-HYbi2WyYzfZMg2U9ZX-eHqx4JWrS4_7l5iuCxx2qYWbjn5c1-1iqHw-rBCx2Y4wkZ2OmXIJ8mTIpRJFusII_rBNDq52G2ByDmHv95nqJz0pO_4JxJEr4oDcdhBcU0jtORWtEaP3WT4JUbHOHRna00hBtRcmZiub3WTOyGldx5szsF0RlPA #x",
+    "S1C.nigh.5/8.ZrzTqf4U-zUG9VfTgeqyqdcoISP4rY72ZUTEZIz_C5tAjB7TAszQro8X3KgKDZ0iO9ccrMthDmaHghWXFlT_bWnmvjcObd-aBAze0RnZ7n38FkXQHxT82PSqhIzY_0vKD4mkOEfnTDCrWHFvBBU3VPbKHY1RfhI8TstAqbiKe40X7nmNs7kIqQsqz6X0xlDF8iRovg6U9AUHszn7Y6KR47vwIaQmov2Ymtvf-A #x",
+    "S1C.nigh.6/8.pPbTaYH1Mxtt4dcJJ15L1Bc8CvzXqmbMa_PAuti-e86vVDZipcNJJGU8X0LJ6KTShBeF2T3jtL3gGaoqZt2eXAcDDnZR6jIWyyoSVfExtQDLnEDVjUC6lp0gOSidwUl2FF0obty_6VRtrdWpPUxnqziSQmy3f9IHCvuuClyaAZ0__ymQ8ywORaSfNbOSFz8w6xIdQ-fZvJGzQ_K0LG_FhQst7Qf3pqkIogukIA #x",
+    "S1C.nigh.7/8.0VXGkqMEVzv-2Ps3UwCeAZcOOi58ef9k73Y700jJKYKqNqipbxFV-mFJG4DCwwzb2PUokGmK630KT4kRiz09w_XEbJBUTXU9oDcWKtjs6YgIViY32mPsQOnFBLBT27ztH21OXykdeey3VBB6RDsuLjCCJxh7ej23mUlf8ofHiVdJkTJOJEv_iZThWiPlWPZRGiEClQNnqILQN0xpXXrZY7xbQbhoJ9Bbt_kz3g #x",
+    "S1C.nigh.8/8.zDpB--dtiaLkTPuMiSPnlo0LUVAPRb3b37xHPMmceRfSWij_fAtHuLMU6wTPeWB_XCiq #x"
+   ]
+  },
+  {
+   "kind": "K",
+   "compact": false,
+   "plaintext": "the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress!",
+   "lines": [
+    "S1K.mkmb.n9dd.1/8.giSGRRHFdij4xFTG3hr6dgWUFDT0gUoJgYkVOZAiyk4YKoqkFQWENfzirYjT25VS8WuGUdsTU7DAlPqm-gReO6IIP3DaBCwrvfMIcvIdx8pNFCyJhhoW9vGXrXd34Ktgfkw0aK7v_CXr2qlKnXgLVLVDYhQuyAwXK6q2YDFBpGqI-QQDYMcGOGgJkeCDYpZgfCHe3ysaMxpEnvvGTmiJ2R1-QdHiP7g_oA",
+    "S1K.mkmb.n9dd.2/8.s6uIQJNSgdlORxcUYI3IA6fjertpl_sUXbiDln26R43PwfLyWnvRlf5x3mkufq-mXIU1WW-VoGXfWy7_bHEBCLdEVuDGlLUzYS5k1Fs4qmKKHX6B_mZhVk-icyIi6LJQHbydHQ5mKSMW01yqNTPq8a-tmc5xN2JiyGVZMeG37NKO_YgQ9QtTHGr-xQ_ED8NREFqUDE_OLgWuY5SHh6eAkeLkwB4lxLOY_g",
+    "S1K.mkmb.n9dd.3/8.3hiv4a2jAloEr5qR8j2RLW81sLegjrR6b-Vdv09CQkIE4alsTjnq1g3boykTL8Z4Cm_Ee3bvAzDFAdGEGGiZkoucwkQPoQ6YemwDxPqvJNTZI-tuw30GrU50Q6zEnJBcTMc8EBdn5Gs98cg-wWL_3h5BFlURqegYebLkzQ6JjR-PIANtUVfcFeREilYwfjEsZ8bdsCaU7XftgQAYDKZW2eA_devlOoVIfg",
+    "S1K.mkmb.n9dd.4/8.LWCNGKILFetXQ5w7iT1Ghp_f76Wy8LYYJ4iveUEm6VkR3M_GhtHD4_dTxCWVnlkgqg_-RNukzYKpWQrKaYIb3b5Jqt0y0K1UzqYL8OXXam_mjyJ6YU59nDOm3KFU4ia8Ac1HhtyP7qy0uWdE0vX8jaVTN1slnKX9w4PGDHKyV-ECdJBxHRLOSMD6x2DAn8HZ4-sW8VqtyrgDdtCoZDmYuXxpiGD6_efFGw",
+    "S1K.mkmb.n9dd.5/8.R3UsoUxLhCtnrPACOUKAdivfz120u4lxaI4TJhJTuvok4F8qdSN7-FALSTJixNvFWf7FftgFGxb1qumtYhWvKL0WHyNbidFiW38r9HwVLDbsTyZJslPpiFyQTpMQMenrWu9AA-YkHEtiUqVc3ZCmIqIgn4aPf5PAP-oJ5qKTaOucxQoqeYcbsbjdaLs1sVEggoISIiGVq7eb5F-0FSAZIFcon_3VTT2uLA",
+    "S1K.mkmb.n9dd.6/8.X4ApENV9-j_z6OU523MSoIHoxOhcr2AT4JwBJbR_ip8j8Fsj9NkHa5P4gbeZu7PlhmC0OqxYYCTUUse70Bx7dku1dlixDpYfGfuXUVM8NudmE-x55ZXM1I0NLSGLF4nCmE4fQdiu96Ut51U1BxGuZBVswaRnyl7A4sD8Zh89yHnWouZ8j0brXRVyQZuqPOxr_aId5Qg5Je7wHtQ3YEVbu6Gy5DBpGuVZog",
+    "S1K.mkmb.n9dd.7/8.8YG_3k8WFuyam7_Ad1s-n-ACVQrxfiSH10E7p_Cs5na_adThEHz3EyKv9cmn97AH465mxhkgzhskKysW0D_clnSPih27_eQCDGuVl0wscnGbIawP_CT1CBz8zjDQ7czXCj514aNYED9hglOTR_J2iojVaToa1myh5RGEuc12aIlssG-uSOiYqVgvU4c3rVSriiZ8K21EkVMr9nCbBEPC_ycPRJHn4d1l",
+    "S1K.mkmb.n9dd.8/8.jjpF5yU490606QQe-0bETWz9D6_bapQypb4fX2ScxSrjZ3t7tJU6-Fm0i9FmeDvygfltwnbgG4E-hfxetdB0RX_JJf9Lf6qTsw"
+   ]
+  },
+  {
+   "kind": "E",
+   "compact": false,
+   "plaintext": "the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress!",
+   "lines": [
+    "S1E.mkmb.1/11.ArAjE0x7iT7M4kio6Ykmzd7AE3epLPW0ZO0ISktWLHrK3YcoTsmcdMZR9Hy9rEaa0_wajDHM80kBOxxHw0Sp6EtVx_4RVhXQNjQ2tUWF9WDXWVf-ZhtAzqxbGRI3_qgXpIqtE5j_42QQGG-XmE2alkAWmWt7yVsezorL1i12g-BOJfobijrQzfU2zJT1sZluSyhQ4a6H26cWXN2SZqTTM_X0F5o",
+    "S1E.mkmb.2/11.Ar1jKeKLTnma3onZGFD36L8b639lDcUqGTb579gZsw6ZVDRslOfGYuu1IC-hFufIydED2dhRHKrcak1zZ5t2A9YOqBsq2NTrq0LGvAKj4qqVC6pUKy3slLqC0yA2-xaXJNL0EKwhZX2SwbMPcqGL6HzQkzvqd1wFxk0hjKa9DjIlA782VX0dlRlBYwcB9tR_7R51qGnOUxDnRz54QnnYul2Ebek",
+    "S1E.mkmb.3/11.AnQ5Ci716plvGRQaeBYu3bBuPa0j9r0Xu5P9H8niAZMxB-_1jh6fF5EWde-Vs3cXBI2h9Jmk7YJRvOAbCLVjgD73eRghkNU0NeDGAjYBpCFUBPK1hMwCzSs1HhUwTz9laQLk5pGj8JK0LUNCL4L6ZeMsvlfrqMGOpfG95FBHADxLB2G12o55evEuGQlzw0aCyvRmGMKmPfA86i0SvbYbLCdYHZY",
+    "S1E.mkmb.4/11.Ahk1GM9ln-ZjoZPg0p1oNCbtHgzJWigP2ybSQG1pAU1X5X2WOl9Ep4uwY3aQZUN9aLvHEU5taR9rD_CBPtP7K0zgpeqCzdoI94tYNSbd4kuzO8SfpsrAFdc2SWk4hcNoH6AFjf-1M0vkx-C9yhR1F-WujaETSZ2bpHU8dfIjxCPLfm98VgM22uTnuPQ7O4v-Gg7cUuMLfx_fhtlHoa-byLES94M",
+    "S1E.mkmb.5/11.A-KaZ5fPPRuN-N_MeWtBybSA_kQW08mPkbkXjsNnDMEyPjysj8-jqTXdk3bXS0m01XhEpLLw78hy6WTclE4CI5LJjH6_L3hbqWlpIH-5C_zgAwSKhukeS3bwe7MvMhU9O3dP4uW-C2BDM7gkxleuKXiWhjLfCok4pUEEcp1kmayZbhifffNSm8o9PnTgD_-MgGei7Fexg-IljhTIIT1eshIO-d8",
+    "S1E.mkmb.6/11.AjFlNu5V-81pQ-HV4GtNnd3EbPhl2l6oQVbjeS8_KYbfvmx6_eBRszntnKO97d9cF5dcUKyapZqFDqKfyZ_PdubRnsfzUAhRBD4fPHZ_uZyV75PJd-dSTTFZBSxsfXWKpC9pWok0N2CdDkbM9d_YYB7G_p-V2ykZ-6ABFX-zgUM7Tcz5t1Mm-gBvSQlqvk9MXr3A1DqWoB7xT-HCqq2vY_PrOw8",
+    "S1E.mkmb.7/11.AhoXsN_92qb3zVbl4ZuvckDe5PTI1ObtZt5SCUpXaz_BkP1fObWN5iGnqOATQZNzpFbOHDVc_BQpqmFBzoqr530FlH-n2UCTsbLUBGs3GMza9bAnYNXE_Q-qFMExUBAHPncSJPyVP5poGsVrE2lE4PWrGnGR-_uwFELO0SACZYvF7vL7LSj7TbrmG-P6fQ7cn9fB5VQRYSvMoF4tLW2GPs13Z9o",
+    "S1E.mkmb.8/11.A60wEf-W_LVDwH1uldRIuR6ETxtGQhxMY4UykJXYCAw-MB5nGiU9Kfb8LA2PwzSE4oM4pit1u73ciR0EL5xJfYMCpbm0ttLqqjJzd4RjhqFZE_ZoNqme6CeYCluZ8xIGAaIyn7wqDN5U1XcSCqF-576gFhU28vhjfNvO7I-VEWXr4E6fkBDc5EmTogrMcxAbDQKRKbsimp3ZsndWP6TKWto",
+    "S1E.mkmb.9/11.Am3FywrUJKl_shuboxBJL8VxdnD5OBStNbSaKt8CGdU1H4XcyF6Qv8-WqfWnR45m3BT-mjHjLtkCfywGhTo8Q1JY_cvCl_Jldy2eQY12b5awwVo26QlxbRsJxmsWDzexg6-gqhPcVQvPXO53jWrih8DwB-87gvNqrDn_Q15zq97xr2pIob954PeYW3O3RJ_PSqZunNT9hXpkR_PLrIot-tBG7Pk",
+    "S1E.mkmb.10/11.AijMZzUwKUP1c_VL0dUnWGXKe9br4dCSf35CHlSQ1jwcT8WPtobQvx6wIY-ewzZ9Mml-yMcPAiiaINxgn4UdaSB-S1s6yZY9dMqN4XiZLspks-rXQSVkvY_Uf22s1jjS5Ub3oFu8pWYGgHu8O7UM-wPdx3CKgP1LUmQCjEWFnltTvd4PGFI2ogSXHHlLG4Ho9wHqM-Y7VIEEnSrW3vH9vFDQOaI",
+    "S1E.mkmb.11/11.A4DyNRDaLq-vrGzlNnSLCb80eCh9yUxwSkq-lJ2li_raUJ7nghduMxTYl3AfXQiVQ9ayf6H6KHxNTQJxfNlCkTc"
+   ]
+  },
+  {
+   "kind": "C",
+   "compact": true,
+   "plaintext": "the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress!",
+   "lines": [
+    "S1C.nigh.z.1/5.yeu_19KqVAl7F5ymPsTL7e-Ch7lO2R8PNoQiDXXPMSR0k-N_7iAYhM4gI3CUeds2Fgo1wxC40e70izWLBSXgoq6Hw34DTaXP37zSLxvjYFk18gwKjqKqU0U6PoZz9x-VbwTfQz7J8JEOZFyoV3BAG-yhRmcMDVX3xsA_JbP8bvYkQavSIUsQH7uM009Ntu-kFTtprs-CXfj2PWdDC9NcWZxUoOmBEl7379hloSNJ4Osy #x",
+    "S1C.nigh.z.2/5.T-Z6DY58GCclqEMHBk6eKmw3gU2Dg4ILDyZxuHW7I2kp2UV88rMMFjOTLfsmWjC76H5JO-KzCHGPdJSwbLlhygmjMiok-dMTPsE0zPF-U6_6vzs8qqLXFtro9dnJhO-9Bi1jKg_wihNjiHp6TnFDHiuYQiBVsSemNcym1W6i9FNP6FjMclh9eJ5sPbYJWIEwP0w9Jl-40tb1z56g5PrjVqwr6eot7uFjdezcI7U #x",
+    "S1C.nigh.z.3/5.6pdsWySGVgrva9wjZLYliwA-cf7B2FxPuRmazqbA6xNBEpLZMcKIl5zZ-cvsVY_6nuiD4F4MpZgFbhbVlWTEBPOW-fqJ1chmvWpip4cEws-EaXD2VaQW61f_G0sMhWRrd_BaKDjCHFz4HNa6lQohMCL_rfsu7deTMkTw-a4iRNCaOUlgiqNZ8U7W2rd5UNOkLYUSyQX8Do-WgUneEjudKRBY9_FbyOCW9FF_Ig #x",
+    "S1C.nigh.z.4/5.Lv5hj0aupgQuCbMnW29rCaILCZMsgbnIT3qpmRq7HHZV7TYQv1OdAU7rItGRiS6CsCriMam5ItJIPb-YHf-pE1KQ7AhNOfRtY15lagDQDvmNq8K1fQYzSwJiuxW8Q3VzeWic0X_KQ7VEnJ0q6S1yRYpmSvY6F2DYfA9Syaub8tBcaLeG3He9hhLy7CUAZMcSB4S8ev-rJrezFI4u8ogXJbzd1zRZkfY6kK9VmIuQ #x",
+    "S1C.nigh.z.5/5.cfH9_ZwPhhjl4pD8CgPdBVfymE4r_YJu9uaSbk4OkXxziFMv-7S95GKKpB6OPqAcDdtwY1E7UO1eFqZMCWh7zDWZC1n_pvn_CGQ5INFRiAJICqx56Lte3lCGymkQMASiDsp2iLFMQgzNBLbNluJTWw4VLsHUQXA0hdTnBigBtFCBIDLwJynkuneH3GHABIg #x"
+   ]
+  },
+  {
+   "kind": "K",
+   "compact": true,
+   "plaintext": "the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress!",
+   "lines": [
+    "S1K.mkmb.n9dd.z.1/5.RkFnM_g56nctd-tCL1TIPZAWt5l8Zf0pMDCcDv9DQao8ltduugvAx_9br-kozZBBip4rD5GwW-G2QZrFlJU-GmcavVuMWoqdnC_utqDSNpnba9XiGH8GeRju0eR5MforSoFIgab8qaGwzCfNpKDMnPuBoFGL3GgmV6hLXL_XFJnrdhRMRgt8zAE1kMfZcIgFdoOcxrlEbCnwRKUxyR11rrMJd1IMf5fbWSZag14O0Q",
+    "S1K.mkmb.n9dd.z.2/5.5dMNj1jQprLm-2Ag8aqFWCY0Fc8L6IPsYFByTQSQju3ulAw4B26WRE7DKsS9UlzsCS3Tmm-B3nfqRimlpPtxGsrxDDrJwpFWA7t5GsSBJI8S61EA9Yh9oxXANXJn7ZZpqup9c0vsOASGinoqjm3DqGPqc_72GpQW8imgjg08npOyrDLxxK0R_-9lAiv76r-1QuV4JjJt2_-D9ydagbaRDJN5f5h0yb-3dxOEgsRGLg",
+    "S1K.mkmb.n9dd.z.3/5.bcQQJsTbLkDGgDCYLzY_BlSdaV_w9JyTRvYb4V8eKo-T0oY-OII7YGe0tTXON7K8FMA2hMMhIIjHaQuEMn4Zko90iPBDDJy8rVhQ8woFXteolcasnxgkIAeyOvrd_LAW9ix7aiQw7DFqB1uKo56LkfB1mQJwtxV9rHRUCKaF6LHdcvFUoPjG7oMYevt-IxXuynD7EPRjK7F8tN_8yLkkEplJFLOz9jD51A1bcw",
+    "S1K.mkmb.n9dd.z.4/5.siOYz62yGPlg2Lizxxhn_vI6jf-4JbvMmD5XL_OaJRc2H6I55vIXY2cdelQlCqRtBWJsMUpxZWua1TNLpcRe1rY6ElcUGorm3duKeGMGKVbzDEFqrywoYl4Ismgo2YJdNR26qw_K6V7ifCFuig2YcFAiwByHaq43h_2OdBPV3npjK-LmkIemEAT0rdr_QpfFjnZpihn9aLUGD_thTboyo4iWTEnzsxrpg6Us2pZZ",
+    "S1K.mkmb.n9dd.z.5/5.EECUVFlTA7LHY_sYdQsSb_Br20AIy5DCjwo_DXqR5DU4i51pWu2EVMgJ_pzXRC76xBiuFjwr53d7hAS3Ac8wu7ELY-UDAc31bXKw9xpDUdzdHgO4qiBOfbQQ7uSc59WRUFjs9KSs__-_jq_vL4rISUHVCCUitcMJKqPigOfm-prKKFM91ns51dUZbcVB9hA"
+   ]
+  },
+  {
+   "kind": "E",
+   "compact": true,
+   "plaintext": "the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress! the quick brown fox jumps over the lazy dog and then it goes to the nether to find 12 blazes at x=-345 y=64 z=1024, naïve café ☃ 😀 Please follow me to the fortress!",
+   "lines": [
+    "S1E.mkmb.z.1/7.AqpEzNlr7TZoJLJOCw3TB_99pKUhImbd0fURkFLHum6RSz7RP7v_lNSqNMc9Oy6Sz55DiPl368WA75KfMX66Mw5_b4tsC-V5GcBV6GbEc45xLA8m8LMNlDW3I_meW5dLYuGcxc4ZGNzZ1-IRyDyjnUWUBvYUV0YE26iAxZTXzUINnzVjN3pFmGZG13MCmtLywA3aaBQH_0u6H1f5OyA09D1GxeZ2kNbdMcCV",
+    "S1E.mkmb.z.2/7.A5RpgA7TGyla3GY8DlgRBgc-oqP94l6l0QXlWGia6JFIfgu3A6DDpNdE1yxAUpZUYkmd5jXXgA3iP8QLl-04dyYNQ6UMYfZo7jBQ_SG519Q22TBZAsBpuuNj8OS3bb-2o1ldKNbIszuZlY0Iw0UjBP3RDgcHpUukfRinvOIUqY8PRQvxg11NjtQjagMe1xkCyVvMW-Z0HPkqsse3vRVr29maYu8eDWs",
+    "S1E.mkmb.z.3/7.At1O9qCPpeAZc_O53WQj7h_nkavMrT-gWdAZ43j_LxbX68p4LPGLsmXQWXX3vlXmbdnZNGl0bQf80dqCFqBhsmLAwETXaI8eF3KExlMxvk7qDpY7olLEsSaUn29tppco00-oo39DukKcXtASTwpk-s93zPJ_bDoL0wr6NyGHzZcXKuEzRmd_OQ7S69LmF9Wn_pMg_fA5Be0FJyYL3JmpHliC3XFkglI",
+    "S1E.mkmb.z.4/7.AwSe-R_m0uugOgNZa5Jq4stt5bGLSU1NAPOV5uYUE6PJWBg8RpHW8hsai0MD6J4X_os-hTHqjEOa50gnZQNeYUZn-unyumYjrKX0GcAeKDFJmDlg46xr2t2mTQUNqlMUWe_KaOxQ-CgDdf4C7nVOnMNrilOabWbXOEoMpveVlnDb1-Cn8ndLM3_XUerZ9zM-BcrR_MbE-2HNb6ajLHyb5twLZ1rierGz3g",
+    "S1E.mkmb.z.5/7.AkHhduLfIhh4G7_xt7VywO_XagzY573tF0_ZgGlUsAIx5F0H2cv8zvXwwQT74GP8jTMW42DxHRpJ4_VIuV3KkKN3Gpidky1JG6D6B5XAqD1Xe8ERDhwRibDSDxyT4-3fVxeZOXANdVJ9hrA-zx9dRrihceTXAckNIohI8go3D_N2e9aRsfbWKFpf0abDAnmK2ATIM-hLMIJS7nh5yjPP3G3zdplKQlgOsda1",
+    "S1E.mkmb.z.6/7.AyrIpQpqq7g0hp6lpsqukZ9mk0uoxgkPtu3y2RHNT64D3z3O247uBd1_MyoepeJWlcgxIx38VZd_ynjTLRaZyZfZmtji8_fRCdeG3tXF1VIdqY-CIJqdGrTDkYyGMxW_0B9WJBgfN3vfup8Wl5OI-UefKYQYGONFkwQjK0ql__JMC7ZTJyVEyxVBqCsPB3E2NRvcZKhUrqEYldFZ7jCiN5oZ_3QulA",
+    "S1E.mkmb.z.7/7.AxgZgKPM3y0fP0ERGRtyVlHpu0GHuZMm9tx0XKPzFhum4Yag3YJ3nQHb7PqRof0hk-DjFQ_8qnB66TwVH0h1rUnsgdIbmEVT8CYxFynM4zZumhiVKGxpfoxWIYIOZEke0Fjh78YQZSC0Y9u1t55ADW7xiXi2sQ"
+   ]
+  },
+  {
+   "kind": "C",
+   "compact": false,
+   "plaintext": "a;b (c) 'd' \"e\" 99999 -7",
+   "lines": [
+    "S1C.nigh.EZauT5YVXgmLrwVkXTZHxUhaCkJnax5KaYRslshQG3N9Qz5-0o7PeF3NaV5Co4FQe6_6hg #x"
+   ]
+  },
+  {
+   "kind": "K",
+   "compact": false,
+   "plaintext": "a;b (c) 'd' \"e\" 99999 -7",
+   "lines": [
+    "S1K.mkmb.n9dd.IdEHorDXIuPNIKbYsUGIsImJASEA9gO5UL8wtj9ssYHVvp8W4DtMofJHWcfn2V_m8VAMaw"
+   ]
+  },
+  {
+   "kind": "E",
+   "compact": false,
+   "plaintext": "a;b (c) 'd' \"e\" 99999 -7",
+   "lines": [
+    "S1E.mkmb.Air89BA9J_VR3D4C_o3nJR_RjavgF200glqCFue12sBgTeM2EEl--LObtCo5Mc8Q50oeTn0gbzXLwRIk8vvZqdFFxgPZccR-Qy0VBJ3GEcH2wkfbYg"
+   ]
+  },
+  {
+   "kind": "C",
+   "compact": true,
+   "plaintext": "a;b (c) 'd' \"e\" 99999 -7",
+   "lines": [
+    "S1C.nigh.z.ny9VZHMznd0oQtej5qUqbCv-1gG8HQuxMW4lold7nuSdvFFaOCfN7EKhnSZ2Fitmaww #x"
+   ]
+  },
+  {
+   "kind": "K",
+   "compact": true,
+   "plaintext": "a;b (c) 'd' \"e\" 99999 -7",
+   "lines": [
+    "S1K.mkmb.n9dd.z.hHJcm3wZJZxkhLgsAOoIv2cOM4AnNAj4fXuhjHX5y-58tSkIXxN1YXHuzx8tMDfh_hQ"
+   ]
+  },
+  {
+   "kind": "E",
+   "compact": true,
+   "plaintext": "a;b (c) 'd' \"e\" 99999 -7",
+   "lines": [
+    "S1E.mkmb.z.Aj9PcVcBZABHL8nN0CXvSfrVI45SExrijIKlSf-1Jfm46KfSOcx88aHnKDfYJMQoP3PqBDavQ4qsQuL3LgCP_TUut8wuo8uLxdR12oOZ3msf5oU"
+   ]
+  }
+ ]
+}

@@ -2,12 +2,18 @@ package adris.altoclef.tasks.speedrun.testrun2.combat;
 
 import adris.altoclef.AltoClef;
 import adris.altoclef.Debug;
+import adris.altoclef.util.helpers.ItemHelper;
+import adris.altoclef.util.helpers.LookHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
+import net.minecraft.entity.boss.dragon.EnderDragonPart;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.math.Vec3d;
+
+import java.util.Arrays;
+import java.util.Locale;
 
 /**
  * RSG End "zero cycle": damage the dragon on the first perch so you
@@ -33,28 +39,16 @@ public final class ZeroCycle {
 
     public static boolean perched(EnderDragonEntity dragon) {
         if (dragon == null) return false;
-        try {
-            Object mgr = dragon.getClass().getMethod("getPhaseManager").invoke(dragon);
-            Object cur = mgr.getClass().getMethod("getCurrent").invoke(mgr);
-            Object type = cur.getClass().getMethod("getType").invoke(cur);
-            String n = String.valueOf(type).toLowerCase();
-            if (n.contains("sitting") || n.contains("land") || n.contains("hover")) return true;
-        } catch (Throwable ignored) {}
+        String phase = String.valueOf(dragon.getPhaseManager().getCurrent().getType()).toLowerCase(Locale.ROOT);
+        if (phase.contains("sitting") || phase.contains("land") || phase.contains("hover")) return true;
         Vec3d p = dragon.getPos();
         return Math.abs(p.x) < 20 && Math.abs(p.z) < 20 && p.y > 60;
     }
 
     public static Vec3d headPoint(EnderDragonEntity dragon) {
-        try {
-            Object head = dragon.getClass().getMethod("getPart", int.class).invoke(dragon, 0);
-            if (head instanceof net.minecraft.entity.Entity e) return e.getPos();
-        } catch (Throwable ignored) {}
-        try {
-            var parts = dragon.getClass().getMethod("getBodyParts").invoke(dragon);
-            if (parts instanceof Object[] arr && arr.length > 0 && arr[0] instanceof net.minecraft.entity.Entity e) {
-                return e.getPos();
-            }
-        } catch (Throwable ignored) {}
+        EnderDragonPart[] parts = dragon.getBodyParts();
+        // The head is the first part.
+        if (parts.length > 0) return parts[0].getPos();
         return dragon.getPos().add(0, 2.5, 0);
     }
 
@@ -80,10 +74,7 @@ public final class ZeroCycle {
             aim = head.add(vel.x * t, 0.5 * BowLead.gravityOf(hand) * t * t, vel.z * t);
         } catch (Throwable ignored) {}
 
-        try {
-            Class<?> look = Class.forName("adris.altoclef.util.helpers.LookHelper");
-            look.getMethod("lookAt", AltoClef.class, Vec3d.class).invoke(null, mod, aim);
-        } catch (Throwable ignored) {}
+        LookHelper.lookAt(mod, aim);
 
         boolean bow = BowLead.isBow(hand) || BowLead.isCrossbow(hand);
         boolean bed = isBed(hand);
@@ -117,13 +108,7 @@ public final class ZeroCycle {
     }
 
     private static boolean isBed(ItemStack hand) {
-        if (hand == null || hand.isEmpty()) return false;
-        try {
-            return Class.forName("net.minecraft.item.BedItem").isInstance(hand.getItem());
-        } catch (Throwable t) {
-            String id = String.valueOf(hand.getItem());
-            return id.endsWith("_bed") || id.endsWith(".bed");
-        }
+        return hand != null && Arrays.asList(ItemHelper.BED).contains(hand.getItem());
     }
 
     private static float charge(PlayerEntity me) {

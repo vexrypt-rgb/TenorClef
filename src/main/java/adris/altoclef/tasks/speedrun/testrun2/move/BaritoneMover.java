@@ -3,6 +3,7 @@ package adris.altoclef.tasks.speedrun.testrun2.move;
 import adris.altoclef.AltoClef;
 import adris.altoclef.Debug;
 import adris.altoclef.tasks.speedrun.testrun2.McCompat;
+import baritone.api.pathing.goals.GoalBlock;
 import net.minecraft.util.math.BlockPos;
 
 /**
@@ -23,13 +24,8 @@ public final class BaritoneMover implements T2Mover {
             if (pos.equals(lastGoal) && busy()) {
                 return Result.busy(last);
             }
-            Object bari = mod.getClientBaritone();
-            if (bari == null) return Result.fail("no baritone");
-            Object custom = bari.getClass().getMethod("getCustomGoalProcess").invoke(bari);
-            Class<?> goalCl = Class.forName("baritone.api.pathing.goals.GoalBlock");
-            Object goal = goalCl.getConstructor(BlockPos.class).newInstance(pos);
-            custom.getClass().getMethod("setGoalAndPath",
-                    Class.forName("baritone.api.pathing.goals.Goal")).invoke(custom, goal);
+            if (mod.getClientBaritone() == null) return Result.fail("no baritone");
+            mod.getClientBaritone().getCustomGoalProcess().setGoalAndPath(new GoalBlock(pos));
             lastGoal = pos.toImmutable();
             last = "walk " + pos.getX() + "," + pos.getY() + "," + pos.getZ();
             return Result.busy(last);
@@ -60,14 +56,9 @@ public final class BaritoneMover implements T2Mover {
 
     @Override
     public boolean busy() {
-        try {
-            AltoClef mod = AltoClef.getInstance();
-            Object bari = mod.getClientBaritone();
-            Object path = bari.getClass().getMethod("getPathingBehavior").invoke(bari);
-            Object p = path.getClass().getMethod("getPath").invoke(path);
-            return p != null;
-        } catch (Throwable t) {
-            return false;
-        }
+        AltoClef mod = AltoClef.getInstance();
+        if (mod == null || mod.getClientBaritone() == null) return false;
+        // getPath() is an Optional and so never null: asking it made every goal look permanently busy.
+        return mod.getClientBaritone().getPathingBehavior().isPathing();
     }
 }

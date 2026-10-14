@@ -2,6 +2,7 @@ package adris.altoclef.mixins;
 
 import adris.altoclef.eventbus.EventBus;
 import adris.altoclef.eventbus.events.ChatMessageEvent;
+import adris.altoclef.eventbus.events.GameMessageEvent;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.ChatHudListener;
 import net.minecraft.client.network.PlayerListEntry;
@@ -29,6 +30,11 @@ public final class ChatReadMixin {
             at = @At("HEAD")
     )
     private void onChatMessage(MessageType messageType, Text message, UUID senderUuid, CallbackInfo ci) {
+        // The server's own lines: typed as such, or chat that no player sent (how proxies and plugins write).
+        if (messageType == MessageType.SYSTEM || (messageType == MessageType.CHAT && senderUuid != null
+                && senderUuid.getMostSignificantBits() == 0L && senderUuid.getLeastSignificantBits() == 0L)) {
+            EventBus.publish(new GameMessageEvent(message.getString()));
+        }
         String senderName = resolveSender(senderUuid);
         String msg;
 

@@ -51,12 +51,28 @@ public class PvpTask extends Task {
         return System.currentTimeMillis() - lastTickMs < 500;
     }
 
+    /** Mobs are fought by Ostinato's PvE process; the 1.16.1 build predates it and keeps using PvP. */
+    private static final boolean HAS_PVE = hasClass("baritone.process.PveProcess");
+
+    private static boolean hasClass(String n) {
+        try { Class.forName(n); return true; } catch (ClassNotFoundException e) { return false; }
+    }
+
+    private boolean pve() {
+        return mode == Mode.HOSTILES && HAS_PVE;
+    }
+
+    private static void command(String c) {
+        AltoClef.getInstance().getClientBaritone().getCommandManager().execute(c);
+    }
+
     private static PvpProcess proc() {
         return AltoClef.getInstance().getClientBaritone().getPvpProcess();
     }
 
     @Override
     protected void onStart() {
+        if (pve()) { command("pve hostiles"); return; }
         switch (mode) {
             case PLAYER -> proc().attackPlayer(name);
             case PLAYERS -> proc().attackPlayers();
@@ -67,6 +83,10 @@ public class PvpTask extends Task {
     @Override
     protected Task onTick() {
         touch();
+        if (pve()) {
+            setDebugState("pve");
+            return null;
+        }
         PvpProcess p = proc();
         if (!p.isActive()) onStart(); // cancelled from outside (e.g. #stop): pick it back up
         attacks = p.attacks;
@@ -81,16 +101,16 @@ public class PvpTask extends Task {
     }
 
     public LivingEntity getTarget() {
-        return (LivingEntity) (Object) proc().getTarget();
+        return pve() ? null : (LivingEntity) (Object) proc().getTarget();
     }
 
     public String stats() {
-        return proc().stats();
+        return pve() ? "PvE" : proc().stats();
     }
 
     @Override
     protected void onStop(Task interruptTask) {
-        proc().onLostControl();
+        if (pve()) command("pve clear"); else proc().onLostControl();
     }
 
     @Override

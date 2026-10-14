@@ -7,7 +7,7 @@ Portable builds for TenorClef. No machine-specific paths in committed `gradle.pr
 | What you build | JDK | Notes |
 | --- | --- | --- |
 | TenorClef modules (`1.21.4`, `1.21.11`, `1.16.1`) | **JDK 21** | Root Loom build; `jvmdowngrader` lowers bytecode for older MC |
-| Ostinato `main` (MC 1.21.4) and `1.21.11` | **JDK 21** | Gradle 8.x / Unimined |
+| Ostinato `main` (MC 1.21.11) and branch `1.21.4` | **JDK 21** | Gradle 8.x / Unimined |
 | Ostinato `1.16.1` branch | **JDK 8** | Gradle **4.9** — do not use JDK 21 for that checkout |
 
 Set `JAVA_HOME` (or your IDE Gradle JVM) to JDK 21 before running TenorClef Gradle.
@@ -16,13 +16,13 @@ Set `JAVA_HOME` (or your IDE Gradle JVM) to JDK 21 before running TenorClef Grad
 REM Windows (example — adjust path to your Adoptium/Temurin install)
 set JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot
 cd C:\Users\redfa\Documents\MinecraftDev\altoclef
-gradlew.bat :1.21.4:compileJava
+gradlew.bat :1.21.11:compileJava
 ```
 
 ```bash
 # Linux / macOS / CI
 export JAVA_HOME=/usr/lib/jvm/temurin-21   # or whatever your install is
-./gradlew :1.21.4:compileJava
+./gradlew :1.21.11:compileJava
 ```
 
 ### Do not commit `org.gradle.java.home`
@@ -73,10 +73,9 @@ gradlew.bat build -Pbaritone.fabric_build
 copy dist\baritone-unoptimized-fabric-*.jar ..\Ostinato\dist\baritone-unoptimized-fabric-ostinato-1.16.1.jar
 ```
 
-### 1.21.11
+### 1.21.11 (primary)
 
-Prefers a tip Ostinato fabric jar from `../Ostinato/dist` (or `libs/baritone-unoptimized-fabric-ostinato*.jar`).
-There is **no** published Maven Baritone for 1.21.11 — without a staged jar, Gradle still configures other modules, but `:1.21.11:compileJava` will not link Baritone until the jar is present.
+Uses the committed `libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar` (Ostinato `main`, JDK 21, `./gradlew :fabric:build`), unless a sibling `../Ostinato/dist` holds an Ostinato fabric jar, which is preferred. To build against a local Ostinato `main`:
 
 ```bat
 cd C:\Users\redfa\Documents\MinecraftDev\Ostinato
@@ -86,9 +85,9 @@ cd ..\altoclef
 gradlew.bat :1.21.11:compileJava
 ```
 
-### 1.21.4 (primary)
+### 1.21.4
 
-Uses the committed `libs/baritone-unoptimized-fabric-1.21.4.jar` (Ostinato `main`, JDK 21, `./gradlew :fabric:build`).
+Uses the committed `libs/baritone-unoptimized-fabric-1.21.4.jar` (Ostinato branch `1.21.4`, JDK 21, `./gradlew :fabric:build`).
 
 ### Other versions
 
@@ -105,10 +104,11 @@ Travel backend only on 1.21 / 1.21.1 / 1.21.11. Place `tungsten*.jar` in `libs/`
 ## Useful commands
 
 ```bat
-gradlew.bat :1.21.4:compileJava
 gradlew.bat :1.21.11:compileJava
+gradlew.bat :1.21.4:compileJava
 gradlew.bat :1.16.1:compileJava
-gradlew.bat :1.21.4:runClient
+gradlew.bat :1.21.11:test
+gradlew.bat :1.21.11:runClient
 ```
 
 Do not compile while a `runClient` / `@testrun` session is live on the same tree.
@@ -117,9 +117,10 @@ Do not compile while a `runClient` / `@testrun` session is live on the same tree
 
 On push/PR to `main`, `.github/workflows/gradle.yml`:
 
-1. **1.21.4** (required) — JDK 21, committed `libs/baritone-unoptimized-fabric-1.21.4.jar`, `./gradlew :1.21.4:compileJava` then `:1.21.4:test`.
-2. **1.21.11** (experimental, `continue-on-error`) — JDK 21, checkout + `:fabric:build` of `vexrypt-rgb/Ostinato@1.21.11`, stage jars to `../Ostinato/dist` (and `libs/`), then `./gradlew :1.21.11:compileJava` **only if** staging succeeded. Does **not** block merge.
+1. **1.21.11** (required, primary) — JDK 21, committed `libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar`, `./gradlew :1.21.11:compileJava` then `:1.21.11:test`.
+2. **1.21.4** (required) — JDK 21, committed `libs/baritone-unoptimized-fabric-1.21.4.jar`, `./gradlew :1.21.4:compileJava` then `:1.21.4:test`.
 3. **1.16.1** (required) — JDK 21 for TenorClef Gradle, uses committed `libs/baritone-unoptimized-fabric-1.16.1.jar`, `./gradlew :1.16.1:compileJava`.
+4. **1.21.11 against Ostinato tip** (`continue-on-error`) — checkout + `:fabric:build` of `vexrypt-rgb/Ostinato@main`, stage its jar to `../Ostinato/dist`, then `./gradlew :1.21.11:compileJava` **only if** staging succeeded. An early warning that the two repositories have drifted; does **not** block merge.
 
 `Deploy Javadoc` (`.github/workflows/javadoc-publish.yml`) is also **non-blocking** (`continue-on-error`) — generation/deploy failures must not red `main`.
 

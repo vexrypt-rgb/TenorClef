@@ -16,43 +16,35 @@ public class WhisperChecker {
 
     // this didn't work correctly, so I rewrote it without fancy regex stuff -miran
     public static MessageResult tryParse(String ourUsername, String whisperFormat, String message) {
-        List<String> parts = new ArrayList<>(List.of("{from}", "{to}", "{message}"));
-
-        // Sort by the order of appearance in whisperFormat.
-        parts.sort(Comparator.comparingInt(whisperFormat::indexOf));
-        parts.removeIf(part -> !whisperFormat.contains(part));
-
-        ArrayList<String> messageParts = new ArrayList<>(Arrays.stream(message.split(" ")).toList());
+        // Walk the format token by token: placeholders capture, literal tokens ("whispers:") must match exactly.
+        String[] formatTokens = whisperFormat.trim().split(" +");
+        ArrayList<String> messageParts = new ArrayList<>(Arrays.asList(message.split(" ")));
         MessageResult result = new MessageResult();
-        for (int i = 0; i < parts.size(); i++) {
-            String part = parts.get(i);
+        for (int i = 0; i < formatTokens.length; i++) {
+            String token = formatTokens[i];
             if (messageParts.isEmpty()) return null;
 
-            if (part.equals("{from}")) {
+            if (token.equals("{from}")) {
                 result.from = messageParts.remove(0);
-            } else if (part.equals("{to}")) {
+            } else if (token.equals("{to}")) {
                 String toUser = messageParts.remove(0);
                 if (!toUser.equals(ourUsername)) {
                     Debug.logInternal("Rejected message since it is sent to " + toUser + " and not " + ourUsername);
                     return null;
                 }
-            } else if (part.equals("{message}")) {
-                List<String> messageList = messageParts.subList(0,messageParts.size()-(parts.size()-i-1));
-
-                StringBuilder msg = new StringBuilder(messageList.get(0));
-
-                for (int j = 1; j < messageList.size(); j++) {
-                    msg.append(" ").append(messageList.get(j));
-                }
-
-                result.message = msg.toString();
-            } else {
-                throw new IllegalArgumentException("Unknown part: "+part);
+            } else if (token.equals("{message}")) {
+                // Leave one message part for every format token that follows.
+                int end = messageParts.size() - (formatTokens.length - i - 1);
+                if (end < 1) return null;
+                result.message = String.join(" ", messageParts.subList(0, end));
+                messageParts.subList(0, end).clear();
+            } else if (token.startsWith("{") && token.endsWith("}")) {
+                throw new IllegalArgumentException("Unknown part: " + token);
+            } else if (!messageParts.remove(0).equals(token)) {
+                return null;
             }
-
         }
-
-        return result;
+        return messageParts.isEmpty() ? result : null;
     }
 
     public MessageResult receiveMessage(AltoClef mod, String ourUsername, String msg) {

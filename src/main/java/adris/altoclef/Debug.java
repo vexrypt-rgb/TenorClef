@@ -55,7 +55,7 @@ public class Debug {
     public static void logMessage(String message, boolean prefix) {
         if (MinecraftClient.getInstance() != null && MinecraftClient.getInstance().player != null) {
             if (prefix) {
-                message = "\u00A72\u00A7l\u00A7o" + getLogPrefix() + "\u00A7r" + message;
+                message = "\u00A7e\u00A7l\u00A7o" + getLogPrefix() + "\u00A7r" + message;
             }
             adris.altoclef.multiversion.entity.PlayerVer.sendClientMessage(MinecraftClient.getInstance().player, TextVer.literal(message), false);
 
@@ -80,7 +80,7 @@ public class Debug {
         AltoClef altoClef = AltoClef.getInstance();
         if (altoClef != null && !altoClef.getModSettings().shouldHideAllWarningLogs()) {
             if (MinecraftClient.getInstance() != null && MinecraftClient.getInstance().player != null) {
-                String msg = "\u00A72\u00A7l\u00A7o" + getLogPrefix() + "\u00A7c" + message + "\u00A7r";
+                String msg = "\u00A7e\u00A7l\u00A7o" + getLogPrefix() + "\u00A7c" + message + "\u00A7r";
                 adris.altoclef.multiversion.entity.PlayerVer.sendClientMessage(MinecraftClient.getInstance().player, TextVer.literal(msg), false);
 
             }
@@ -101,7 +101,7 @@ public class Debug {
         }
 
         if (MinecraftClient.getInstance() != null && MinecraftClient.getInstance().player != null) {
-            String msg = "\u00A72\u00A7l\u00A7c" + getLogPrefix() + "[ERROR] " + message + "\nat:\n" + stacktrace + "\u00A7r";
+            String msg = "\u00A7e\u00A7l\u00A7c" + getLogPrefix() + "[ERROR] " + message + "\nat:\n" + stacktrace + "\u00A7r";
             adris.altoclef.multiversion.entity.PlayerVer.sendClientMessage(MinecraftClient.getInstance().player, TextVer.literal(msg), false);
         }
     }

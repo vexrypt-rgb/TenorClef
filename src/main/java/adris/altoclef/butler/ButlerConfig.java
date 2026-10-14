@@ -64,6 +64,32 @@ public class ButlerConfig {
      */
     public boolean requirePrefixMsg = true;
 
+    /**
+     * SIGIL encrypted chat. Passphrases and private keys are NOT stored in this file: they live in
+     * altoclef/sigil/ (treat that folder like a password file). This file only names which ones to use.
+     * <p>
+     * Default circle for sealed replies and for "@seal" when no target fits. Empty = none.
+     */
+    public String sigilCircle = "";
+    /**
+     * Name of the signet (keypair) used for directed S1K sealing. Empty = the first one on the keyring.
+     */
+    public String sigilSignet = "";
+    /**
+     * If true, the butler ignores commands that did not arrive as a sealed SIGIL whisper.
+     * Bot-to-bot messages (starting with a backtick) are still handled.
+     */
+    public boolean sigilRequireSealed = false;
+    /**
+     * If true, a command that arrived sealed is answered sealed (to the same circle or contact).
+     */
+    public boolean sigilReplySealed = true;
+    /**
+     * Player option, off by default: decrypt SIGIL tokens seen in public chat for circles and contacts on the keyring
+     * and show the plaintext locally, marked as decrypted.
+     */
+    public boolean sigilAutoDecrypt = false;
+
     public static ButlerConfig getInstance() {
         return _instance;
     }

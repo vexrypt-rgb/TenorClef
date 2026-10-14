@@ -20,15 +20,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(TitleScreen.class)
 public class EntryMixin {
 
-    @Unique
-    private static boolean _initialized = false;
-
     @Inject(at = @At("HEAD"), method = "init()V")
     private void init(CallbackInfo info) {
-        if (!_initialized) {
-            _initialized = true;
-            Debug.logMessage("Global Init");
-            EventBus.publish(new TitleScreenEntryEvent());
-        }
+        adris.altoclef.AltoClef.ensureLoaded();
     }
 }

@@ -22,6 +22,8 @@ public class PlanRunnerTask extends Task {
     private int stepCount;
     /** True once we have handed a terminal step failure to the executor. */
     private boolean failureHandled;
+    /** The BLOCKED this task reports is its own, set while the goal was paused; it ends with the pause. */
+    private boolean pausedForThreat;
 
     public PlanRunnerTask(PlanExecutor executor) {
         this.executor = executor;
@@ -34,14 +36,28 @@ public class PlanRunnerTask extends Task {
     @Override
     protected void onStart() {
         failureHandled = false;
+        pausedForThreat = false;
         stepTask = null;
         stepKey = null;
         setDebugState("plan start");
     }
 
+    /** A higher-priority chain (mob defense, survival) only suspends the plan; it must not cancel the goal. */
+    private boolean suspending;
+
+    @Override
+    public void interrupt(Task interruptTask) {
+        suspending = true;
+        try {
+            super.interrupt(interruptTask);
+        } finally {
+            suspending = false;
+        }
+    }
+
     @Override
     protected void onStop(Task interruptTask) {
-        if (executor != null && !executor.getStatus().isTerminal()) {
+        if (!suspending && executor != null && !executor.getStatus().isTerminal()) {
             executor.cancel();
         }
         stepTask = null;
@@ -97,6 +113,7 @@ public class PlanRunnerTask extends Task {
             // Leave MobDefense / WorldSurvival chains running; idle this step.
             setDebugState("paused for threat");
             setResult(TaskResult.BLOCKED);
+            pausedForThreat = true;
             return null;
         }
         if (st != GoalStatus.RUNNING) {
@@ -104,9 +121,16 @@ public class PlanRunnerTask extends Task {
             return null;
         }
 
-        // Child finished successfully → advance plan
+        if (pausedForThreat) {
+            // Left standing, the BLOCKED would outlive the pause and keep this task from taking in a step's failure.
+            pausedForThreat = false;
+            setResult(TaskResult.RUNNING);
+        }
+
+        // A step can be finished and failed at once (it gave up); only one that did not fail advances the plan.
         Task sub = getSub();
-        if (sub != null && sub.isFinished() && !failureHandled) {
+        boolean stepFailed = sub != null && sub.getLastResult() == TaskResult.FAILURE;
+        if (sub != null && sub.isFinished() && !stepFailed && !failureHandled) {
             executor.onStepSuccess();
             clearStep();
             setResult(TaskResult.RUNNING);
@@ -123,9 +147,12 @@ public class PlanRunnerTask extends Task {
 
         // Child / absorb reported terminal failure → PlanExecutor + RecoveryManager
         TaskResult absorbed = getExplicitResult();
-        if (absorbed == TaskResult.FAILURE && !failureHandled) {
+        if ((absorbed == TaskResult.FAILURE || stepFailed) && !failureHandled) {
             failureHandled = true;
             TaskFailure failure = getLastFailure();
+            if (failure == null && sub != null) {
+                failure = sub.getLastFailure();
+            }
             if (failure == null) {
                 failure = new TaskFailure(FailureReason.UNKNOWN, "step failed", false);
             }
@@ -202,6 +229,11 @@ public class PlanRunnerTask extends Task {
     @Override
     protected boolean isEqual(Task other) {
         if (other instanceof PlanRunnerTask o) {
+            // A finished run of the same goal must not shadow a fresh run: setTask would keep the dead one.
+            if (executor != o.executor && executor != null && o.executor != null
+                    && (executor.getStatus().isTerminal() || o.executor.getStatus().isTerminal())) {
+                return false;
+            }
             Goal a = executor != null ? executor.getGoal() : null;
             Goal b = o.executor != null ? o.executor.getGoal() : null;
             if (a == null || b == null) {

@@ -54,6 +54,10 @@ public final class T2Fault {
             case "E108", "S108" -> "crafting table under feet: walk off, do not jump-place";
             case "E110", "S110" -> "piglin and no gold helm: equip gold or leave range";
             case "E111", "S111" -> "null portal child: parent must keep Construct sticky";
+            case "M01" -> "kinematic controller stuck: handed back to Baritone for 60 ticks. Repeated M01 at one spot means a snag the rollout cannot see (leaves, fences, slabs)";
+            case "M02" -> "off path: Ostinato cancelled and will repath. Repeated M02 means the executor is being knocked or pushed off (mobs, water, kinematic overshoot)";
+            case "M03" -> "movement timeout: one path movement took far longer than its cost estimate. Check the block at src/dest";
+            case "M04" -> "movement failed: the movement reported UNREACHABLE/FAILED, usually a world change mid-path";
             case "E50" -> "death: @back after respawn; read last_death.txt";
             case "E60", "E119" -> "portal ignored: stand in portal block, do not rebuild";
             case "C210" -> "fell in hole: walk, do not spend reserved cobble";

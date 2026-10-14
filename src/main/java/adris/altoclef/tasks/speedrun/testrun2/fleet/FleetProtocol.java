@@ -17,9 +17,6 @@ public final class FleetProtocol {
 
     public static final String TAG = "~ ";
 
-    private static String lastAssign;
-    private static int lastCount;
-
     private FleetProtocol() {}
 
     /** @return true if consumed (not a normal butler reject). */
@@ -49,14 +46,21 @@ public final class FleetProtocol {
                 String kind = p[1];
                 String item = p[2];
                 int n = p.length >= 4 ? parse(p[3], 1) : 1;
-                lastAssign = item;
-                lastCount = n;
                 Debug.logMessage("FLEET " + from + " assigned " + kind + " " + item + " x" + n);
                 if ("get".equals(kind)) {
+                    // Whatever runs here was asked for first; a second request does not get to replace it.
+                    if (mod != null && mod.getUserTaskChain().isActive() && !mod.getUserTaskChain().isRunningIdleTask()) {
+                        whisper(mod, from, "~ fail " + item + " busy");
+                        return true;
+                    }
                     try {
                         var task = TaskCatalogue.getItemTask(item, n);
                         if (task != null && mod != null) {
-                            mod.runUserTask(task, () -> whisper(mod, from, "~ done " + item));
+                            mod.runUserTask(task, () -> {
+                                // Finishing is not succeeding: report done only if the items are really there.
+                                int have = new adris.altoclef.planner.CatalogueInventoryView(mod).getCount(item);
+                                whisper(mod, from, have >= n ? "~ done " + item : "~ fail " + item);
+                            });
                         } else {
                             whisper(mod, from, "~ fail " + item);
                         }

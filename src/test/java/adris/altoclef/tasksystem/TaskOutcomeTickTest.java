@@ -102,6 +102,21 @@ public class TaskOutcomeTickTest {
     }
 
     @Test
+    void droppingFailedChildAndMeetingOwnGoalIsSuccess() {
+        Scripted bad = new Scripted("bail");
+        bad.onTickAction = bad::giveUp;
+        Parent p = new Parent(() -> bad);
+        p.tick(CHAIN);
+        Assertions.assertEquals(TaskResult.FAILURE, p.getLastResult());
+
+        // The parent gets there without the child: the copied failure must not outlive it.
+        p.goal = true;
+        p.tick(CHAIN);
+        Assertions.assertEquals(TaskResult.SUCCESS, p.getLastResult());
+        Assertions.assertNull(p.getLastFailure());
+    }
+
+    @Test
     void legacyFinishWithoutOutcomeStillShimsToSuccess() {
         // Existing valid path: most legacy tasks' isFinished() IS their postcondition.
         Scripted c = new Scripted("legacy");

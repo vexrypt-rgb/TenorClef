@@ -11,18 +11,28 @@ import baritone.api.pathing.goals.GoalRunAway;
 import net.minecraft.entity.AreaEffectCloudEntity;
 import net.minecraft.util.math.BlockPos;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class DragonBreathTracker {
-    private final HashSet<BlockPos> breathBlocks = new HashSet<>();
+    // Replaced whole on every update and never mutated after: the path planner reads it from its own thread.
+    private volatile Set<BlockPos> breathBlocks = Collections.emptySet();
 
     public void updateBreath(AltoClef mod) {
-        breathBlocks.clear();
-        for (AreaEffectCloudEntity cloud : mod.getEntityTracker().getTrackedEntities(AreaEffectCloudEntity.class)) {
+        List<AreaEffectCloudEntity> clouds = mod.getEntityTracker().getTrackedEntities(AreaEffectCloudEntity.class);
+        if (clouds.isEmpty()) {
+            breathBlocks = Collections.emptySet();
+            return;
+        }
+        Set<BlockPos> next = new HashSet<>();
+        for (AreaEffectCloudEntity cloud : clouds) {
             for (BlockPos bad : WorldHelper.getBlocksTouchingBox(cloud.getBoundingBox())) {
-                breathBlocks.add(bad);
+                next.add(bad);
             }
         }
+        breathBlocks = next;
     }
 
     public boolean isTouchingDragonBreath(BlockPos pos) {

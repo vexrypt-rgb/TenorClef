@@ -3,6 +3,7 @@ package adris.altoclef.tasks.speedrun.testrun2.combat;
 import adris.altoclef.multiversion.CBlocks;
 
 import adris.altoclef.AltoClef;
+import adris.altoclef.tasks.speedrun.testrun2.util.Place;
 import adris.altoclef.tasksystem.Task;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -64,7 +65,7 @@ public final class ZeroSetup {
         for (Step s : plan(stand)) {
             try {
                 if (mod.getWorld().getBlockState(s.pos).isAir()) {
-                    return place(s.pos, s.block);
+                    return Place.ifHeld(mod, s.pos, s.block);
                 }
             } catch (Throwable ignored) {}
         }
@@ -86,14 +87,5 @@ public final class ZeroSetup {
 
     public static Item hardItem() {
         return Items.OBSIDIAN;
-    }
-
-    private static Task place(BlockPos pos, Block block) {
-        try {
-            return (Task) Class.forName("adris.altoclef.tasks.construction.PlaceBlockTask")
-                    .getConstructor(BlockPos.class, Block.class).newInstance(pos, block);
-        } catch (Throwable t) {
-            return null;
-        }
     }
 }

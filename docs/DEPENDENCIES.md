@@ -7,7 +7,7 @@ Audit date: 2026-09-19 (America/Phoenix). Phase 1 Gradle/CI updates 2026-09-19 P
 | Path | Role |
 |------|------|
 | `C:\Users\redfa\Documents\MinecraftDev\altoclef` | TenorClef (this repo; remote `vexrypt-rgb/TenorClef`) |
-| `C:\Users\redfa\Documents\MinecraftDev\Ostinato` | Ostinato `main` (MC 1.21.4; `1.21.11` on its own branch) |
+| `C:\Users\redfa\Documents\MinecraftDev\Ostinato` | Ostinato `main` (MC 1.21.11; 1.21.4 on branch `1.21.4`) |
 | `C:\Users\redfa\Documents\MinecraftDev\Ostinato-1.16.1` | Ostinato `1.16.1` branch checkout |
 
 This audit used clones of the same GitHub remotes on the agent box.
@@ -43,11 +43,11 @@ Directories probed:
 
 ### 1.21.4 (`mcVersion == 12104`)
 
-- Requires `libs/baritone-unoptimized-fabric-1.21.4.jar` (Ostinato `main`, MC 1.21.4). **Hard fail** if missing.
+- Requires `libs/baritone-unoptimized-fabric-1.21.4.jar` (Ostinato branch `1.21.4`). **Hard fail** if missing.
 
-### 1.21.11
+### 1.21.11 (primary)
 
-- Newest non-1.16.1, non-1.21.4 jar from `../Ostinato/dist` (else `libs/`). No Maven fallback.
+- Newest non-1.16.1, non-1.21.4, non-26.3 jar from `../Ostinato/dist`, else the committed `libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar` (Ostinato `main`). No Maven fallback.
 
 ### Everything else (1.21.1 … 1.16.5)
 
@@ -70,7 +70,7 @@ See also existing `docs/OSTINATO_WIRING.md`.
 
 **Fact for Phase 0:** Tungsten is a **1.21.x-only** classpath concern. 1.16.1 = Ostinato Baritone only (`mover=baritone` expected).
 
-## Ostinato `1.21.11` branch (formerly `main`)
+## Ostinato `main` (MC 1.21.11)
 
 | Item | Value |
 |------|-------|
@@ -117,7 +117,7 @@ Expect `[altoclef] Ostinato Baritone for <version>: <jar name>` on configure.
 ## CI today (`.github/workflows/gradle.yml`) — **Phase 1**
 
 - JDK 21, `ubuntu-latest`
-- Jobs: `:1.21.4:compileJava` + `:1.21.4:test` (primary), `:1.21.11:compileJava` (checkout/build Ostinato `1.21.11` → `../Ostinato/dist`), `:1.16.1:compileJava` (committed `libs/baritone-unoptimized-fabric-1.16.1.jar`)
+- Jobs: `:1.21.11:compileJava` + `:1.21.11:test` (primary, committed `libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar`), `:1.21.4:compileJava` + `:1.21.4:test`, `:1.16.1:compileJava` (committed `libs/baritone-unoptimized-fabric-1.16.1.jar`), and a non-blocking `:1.21.11:compileJava` against the tip of Ostinato `main` (checkout/build → `../Ostinato/dist`)
 - Tungsten **optional** — never required for a green job
 - See `docs/DEVELOPMENT.md` for clean-runner behavior
 

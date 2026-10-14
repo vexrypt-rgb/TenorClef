@@ -1,6 +1,5 @@
 package adris.altoclef.util.helpers;
 
-import adris.altoclef.multiversion.blockpos.BlockPosVer;
 import adris.altoclef.AltoClef;
 import adris.altoclef.Debug;
 import adris.altoclef.util.slots.Slot;
@@ -488,10 +487,8 @@ public interface LookHelper {
 
         // Check if the crosshair target is a block
         if (result.getType() == HitResult.Type.BLOCK) {
-            // Get the block position from the crosshair target
-            Vec3i resultGetPosOrigin = new Vec3i((int) result.getPos().getX(), (int) result.getPos().getY(), (int) result.getPos().getZ());
-            // Check if the block is an interactable block
-            return WorldHelper.isInteractableBlock(BlockPosVer.copyOf(resultGetPosOrigin));
+            // The block that was hit, not the hit point: that sits on a face and rounds into a neighbour
+            return WorldHelper.isInteractableBlock(((BlockHitResult) result).getBlockPos());
         }
         // Check if the crosshair target is an entity
         else if (result.getType() == HitResult.Type.ENTITY && result instanceof EntityHitResult) {

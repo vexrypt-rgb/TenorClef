@@ -69,15 +69,6 @@ public final class AttributeSwap {
 
     public static void equip(AltoClef mod, Item item) {
         if (item == null || item == Items.AIR) return;
-        try {
-            var handler = mod.getSlotHandler();
-            handler.getClass().getMethod("forceEquipItem", Item.class).invoke(handler, item);
-        } catch (Throwable t) {
-            try {
-                mod.getSlotHandler().getClass()
-                        .getMethod("forceEquipItem", Item[].class)
-                        .invoke(mod.getSlotHandler(), (Object) new Item[]{item});
-            } catch (Throwable ignored) {}
-        }
+        mod.getSlotHandler().forceEquipItem(item);
     }
 }

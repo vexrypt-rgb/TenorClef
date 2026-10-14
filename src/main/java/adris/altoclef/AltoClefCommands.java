@@ -70,6 +70,7 @@ public class AltoClefCommands {
                 new T2PanicCommand(),
                 new T2MenuCommand(),
                 new SwarmCommand(),
+                new CompositionCommand(),
                 new MapArtCommand(),
                 new DjCommand(),
                 new ButlerCommand(),

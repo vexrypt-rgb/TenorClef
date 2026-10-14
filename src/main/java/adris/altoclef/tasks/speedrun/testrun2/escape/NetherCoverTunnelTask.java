@@ -5,6 +5,7 @@ import adris.altoclef.TaskCatalogue;
 import adris.altoclef.tasks.construction.DestroyBlockTask;
 import adris.altoclef.tasks.speedrun.testrun2.McCompat;
 import adris.altoclef.tasks.speedrun.testrun2.core.T2Sticky;
+import adris.altoclef.tasks.speedrun.testrun2.util.Place;
 import adris.altoclef.tasksystem.Task;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.Items;
@@ -161,17 +162,7 @@ public class NetherCoverTunnelTask extends Task {
         } catch (Throwable t) {
             return null;
         }
-        if (count(mod, Items.NETHERRACK) < 1) return null;
-        try {
-            Class<?> cls = Class.forName("adris.altoclef.tasks.construction.PlaceBlockTask");
-            try {
-                return (Task) cls.getConstructor(BlockPos.class, net.minecraft.block.Block.class)
-                        .newInstance(pos, Blocks.NETHERRACK);
-            } catch (NoSuchMethodException e) {
-                return (Task) cls.getConstructor(BlockPos.class).newInstance(pos);
-            }
-        } catch (Throwable ignored) {}
-        return null;
+        return Place.ifHeld(mod, pos, Blocks.NETHERRACK);
     }
 
     private static int count(AltoClef mod, net.minecraft.item.Item item) {

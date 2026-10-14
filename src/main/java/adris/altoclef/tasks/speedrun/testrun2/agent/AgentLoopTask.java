@@ -20,11 +20,16 @@ public class AgentLoopTask extends Task {
     private int ticks;
     private boolean done;
     private AgentProtocol protocol;
+    /** The command files are read a few times a second, not every tick: each poll is disk I/O on the game thread. */
+    private static final int POLL_TICKS = 5;
+    /** Commands put back because a child was running, so each is reported once and not on every poll. */
+    private final java.util.Set<String> held = new java.util.HashSet<>();
 
     @Override
     protected void onStart() {
         T2Brain.reset();
         sticky.clear();
+        held.clear();
         done = false;
         ticks = 0;
         AgentFiles.ensure();
@@ -54,8 +59,10 @@ public class AgentLoopTask extends Task {
         if (live != null && live.isFinished()) {
             AgentFiles.log("CHILD done " + live.getClass().getSimpleName());
             sticky.clear();
+            held.clear();
             live = null;
         }
+        if (ticks % POLL_TICKS != 0) return live;
 
         // Phase 9: prefer request.json drop, then inbox line
         String jsonDrop = AgentFiles.takeRequestJson();
@@ -76,21 +83,30 @@ public class AgentLoopTask extends Task {
                 return live;
             }
 
+            if (live != null && !isStop(line)) {
+                // Busy: back of the queue, untouched. Running it here would log and announce it on every poll.
+                AgentFiles.pushInbox(line);
+                if (held.add(line)) AgentFiles.log("BUSY hold " + line);
+                return live;
+            }
             Task next = AgentActions.apply(mod, line);
             if (next instanceof AgentActions.StopSentinel) {
                 done = true;
                 Debug.logMessage("AGENT stop");
                 return null;
             }
-            if (live != null && next != null) {
-                AgentFiles.pushInbox(line);
-                AgentFiles.log("BUSY hold " + line);
-            } else if (next != null) {
+            if (next != null) {
                 return sticky.keep("act:" + line, next);
             }
         }
 
         return live;
+    }
+
+    private static boolean isStop(String line) {
+        String t = line.trim();
+        if (t.startsWith("@")) t = t.substring(1).trim();
+        return t.split("\\s+")[0].equalsIgnoreCase("stop");
     }
 
     @Override

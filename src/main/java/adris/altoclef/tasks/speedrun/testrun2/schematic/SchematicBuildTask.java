@@ -7,9 +7,9 @@ import adris.altoclef.tasks.speedrun.testrun2.McCompat;
 import adris.altoclef.tasks.speedrun.testrun2.T2Brain;
 import adris.altoclef.tasks.speedrun.testrun2.T2History;
 import adris.altoclef.tasksystem.Task;
+import baritone.api.process.IBuilderProcess;
 import net.minecraft.item.Items;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
 
 import java.io.File;
 
@@ -38,7 +38,7 @@ public class SchematicBuildTask extends Task {
 
     private Phase phase = Phase.KIT;
     private Task child;
-    private Object builder;
+    private IBuilderProcess builder;
     private boolean buildStarted;
     private int still;
     private int lastHash;
@@ -189,51 +189,33 @@ public class SchematicBuildTask extends Task {
     }
 
     private boolean startBuilder(AltoClef mod) {
+        if (mod.getClientBaritone() == null) return false;
+        builder = mod.getClientBaritone().getBuilderProcess();
+        BlockPos feet = origin != null ? origin : mod.getPlayer().getBlockPos();
         try {
-            Object bari = mod.getClientBaritone();
-            if (bari == null) return false;
-            builder = bari.getClass().getMethod("getBuilderProcess").invoke(bari);
-            if (builder == null) return false;
-            BlockPos feet = origin != null ? origin : mod.getPlayer().getBlockPos();
-            Vec3i originVec = new Vec3i(feet.getX(), feet.getY(), feet.getZ());
-            boolean ok = false;
-            try {
-                Object r = builder.getClass()
-                        .getMethod("build", String.class, File.class, Vec3i.class)
-                        .invoke(builder, file.getName(), file, originVec);
-                ok = !(r instanceof Boolean) || (Boolean) r;
-            } catch (NoSuchMethodException e) {
-                builder.getClass()
-                        .getMethod("build", String.class, File.class, BlockPos.class)
-                        .invoke(builder, file.getName(), file, feet);
-                ok = true;
-            }
+            boolean ok = builder.build(file.getName(), file, feet);
             Debug.logMessage("SCHEM baritone build " + file.getName() + " @ " + feet + " ok=" + ok);
             return ok;
-        } catch (Throwable t) {
-            Debug.logWarning("SCHEM E200 " + t.getClass().getSimpleName() + ": " + t.getMessage());
+        } catch (RuntimeException e) {
+            // An unreadable or unsupported schematic file.
+            Debug.logWarning("SCHEM E200 " + e.getClass().getSimpleName() + ": " + e.getMessage());
             return false;
         }
     }
 
     private void pauseBuilder() {
         if (builder == null) return;
-        try {
-            builder.getClass().getMethod("onLostControl").invoke(builder);
-        } catch (Throwable ignored) {}
+        builder.onLostControl();
         McCompat.cancelPathing();
         buildStarted = false;
     }
 
     private boolean builderFinished() {
         if (builder == null) return false;
-        try {
-            Object active = builder.getClass().getMethod("isActive").invoke(builder);
-            if (active instanceof Boolean && !((Boolean) active) && buildStarted && still > 20 * 3) {
-                placedHint++;
-                return placedHint > 2;
-            }
-        } catch (Throwable ignored) {}
+        if (!builder.isActive() && buildStarted && still > 20 * 3) {
+            placedHint++;
+            return placedHint > 2;
+        }
         return false;
     }
 

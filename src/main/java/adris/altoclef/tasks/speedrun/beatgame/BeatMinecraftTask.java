@@ -167,7 +167,7 @@ public class BeatMinecraftTask extends Task {
     private boolean enterindEndPortal = false;
     private Task lootTask;
     private boolean collectingEyes;
-    private boolean escapingDragonsBreath = false;
+    private volatile boolean escapingDragonsBreath = false;
     private Task getBedTask;
     private List<TaskChange> taskChanges = new ArrayList<>();
     private PriorityTask prevLastGather = null;
@@ -1156,18 +1156,10 @@ public class BeatMinecraftTask extends Task {
      * @param mod The AltoClef mod instance.
      */
     private void avoidDragonBreath(AltoClef mod) {
-        mod.getBehaviour().avoidWalkingThrough(blockPos -> {
-            Dimension currentDimension = WorldHelper.getCurrentDimension();
-            boolean isEndDimension = currentDimension == Dimension.END;
-            boolean isTouchingDragonBreath = dragonBreathTracker.isTouchingDragonBreath(blockPos);
-
-            if (isEndDimension && !escapingDragonsBreath && isTouchingDragonBreath) {
-                Debug.logInternal("Avoiding dragon breath at blockPos: " + blockPos);
-                return true;
-            } else {
-                return false;
-            }
-        });
+        // The path planner asks this for every cell it considers, from its own thread: cheapest test first, no logging.
+        mod.getBehaviour().avoidWalkingThrough(blockPos -> !escapingDragonsBreath
+                && dragonBreathTracker.isTouchingDragonBreath(blockPos)
+                && WorldHelper.getCurrentDimension() == Dimension.END);
     }
 
     /**

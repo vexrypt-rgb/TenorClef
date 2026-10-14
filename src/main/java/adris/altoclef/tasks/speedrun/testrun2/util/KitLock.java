@@ -6,13 +6,13 @@ import net.minecraft.item.Items;
 /** Protect the items every personal task should never dump. */
 public final class KitLock {
 
-    private static boolean on;
-
     private KitLock() {}
 
     public static void tick(AltoClef mod) {
-        if (on || mod == null) return;
+        if (mod == null) return;
         try {
+            // Asked of the behaviour itself, not remembered: a task that pops its state takes the lock with it.
+            if (mod.getBehaviour().isProtected(Items.FLINT_AND_STEEL)) return;
             mod.getBehaviour().addProtectedItems(
                     Items.WOODEN_PICKAXE, Items.STONE_PICKAXE, Items.IRON_PICKAXE,
                     Items.DIAMOND_PICKAXE, Items.NETHERITE_PICKAXE,
@@ -24,7 +24,6 @@ public final class KitLock {
                     Items.CRAFTING_TABLE, Items.FURNACE
                     // cobble / netherrack are NOT global — last-block place loops if reserved forever
             );
-            on = true;
         } catch (Throwable ignored) {}
     }
 }

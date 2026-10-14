@@ -58,10 +58,7 @@ public final class SurviveTick {
             releaseUse(mc);
             return;
         }
-        try {
-            mod.getSlotHandler().getClass().getMethod("forceEquipItem", Item.class)
-                    .invoke(mod.getSlotHandler(), food);
-        } catch (Throwable ignored) {}
+        mod.getSlotHandler().forceEquipItem(food);
         eatTicks++;
         if (eatTicks <= 30) {
             mc.options.useKey.setPressed(true);

@@ -90,6 +90,13 @@ public abstract class Task {
                 // Our previous sub must be interrupted.
                 sub.stop();
                 sub = null;
+                if (absorbedFromChild) {
+                    // The child the failure was copied from is gone; whatever this task does next is its own.
+                    absorbedFromChild = false;
+                    explicitResult = TaskResult.RUNNING;
+                    lastFailure = null;
+                    lastRecovery = null;
+                }
             }
         }
 

@@ -795,7 +795,7 @@ public final class T2Codes {
         return String.join("\n",
                 "T2 codes:",
                 "  I02 pulse every 30s",
-                "  E10  submerged â€” WaterBail once",
+                "  E10  submerged - WaterBail once",
                 "  E102 standing in water, velocity ~0",
                 "  E20  combat overlay",
                 "  E110 piglin in range, no gold helmet",

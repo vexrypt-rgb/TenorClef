@@ -657,6 +657,8 @@ public class Settings implements IFailableConfigFile {
     }
 
     public String getAutoRunCommand() {
+        String o = System.getProperty("tenorclef.autorun.command");
+        if (o != null && !o.isBlank()) return o.trim();
         return autoRunCommand == null ? "" : autoRunCommand.trim();
     }
 

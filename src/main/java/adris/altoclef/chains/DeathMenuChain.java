@@ -34,6 +34,7 @@ public class DeathMenuChain extends TaskChain {
     // Sometimes we fuck up, so we might want to retry considering the death screen.
     private final TimerReal deathRetryTimer = new TimerReal(8);
     private final TimerGame reconnectTimer = new TimerGame(1);
+    private int respawnAttempts;
     private final TimerGame waitOnDeathScreenBeforeRespawnTimer = new TimerGame(2);
     private ServerInfo prevServerEntry = null;
     private boolean reconnecting = false;
@@ -89,6 +90,10 @@ public class DeathMenuChain extends TaskChain {
             prevServerEntry = MinecraftClient.getInstance().getCurrentServerEntry();
         }
 
+        if (!(screen instanceof DeathScreen) && AltoClef.inGame()
+                && MinecraftClient.getInstance().player != null && MinecraftClient.getInstance().player.isAlive()) {
+            respawnAttempts = 0;
+        }
         if (screen instanceof DeathScreen) {
             AltoClef mod = AltoClef.getInstance();
 
@@ -100,6 +105,11 @@ public class DeathMenuChain extends TaskChain {
                     assert MinecraftClient.getInstance().player != null;
                     Text screenMessage = ((DeathScreenAccessor) screen).getMessage();
                     String deathMessage = screenMessage != null ? screenMessage.getString() : "Unknown"; //"(not implemented yet)"; //screen.children().toString();
+                    // A world saved with the player at 0 HP loads "dead" without the server ever running death,
+                    // so the respawn request is ignored; if the screen is still up after an attempt, really kill them.
+                    if (respawnAttempts++ >= 1) {
+                        PlayerVer.sendChatCommand(MinecraftClient.getInstance().player, "kill @s");
+                    }
                     MinecraftClient.getInstance().player.requestRespawn();
                     MinecraftClient.getInstance().setScreen(null);
                     for (String i : mod.getModSettings().getDeathCommand().split(" & ")) {

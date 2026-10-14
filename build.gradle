@@ -175,7 +175,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.0'
 
     // Jvm downgrader
-    include('xyz.wagyourtail.jvmdowngrader:jvmdowngrader-java-api:0.9.0:downgraded-8')
+    include('xyz.wagyourtail.jvmdowngrader:jvmdowngrader-java-api:1.2.2:downgraded-8')
 
     // Nether pathfinder
     implementation 'dev.babbaj:nether-pathfinder:1.5'
@@ -325,6 +325,7 @@ dependencies {
         def vendorLibs = (mcVersion == 11601) ? vendorLibs1161 : vendorLibsTip
         def nameOk = { String n ->
             if (n.contains('sources') || n.contains('dev') || n.contains('javadoc')) return false
+            if (project.hasProperty('noTungsten')) return false
             if (mcVersion == 11601) return n.contains('1.16.1') || n.contains('1161')
             // tip: reject 1.16.1 jars
             return !n.contains('1.16.1') && !n.contains('1161')
@@ -411,6 +412,12 @@ processResources {
     filesMatching("fabric.mod.json") {
         expand "version": project.version,
                 "mcVersion": project.name
+    }
+
+    // Mixin rejects a compatibility level above the running JRE; downgraded (Java 8/17) builds must not claim 21.
+    filesMatching("altoclef.mixins.json") {
+        def level = getJavaVersion() == JavaVersion.VERSION_1_8 ? "JAVA_8" : (getJavaVersion() == JavaVersion.VERSION_17 ? "JAVA_17" : null)
+        if (level != null) filter { it.replace('"JAVA_21"', '"' + level + '"') }
     }
 
     from(sourceSets.main.resources.srcDirs) {

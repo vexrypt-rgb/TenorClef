@@ -19,6 +19,13 @@
 - TenorClef still embeds `TungstenBridge` for its own TungstenGoto/Follow tasks; hybrid selection increasingly lives in Ostinato.
 - `AltoClef.initializeBaritoneSettings` still mutates Baritone settings (agent preferences; later via engine config).
 
+## Swarm
+
+Ostinato owns the swarm link (sigil crypto, roster, transport, region builds). TenorClef's side is
+`swarm/SwarmAdapter` (reflection over the `swarm*` settings and the `#swarm` command, so stock jars
+just report it unavailable), the `@swarm` command, and the Swarm tab of the TenorClef menu
+(`@swarm menu`): enable, signed senders, channel, roster, sigil home, status, ping, reload, build, stop.
+
 ## Phase 2 direction
 
 1. Expand Ostinato `IMovementBackend` → documented **MovementEngine** API (`MovementGoal`, status, path result, failures).

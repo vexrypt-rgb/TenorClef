@@ -101,6 +101,10 @@ public class T2MenuScreen extends Screen {
     TextFieldWidget urlBox;
     TextFieldWidget modelBox;
     TextFieldWidget bindBox;
+    TextFieldWidget rosterBox;
+    TextFieldWidget homeBox;
+    TextFieldWidget groupBox;
+    TextFieldWidget fileBox;
     TextFieldWidget cmpName;
     TextFieldWidget sigName;
     TextFieldWidget sigPaste;
@@ -144,6 +148,12 @@ public class T2MenuScreen extends Screen {
         }
     }
 
+    /** Open the menu on a given tab (for example 6, Swarm). */
+    public static void openTab(int t) {
+        tab = t;
+        open();
+    }
+
     public static void openSoon() {
         pendingOpen = 12;
         Debug.logMessage("T2MENU queued");
@@ -170,6 +180,7 @@ public class T2MenuScreen extends Screen {
         if (tab == 3) return TAB_AGENT_L;
         if (tab == 4 || tab == 6 || tab == 7 || tab == 8) return new String[0][];
         if (tab == 5) return TAB_SHOW_L;
+        if (tab == 6) return new String[0][];
         return TAB_TASKS_L;
     }
 
@@ -179,13 +190,14 @@ public class T2MenuScreen extends Screen {
         if (tab == 3) return TAB_AGENT_R;
         if (tab == 4 || tab == 6 || tab == 7 || tab == 8) return new String[0][];
         if (tab == 5) return TAB_SHOW_R;
+        if (tab == 6) return new String[0][];
         return TAB_TASKS_R;
     }
 
     void layout() {
-        boolean wide = tab == T2CompositionTab.ID;
+        boolean wide = tab == T2CompositionTab.ID || tab == 6;
         int pw = Math.min(wide ? 780 : 560, Math.max(420, this.width - 32));
-        int ph = Math.min(wide ? 420 : tab == 3 ? 292 : 268, this.height - 16);
+        int ph = Math.min(wide ? 420 : (tab == 3 || tab == 6) ? 292 : 268, this.height - 16);
         if (ph < 200) ph = Math.max(188, this.height - 16);
         px0 = (this.width - pw) / 2;
         py0 = (this.height - ph) / 2;
@@ -207,7 +219,7 @@ public class T2MenuScreen extends Screen {
         hitLab.clear();
         dropStart = Integer.MAX_VALUE;
         layout();
-        T2MenuActions.button(this, px1 - 22, py0 + 7, 14, 14, "x", null);
+        T2MenuActions.attach(this, T2MenuActions.button(this, px1 - 22, py0 + 7, 14, 14, "x", null));
         String[] nav = {"Tasks", "Link", "Media", "Agent", "Faults", "Showcase", "SIGIL", "Compose", "Swarm"};
         int[] navId = {0, 1, 2, 3, 4, 5, 6, 7, 8};
         int iy = headerB + 8;
@@ -272,6 +284,10 @@ public class T2MenuScreen extends Screen {
                     py += 17;
                 }
             }
+            return;
+        }
+        if (tab == 6) {
+            T2MenuSwarm.build(this, colW, bh);
             return;
         }
         int y = contentY;

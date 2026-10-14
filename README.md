@@ -52,9 +52,31 @@ On macOS or Linux run:
 ./gradlew :1.21.11:build
 ```
 
-`:1.21.4:build` and `:1.16.1:build` work the same way. For a version that depends on a local Ostinato
-build, follow the wiring guide first.
-The initial Gradle configuration can take a while because Minecraft is remapped.
+
+Legacy 1.16.1 (`:1.16.1:build` / `:1.16.1:runClient`) is the RSG client lane.
+For a version that depends on a local Ostinato build, follow the wiring guide
+first. The initial Gradle configuration can take a while because Minecraft is
+remapped.
+
+## Commands (short list)
+
+TenorClef commands use `@`. Ostinato / Baritone commands use `#`.
+
+| Command | What it does |
+| --- | --- |
+| `@help` | List TenorClef commands |
+| `@gamer` | Beat the game |
+| `@testrun2` | Modern speedrun task (BOOTSTRAP → END). 1.16.1 lane. |
+| `@stop` / `Ctrl+K` | Cancel the current task |
+| `@pathbench …` | Path / travel benches (see below) |
+| `#help` | Ostinato / Baritone commands |
+| `#swarm …` | Multi-bot link and region builds (Ostinato) |
+| `@swarm …` | TenorClef front end for `#swarm`: `on`/`off`, `status`, `ping`, `reload`, `build`, `stop`, `set <setting> <value>`, `menu` |
+
+Full command and settings notes: [usage.md](usage.md). Settings live under
+`.minecraft/altoclef/` after the first launch; `@reload_settings` applies
+edits.
+n
 
 ## Movement backends
 
@@ -123,6 +145,7 @@ Step-by-step guides for every feature are in [docs/guides](docs/guides/README.md
 - [Showcase courses](docs/guides/showcase.md)
 - [Settings](docs/guides/settings.md)
 - [Diagnostics and tools](docs/guides/diagnostics.md)
+n
 
 ## Project guides
 

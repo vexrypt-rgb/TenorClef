@@ -2,16 +2,15 @@ package adris.altoclef.tasks.pvp;
 
 import adris.altoclef.AltoClef;
 import adris.altoclef.tasksystem.Task;
-//#if MC >= 12104 && MC < 260000
-import baritone.process.PvpProcess;
-//#endif
 import net.minecraft.entity.LivingEntity;
 
-//#if MC >= 12104 && MC < 260000
 /**
  * Thin wrapper over Ostinato's {@code PvpProcess}, which owns the fighting movement (crits,
  * W-tap, strafe, jump reset, shield, axe, bow, gapples, totem). This task only starts it, keeps
  * the other chains out of the way and mirrors its stats.
+ * <p>
+ * The process is reached by reflection: only the 1.21.4 Ostinato jar has it, and this source is
+ * shared with the 1.16.1 and 1.21.11 builds, whose jars don't (there the task ends at once).
  */
 public class PvpTask extends Task {
 
@@ -51,66 +50,79 @@ public class PvpTask extends Task {
         return System.currentTimeMillis() - lastTickMs < 500;
     }
 
-    /** Mobs are fought by Ostinato's PvE process; the 1.16.1 build predates it and keeps using PvP. */
-    private static final boolean HAS_PVE = hasClass("baritone.process.PveProcess");
-
-    private static boolean hasClass(String n) {
-        try { Class.forName(n); return true; } catch (ClassNotFoundException e) { return false; }
+    private static Object proc() {
+        try {
+            Object b = AltoClef.getInstance().getClientBaritone();
+            return b.getClass().getMethod("getPvpProcess").invoke(b);
+        } catch (Throwable t) {
+            return null;
+        }
     }
 
-    private boolean pve() {
-        return mode == Mode.HOSTILES && HAS_PVE;
+    private static Object call(Object p, String method, Object... args) {
+        try {
+            Class<?>[] types = new Class<?>[args.length];
+            for (int i = 0; i < args.length; i++) types[i] = args[i].getClass();
+            return p.getClass().getMethod(method, types).invoke(p, args);
+        } catch (Throwable t) {
+            return null;
+        }
     }
 
-    private static void command(String c) {
-        AltoClef.getInstance().getClientBaritone().getCommandManager().execute(c);
-    }
-
-    private static PvpProcess proc() {
-        return AltoClef.getInstance().getClientBaritone().getPvpProcess();
+    private static Number field(Object p, String name) {
+        try {
+            return (Number) p.getClass().getField(name).get(p);
+        } catch (Throwable t) {
+            return 0;
+        }
     }
 
     @Override
     protected void onStart() {
-        if (pve()) { command("pve hostiles"); return; }
-        switch (mode) {
-            case PLAYER -> proc().attackPlayer(name);
-            case PLAYERS -> proc().attackPlayers();
-            case HOSTILES -> proc().attackHostiles();
-        }
+        Object p = proc();
+        if (p == null) return;
+        if (mode == Mode.PLAYER) call(p, "attackPlayer", name);
+        else if (mode == Mode.PLAYERS) call(p, "attackPlayers");
+        else call(p, "attackHostiles");
     }
 
     @Override
     protected Task onTick() {
-        touch();
-        if (pve()) {
-            setDebugState("pve");
+        Object p = proc();
+        if (p == null) {
+            setDebugState("PvP needs an Ostinato build with PvpProcess (1.21.4)");
             return null;
         }
-        PvpProcess p = proc();
-        if (!p.isActive()) onStart(); // cancelled from outside (e.g. #stop): pick it back up
-        attacks = p.attacks;
-        crits = p.crits;
-        sprintHits = p.sprintHits;
-        axeHits = p.axeHits;
-        blocks = p.blocks;
-        gapples = p.gapples;
-        damageTaken = p.damageTaken;
-        setDebugState(p.displayName0());
+        touch();
+        if (!Boolean.TRUE.equals(call(p, "isActive"))) onStart(); // cancelled from outside (e.g. #stop): pick it back up
+        attacks = field(p, "attacks").intValue();
+        crits = field(p, "crits").intValue();
+        sprintHits = field(p, "sprintHits").intValue();
+        axeHits = field(p, "axeHits").intValue();
+        blocks = field(p, "blocks").intValue();
+        gapples = field(p, "gapples").intValue();
+        damageTaken = field(p, "damageTaken").floatValue();
+        Object d = call(p, "displayName0");
+        setDebugState(String.valueOf(d));
         return null;
     }
 
     public LivingEntity getTarget() {
-        return pve() ? null : (LivingEntity) (Object) proc().getTarget();
+        Object p = proc();
+        Object t = p == null ? null : call(p, "getTarget");
+        return t instanceof LivingEntity ? (LivingEntity) t : null;
     }
 
     public String stats() {
-        return pve() ? "PvE" : proc().stats();
+        Object p = proc();
+        Object s = p == null ? null : call(p, "stats");
+        return s == null ? "" : s.toString();
     }
 
     @Override
     protected void onStop(Task interruptTask) {
-        if (pve()) command("pve clear"); else proc().onLostControl();
+        Object p = proc();
+        if (p != null) call(p, "onLostControl");
     }
 
     @Override
@@ -120,7 +132,7 @@ public class PvpTask extends Task {
 
     @Override
     protected boolean isEqual(Task other) {
-        return other instanceof PvpTask p && p.mode == mode && p.name.equals(name);
+        return other instanceof PvpTask && ((PvpTask) other).mode == mode && ((PvpTask) other).name.equals(name);
     }
 
     @Override
@@ -128,39 +140,3 @@ public class PvpTask extends Task {
         return "PvP " + name;
     }
 }
-//#else
-//$$ /**
-//$$  * PvP needs Ostinato's PvpProcess, which only ships in the 1.21.4 and 1.21.11 builds. Other versions get an
-//$$  * inert stand-in with the same API so the rest of TenorClef still compiles.
-//$$  */
-//$$ public class PvpTask extends Task {
-//$$     public int attacks, crits, sprintHits, blocks, gapples, pots, axeHits;
-//$$     public float damageTaken;
-//$$
-//$$     public static PvpTask player(String name) { return new PvpTask(); }
-//$$     public static PvpTask nearestPlayer() { return new PvpTask(); }
-//$$     public static PvpTask hostiles() { return new PvpTask(); }
-//$$     public static void touch() { }
-//$$     public static boolean anyActive() { return false; }
-//$$     public LivingEntity getTarget() { return null; }
-//$$     public String stats() { return "PvP is not available on this Minecraft version"; }
-//$$
-//$$     @Override
-//$$     protected void onStart() { }
-//$$
-//$$     @Override
-//$$     protected Task onTick() { return null; }
-//$$
-//$$     @Override
-//$$     protected void onStop(Task interruptTask) { }
-//$$
-//$$     @Override
-//$$     public boolean isFinished() { return true; }
-//$$
-//$$     @Override
-//$$     protected boolean isEqual(Task other) { return other instanceof PvpTask; }
-//$$
-//$$     @Override
-//$$     protected String toDebugString() { return "PvP (unavailable)"; }
-//$$ }
-//#endif

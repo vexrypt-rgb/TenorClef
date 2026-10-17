@@ -26,7 +26,7 @@ jobs:
         continue-on-error: true
         run: |
           set -euo pipefail
-          if ./gradlew javadoc --stacktrace; then
+          if ./gradlew -Pno26 javadoc --stacktrace; then
             echo "ok=true" >> "$GITHUB_OUTPUT"
           else
             echo "::warning::javadoc generation failed — deploy skipped (non-blocking)"

@@ -73,9 +73,9 @@ gradlew.bat build -Pbaritone.fabric_build
 copy dist\baritone-unoptimized-fabric-*.jar ..\Ostinato\dist\baritone-unoptimized-fabric-ostinato-1.16.1.jar
 ```
 
-### 1.21.11 (primary)
+### 1.21.11
 
-Uses the committed `libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar` (Ostinato `main`, JDK 21, `./gradlew :fabric:build`), unless a sibling `../Ostinato/dist` holds an Ostinato fabric jar, which is preferred. To build against a local Ostinato `main`:
+Uses the committed `libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar` (Ostinato branch `1.21.11`, JDK 21, `./gradlew :fabric:build`), unless a sibling `../Ostinato/dist` holds an Ostinato fabric jar, which is preferred. To build against a local Ostinato `main`:
 
 ```bat
 cd C:\Users\redfa\Documents\MinecraftDev\Ostinato
@@ -117,10 +117,11 @@ Do not compile while a `runClient` / `@testrun` session is live on the same tree
 
 On push/PR to `main`, `.github/workflows/gradle.yml`:
 
-1. **1.21.11** (required, primary) — JDK 21, committed `libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar`, `./gradlew :1.21.11:compileJava` then `:1.21.11:test`.
-2. **1.21.4** (required) — JDK 21, committed `libs/baritone-unoptimized-fabric-1.21.4.jar`, `./gradlew :1.21.4:compileJava` then `:1.21.4:test`.
-3. **1.16.1** (required) — JDK 21 for TenorClef Gradle, uses committed `libs/baritone-unoptimized-fabric-1.16.1.jar`, `./gradlew :1.16.1:compileJava`.
-4. **1.21.11 against Ostinato tip** (`continue-on-error`) — checkout + `:fabric:build` of `vexrypt-rgb/Ostinato@main`, stage its jar to `../Ostinato/dist`, then `./gradlew :1.21.11:compileJava` **only if** staging succeeded. An early warning that the two repositories have drifted; does **not** block merge.
+1. **26.3** (required, primary) — JDK 21 for Gradle plus a JDK 25 toolchain, committed `libs/baritone-unoptimized-fabric-ostinato-26.3.jar` (Ostinato `main` release jar), `./gradlew :26.3:compileJava` then `:26.3:test`.
+2. **1.21.11** (required) — JDK 21, committed `libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar`, `./gradlew -Pno26 :1.21.11:compileJava` then `:1.21.11:test`.
+3. **1.21.4** (required) — JDK 21, committed `libs/baritone-unoptimized-fabric-1.21.4.jar`, `./gradlew :1.21.4:compileJava` then `:1.21.4:test`.
+4. **1.16.1** (required) — JDK 21 for TenorClef Gradle, uses committed `libs/baritone-unoptimized-fabric-1.16.1.jar`, `./gradlew :1.16.1:compileJava`.
+5. **1.21.11 against Ostinato tip** (`continue-on-error`) — checkout + `:fabric:build` of `vexrypt-rgb/Ostinato@1.21.11`, stage its jar to `../Ostinato/dist`, then `./gradlew :1.21.11:compileJava` **only if** staging succeeded. An early warning that the two repositories have drifted; does **not** block merge.
 
 `Deploy Javadoc` (`.github/workflows/javadoc-publish.yml`) is also **non-blocking** (`continue-on-error`) — generation/deploy failures must not red `main`.
 

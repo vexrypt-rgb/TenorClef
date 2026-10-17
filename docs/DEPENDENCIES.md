@@ -45,9 +45,13 @@ Directories probed:
 
 - Requires `libs/baritone-unoptimized-fabric-1.21.4.jar` (Ostinato branch `1.21.4`). **Hard fail** if missing.
 
-### 1.21.11 (primary)
+### 26.3 (primary)
 
-- Newest non-1.16.1, non-1.21.4, non-26.3 jar from `../Ostinato/dist`, else the committed `libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar` (Ostinato `main`). No Maven fallback.
+- Newest `baritone-unoptimized-fabric-*26.3*.jar` from `../Ostinato/dist`, else the committed `libs/baritone-unoptimized-fabric-ostinato-26.3.jar` (the Ostinato `main` release jar). **Hard fail** if missing. Compiles with a JDK 25 toolchain; `-Pno26` leaves the module out.
+
+### 1.21.11
+
+- Newest non-1.16.1, non-1.21.4, non-26.3 jar from `../Ostinato/dist`, else the committed `libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar` (Ostinato branch `1.21.11`). No Maven fallback.
 
 ### Everything else (1.21.1 … 1.16.5)
 
@@ -117,7 +121,7 @@ Expect `[altoclef] Ostinato Baritone for <version>: <jar name>` on configure.
 ## CI today (`.github/workflows/gradle.yml`) — **Phase 1**
 
 - JDK 21, `ubuntu-latest`
-- Jobs: `:1.21.11:compileJava` + `:1.21.11:test` (primary, committed `libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar`), `:1.21.4:compileJava` + `:1.21.4:test`, `:1.16.1:compileJava` (committed `libs/baritone-unoptimized-fabric-1.16.1.jar`), and a non-blocking `:1.21.11:compileJava` against the tip of Ostinato `main` (checkout/build → `../Ostinato/dist`)
+- Jobs: `:26.3:compileJava` + `:26.3:test` (primary, committed `libs/baritone-unoptimized-fabric-ostinato-26.3.jar`, JDK 25 toolchain), `:1.21.11:compileJava` + `:1.21.11:test` (committed `libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar`), `:1.21.4:compileJava` + `:1.21.4:test`, `:1.16.1:compileJava` (committed `libs/baritone-unoptimized-fabric-1.16.1.jar`), and a non-blocking `:1.21.11:compileJava` against the tip of Ostinato `1.21.11` (checkout/build → `../Ostinato/dist`)
 - Tungsten **optional** — never required for a green job
 - See `docs/DEVELOPMENT.md` for clean-runner behavior
 

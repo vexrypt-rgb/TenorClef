@@ -14,12 +14,36 @@ permissions:
 # (see build.gradle).
 # Tungsten is OPTIONAL — jobs must pass without a tungsten jar.
 #
-# Required green: 1.21.11 (primary), 1.21.4, 1.16.1.
-# Non-blocking: 1.21.11 against the tip of Ostinato main, as an early warning that the two have drifted.
+# Required green: 26.3 (primary), 1.21.11, 1.21.4, 1.16.1.
+# Non-blocking: 1.21.11 against the tip of Ostinato branch 1.21.11, as an early warning that the two have drifted.
+# The jobs for the older lines pass -Pno26 so they do not set up the 26.3 module they do not build.
 
 jobs:
+  build-263:
+    name: Compile + test Fabric 26.3 (primary)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # 26.3 compiles with a JDK 25 toolchain; Gradle and the preprocessor's Kotlin remapper run on 21.
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - name: Verify staged Ostinato 26.3 jar
+        run: ls -la libs/baritone-unoptimized-fabric-ostinato-26.3.jar
+      - name: Compile 26.3 module
+        run: ./gradlew -Porg.gradle.java.installations.fromEnv=JAVA_HOME_25_X64 :26.3:compileJava --stacktrace
+      # Unit tests are pure Java (no Minecraft client).
+      - name: Unit tests
+        run: ./gradlew -Porg.gradle.java.installations.fromEnv=JAVA_HOME_25_X64 :26.3:test --stacktrace
+
   build-12111:
-    name: Compile + test Fabric 1.21.11 (primary)
+    name: Compile + test Fabric 1.21.11
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,10 +55,10 @@ jobs:
       - name: Verify staged Ostinato 1.21.11 jar
         run: ls -la libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar
       - name: Compile 1.21.11 module
-        run: ./gradlew :1.21.11:compileJava --stacktrace
+        run: ./gradlew -Pno26 :1.21.11:compileJava --stacktrace
       # Unit tests are pure Java (no Minecraft client).
       - name: Unit tests
-        run: ./gradlew :1.21.11:test --stacktrace
+        run: ./gradlew -Pno26 :1.21.11:test --stacktrace
 
   build-1214:
     name: Compile + test Fabric 1.21.4
@@ -49,9 +73,9 @@ jobs:
       - name: Verify staged Ostinato 1.21.4 jar
         run: ls -la libs/baritone-unoptimized-fabric-1.21.4.jar
       - name: Compile 1.21.4 module
-        run: ./gradlew :1.21.4:compileJava --stacktrace
+        run: ./gradlew -Pno26 :1.21.4:compileJava --stacktrace
       - name: Unit tests
-        run: ./gradlew :1.21.4:test --stacktrace
+        run: ./gradlew -Pno26 :1.21.4:test --stacktrace
       - name: Upload jars (if produced)
         if: success()
         uses: actions/upload-artifact@v4
@@ -62,8 +86,8 @@ jobs:
           retention-days: 14
 
   build-12111-tip:
-    name: Compile Fabric 1.21.11 (Ostinato main tip)
-    # Builds whatever Ostinato main is today, so it can go red for reasons outside this repository.
+    name: Compile Fabric 1.21.11 (Ostinato 1.21.11 tip)
+    # Builds whatever Ostinato branch 1.21.11 is today, so it can go red for reasons outside this repository.
     continue-on-error: true
     runs-on: ubuntu-latest
     steps:
@@ -80,7 +104,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: vexrypt-rgb/Ostinato
-          ref: 'main'
+          ref: '1.21.11'
           path: _ostinato_tip
 
       - name: Build Ostinato Fabric jar into sibling dist
@@ -108,7 +132,7 @@ jobs:
 
       - name: Compile 1.21.11 module
         if: steps.stage_ostinato.outputs.staged == 'true'
-        run: ./gradlew :1.21.11:compileJava --stacktrace
+        run: ./gradlew -Pno26 :1.21.11:compileJava --stacktrace
 
   build-1161:
     name: Compile Fabric 1.16.1 (Ostinato legacy)
@@ -132,4 +156,4 @@ jobs:
           fi
 
       - name: Compile 1.16.1 module
-        run: ./gradlew :1.16.1:compileJava --stacktrace
+        run: ./gradlew -Pno26 :1.16.1:compileJava --stacktrace

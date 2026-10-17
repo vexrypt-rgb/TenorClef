@@ -54,6 +54,13 @@ tasks.withType(JavaCompile).configureEach {
     }
 }
 
+// The 26.3 classes are Java 25, so its tests run on the JDK 25 toolchain too.
+if (unobfuscated) {
+    tasks.withType(Test).configureEach {
+        javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
+    }
+}
+
 base {
     archivesName = project.archives_base_name
 }

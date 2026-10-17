@@ -19,7 +19,8 @@ subprojects {
 // this block. Trimming the chain to speed up a 1.16.1-only build throws
 // NullPointerException at PreprocessPlugin.apply(PreprocessPlugin.kt:60) — verified.
 preprocess {
-    val with26 = providers.gradleProperty("with26").isPresent
+    // 26.3 heads the chain by default; -Pno26 leaves it out (see settings.gradle.kts).
+    val with26 = !providers.gradleProperty("no26").isPresent
     val mc260300 = if (with26) createNode("26.3", 260300, "mojmap") else null
     val mc12111 = createNode("1.21.11", 12111, "yarn")
     val mc12104 = createNode("1.21.4", 12104, "yarn")

@@ -219,7 +219,7 @@ public class T2MenuScreen extends Screen {
         hitLab.clear();
         dropStart = Integer.MAX_VALUE;
         layout();
-        T2MenuActions.attach(this, T2MenuActions.button(this, px1 - 22, py0 + 7, 14, 14, "x", null));
+        T2MenuActions.button(this, px1 - 22, py0 + 7, 14, 14, "x", null);
         String[] nav = {"Tasks", "Link", "Media", "Agent", "Faults", "Showcase", "SIGIL", "Compose", "Swarm"};
         int[] navId = {0, 1, 2, 3, 4, 5, 6, 7, 8};
         int iy = headerB + 8;

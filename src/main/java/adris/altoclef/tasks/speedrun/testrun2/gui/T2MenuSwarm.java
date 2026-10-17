@@ -23,32 +23,28 @@ final class T2MenuSwarm {
         int x2 = s.contentX + colW + 8;
         int y = s.contentY + 12;
         boolean ok = SwarmAdapter.available();
-        T2MenuActions.attach(s, T2MenuActions.button(s, s.contentX, y, colW, bh,
-                "swarm  " + (ok && SwarmAdapter.enabled() ? "ON" : "OFF"), "SW:TOGGLE"));
-        T2MenuActions.attach(s, T2MenuActions.button(s, x2, y, colW, bh, "status", "SW:status"));
+        T2MenuActions.button(s, s.contentX, y, colW, bh,
+                "swarm  " + (ok && SwarmAdapter.enabled() ? "ON" : "OFF"), "SW:TOGGLE");
+        T2MenuActions.button(s, x2, y, colW, bh, "status", "SW:status");
         y += 22;
-        T2MenuActions.attach(s, T2MenuActions.button(s, s.contentX, y, colW, bh,
-                "signed senders  " + (Boolean.FALSE.equals(SwarmAdapter.get("swarmRequireSignedSender")) ? "no" : "yes"), "SW:SIGNED"));
-        T2MenuActions.attach(s, T2MenuActions.button(s, x2, y, colW, bh, "ping group", "SW:PING"));
+        T2MenuActions.button(s, s.contentX, y, colW, bh,
+                "signed senders  " + (Boolean.FALSE.equals(SwarmAdapter.get("swarmRequireSignedSender")) ? "no" : "yes"), "SW:SIGNED");
+        T2MenuActions.button(s, x2, y, colW, bh, "ping group", "SW:PING");
         y += 22;
-        T2MenuActions.attach(s, T2MenuActions.button(s, s.contentX, y, colW, bh,
-                "channel  " + SwarmAdapter.getString("swarmChannel"), "SW:CHANNEL"));
-        T2MenuActions.attach(s, T2MenuActions.button(s, x2, y, colW, bh, "reload roster", "SW:reload"));
+        T2MenuActions.button(s, s.contentX, y, colW, bh,
+                "channel  " + SwarmAdapter.getString("swarmChannel"), "SW:CHANNEL");
+        T2MenuActions.button(s, x2, y, colW, bh, "reload roster", "SW:reload");
         y += 22;
-        T2MenuActions.attach(s, T2MenuActions.button(s, s.contentX, y, colW, bh, "build here", "SW:BUILD"));
-        T2MenuActions.attach(s, T2MenuActions.button(s, x2, y, colW, bh, "stop build", "SW:stop"));
+        T2MenuActions.button(s, s.contentX, y, colW, bh, "build here", "SW:BUILD");
+        T2MenuActions.button(s, x2, y, colW, bh, "stop build", "SW:stop");
 
         int fy = s.footerT - 62;
         s.rosterBox = T2MenuActions.textField(s, s.contentX, fy, s.contentW, 14, SwarmAdapter.getString("swarmRosterFile"));
         s.homeBox = T2MenuActions.textField(s, s.contentX, fy + 15, s.contentW, 14, SwarmAdapter.getString("swarmSigilHome"));
         s.groupBox = T2MenuActions.textField(s, s.contentX, fy + 30, s.contentW / 3 - 4, 14, groupText);
         s.fileBox = T2MenuActions.textField(s, s.contentX + s.contentW / 3 + 4, fy + 30, s.contentW * 2 / 3 - 4, 14, fileText);
-        T2MenuActions.attach(s, s.rosterBox);
-        T2MenuActions.attach(s, s.homeBox);
-        T2MenuActions.attach(s, s.groupBox);
-        T2MenuActions.attach(s, s.fileBox);
-        T2MenuActions.attach(s, T2MenuActions.button(s, s.px1 - 212, s.footerT + 2, 96, 18, "save swarm", "SW:SAVE"));
-        T2MenuActions.attach(s, T2MenuActions.button(s, s.px1 - 108, s.footerT + 2, 96, 18, "close", null));
+        T2MenuActions.button(s, s.px1 - 212, s.footerT + 2, 96, 18, "save swarm", "SW:SAVE");
+        T2MenuActions.button(s, s.px1 - 108, s.footerT + 2, 96, 18, "close", null);
     }
 
     static void paint(T2MenuScreen s, DrawContextWrapper g) {

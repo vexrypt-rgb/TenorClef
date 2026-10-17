@@ -40,7 +40,6 @@ param(
   [int]$TimeoutSec = 600,
   [int]$MaxRunSec = 0,
   [string]$Command = 'testrun2',
-  [string]$Mover = 'ostinato',
   [switch]$SkipOstinatoUpdate
 )
 
@@ -95,14 +94,14 @@ foreach ($f in @($TopSettings, $WorldSettings)) {
   $obj = $null
   if (Test-Path $f) { try { $obj = Get-Content -Raw $f | ConvertFrom-Json } catch { $obj = $null } }
   if (-not $obj) { $obj = [pscustomobject]@{} }
-  foreach ($kv in @{ idleCommand=''; speedrunMoverPreference=$Mover; autoLoadWorld=$true; autoRunCommand=$Command }.GetEnumerator()) {
+  foreach ($kv in @{ idleCommand=''; autoLoadWorld=$true; autoRunCommand=$Command }.GetEnumerator()) {
     if ($obj.PSObject.Properties.Name -contains $kv.Key) { $obj.$($kv.Key) = $kv.Value }
     else { $obj | Add-Member -NotePropertyName $kv.Key -NotePropertyValue $kv.Value -Force }
   }
   $enc = New-Object System.Text.UTF8Encoding($false)
   [System.IO.File]::WriteAllText($f, ($obj | ConvertTo-Json -Depth 40), $enc)
 }
-Write-Host "settings: both files set (autoLoadWorld=true, autoRunCommand=$Command, mover=$Mover)" -ForegroundColor DarkGray
+Write-Host "settings: both files set (autoLoadWorld=true, autoRunCommand=$Command)" -ForegroundColor DarkGray
 
 # ---- 4b. rebuild Ostinato if origin/1.16.1 moved --------------------------------
 if (-not $SkipOstinatoUpdate) { & (Join-Path $PSScriptRoot 'update-ostinato.ps1') -Repo $Repo }

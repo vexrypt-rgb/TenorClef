@@ -21,12 +21,12 @@ and exports a JSON summary (no live MC client required for mocks).
 | Layer | Role |
 |-------|------|
 | **TenorClef** | High-level autonomous agent: perception, world model, goals, planning, tasks, evaluation, recovery |
-| **Ostinato** | Low-level movement: nav, pathfinding, physics; backends **Baritone** + **Tungsten** |
+| **Ostinato** | Low-level movement: nav, pathfinding, physics (Baritone-compatible pathing with kinematic and physics travel) |
 
 Target pipeline:
 
 ```
-Goal → Requirements → Plan → Task → Action Interface → Ostinato MovementEngine → Baritone | Tungsten
+Goal → Requirements → Plan → Task → Action Interface → Ostinato MovementEngine → Baritone pathing
 ```
 
 Incremental refactor of the AltoClef fork — **do not rewrite from scratch**. First real code PR is Phase 2 (MovementEngine API).
@@ -98,9 +98,7 @@ GetToEntity (TARGET_UNAVAILABLE / TIMEOUT), ResourceTask SUCCESS shim, PickupDro
 - `getInputOverrideHandler().setInputForceState(...)`
 - Extra hooks: `baritone.altoclef.AltoClefSettings` via `getExtraBaritoneSettings()`
 
-**Path B — Tungsten travel facade (optional).** `adris.altoclef.movement.TungstenMovement` + reflection `TungstenBridge` → `TungstenGotoTask` / `TungstenFollowTask`. Mining intentionally stays on Baritone (`docs/TUNGSTEN_BACKEND.md`).
-
-**Ostinato MovementEngine (Phase 2):** Ostinato tip exposes `IMovementEngine` / `HybridMovementEngine` (built on `IMovementBackend`). TenorClef routes **GetToBlockTask** and **GetToEntityTask** through `adris.altoclef.movement.MovementEngineAdapter` (reflection + CustomGoalProcess fallback). Other ~60 Baritone call sites unchanged. Mining/builder stay on Baritone processes.
+**Ostinato MovementEngine (Phase 2):** Ostinato tip exposes `IMovementEngine` / `HybridMovementEngine` (Baritone custom-goal pathing). TenorClef routes **GetToBlockTask** and **GetToEntityTask** through `adris.altoclef.movement.MovementEngineAdapter` (reflection + CustomGoalProcess fallback). Other ~60 Baritone call sites unchanged. Mining/builder stay on Baritone processes.
 
 ### Phase 3 core split (incremental)
 
@@ -281,7 +279,7 @@ ReplayMod preprocess + Fabric Loom: `settings.gradle.kts` includes `1.21.11` …
 ┌──────────────────────────────────────────────┐
 │ Ostinato MovementEngine                       │
 │  MovementGoal / Status / PathResult / failures│
-│  Hybrid engine → Baritone | Tungsten backends │
+│  Hybrid engine → Baritone custom-goal pathing │
 └──────────────────────────────────────────────┘
 ```
 

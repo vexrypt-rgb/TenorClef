@@ -8,5 +8,5 @@ rm -f logs/move-window.log
 (nohup powershell -ExecutionPolicy Bypass -File tools/move-mc-window.ps1 >/dev/null 2>&1 &)
 export JAVA_HOME="C:/Program Files/Eclipse Adoptium/jdk-21.0.12.101-hotspot"
 export JAVA_TOOL_OPTIONS="-Dtenorclef.autorun.command=\"$CMD\" $EXTRA"
-nohup ./gradlew :1.21.11:runClient --no-daemon -PnoTungsten --args="--quickPlaySingleplayer SigilTest" > "$LOG" 2>&1 &
+nohup ./gradlew :1.21.11:runClient --no-daemon --args="--quickPlaySingleplayer SigilTest" > "$LOG" 2>&1 &
 echo launched

@@ -2,7 +2,6 @@ package adris.altoclef.tasks.manhunt;
 
 import adris.altoclef.AltoClef;
 import adris.altoclef.TaskCatalogue;
-import adris.altoclef.movement.TungstenMovement;
 import adris.altoclef.tasks.movement.GetToEntityTask;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.helpers.StorageHelper;
@@ -20,7 +19,7 @@ import java.util.Optional;
  * 3. Chase and fight until the runner is dead
  * 4. Re-acquire target after death / dimension changes
  *
- * Movement: TungstenMovement facade (physics A* when available, else Baritone GetToEntity).
+ * Movement: GetToEntityTask on Ostinato travel.
  */
 public class HunterManhuntTask extends Task {
 
@@ -81,8 +80,7 @@ public class HunterManhuntTask extends Task {
             return combatTask;
         }
 
-        // Chase via Tungsten when available, else Baritone
-        return TungstenMovement.followEntity(currentTarget, 2.0);
+        return new GetToEntityTask(currentTarget, 2.0);
     }
 
     private Optional<PlayerEntity> findTarget() {

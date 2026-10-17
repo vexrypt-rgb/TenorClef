@@ -6,7 +6,7 @@
   Repo: C:\Users\redfa\Documents\MinecraftDev\altoclef
   JDK:  C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot
   Keep idleCommand empty; send @testrun2 via chat AFTER join.
-  Prefer Baritone. No Tungsten movement work here.
+  Prefer Baritone.
 #>
 [CmdletBinding()]
 param(
@@ -122,7 +122,6 @@ function Update-FromLog {
     @{ re = 'T2 \[E94\]';                         name = 'T2_E94' },
     @{ re = 'pick=0';                              name = 'pick0' },
     @{ re = 'PORTAL';                              name = 'PORTAL' },
-    @{ re = 'TungstenGoto';                        name = 'TungstenGoto' },
     @{ re = 'FINISHED|User task FINISHED';         name = 'FINISHED' },
     @{ re = '(?i)hard_stuck|hard stuck';           name = 'hard_stuck' },
     @{ re = '(?i)You died|\bdeath\b';               name = 'death' },
@@ -154,17 +153,9 @@ function Ensure-BaritoneSettings {
       } else {
         if ("$($obj.idleCommand)".Trim().Length -gt 0) { $obj.idleCommand = ""; $changed = $true }
       }
-      if ($obj.PSObject.Properties.Name -contains "speedrunMoverPreference") {
-        if ("$($obj.speedrunMoverPreference)" -ne "ostinato") {
-          $obj.speedrunMoverPreference = "ostinato"; $changed = $true
-        }
-      } else {
-        $obj | Add-Member -NotePropertyName speedrunMoverPreference -NotePropertyValue "ostinato" -Force
-        $changed = $true
-      }
       if ($changed) {
         Write-Utf8NoBom $SettingsPath ($obj | ConvertTo-Json -Depth 30)
-        Write-Host "OK patched altoclef_settings.json (idleCommand='', speedrunMoverPreference=ostinato)"
+        Write-Host "OK patched altoclef_settings.json (idleCommand='')"
       } else {
         Write-Host "OK settings already idle empty + baritone"
       }
@@ -172,7 +163,7 @@ function Ensure-BaritoneSettings {
       Write-Host "NOTE: settings patch failed: $_"
     }
   } else {
-    $seed = @{ idleCommand = ""; speedrunMoverPreference = "ostinato" } | ConvertTo-Json
+    $seed = @{ idleCommand = "" } | ConvertTo-Json
     Write-Utf8NoBom $SettingsPath $seed
     Write-Host "OK wrote seed altoclef_settings.json"
   }

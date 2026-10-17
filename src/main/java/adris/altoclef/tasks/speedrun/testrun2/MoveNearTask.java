@@ -2,27 +2,24 @@ package adris.altoclef.tasks.speedrun.testrun2;
 
 import adris.altoclef.AltoClef;
 import adris.altoclef.tasks.movement.GetToBlockTask;
-import adris.altoclef.tasks.movement.TungstenGotoTask;
-import adris.altoclef.util.helpers.TungstenHelper;
 import adris.altoclef.tasksystem.Task;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 /**
- * Travel: Tungsten physics A* when it is the primary mover (speedrunMoverPreference = tungsten/auto
- * and the jar is bound), else Baritone. TungstenGotoTask falls back to Baritone on its own timeouts.
+ * Walk to within {@code arriveRange} of a block on Ostinato travel, bailing out of deep water first.
  */
-public class TungstenMoveTask extends Task {
+public class MoveNearTask extends Task {
 
     private final BlockPos target;
     private final double arriveRange;
     private Task inner;
 
-    public TungstenMoveTask(BlockPos target) {
+    public MoveNearTask(BlockPos target) {
         this(target, 2.5);
     }
 
-    public TungstenMoveTask(BlockPos target, double arriveRange) {
+    public MoveNearTask(BlockPos target, double arriveRange) {
         this.target = target;
         this.arriveRange = arriveRange;
     }
@@ -33,7 +30,7 @@ public class TungstenMoveTask extends Task {
     }
 
     private Task newInner() {
-        return TungstenHelper.isPrimary() ? new TungstenGotoTask(target) : new GetToBlockTask(target);
+        return new GetToBlockTask(target);
     }
 
     @Override
@@ -44,8 +41,6 @@ public class TungstenMoveTask extends Task {
         if (SpeedrunOpt.AVOID_DEEP_WATER) {
             try {
                 if (mod.getPlayer().isTouchingWater() || mod.getPlayer().isSubmergedInWater()) {
-                    // Water is handled by the bail; make sure Tungsten is not steering at the same time.
-                    if (inner instanceof TungstenGotoTask) TungstenHelper.stop();
                     return new WaterBailTask();
                 }
             } catch (Throwable ignored) {}
@@ -64,7 +59,7 @@ public class TungstenMoveTask extends Task {
 
     @Override
     protected boolean isEqual(Task other) {
-        return other instanceof TungstenMoveTask o && o.target.equals(target);
+        return other instanceof MoveNearTask o && o.target.equals(target);
     }
 
     @Override

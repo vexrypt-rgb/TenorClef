@@ -55,12 +55,6 @@ public final class SpeedrunOpt {
     /** Chests to open before forcing iron. Stops a full village tour. */
     public static final int LOOT_MAX_CHESTS = 3;
 
-    /** Tungsten search budget for overworld travel (ms). Lower = less freeze, more replans. */
-    public static final long TUNGSTEN_SEARCH_MS = 1500L;
-
-    /** Give up a tungsten lock that hasn't closed 2 blocks in this many ms. */
-    public static final long TUNGSTEN_STALE_MS = 8000L;
-
     /** If true, never path into water deeper than 1 block; WaterBailTask handles accidents. */
     public static final boolean AVOID_DEEP_WATER = true;
 

@@ -28,11 +28,10 @@ Audit date: 2026-09-19 (America/Phoenix). Phase 1 CI/Gradle notes updated 2026-0
 - `WorldSurvivalChain` handles drown/lava/fire/portal with priority bands but remains a special-case chain, not a unified threat model (Phase 8).
 - Root `TODO.md`: lava escape, endermen eye contact, piglin rules, bastion avoidance.
 
-## Baritone / Tungsten leakage into TenorClef
+## Baritone leakage into TenorClef
 
 - **~60** Java files `import baritone...`.
-- Travel helpers exist (`TungstenMovement`) but most movement/construction/speedrun tasks still speak Baritone process APIs directly.
-- Duplicate control planes: TenorClef Tungsten facade **and** Ostinato tip `IMovementBackend` / `movementBackend` setting — risk of divergent switches until Phase 2 unifies on Ostinato MovementEngine.
+- `MovementEngineAdapter` exists, but most movement/construction/speedrun tasks still speak Baritone process APIs directly.
 
 ## Version / build debt
 
@@ -41,7 +40,6 @@ Audit date: 2026-09-19 (America/Phoenix). Phase 1 CI/Gradle notes updated 2026-0
 - **1.21.11 tip job still noisy** (missing symbols / Item vs ItemStack / Ostinato staging git failures). **CI noise cleanup (2026-09-20):** job is `continue-on-error` + soft Ostinato stage; required gates remain `1.21.1` + `1.16.1`. Full tip port deferred.
 - **Deploy Javadoc** workflow often red (Gradle/docs path). Made non-blocking (`continue-on-error`) same cleanup; root-cause fix still open.
 - Dual Ostinato lineages (Gradle 4.9 + JDK8 vs Gradle 8 + JDK21) remain; documented in `docs/DEVELOPMENT.md`.
-- Tungsten jar often absent from `libs/` — soft fallback remains; **CI explicitly optional** (jobs must pass without Tungsten). Proving the Tungsten path in CI is still open.
 
 ## Tests / CI gaps
 

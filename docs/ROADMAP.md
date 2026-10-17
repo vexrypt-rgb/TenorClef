@@ -7,11 +7,11 @@ Canonical workflow copy: `agent-data/workflows/tenorclef-ostinato/ROADMAP.md` (k
 ## Target split
 
 - **TenorClef** — high-level autonomous Minecraft agent: perception → world model → goals → planning → task execution → evaluation → recovery/replanning.
-- **Ostinato** — low-level movement/action layer: navigation → pathfinding → movement → physics traversal → backend abstraction (**Baritone** + **Tungsten**).
-- TenorClef must not know Baritone/Tungsten internals; Ostinato exposes a stable **MovementEngine** API.
+- **Ostinato** — low-level movement/action layer: navigation → pathfinding → movement → physics traversal (Baritone-compatible pathing with kinematic and physics travel).
+- TenorClef must not know Baritone internals; Ostinato exposes a stable **MovementEngine** API.
 
 ```
-Goal → Requirements → Plan → Tasks → Action Interface → Ostinato MovementEngine → Baritone | Tungsten
+Goal → Requirements → Plan → Tasks → Action Interface → Ostinato MovementEngine → Baritone pathing
 ```
 
 ## Phases (order matters)
@@ -35,8 +35,7 @@ Goal → Requirements → Plan → Tasks → Action Interface → Ostinato Movem
 Define and ship:
 
 - `MovementEngine`, `MovementGoal`, `MovementStatus`, `PathResult`, movement failures
-- `BaritoneMovementBackend`, `TungstenMovementBackend`, `HybridMovementEngine`
-- Preserve Tungsten-unavailable → Baritone fallback
+- `HybridMovementEngine` (the Tungsten backend it once wrapped has since been removed)
 - Migrate 1–2 representative TenorClef tasks onto the API
 - Unit (+ integration where possible) tests + interface docs
 
@@ -181,7 +180,7 @@ User: "Get me a full set of iron armor and a shield." → goal → plan → Osti
 | Theme | Examples |
 |-------|----------|
 | Foundation | CI matrix, JDK pins, Ostinato jar publish, remove `org.gradle.java.home` |
-| Ostinato movement | MovementEngine API, Baritone/Tungsten backends, Hybrid fallback |
+| Ostinato movement | MovementEngine API over Baritone pathing |
 | TenorClef core | Split AltoClef god object, inject services, kill singleton creep |
 | Tasks / failure | TaskResult / FailureReason, catalogue cleanup |
 | Intelligence | World model, planner, agent protocol |

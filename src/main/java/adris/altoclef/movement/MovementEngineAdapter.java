@@ -255,7 +255,6 @@ public final class MovementEngineAdapter {
             mod.getClientBaritone().getPathingBehavior().forceCancel();
             mod.getClientBaritone().getCustomGoalProcess().onLostControl();
         }
-        TungstenMovement.cancel();
     }
 
     public static String statusLine() {
@@ -269,6 +268,6 @@ public final class MovementEngineAdapter {
             } catch (Throwable ignored) {
             }
         }
-        return "MovementEngine: FALLBACK (" + detail() + ") | " + TungstenMovement.statusLine();
+        return "MovementEngine: FALLBACK (" + detail() + ")";
     }
 }

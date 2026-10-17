@@ -7,7 +7,6 @@ import adris.altoclef.tasksystem.FailureReason;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.tasksystem.TaskResult;
 import adris.altoclef.util.ItemTarget;
-import adris.altoclef.util.helpers.TungstenHelper;
 import net.minecraft.item.Items;
 
 /**
@@ -28,7 +27,6 @@ public class DeathRecycleTask extends Task {
         done = false;
         pickup = null;
         Debug.logMessage("TESRUN2 death-recycle: looking for grave drops");
-        try { TungstenHelper.stop(); } catch (Throwable ignored) {}
         targets = graveTargets();
         pickup = new PickupDroppedItemTask(targets, false);
     }

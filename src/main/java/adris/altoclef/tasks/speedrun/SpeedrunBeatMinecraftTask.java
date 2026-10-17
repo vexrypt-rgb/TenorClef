@@ -2,7 +2,6 @@ package adris.altoclef.tasks.speedrun;
 
 import adris.altoclef.AltoClef;
 import adris.altoclef.Debug;
-import adris.altoclef.movement.TungstenMovement;
 import adris.altoclef.tasks.movement.DefaultGoToDimensionTask;
 import adris.altoclef.tasks.movement.GetToBlockTask;
 import adris.altoclef.tasks.speedrun.bastion.*;
@@ -47,7 +46,6 @@ public class SpeedrunBeatMinecraftTask extends Task {
         public int blazeRodTarget = 7;
         /** When true, EarlyOverworld skips CollectFood (default false — food on unless skipfood). */
         public boolean skipFood = false;
-        public TungstenMovement.TravelMover mover = TungstenMovement.TravelMover.OSTINATO;
         public boolean verbose = false;
         /** One-liner chat HUD on phase change. */
         public boolean phaseChatHud = true;
@@ -61,7 +59,6 @@ public class SpeedrunBeatMinecraftTask extends Task {
                     c.pearlTarget = s.getSpeedrunPearlTarget();
                     c.blazeRodTarget = s.getSpeedrunBlazeRodTarget();
                     c.skipFood = s.getSpeedrunSkipFood();
-                    c.mover = TungstenMovement.parseTravelMover(s.getSpeedrunMoverPreference());
                     c.verbose = s.getSpeedrunVerbose();
                     c.phaseChatHud = s.getSpeedrunPhaseChatHud();
                 }
@@ -99,7 +96,6 @@ public class SpeedrunBeatMinecraftTask extends Task {
     private final EnumMap<Phase, Long> phaseMs = new EnumMap<>(Phase.class);
     private long lastVerboseLogMs = 0L;
     private String lastVerboseKey = "";
-    private TungstenMovement.TravelMover previousMover = null;
 
     public SpeedrunBeatMinecraftTask(AltoClef mod) {
         this(mod, Phase.OVERWORLD_EARLY, null);
@@ -141,7 +137,6 @@ public class SpeedrunBeatMinecraftTask extends Task {
                 + " divineX=" + divineFossilX
                 + " startPhase=" + startPhase
                 + " skipFood=" + config.skipFood
-                + " mover=" + config.mover
                 + " verbose=" + config.verbose
                 + " | " + formatTimersLine();
     }
@@ -254,11 +249,9 @@ public class SpeedrunBeatMinecraftTask extends Task {
         timingPhase = startPhase;
         lastVerboseLogMs = 0L;
         lastVerboseKey = "";
-        previousMover = TungstenMovement.getTravelMover();
-        TungstenMovement.setTravelMover(config.mover);
         setDebugState("Starting modern speedrun route (@testrun) at " + startPhase
                 + " pearls=" + config.pearlTarget + " rods=" + config.blazeRodTarget
-                + " skipFood=" + config.skipFood + " mover=" + config.mover);
+                + " skipFood=" + config.skipFood);
         if (config.phaseChatHud) {
             Debug.logMessage("Speedrun PHASE=" + startPhase + " (+0s, total 0s)");
         }
@@ -593,10 +586,6 @@ public class SpeedrunBeatMinecraftTask extends Task {
         long now = System.currentTimeMillis();
         if (timingPhase != null && phaseEnterMs > 0) {
             phaseMs.merge(timingPhase, Math.max(0, now - phaseEnterMs), Long::sum);
-        }
-        if (previousMover != null) {
-            TungstenMovement.setTravelMover(previousMover);
-            previousMover = null;
         }
     }
 

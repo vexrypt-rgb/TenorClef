@@ -485,11 +485,6 @@ public class Settings implements IFailableConfigFile {
     private boolean speedrunSkipFood = false;
 
     /**
-     * @testrun travel mover: auto | tungsten | ostinato (default ostinato, the Baritone fork; "baritone" still accepted).
-     */
-    private String speedrunMoverPreference = "ostinato";
-
-    /**
      * @testrun: extra phase/subgoal Debug.logMessage (rate-limited).
      */
     private boolean speedrunVerbose = false;
@@ -778,10 +773,6 @@ public class Settings implements IFailableConfigFile {
 
     public boolean getSpeedrunSkipFood() {
         return speedrunSkipFood;
-    }
-
-    public String getSpeedrunMoverPreference() {
-        return speedrunMoverPreference;
     }
 
     public boolean getSpeedrunVerbose() {

@@ -36,13 +36,6 @@ matching Ostinato branch and copy its `dist/baritone-unoptimized-fabric-*.jar` o
 - `1.21.4`: JDK 21, branch `1.21.4`, `./gradlew :fabric:build`.
 - `1.16.1`: JDK 8, `./gradlew build -Pbaritone.fabric_build`.
 
-## Tungsten
-
-Tungsten is optional and only affects travel/custom-goal movement on the modern target.
-Build its Fabric jar from `vendor/tungsten` and place it in TenorClef's `libs/` folder,
-or install it beside TenorClef and Ostinato in the Minecraft instance. If absent,
-Ostinato falls back to Baritone travel.
-
 ## Publishing follow-up
 
 The jars in `libs/` pin each module to an Ostinato release, but nothing stops a jar of another

@@ -93,10 +93,6 @@ Uses the committed `libs/baritone-unoptimized-fabric-1.21.4.jar` (Ostinato branc
 
 `1.21.1` down to `1.16.5` are preprocess-only nodes: TenorClef always runs on Ostinato and Ostinato has no build for them, so their compile, jar and test tasks are disabled. They keep upstream Baritone compile-only, only so the preprocessor can resolve types.
 
-## Tungsten (optional)
-
-Travel backend only on 1.21 / 1.21.1 / 1.21.11. Place `tungsten*.jar` in `libs/` or build `vendor/tungsten`. **CI and local builds must succeed without Tungsten** (Baritone fallback). See `docs/TUNGSTEN_BACKEND.md`.
-
 ## Version directories (Gradle 9+)
 
 `settings.gradle.kts` creates empty `versions/<mc>/` folders when missing so a clean clone can configure. ReplayMod preprocess fills sources on first build.
@@ -125,7 +121,7 @@ On push/PR to `main`, `.github/workflows/gradle.yml`:
 
 `Deploy Javadoc` (`.github/workflows/javadoc-publish.yml`) is also **non-blocking** (`continue-on-error`) — generation/deploy failures must not red `main`.
 
-Tungsten is never required. No `org.gradle.java.home` pin.
+No `org.gradle.java.home` pin.
 
 ### Related: Ostinato `1.16.1` Tests
 

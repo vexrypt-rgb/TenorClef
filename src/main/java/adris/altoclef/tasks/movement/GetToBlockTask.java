@@ -55,58 +55,6 @@ public class GetToBlockTask extends CustomBaritoneGoalTask implements ITaskRequi
     private adris.altoclef.movement.TravelTrace trace;
     private int traceDispatches;
 
-    private adris.altoclef.tasks.movement.TungstenGotoTask tungstenLeg;
-    private boolean tungstenGaveUp;
-    // Current long leg (> 16 blocks) being timed for MoverStats; legStartMs == 0 means none.
-    private long legStartMs;
-    private double legBlocks;
-    private boolean legTungsten;
-
-    private Task tungstenLeg(AltoClef mod, ClientWorld world, boolean isPortal) {
-        if (world == null || mod.getPlayer() == null) return null;
-        boolean far = !BlockPosVer.isWithinDistance(mod.getPlayer().getBlockPos(), _position, 16);
-        if (legStartMs != 0 && !far) {
-            // Reached the handoff radius: score the leg with whichever mover drove it.
-            adris.altoclef.movement.MoverStats.record(legTungsten, (System.currentTimeMillis() - legStartMs) / 1000.0, legBlocks, false);
-            legStartMs = 0;
-        }
-        boolean primary;
-        try {
-            primary = adris.altoclef.util.helpers.TungstenHelper.isPrimary();
-        } catch (Throwable t) {
-            primary = false;
-        }
-        if (tungstenLeg != null && tungstenLeg.usedFallback()) {
-            // Give-up: every second of search/travel it burned counts against Tungsten.
-            if (legStartMs != 0) adris.altoclef.movement.MoverStats.record(true, (System.currentTimeMillis() - legStartMs) / 1000.0, legBlocks, true);
-            legStartMs = 0;
-            tungstenGaveUp = true;
-            tungstenLeg = null;
-            return null;
-        }
-        if (!far) {
-            tungstenLeg = null;
-            return null;
-        }
-        if (legStartMs == 0) {
-            boolean standable = world.getBlockState(_position).isReplaceable()
-                    && world.getBlockState(_position.up()).isReplaceable();
-            // S247: Tungsten's physics search has no lava avoidance. s247t and s248t both walked
-            // into the Nether lava sea (y~31) on Tungsten legs to a blaze spawner. Baritone there.
-            boolean nether = adris.altoclef.util.helpers.WorldHelper.getCurrentDimension()
-                    == adris.altoclef.util.Dimension.NETHER;
-            legTungsten = primary && !tungstenGaveUp && !isPortal && standable && !nether
-                    && adris.altoclef.movement.MoverStats.preferTungsten();
-            legStartMs = System.currentTimeMillis();
-            legBlocks = Math.sqrt(mod.getPlayer().getBlockPos().getSquaredDistance(_position)) - 16;
-            // Only score Baritone legs when Tungsten is a real option, so the comparison is fair.
-            if (!legTungsten && !(primary && standable && !isPortal)) legStartMs = 0;
-        }
-        if (!legTungsten) return null;
-        if (tungstenLeg == null) tungstenLeg = new adris.altoclef.tasks.movement.TungstenGotoTask(_position);
-        return tungstenLeg;
-    }
-
     /** True once we have been isFinished for >10s while still being ticked (parent stuck). */
     private boolean staleFinished = false;
     private boolean staleFinishedWarned = false;
@@ -143,12 +91,7 @@ public class GetToBlockTask extends CustomBaritoneGoalTask implements ITaskRequi
             return new DefaultGoToDimensionTask(_dimension);
         }
 
-        // Tungsten (when it is the travel mover) owns long open-ground legs; Baritone keeps the
-        // last blocks, portals and non-standable targets (tables, ore) since Tungsten cannot
-        // mine or place. One Tungsten give-up hands this instance to Baritone for good.
-        Task tung = tungstenLeg(modEarly, world, isPortal);
-        traceTick(modEarly, tung != null);
-        if (tung != null) return tung;
+        traceTick(modEarly);
 
         if (isFinished()) {
             finishedTicks++;
@@ -177,20 +120,15 @@ public class GetToBlockTask extends CustomBaritoneGoalTask implements ITaskRequi
         return super.onTick();
     }
 
-    private void traceTick(AltoClef mod, boolean tungstenLegActive) {
+    private void traceTick(AltoClef mod) {
         if (trace == null || mod.getPlayer() == null) return;
-        if (tungstenLegActive) {
-            trace.dispatched("TUNGSTEN_TASK", false);
-        } else if (tungstenGaveUp && "TUNGSTEN_TASK".equals(trace.executed())) {
-            trace.dispatched(null, true);
-        }
         int n = adris.altoclef.movement.MovementEngineAdapter.dispatchCount();
         if (n != traceDispatches) {
             traceDispatches = n;
             trace.dispatched(adris.altoclef.movement.MovementEngineAdapter.lastBackend(),
                     adris.altoclef.movement.MovementEngineAdapter.lastFellBack());
         }
-        boolean pathing = tungstenLegActive || mod.getClientBaritone().getPathingBehavior().isPathing();
+        boolean pathing = mod.getClientBaritone().getPathingBehavior().isPathing();
         trace.tick(mod.getPlayer().getX(), mod.getPlayer().getY(), mod.getPlayer().getZ(), pathing);
     }
 

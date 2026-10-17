@@ -12,7 +12,6 @@ permissions:
 # TenorClef always runs on Ostinato, so only the versions Ostinato is built for are compiled, each
 # against the Ostinato jar committed in libs/ for it. The other versions are preprocess-only nodes
 # (see build.gradle).
-# Tungsten is OPTIONAL — jobs must pass without a tungsten jar.
 #
 # Required green: 26.3 (primary), 1.21.11, 1.21.4, 1.16.1.
 # Non-blocking: 1.21.11 against the tip of Ostinato branch 1.21.11, as an early warning that the two have drifted.

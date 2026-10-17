@@ -2,7 +2,7 @@
 
 TenorClef settings live in `altoclef/altoclef_settings.json` under the game directory (created on first
 launch). Edit the file, then run `@reload_settings` in game. The authoritative list, with documentation per
-field, is `src/main/java/adris/altoclef/Settings.java`. Movement settings (`movementBackend`,
+field, is `src/main/java/adris/altoclef/Settings.java`. Movement settings (`physicsTravel`,
 `kinematicTravel`, `allowLadderClutch`, …) belong to Ostinato and are changed with `#set` there; see the
 [Ostinato settings guide](https://github.com/vexrypt-rgb/Ostinato/blob/main/docs/guides/settings.md).
 
@@ -50,7 +50,7 @@ field, is `src/main/java/adris/altoclef/Settings.java`. Movement settings (`move
 
 ## Speedrun
 `speedrunPearlTarget` (14), `speedrunBlazeRodTarget` (7), `speedrunSkipFood` (false),
-`speedrunMoverPreference` (`ostinato`), `speedrunVerbose` (false), `speedrunPhaseChatHud` (true). These are
+`speedrunVerbose` (false), `speedrunPhaseChatHud` (true). These are
 the defaults for `@testrun` flags.
 
 ## Butler and SIGIL (`ButlerConfig`)

@@ -14,8 +14,6 @@ param(
   [int]$MaxWorlds = 0,
   # Sim time warp (1 = off). The forked MC JVM inherits JAVA_TOOL_OPTIONS -> WarpClock.
   [double]$Warp = 1,
-  # Travel mover for @testrun2: baritone | tungsten | auto
-  [string]$Mover = 'ostinato',
   [switch]$MonitorOnly,
   [switch]$ForceKillStale
 )
@@ -97,7 +95,6 @@ function Save-Status {
     blocker         = $Blocker
     notes           = $Notes
     testrun2        = [bool]$Testrun2
-    mover           = 'baritone'
     mode            = '1.16.1-live-keepalive'
     worldsCompleted = $script:WorldsDone
     mcVersion       = '1.16.1'
@@ -141,7 +138,6 @@ function Ensure-Settings {
 
     $obj = Set-JsonKey $obj 'idleCommand' ''
     if ($obj.PSObject.Properties.Name -contains 'idle_command') { $obj.idle_command = '' }
-    $obj = Set-JsonKey $obj 'speedrunMoverPreference' $Mover
 
     # Headless automation contract: create a fresh Easy world and run @testrun2.
     $obj = Set-JsonKey $obj 'autoLoadWorld' $true

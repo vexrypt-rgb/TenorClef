@@ -46,7 +46,7 @@ Measures pathfinding against a fixed ring of 16 goals around the bot (8 directio
 - `@pathbench search [- | setting=v1,v2,...] [reps]` runs Baritone's A* only, with no movement.
   With a sweep, the whole ring is re-run once per value of that Baritone setting, e.g.
   `@pathbench search costHeuristic=3.0,3.563,4.0 2`. The original value is restored afterwards.
-- `@pathbench travel [baritone|tungsten] [reps]` runs end to end. The bot teleports back to the
+- `@pathbench travel [baritone|kinematic|physics] [reps]` runs end to end. The bot teleports back to the
   start before each trial. Results are in game ticks, so they don't depend on `@warp`.
 
 Output goes to `run/pathbench/pathbench_*.csv`, plus a `PATHBENCH SUMMARY ...` line in latest.log.

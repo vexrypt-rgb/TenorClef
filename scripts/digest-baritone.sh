@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# digest-baritone.sh — compact Baritone/Ostinato/Tungsten movement summary of a sim run.
+# digest-baritone.sh — compact Baritone/Ostinato movement summary of a sim run.
 # digest-run.sh drops all [Baritone] lines; use this when a stall or death needs movement detail.
 #
 # Usage:
@@ -13,7 +13,7 @@
 #   goals goal types searched (top 3)   unr  UNREACHABLE   slow  "movement has taken too long"
 #   air   low-on-air surfacing   wy  Wrong Y coordinate   spr  sprinting unsafe   ahead  planning ahead
 # Rare messages (anything not counted above) print verbatim under the bucket, numbers-insensitive
-# duplicates collapsed to xN. Ostinato/Tungsten/MOVER lines count as rare.
+# duplicates collapsed to xN. Ostinato lines count as rare.
 
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -23,7 +23,7 @@ FROM="${2:-00:00:00}"; TO="${3:-99:99:99}"; WIN="${WIN:-30}"
 case "$LOGF" in *.gz) CAT="zcat" ;; *) CAT="cat" ;; esac
 
 $CAT "$LOGF" | sed 's/\x1b\[[0-9;]*m//g; s/§.//g' \
-  | grep -a -E '\[Baritone\]|Ostinato|Tungsten|MOVER ' | grep -av 'STDOUT\].*\[Baritone\]' \
+  | grep -a -E '\[Baritone\]|Ostinato' | grep -av 'STDOUT\].*\[Baritone\]' \
   | awk -v from="$FROM" -v to="$TO" -v win="$WIN" '
 function secs(t,  a) { split(t, a, ":"); return a[1] * 3600 + a[2] * 60 + a[3] }
 function flush(   g, top, i, best, bk, out) {

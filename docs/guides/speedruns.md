@@ -22,7 +22,6 @@ Flags may come before the mode (`@testrun skipfood nether`):
 | `pearls=N` | ender pearl target (default 14, setting `speedrunPearlTarget`) |
 | `rods=N` (`blaze=`, `blazerods=`) | blaze rod target (default 7, `speedrunBlazeRodTarget`) |
 | `skipfood` / `nofood`, `food` / `collectfood` | skip or force food collection |
-| `mover=auto\|tungsten\|ostinato` | travel backend preference (default `ostinato`, `speedrunMoverPreference`) |
 | `verbose`, `hud` / `nohud` | verbose logs, phase chat HUD |
 
 Starting at a later phase assumes you provide the inventory and dimension that phase expects. `@status`,

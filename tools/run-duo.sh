@@ -13,5 +13,5 @@ else
 fi
 rm -f logs/move-window.log
 (nohup powershell -ExecutionPolicy Bypass -File tools/move-mc-window.ps1 >/dev/null 2>&1 &)
-nohup ./gradlew :1.21.11:runClient --no-daemon -PnoTungsten --args="$ARGS" > "$LOG" 2>&1 &
+nohup ./gradlew :1.21.11:runClient --no-daemon --args="$ARGS" > "$LOG" 2>&1 &
 echo launched $ROLE

@@ -8,7 +8,7 @@ public class TravelTraceTest {
 
     @Test
     void arrivedRecordCarriesAllFields() {
-        TravelTrace t = new TravelTrace("GoalBlock", 0, 64, 0, 3, 64, 0, "TUNGSTEN");
+        TravelTrace t = new TravelTrace("GoalBlock", 0, 64, 0, 3, 64, 0, "PHYSICS");
         t.tick(0, 64, 0, false);
         t.tick(0, 64, 0, true);
         t.dispatched("BARITONE", true);
@@ -19,7 +19,7 @@ public class TravelTraceTest {
         assertEquals(2, t.firstPathingTick());
         assertEquals(3.0, t.traveled(), 1e-9);
         assertEquals(2, t.stallTicks());
-        assertTrue(line.contains("requested=TUNGSTEN executed=BARITONE fallback=true"), line);
+        assertTrue(line.contains("requested=PHYSICS executed=BARITONE fallback=true"), line);
         assertTrue(line.contains("outcome=ARRIVED reason=- verified=true"), line);
         assertTrue(line.contains("remaining=0.0"), line);
     }

@@ -5,7 +5,7 @@ import adris.altoclef.commandsystem.ArgParser;
 import adris.altoclef.commandsystem.Command;
 import adris.altoclef.commandsystem.args.StringArg;
 import adris.altoclef.commandsystem.exception.CommandException;
-import adris.altoclef.movement.TungstenMovement;
+import adris.altoclef.movement.MovementEngineAdapter;
 import adris.altoclef.tasks.speedrun.SpeedrunBeatMinecraftTask;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.helpers.WorldHelper;
@@ -27,7 +27,7 @@ import java.util.Locale;
  *   <li>{@code phases}/{@code help} - list modes and phase order</li>
  * </ul>
  * Optional flags (any order after mode): {@code pearls=N} {@code rods=N}
- * {@code skipfood}|{@code food} {@code mover=auto|tungsten|ostinato} {@code verbose} {@code nohud}
+ * {@code skipfood}|{@code food} {@code verbose} {@code nohud}
  */
 public class TestRunCommand extends Command {
 
@@ -45,7 +45,7 @@ public class TestRunCommand extends Command {
             "  status      live phase + timers/counts",
             "  verbose     toggle verbose phase logs (session)",
             "  phases|help this text",
-            "Flags: pearls=14 rods=7 skipfood|food mover=auto|tungsten|ostinato verbose nohud",
+            "Flags: pearls=14 rods=7 skipfood|food verbose nohud",
             "Also: @status @coords @inventory @stop @pause @unpause"
     );
 
@@ -136,7 +136,6 @@ public class TestRunCommand extends Command {
                 + " pearls=" + cfg.pearlTarget
                 + " rods=" + cfg.blazeRodTarget
                 + " skipFood=" + cfg.skipFood
-                + " mover=" + cfg.mover
                 + " verbose=" + cfg.verbose
                 + " (dim=" + WorldHelper.getCurrentDimension() + ")");
         mod.runUserTask(new SpeedrunBeatMinecraftTask(mod, phase, cfg), this::finish);
@@ -174,7 +173,6 @@ public class TestRunCommand extends Command {
             switch (key) {
                 case "pearls", "pearl", "enderpearls" -> cfg.pearlTarget = parsePositive(val, cfg.pearlTarget);
                 case "rods", "blaze", "blazerods", "blaze_rods" -> cfg.blazeRodTarget = parsePositive(val, cfg.blazeRodTarget);
-                case "mover", "travel", "path" -> cfg.mover = TungstenMovement.parseTravelMover(val);
                 case "skipfood", "nofood" -> cfg.skipFood = parseBool(val, true);
                 case "food", "collectfood" -> cfg.skipFood = !parseBool(val, true);
                 case "verbose" -> cfg.verbose = parseBool(val, true);
@@ -211,7 +209,7 @@ public class TestRunCommand extends Command {
             } else {
                 mod.log("@testrun status: SpeedrunBeatMinecraftTask not active. CURRENT: " + tasks.get(0));
             }
-            mod.log("sessionVerbose=" + sessionVerbose + " | " + TungstenMovement.statusLine());
+            mod.log("sessionVerbose=" + sessionVerbose + " | " + MovementEngineAdapter.statusLine());
             return;
         }
         mod.log("@testrun status: phase=" + speedrun.getCurrentPhase()

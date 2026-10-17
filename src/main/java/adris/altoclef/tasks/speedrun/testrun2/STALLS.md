@@ -13,16 +13,15 @@
 | Piglin trade first forever | Gold in bag, no fortress, 0 rods | 75s trade cap then blazes |
 | `isFinished` never true | Timer never prints | DONE when dragon gone or closer finished |
 | PORTAL without bucket | Flint from RP, walk into lava lake | Bucket required before PORTAL |
-| Water + tungsten lock | Drowned, phase doesn't change | WaterBailTask intercept |
+| Water | Drowned, phase doesn't change | WaterBailTask intercept |
 
-## Stock AltoClef / Tungsten stalls we cannot fully own
+## Stock AltoClef stalls we cannot fully own
 
 - **Food chain** steals the user task when hunger drops. Looks like “stuck between tasks.” Eat or carry more food.
 - **Mob defense chain** same story next to a blaze spawner.
 - **Crafting table missing in the Nether** when crafting eyes — catalogue should place one; if your fork doesn't, closer takes over after 2 min.
 - **Flint** needs gravel. No gravel + no RP flint = IRON phase stall → closer at 2 min.
 - **GoToStrongholdPortalTask** throwing eyes into a cave wall / ocean. Water fix helps ocean; caves are stock.
-- **Two pathfinders** if shredder still gets a goal while tungsten is locked. UnionClef G-0 should have tungsten primary; `setPrimary(true)` is on start.
 - **Death** resets inventory; `decide()` jumps back to BOOTSTRAP. That is correct, not a hang.
 
 ## What to watch in chat

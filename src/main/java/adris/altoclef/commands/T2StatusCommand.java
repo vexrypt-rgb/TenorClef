@@ -6,7 +6,6 @@ import adris.altoclef.commandsystem.ArgParser;
 import adris.altoclef.commandsystem.Command;
 import adris.altoclef.commandsystem.exception.CommandException;
 import adris.altoclef.tasks.speedrun.testrun2.SpeedrunClock;
-import adris.altoclef.util.helpers.TungstenHelper;
 import net.minecraft.item.Items;
 
 /** `@t2stat` — print clock + kit without stopping the run. */
@@ -28,9 +27,7 @@ public class T2StatusCommand extends Command {
                 + " fns=" + inv.getItemCount(Items.FLINT_AND_STEEL)
                 + " rods=" + inv.getItemCount(Items.BLAZE_ROD)
                 + " pearls=" + inv.getItemCount(Items.ENDER_PEARL)
-                + " eyes=" + inv.getItemCount(Items.ENDER_EYE)
-                + " tungsten=" + TungstenHelper.isTungstenLoaded()
-                + " primary=" + TungstenHelper.isPrimary());
+                + " eyes=" + inv.getItemCount(Items.ENDER_EYE));
         finish();
     }
 }

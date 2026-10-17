@@ -1,7 +1,7 @@
 # Travel and navigation
 
 TenorClef never walks by itself: every move goes through [Ostinato](https://github.com/vexrypt-rgb/Ostinato)
-(Baritone-compatible pathing) or, on modern targets, optionally Tungsten.
+(Baritone-compatible pathing).
 
 ## `@goto`
 ```
@@ -12,12 +12,6 @@ TenorClef never walks by itself: every move goes through [Ostinato](https://gith
 @goto nether                 # just change dimension (uses a portal)
 ```
 Accepted shapes: `[x y z dimension]`, `[x z dimension]`, `[y dimension]`, `[dimension]`, `[x y z]`, `[x z]`, `[y]`.
-
-## `@tgoto` and `@ttest`
-`@tgoto` takes the same arguments but asks the Tungsten physics A* to travel when it is installed and
-falls back to Baritone otherwise. `@ttest [legs]` runs a Tungsten self-test over `legs` random surface legs
-(default 8). See [Tungsten backend](../TUNGSTEN_BACKEND.md). Which backend is used by default is Ostinato's
-`movementBackend` setting (`baritone`, `tungsten`, `auto`); check the log if you expect Tungsten.
 
 ## People and places
 | Command | Notes |
@@ -35,7 +29,7 @@ the Nether. Portals are built/entered by the task layer when needed.
 
 ## Measuring movement
 `@pathbench search [-|setting=a,b] [reps]` times path searches (optionally sweeping settings);
-`@pathbench travel [baritone|tungsten|kinematic] [reps]` runs fixed goals end to end and writes CSV to
+`@pathbench travel [baritone|kinematic|physics] [reps]` runs fixed goals end to end and writes CSV to
 `versions/<mc>/run/pathbench/`. Recorded numbers and their caveats are in the README and
 [BENCHMARKS.md](../BENCHMARKS.md).
 

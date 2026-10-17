@@ -22,8 +22,6 @@ linked guide.
 | Command | What it does |
 | --- | --- |
 | `@goto <x y z [dim]>` / `<x z>` / `<y>` / `<dim>` | Travel to coordinates or a dimension |
-| `@tgoto …` | Same, via the Tungsten physics A* when available, else Baritone |
-| `@ttest [legs]` | Tungsten self-test over random surface legs |
 | `@follow [player]` | Follow a player |
 | `@sethome` (`@set_home`) / `@home` (`@t2home`) | Save feet position / walk back to it |
 | `@back` | Walk to the last death position |

@@ -1,7 +1,3 @@
-Place remapped Tungsten Fabric jars here. Gradle picks them up for the compiled
-modules that support Tungsten (`1.21.11`, `1.21.4`, and the
-preprocess-only 1.21 / 1.21.1 steps).
-
 Ostinato Baritone jars (preferred):
 
 - Prefer `../Ostinato/dist` after building the matching Ostinato branch. See

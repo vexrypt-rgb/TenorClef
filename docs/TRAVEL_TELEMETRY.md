@@ -11,8 +11,8 @@ TRAVEL goal=GetToBlock start=x,y,z target=x,y,z requested=<backend> executed=<ba
 
 | Field | Meaning |
 |---|---|
-| `requested` | Ostinato `movementBackend` preference at dispatch (`MovementEngineAdapter.requestedBackend()`) |
-| `executed` | Mover that took the last dispatch: an engine backend (`BARITONE`, `TUNGSTEN`, ...), `CUSTOM_GOAL_PROCESS` (adapter fallback), or `TUNGSTEN_TASK` (GetToBlockTask's direct Tungsten leg) |
+| `requested` | Ostinato backend preference at dispatch (`MovementEngineAdapter.requestedBackend()`; `BARITONE`, or `NONE` without a MovementEngine) |
+| `executed` | Mover that took the last dispatch: the engine backend (`BARITONE`) or `CUSTOM_GOAL_PROCESS` (adapter fallback) |
 | `fallback` | Sticky: true if any dispatch ran on something other than `requested` |
 | `pathFoundTick` | First task tick on which Baritone/engine reported pathing (-1 = never) |
 | `traveled` | Summed per-tick movement; jumps ≥10 blocks (teleport/respawn) are excluded |
@@ -22,7 +22,7 @@ TRAVEL goal=GetToBlock start=x,y,z target=x,y,z requested=<backend> executed=<ba
 
 ## Reproducing
 
-`@goto x y z` with `movementbackend baritone|tungsten` in `run/baritone/settings.txt`, then
+`@goto x y z`, then
 `grep -a "TRAVEL goal=" run/logs/latest.log` (the line appears twice: log + chat echo).
 
 ## Observed results (1.16.1, seed 12345, `goto 87 69 -115`, spawn ≈ 57–63,68–71,-110–-112)
@@ -42,5 +42,5 @@ Tungsten runs all took ≈49 s and each logged ~420 Tungsten `search start` line
 **Resolved contradiction:** two tungsten runs reported `verified=true` with `remaining` 19.5 and 47.8.
 Cause: `verified` used `isFinished()`, which is also true after a terminal recovery abort. Fixed to a
 pure world check (`CustomBaritoneGoalTask.isInGoal()`); those runs were aborts, not arrivals. The
-table rows above predate the fix, so `verified` there is unreliable for aborted runs. Tungsten is parked (not a target backend for now); Baritone and
-the kinematic mover are the supported travel paths.
+table rows above predate the fix, so `verified` there is unreliable for aborted runs. Tungsten support was later removed from TenorClef and Ostinato;
+Baritone with the kinematic and physics movers is the travel path. The tungsten rows are history.

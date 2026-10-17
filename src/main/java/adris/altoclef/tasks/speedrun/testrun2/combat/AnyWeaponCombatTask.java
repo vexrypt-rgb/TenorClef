@@ -7,7 +7,6 @@ import adris.altoclef.tasks.speedrun.testrun2.McCompat;
 import adris.altoclef.tasks.speedrun.testrun2.SpeedrunOpt;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.helpers.LookHelper;
-import adris.altoclef.util.helpers.TungstenHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.mob.CreeperEntity;
@@ -59,7 +58,6 @@ public class AnyWeaponCombatTask extends Task {
         hits = 0;
         done = false;
         target = null;
-        try { TungstenHelper.stop(); } catch (Throwable ignored) {}
     }
 
     @Override
@@ -120,7 +118,6 @@ public class AnyWeaponCombatTask extends Task {
         // is the raise/lower pump that froze sprint.
 
         if (dist > REACH) {
-            approach(mod, target);
             return null;
         }
 
@@ -225,18 +222,7 @@ public class AnyWeaponCombatTask extends Task {
         LookHelper.lookAt(mod, pos);
     }
 
-    private void approach(AltoClef mod, LivingEntity e) {
-        try {
-            TungstenHelper.tryPathTo(e.getPos());
-        } catch (Throwable ignored) {}
-    }
-
     private void retreat(AltoClef mod, LivingEntity e) {
-        Vec3d away = MathsHelper.scale(mod.getPlayer().getPos().subtract(e.getPos()).normalize(), 4);
-        Vec3d dest = mod.getPlayer().getPos().add(away);
-        try {
-            TungstenHelper.tryPathTo(dest);
-        } catch (Throwable ignored) {}
         try {
             net.minecraft.client.MinecraftClient.getInstance().options.jumpKey.setPressed(true);
         } catch (Throwable ignored) {}
@@ -315,7 +301,6 @@ public class AnyWeaponCombatTask extends Task {
             opts.useKey.setPressed(false);
             opts.jumpKey.setPressed(false);
         } catch (Throwable ignored) {}
-        try { TungstenHelper.stop(); } catch (Throwable ignored) {}
         if (hits > 0) Debug.logMessage("TESRUN2 combat hits=" + hits);
     }
 

@@ -30,7 +30,6 @@ import adris.altoclef.tasksystem.TaskResult;
 import adris.altoclef.util.Dimension;
 import adris.altoclef.util.ItemTarget;
 import adris.altoclef.util.helpers.StorageHelper;
-import adris.altoclef.util.helpers.TungstenHelper;
 import adris.altoclef.util.helpers.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -62,7 +61,7 @@ import java.util.Set;
  *   8. isFinished() never flipped DONE, so @testrun2's timer never stopped.
  *   9. Phase could flip PORTAL while still missing a bucket if flint dropped
  *      from an RP chest — portal task then stalls. Bucket is required first.
- *  10. Water + tungsten lock with no child swap — WaterBailTask is injected.
+ *  10. Water with no child swap — WaterBailTask is injected.
  */
 public class ModernSpeedrunTask extends Task {
 
@@ -488,12 +487,6 @@ public class ModernSpeedrunTask extends Task {
             T2Deadman.arm();
         } catch (Throwable ignored) {}
         sessionLive = true;
-        // Travel mover comes from settings (speedrunMoverPreference: baritone | tungsten | auto).
-        // Before this, @testrun2 never read it and TungstenHelper was a stub, so Tungsten never ran.
-        try {
-            adris.altoclef.movement.TungstenMovement.setTravelMover(adris.altoclef.movement.TungstenMovement
-                    .parseTravelMover(AltoClef.getInstance().getModSettings().getSpeedrunMoverPreference()));
-        } catch (Throwable ignored) {}
         T2Brain.reset();
         AltoClef boot = AltoClef.getInstance();
         if (boot != null && boot.getPlayer() != null && count(boot, Items.IRON_PICKAXE) >= 1) {
@@ -571,10 +564,9 @@ public class ModernSpeedrunTask extends Task {
         // spawn area, so village/portal are both false and any gate would reject every
         // seed and reroll forever. The S159 gate runs once the scanner has had time — see
         // spawnGate() and the SPAWN_GATE_TICKS field comment.
-        // Mining always Baritone; travel mover may be tungsten when jar present (1.21.x only).
         String moverLine;
         try {
-            moverLine = adris.altoclef.movement.TungstenMovement.statusLine();
+            moverLine = adris.altoclef.movement.MovementEngineAdapter.statusLine();
         } catch (Throwable t) {
             moverLine = "mover=ostinato (status unavailable)";
         }
@@ -1045,7 +1037,6 @@ public class ModernSpeedrunTask extends Task {
 
         if (dragonDead(mod)) {
             setPhase(Phase.DONE);
-            try { TungstenHelper.stop(); } catch (Throwable ignored) {}
             return null;
         }
         if (usedCloser && WorldHelper.getCurrentDimension() == Dimension.NETHER) {
@@ -1734,7 +1725,7 @@ public class ModernSpeedrunTask extends Task {
             BlockPos pos = chest.get();
             Vec3d c = Vec3d.ofCenter(pos);
             if (mod.getPlayer().getPos().squaredDistanceTo(c) > CHEST_RANGE_SQ) {
-                return new TungstenMoveTask(pos, 3.0);
+                return new MoveNearTask(pos, 3.0);
             }
             looted.add(pos);
             return new LootContainerTask(pos, lootWanted());
@@ -1744,7 +1735,7 @@ public class ModernSpeedrunTask extends Task {
                 var bell = mod.getBlockScanner().getNearestBlock(Blocks.BELL);
                 if (bell != null && bell.isPresent()) {
                     T2History.note("WHY loot: village bell");
-                    return new TungstenMoveTask(bell.get(), 6.0);
+                    return new MoveNearTask(bell.get(), 6.0);
                 }
             } catch (Throwable ignored) {}
             return null;
@@ -3369,7 +3360,6 @@ public class ModernSpeedrunTask extends Task {
     @Override
     protected void onStop(Task interruptTask) {
         AltoClef.getInstance().getBehaviour().pop();
-        try { TungstenHelper.stop(); } catch (Throwable ignored) {}
         adris.altoclef.tasks.speedrun.testrun2.core.T2Input.releaseAll();
         try { McCompat.cancelPathing(); } catch (Throwable ignored) {}
         boolean dead = false;

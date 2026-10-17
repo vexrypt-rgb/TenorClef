@@ -1,7 +1,7 @@
 package adris.altoclef.tasks.manhunt;
 
 import adris.altoclef.AltoClef;
-import adris.altoclef.movement.TungstenMovement;
+import adris.altoclef.movement.MovementEngineAdapter;
 import adris.altoclef.tasks.speedrun.SpeedrunBeatMinecraftTask;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.helpers.StorageHelper;
@@ -20,7 +20,7 @@ import java.util.Optional;
  *   - Fight back (PvP) or kite depending on gear advantage
  *   - Resume speedrun when the threat is gone or dead
  *
- * Travel/chase hooks go through TungstenMovement (Baritone fallback). Speedrun mining stays on Baritone.
+ * Travel and speedrun mining both run on Ostinato.
  */
 public class RunnerManhuntTask extends Task {
 
@@ -38,7 +38,7 @@ public class RunnerManhuntTask extends Task {
 
     @Override
     protected void onStart() {
-        setDebugState("Runner - starting speedrun; " + TungstenMovement.statusLine());
+        setDebugState("Runner - starting speedrun; " + MovementEngineAdapter.statusLine());
         speedrunTask = new SpeedrunBeatMinecraftTask(mod);
         combatTask = null;
     }

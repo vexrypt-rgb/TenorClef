@@ -80,18 +80,15 @@ n
 
 ## Movement backends
 
-Every build uses Ostinato, the AltoClef-compatible Baritone fork. On the modern targets,
-Tungsten is an optional travel backend; mining, building, and inventory operations use
-Ostinato's Baritone processes. Ostinato also carries the encrypted `#swarm` link for
+Every build uses Ostinato, the AltoClef-compatible Baritone fork, for travel, mining,
+building, and inventory operations. Ostinato also carries the encrypted `#swarm` link for
 multi-bot groups, including coordinated region builds (`#swarm build`); see Ostinato's
 `docs/REGION_BUILD.md`. TenorClef's own swarm (`@swarm`, or the Swarm tab in the menu) uses that same
 link, so both need the Ostinato version named in the release notes; see the
 [swarm guide](docs/guides/swarm-and-fleet.md).
 
-When using an Ostinato-enabled pairing, its `movementBackend` setting selects
-`baritone`, `tungsten`, or `auto`; `auto` falls back to Baritone when Tungsten is not
-installed. The 1.16.1 pairing also has an experimental physics-driven `kinematicTravel`
-controller, plus `pitfallAvoidance`. See [Ostinato's README](https://github.com/vexrypt-rgb/Ostinato) for
+Ostinato's travel can be flown by its physics-driven `kinematicTravel` and `physicsTravel`
+controllers, plus `pitfallAvoidance`. TenorClef no longer bridges to the Tungsten mod. See [Ostinato's README](https://github.com/vexrypt-rgb/Ostinato) for
 backend details.
 
 ## Benchmarking movement
@@ -99,7 +96,7 @@ backend details.
 The in-game `@pathbench` command measures the pathfinder and the movement layer:
 
 - `@pathbench search [-|setting=a,b] [reps]` times path searches, optionally sweeping a setting.
-- `@pathbench travel [baritone|tungsten|kinematic] [reps]` runs end-to-end trials over a fixed
+- `@pathbench travel [baritone|kinematic|physics] [reps]` runs end-to-end trials over a fixed
   set of goals and records reached/stalled and ticks per goal.
 
 Results are written as CSV to `versions/<mc>/run/pathbench/` (not committed). The table below was

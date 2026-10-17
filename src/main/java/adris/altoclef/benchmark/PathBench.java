@@ -28,7 +28,6 @@ package adris.altoclef.benchmark;
 //$$ import java.util.List;
 //$$ import java.util.Locale;
 //$$ import adris.altoclef.Debug;
-//$$ import adris.altoclef.movement.TungstenMovement;
 //$$
 //$$ /**
 //$$  * Headless-friendly pathfinding benchmark (1.16.1 SIM target).
@@ -38,7 +37,7 @@ package adris.altoclef.benchmark;
 //$$  * {@code key=v1,v2,...} re-runs the whole ring once per Baritone setting value, so a
 //$$  * settings change can be compared inside one launch.
 //$$  *
-//$$  * <p><b>travel</b>: end-to-end with a mover (baritone | tungsten). Teleports back to the
+//$$  * <p><b>travel</b>: end-to-end with a mover (baritone | kinematic | physics). Teleports back to the
 //$$  * start before each trial and records game ticks to arrive and final distance.
 //$$  *
 //$$  * <p>Writes {@code pathbench/pathbench_<mode>_<time>.csv} and logs a {@code PATHBENCH}
@@ -179,32 +178,6 @@ package adris.altoclef.benchmark;
 //$$
 //$$     // ---- travel ------------------------------------------------------------------------
 //$$
-//$$     /** Tungsten movement along a Baritone block route: Baritone picks the blocks, Tungsten the sprint/jump inputs. */
-//$$     private static boolean startGuided(MinecraftClient mc, IBaritone b, BlockPos g) {
-//$$         try {
-//$$             BlockPos from = mc.submit(() -> mc.player.getBlockPos()).get();
-//$$             CalculationContext ctx = mc.submit(() -> new CalculationContext(b, true)).get();
-//$$             AStarPathFinder pf = new AStarPathFinder(from.getX(), from.getY(), from.getZ(), new GoalBlock(g), new Favoring(null, ctx), ctx);
-//$$             long ms = Long.getLong("tenorclef.pathbench.guideMs", 1500L);
-//$$             IPath p = pf.calculate(ms, ms * 2).getPath().orElse(null);
-//$$             if (p == null || p.positions().size() < 2) return TungstenMovement.requestPathTo(g);
-//$$             // Keep every Nth block plus every height change, so Tungsten is free to cut corners on flat runs.
-//$$             int stride = Integer.getInteger("tenorclef.pathbench.guideStride", 3);
-//$$             List<? extends baritone.api.utils.BetterBlockPos> pos = p.positions();
-//$$             java.util.List<BlockPos> way = new java.util.ArrayList<>();
-//$$             for (int i = 0; i < pos.size(); i++) {
-//$$                 boolean yChange = i > 0 && pos.get(i).getY() != pos.get(i - 1).getY()
-//$$                         || i + 1 < pos.size() && pos.get(i).getY() != pos.get(i + 1).getY();
-//$$                 if (i == 0 || i == pos.size() - 1 || i % stride == 0 || yChange) way.add(new BlockPos(pos.get(i).getX(), pos.get(i).getY(), pos.get(i).getZ()));
-//$$             }
-//$$             BlockPos end = way.get(way.size() - 1);
-//$$             return TungstenMovement.requestPathVia(end, way);
-//$$         } catch (Exception e) {
-//$$             Debug.logHarness("PATHBENCH guided route failed: " + e);
-//$$             return TungstenMovement.requestPathTo(g);
-//$$         }
-//$$     }
-//$$
 //$$     private static void travel(MinecraftClient mc, BlockPos origin, String opt, int reps) throws Exception {
 //$$         String mover = opt == null || opt.equals("-") ? "baritone" : opt.toLowerCase(Locale.ROOT);
 //$$         IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
@@ -232,15 +205,11 @@ package adris.altoclef.benchmark;
 //$$         long limitTicks = Long.getLong("tenorclef.pathbench.travelTicks", 20L * 90);
 //$$         // End a trial early once it stops getting closer; 0 disables.
 //$$         long stallTicks = Long.getLong("tenorclef.pathbench.stallTicks", 400L);
-//$$         long idleTicks = Long.getLong("tenorclef.pathbench.idleTicks", 80L);
 //$$         // Optional goal subset, e.g. -Dtenorclef.pathbench.goals=8,9,10
 //$$         String goalSel = System.getProperty("tenorclef.pathbench.goals", "").trim();
 //$$         java.util.Set<Integer> only = new java.util.HashSet<>();
 //$$         if (!goalSel.isEmpty()) for (String x : goalSel.split(",")) only.add(Integer.parseInt(x.trim()));
-//$$         // "ostinato": Baritone's custom goal with movementBackend=tungsten (Ostinato's own Tungsten bridge).
-//$$         // "kinematic": Baritone's path driven by Ostinato's physics look-ahead controller.
-//$$         boolean viaCustom = mover.equals("baritone") || mover.equals("ostinato") || mover.equals("kinematic") || mover.equals("physics");
-//$$         BaritoneAPI.getSettings().movementBackend.value = mover.equals("ostinato") ? "tungsten" : "baritone";
+//$$         // "kinematic": Baritone's path driven by Ostinato's physics look-ahead controller; "physics": the physics travel driver.
 //$$         BaritoneAPI.getSettings().kinematicTravel.value = mover.equals("kinematic");
 //$$         BaritoneAPI.getSettings().physicsTravel.value = mover.equals("physics");
 //$$         // surface movement faults (e.g. M01 kinematic hand-back); the default sink discards them
@@ -260,7 +229,7 @@ package adris.altoclef.benchmark;
 //$$                         int hostiles = mc.world.getEntities(net.minecraft.entity.mob.HostileEntity.class, mc.player.getBoundingBox().expand(32), e -> true).size();
 //$$                         Debug.logHarness(String.format(Locale.ROOT, "PATHBENCH TRIALSTATE goal=%d rep=%d timeOfDay=%d hostiles32=%d", gi, r, mc.world.getTimeOfDay() % 24000, hostiles));
 //$$                     }
-//$$                     boolean started = mover.equals("tungsten") ? TungstenMovement.requestPathTo(g) : mover.equals("guided") ? startGuided(mc, baritone, g) : startBaritone(mc, baritone, g);
+//$$                     boolean started = startBaritone(mc, baritone, g);
 //$$                     long firstMove = -1;
 //$$                     long kin0 = kinTicks(), kinAtBest = kin0; // attributes a stall to the kinematic controller or to Baritone
 //$$                     double startD = dist(mc, g);
@@ -293,15 +262,8 @@ package adris.altoclef.benchmark;
 //$$                         if (d < bestD - 1.0) { bestD = d; bestAt = el; kinAtBest = kinTicks(); }
 //$$                         if (stallTicks > 0 && el - bestAt > stallTicks) { result = "STALLED"; break; }
 //$$                         if (Math.abs(d - lastD) > 0.3) { lastD = d; lastMoveAt = el; }
-//$$                         if (!viaCustom && idleTicks > 0 && firstMove >= 0 && el - lastMoveAt > idleTicks && el - lastReq > idleTicks && el < limitTicks) {
-//$$                             TungstenMovement.cancel(); Thread.sleep(100);
-//$$                             if (mover.equals("guided")) startGuided(mc, baritone, g); else TungstenMovement.requestPathTo(g);
-//$$                             lastReq = el; lastMoveAt = el; continue;
-//$$                         }
-//$$                         boolean active = !viaCustom ? TungstenMovement.isPathing() : baritone.getCustomGoalProcess().isActive();
+//$$                         boolean active = baritone.getCustomGoalProcess().isActive();
 //$$                         if (!active && el - lastReq > 40) {
-//$$                             if (mover.equals("tungsten") && el < limitTicks) { TungstenMovement.requestPathTo(g); lastReq = el; continue; }
-//$$                             if (mover.equals("guided") && el < limitTicks) { startGuided(mc, baritone, g); lastReq = el; continue; }
 //$$                             result = "STOPPED"; break;
 //$$                         }
 //$$                         if (el > limitTicks) break;
@@ -314,12 +276,11 @@ package adris.altoclef.benchmark;
 //$$                         Debug.logHarness(String.format(Locale.ROOT, "PATHBENCH TAIL t=%d pos=%.2f,%.2f,%.2f vel=%.2f,%.2f,%.2f ground=%s hcoll=%s %s",
 //$$                                 worldTime(mc) - t0, mc.player.getX(), mc.player.getY(), mc.player.getZ(), v.x, v.y, v.z, mc.player.isOnGround(), mc.player.horizontalCollision, execState(baritone)));
 //$$                     }
-//$$                     boolean activeAtEnd =!viaCustom ? TungstenMovement.isPathing() : baritone.getCustomGoalProcess().isActive();
+//$$                     boolean activeAtEnd = baritone.getCustomGoalProcess().isActive();
 //$$                     long kinNow = kinTicks();
-//$$                     boolean pathAtEnd = viaCustom && baritone.getPathingBehavior().hasPath();
-//$$                     boolean calcAtEnd = viaCustom && baritone.getPathingBehavior().getInProgress().isPresent();
-//$$                     if (!viaCustom) TungstenMovement.cancel();
-//$$                     else mc.execute(() -> baritone.getPathingBehavior().cancelEverything());
+//$$                     boolean pathAtEnd = baritone.getPathingBehavior().hasPath();
+//$$                     boolean calcAtEnd = baritone.getPathingBehavior().getInProgress().isPresent();
+//$$                     mc.execute(() -> baritone.getPathingBehavior().cancelEverything());
 //$$                     long ticks = worldTime(mc) - t0;
 //$$                     double end = dist(mc, g);
 //$$                     csv.printf(Locale.ROOT, "%s,%d,%d,%d,%d,%d,%s,%d,%.2f,%d%n", mover, gi, g.getX() - origin.getX(), g.getZ() - origin.getZ(),
@@ -337,7 +298,6 @@ package adris.altoclef.benchmark;
 //$$                 }
 //$$             }
 //$$         } finally {
-//$$             BaritoneAPI.getSettings().movementBackend.value = "baritone";
 //$$             BaritoneAPI.getSettings().kinematicTravel.value = false;
 //$$             BaritoneAPI.getSettings().physicsTravel.value = false;
 //$$             BaritoneAPI.getSettings().movementFault.value = prevFault;

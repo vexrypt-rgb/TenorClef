@@ -11,12 +11,12 @@ import adris.altoclef.commandsystem.exception.CommandException;
 
 /**
  * {@code @pathbench search [- | setting=v1,v2] [reps]}  Baritone A* only, CSV + summary.
- * {@code @pathbench travel [baritone | tungsten | kinematic] [reps]}  end-to-end movement trials.
+ * {@code @pathbench travel [baritone | kinematic | physics] [reps]}  end-to-end movement trials.
  */
 public class PathBenchCommand extends Command {
 
     public PathBenchCommand() throws CommandException {
-        super("pathbench", "Pathfinding benchmark: search [-|setting=a,b] [reps] | travel [baritone|tungsten|kinematic] [reps]",
+        super("pathbench", "Pathfinding benchmark: search [-|setting=a,b] [reps] | travel [baritone|kinematic|physics] [reps]",
                 new StringArg("mode", "search"),
                 new StringArg("opt", "-"),
                 new IntArg("reps", 3));

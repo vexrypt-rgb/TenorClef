@@ -39,7 +39,6 @@ Directories probed:
 
 - Requires an Ostinato Baritone jar matching `baritone-unoptimized-fabric-*1.16.1*` or `baritone-unoptimized-fabric-ostinato-1.16.1.jar`.
 - **Hard fail** if missing (no Maven fallback for 1.16.1).
-- **Tungsten is not attached** on this module.
 
 ### 1.21.4 (`mcVersion == 12104`)
 
@@ -57,22 +56,7 @@ Directories probed:
 
 - Preprocess-only: not compiled or packaged. Upstream `cabaletta:baritone-unoptimized-fabric:<mc>` is `modCompileOnly`, only for the preprocessor's type resolution.
 
-### Tungsten (1.21.x)
-
-- **Tungsten optional:** `libs/tungsten*.jar` or `vendor/tungsten/build/libs`; if absent, log and Baritone-only travel.
-
 See also existing `docs/OSTINATO_WIRING.md`.
-
-## Tungsten vendor pin
-
-`vendor/TUNGSTEN_PIN.txt`:
-
-- Repo: `https://github.com/3ndetz/Tungsten`
-- Branch: `altoclef-compat`
-- Commit: `5cb12ad65c0e045aa5a02d017c98df64eeda6d40`
-- Treat as **GPL-3.0** for distribution.
-
-**Fact for Phase 0:** Tungsten is a **1.21.x-only** classpath concern. 1.16.1 = Ostinato Baritone only (`mover=baritone` expected).
 
 ## Ostinato `main` (MC 1.21.11)
 
@@ -81,7 +65,7 @@ See also existing `docs/OSTINATO_WIRING.md`.
 | Minecraft | **1.21.11** |
 | Java | **21** |
 | Gradle wrapper | **8.14.x** (Unimined multi-loader) |
-| Movement precursor | `baritone.api.movement.IMovementBackend`, `MovementBackends`, setting `movementBackend` |
+| Movement API | `baritone.api.movement.IMovementEngine`, `MovementBackends` (reached by reflection) |
 | Swim | `Settings.swimInWater` + traverse/diagonal sprint-swim (`docs/SWIM_PORT.md`, port of baritone#3988 / #2377) |
 
 ```bat
@@ -96,7 +80,6 @@ gradlew.bat :fabric:build
 | Minecraft | **1.16.1** (Cabaletta 1.16.5-era Fabric toolchain retargeted) |
 | Java | **JDK 8** |
 | Gradle wrapper | **4.9** |
-| Tungsten | **Not present** in this lineage |
 
 ```bat
 cd C:\Users\redfa\Documents\MinecraftDev\Ostinato-1.16.1
@@ -122,7 +105,6 @@ Expect `[altoclef] Ostinato Baritone for <version>: <jar name>` on configure.
 
 - JDK 21, `ubuntu-latest`
 - Jobs: `:26.3:compileJava` + `:26.3:test` (primary, committed `libs/baritone-unoptimized-fabric-ostinato-26.3.jar`, JDK 25 toolchain), `:1.21.11:compileJava` + `:1.21.11:test` (committed `libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar`), `:1.21.4:compileJava` + `:1.21.4:test`, `:1.16.1:compileJava` (committed `libs/baritone-unoptimized-fabric-1.16.1.jar`), and a non-blocking `:1.21.11:compileJava` against the tip of Ostinato `1.21.11` (checkout/build → `../Ostinato/dist`)
-- Tungsten **optional** — never required for a green job
 - See `docs/DEVELOPMENT.md` for clean-runner behavior
 
 ## Other libraries

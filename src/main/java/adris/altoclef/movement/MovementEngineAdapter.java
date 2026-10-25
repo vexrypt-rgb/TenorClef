@@ -2,6 +2,7 @@ package adris.altoclef.movement;
 
 import adris.altoclef.AltoClef;
 import adris.altoclef.Debug;
+import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
 import baritone.api.pathing.goals.Goal;
 import net.minecraft.entity.Entity;
@@ -61,6 +62,12 @@ public final class MovementEngineAdapter {
             return classesPresent;
         }
         classesPresent = false;
+        //#if MC >= 260000
+        //$$ // Ostinato: 26.3 jars carry the typed driver API (IBaritone.getMovementEngine), no reflection.
+        //$$ classesPresent = true;
+        //$$ engineDetail = "Ostinato MovementEngine (typed API)";
+        //$$ if (classesPresent) return true;
+        //#endif
         try {
             Class<?> backends = Class.forName(ENGINE_FACTORY);
             Class<?> goalCls = Class.forName(GOAL_CLASS);
@@ -98,11 +105,76 @@ public final class MovementEngineAdapter {
         if (!probeClasses() || baritone == null) {
             return null;
         }
+        //#if MC >= 260000
+        //$$ return baritone.getMovementEngine(); // Ostinato: typed API
+        //#else
         return factoryMethod.invoke(null, baritone);
+        //#endif
     }
 
     private static boolean accepted(Object pathResult) throws Exception {
+        //#if MC >= 260000
+        //$$ return pathResult != null && ((baritone.api.movement.PathResult) pathResult).isAccepted();
+        //#else
         return pathResult != null && Boolean.TRUE.equals(pathResultAccepted.invoke(pathResult));
+        //#endif
+    }
+
+    // Ostinato: one call per engine operation. 26.3 uses the typed API; older jars keep reflection.
+    private static Object engGoToGoal(Object eng, Goal goal) throws Exception {
+        //#if MC >= 260000
+        //$$ return ((baritone.api.movement.IMovementEngine) eng).goTo(baritone.api.movement.MovementGoal.custom(goal));
+        //#else
+        return goToGoalMethod.invoke(eng, goalCustomMethod.invoke(null, goal));
+        //#endif
+    }
+
+    private static Object engGoToBlock(Object eng, BlockPos pos) throws Exception {
+        //#if MC >= 260000
+        //$$ return ((baritone.api.movement.IMovementEngine) eng).goTo(pos);
+        //#else
+        return goToBlockMethod.invoke(eng, pos);
+        //#endif
+    }
+
+    private static Object engFollow(Object eng, Entity entity, double maintainDistance) throws Exception {
+        //#if MC >= 260000
+        //$$ return ((baritone.api.movement.IMovementEngine) eng).follow(entity, maintainDistance);
+        //#else
+        return followMethod.invoke(eng, entity, maintainDistance);
+        //#endif
+    }
+
+    private static boolean engIsPathing(Object eng) throws Exception {
+        //#if MC >= 260000
+        //$$ return ((baritone.api.movement.IMovementEngine) eng).isPathing();
+        //#else
+        return Boolean.TRUE.equals(isPathingMethod.invoke(eng));
+        //#endif
+    }
+
+    private static void engCancel(Object eng) throws Exception {
+        //#if MC >= 260000
+        //$$ ((baritone.api.movement.IMovementEngine) eng).cancel();
+        //#else
+        cancelMethod.invoke(eng);
+        //#endif
+    }
+
+    private static String engStatusLine(Object eng) throws Exception {
+        //#if MC >= 260000
+        //$$ return ((baritone.api.movement.IMovementEngine) eng).statusLine();
+        //#else
+        return String.valueOf(statusLineMethod.invoke(eng));
+        //#endif
+    }
+
+    private static String resultBackend(Object result) throws Exception {
+        //#if MC >= 260000
+        //$$ return String.valueOf(((baritone.api.movement.PathResult) result).getBackend());
+        //#else
+        return String.valueOf(pathResultBackend.invoke(result));
+        //#endif
     }
 
     /**
@@ -122,11 +194,10 @@ public final class MovementEngineAdapter {
             try {
                 Object eng = engineFor(bari);
                 if (eng != null) {
-                    Object mg = goalCustomMethod.invoke(null, goal);
-                    Object result = goToGoalMethod.invoke(eng, mg);
+                    Object result = engGoToGoal(eng, goal);
                     if (accepted(result)) {
                         dispatches++;
-                        lastBackend = String.valueOf(pathResultBackend.invoke(result));
+                        lastBackend = resultBackend(result);
                         lastFellBack = !lastBackend.equals(requestedBackend());
                         return true;
                     }
@@ -147,7 +218,11 @@ public final class MovementEngineAdapter {
     public static String requestedBackend() {
         if (!probeClasses()) return "NONE";
         try {
+            //#if MC >= 260000
+            //$$ return String.valueOf(BaritoneAPI.getProvider().getPrimaryBaritone().getMovementBackendPreference()); // Ostinato
+            //#else
             return String.valueOf(preferenceMethod.invoke(null));
+            //#endif
         } catch (Throwable t) {
             return "UNKNOWN";
         }
@@ -189,7 +264,7 @@ public final class MovementEngineAdapter {
         if (probeClasses()) {
             try {
                 Object eng = engineFor(mod.getClientBaritone());
-                if (eng != null && accepted(goToBlockMethod.invoke(eng, pos))) {
+                if (eng != null && accepted(engGoToBlock(eng, pos))) {
                     return true;
                 }
             } catch (Throwable t) {
@@ -210,7 +285,7 @@ public final class MovementEngineAdapter {
         if (probeClasses()) {
             try {
                 Object eng = engineFor(mod.getClientBaritone());
-                if (eng != null && accepted(followMethod.invoke(eng, entity, maintainDistance))) {
+                if (eng != null && accepted(engFollow(eng, entity, maintainDistance))) {
                     return true;
                 }
             } catch (Throwable t) {
@@ -229,7 +304,7 @@ public final class MovementEngineAdapter {
         if (probeClasses()) {
             try {
                 Object eng = engineFor(bari);
-                if (eng != null && Boolean.TRUE.equals(isPathingMethod.invoke(eng))) {
+                if (eng != null && engIsPathing(eng)) {
                     return true;
                 }
             } catch (Throwable ignored) {
@@ -244,7 +319,7 @@ public final class MovementEngineAdapter {
             try {
                 Object eng = engineFor(mod.getClientBaritone());
                 if (eng != null) {
-                    cancelMethod.invoke(eng);
+                    engCancel(eng);
                     return;
                 }
             } catch (Throwable t) {
@@ -263,7 +338,7 @@ public final class MovementEngineAdapter {
             try {
                 Object eng = engineFor(mod.getClientBaritone());
                 if (eng != null) {
-                    return String.valueOf(statusLineMethod.invoke(eng));
+                    return engStatusLine(eng);
                 }
             } catch (Throwable ignored) {
             }

@@ -40,6 +40,79 @@ public interface SwarmLink {
         void accept(A a, B b, C c);
     }
 
+    /** The link for this build: typed Ostinato API on 26.3, reflection on older lines. */
+    static SwarmLink create() {
+        //#if MC >= 260000
+        //$$ return new Typed();
+        //#else
+        return new Ostinato();
+        //#endif
+    }
+
+    //#if MC >= 260000
+    //$$ /** Ostinato: the link over the typed {@code IBaritone.getSwarm()} API, no reflection. */
+    //$$ final class Typed implements SwarmLink {
+    //$$     private static baritone.api.swarm.ISwarm swarm() {
+    //$$         return BaritoneAPI.getProvider().getPrimaryBaritone().getSwarm();
+    //$$     }
+    //$$
+    //$$     @Override
+    //$$     public String problem() {
+    //$$         baritone.api.swarm.ISwarm s = swarm();
+    //$$         if (s.isOnline()) return null;
+    //$$         return "Ostinato swarm link is not running (" + s.state()
+    //$$                 + "). Set swarmEnabled true, add a roster and keyring; see the Ostinato swarm guide.";
+    //$$     }
+    //$$
+    //$$     @Override
+    //$$     public String self() {
+    //$$         return swarm().self();
+    //$$     }
+    //$$
+    //$$     @Override
+    //$$     public String leader() {
+    //$$         for (baritone.api.swarm.ISwarmGroup g : swarm().myGroups()) {
+    //$$             if (g.lead() != null) return g.lead();
+    //$$         }
+    //$$         return null;
+    //$$     }
+    //$$
+    //$$     @Override
+    //$$     public boolean leads() {
+    //$$         baritone.api.swarm.ISwarm s = swarm();
+    //$$         String me = s.self();
+    //$$         if (me == null) return false;
+    //$$         for (baritone.api.swarm.ISwarmGroup g : s.myGroups()) {
+    //$$             if (me.equals(g.lead())) return true;
+    //$$         }
+    //$$         return false;
+    //$$     }
+    //$$
+    //$$     @Override
+    //$$     public String leadOf(String group) {
+    //$$         baritone.api.swarm.ISwarmGroup g = swarm().group(group);
+    //$$         return g == null ? null : g.lead();
+    //$$     }
+    //$$
+    //$$     @Override
+    //$$     public boolean send(String to, SwarmMessage m) {
+    //$$         baritone.api.swarm.ISwarm s = swarm();
+    //$$         for (baritone.api.swarm.ISwarmGroup g : s.myGroups()) {
+    //$$             if (!g.has(to)) continue;
+    //$$             return s.send(g.id(), to, TYPE, m.encode(), baritone.api.swarm.SwarmPriority.HIGH);
+    //$$         }
+    //$$         return false;
+    //$$     }
+    //$$
+    //$$     @Override
+    //$$     public void onReceive(TriConsumer<String, String, String> handler) {
+    //$$         // Re-registering replaces the handler for TYPE, so this is safe to call every tick and
+    //$$         // picks up a restarted link.
+    //$$         swarm().registerHandler(TYPE, handler::accept);
+    //$$     }
+    //$$ }
+    //#endif
+
     /**
      * The real link, backed by the primary Ostinato instance. It talks to Ostinato by reflection so every
      * Minecraft-version module still compiles against older Ostinato jars; those report a clear

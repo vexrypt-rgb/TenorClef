@@ -18,6 +18,14 @@ permissions:
 # The jobs for the older lines pass -Pno26 so they do not set up the 26.3 module they do not build.
 
 jobs:
+  baritone-imports:
+    name: Baritone API import gate
+    # Ostinato: fails on any new file that reaches Baritone/Ostinato internals instead of baritone.api.*.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: scripts/check-baritone-imports.sh
+
   build-263:
     name: Compile + test Fabric 26.3 (primary)
     runs-on: ubuntu-latest

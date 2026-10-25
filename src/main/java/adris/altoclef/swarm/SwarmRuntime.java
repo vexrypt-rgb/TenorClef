@@ -13,7 +13,7 @@ import java.util.Set;
 public final class SwarmRuntime {
     private static final Set<String> TO_LEADER = Set.of("reg", "bye", "hb", "accept", "reject", "prog", "result", "obs");
 
-    private static SwarmLink link = new SwarmLink.Ostinato();
+    private static SwarmLink link = SwarmLink.create();
     private static SwarmCoordinator leader;
     private static SwarmWorker worker;
     private static String leaderName;

@@ -1,5 +1,6 @@
 package adris.altoclef.chains;
 
+import adris.altoclef.util.baritone.BaritoneQueries;
 import adris.altoclef.AltoClef;
 import adris.altoclef.tasks.entity.AbstractKillEntityTask;
 import adris.altoclef.tasksystem.TaskChain;
@@ -7,8 +8,6 @@ import adris.altoclef.tasksystem.TaskRunner;
 import baritone.api.BaritoneAPI;
 import baritone.api.pathing.calc.IPath;
 import baritone.api.pathing.movement.IMovement;
-import baritone.pathing.movement.Movement;
-import baritone.utils.BlockStateInterface;
 
 import java.util.Optional;
 
@@ -45,11 +44,10 @@ public class PreEquipItemChain extends SingleTaskChain {
         IPath path = pathOptional.get();
 
         // should this really be created each tick?
-        BlockStateInterface bsi = new BlockStateInterface(BaritoneAPI.getProvider().getPrimaryBaritone().getPlayerContext());
-        for (IMovement iMovement : path.movements()) {
-            Movement movement = (Movement) iMovement;
-            if (movement.toBreak(bsi).stream().anyMatch(pos -> mod.getWorld().getBlockState(pos).getBlock().getHardness() > 0)
-                    || !movement.toPlace(bsi).isEmpty()) return;
+        baritone.api.utils.IWorldQueries q = BaritoneQueries.get(); // Ostinato: driver API
+        for (IMovement movement : path.movements()) {
+            if (q.blocksToBreak(movement).stream().anyMatch(pos -> mod.getWorld().getBlockState(pos).getBlock().getHardness() > 0)
+                    || !q.blocksToPlace(movement).isEmpty()) return;
         }
 
         // we are *probably* trying to kill sth, might as well equip sword

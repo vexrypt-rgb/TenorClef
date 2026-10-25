@@ -1,10 +1,4 @@
 # Ostinato: files that still use Baritone/Ostinato internals (imports or reflective class names).
-# This list only shrinks. What is left needs API that does not exist yet: MovementHelper/ToolSet/
-# BlockStateInterface/CalculationContext/MineProcess helpers, and PathBench (1.16.1 sim internals).
+# This list only shrinks. PathBench benchmarks the 1.16.1 pathfinder internals themselves
+# (AStarPathFinder, CalculationContext, Favoring), so it has no API equivalent by design.
 src/main/java/adris/altoclef/benchmark/PathBench.java
-src/main/java/adris/altoclef/chains/PreEquipItemChain.java
-src/main/java/adris/altoclef/tasks/construction/PlaceBlockNearbyTask.java
-src/main/java/adris/altoclef/tasks/movement/EscapeFromLavaTask.java
-src/main/java/adris/altoclef/tasks/movement/GetOutOfWaterTask.java
-src/main/java/adris/altoclef/util/helpers/StorageHelper.java
-src/main/java/adris/altoclef/util/helpers/WorldHelper.java

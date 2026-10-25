@@ -1,15 +1,12 @@
 package adris.altoclef.util.helpers;
 
+import adris.altoclef.util.baritone.BaritoneQueries;
 import adris.altoclef.AltoClef;
 import adris.altoclef.mixins.ClientConnectionAccessor;
 import adris.altoclef.multiversion.MethodWrapper;
 import adris.altoclef.multiversion.world.WorldVer;
 import adris.altoclef.util.Dimension;
 import baritone.api.BaritoneAPI;
-import baritone.pathing.movement.CalculationContext;
-import baritone.pathing.movement.MovementHelper;
-import baritone.process.MineProcess;
-import baritone.utils.BlockStateInterface;
 //#if MC < 260000
 import net.minecraft.block.*;
 //#else
@@ -272,7 +269,7 @@ public interface WorldHelper {
 
         boolean canBreak = altoClef.getWorld().getBlockState(pos).getHardness(altoClef.getWorld(), pos) >= 0
                 && !altoClef.getExtraBaritoneSettings().shouldAvoidBreaking(pos)
-                && MineProcess.plausibleToBreak(new CalculationContext(altoClef.getClientBaritone()), pos)
+                && altoClef.getClientBaritone().getWorldQueries().plausibleToBreak(pos)
                 && canReach(pos);
 
         altoClef.getExtraBaritoneSettings().setInteractionPaused(prevInteractionPaused);
@@ -292,7 +289,7 @@ public interface WorldHelper {
         AltoClef altoClef = AltoClef.getInstance();
 
         // There might be mumbo jumbo next to it, we fall and we get killed by lava or something.
-        if (MovementHelper.avoidBreaking(((baritone.Baritone) altoClef.getClientBaritone()).bsi, toBreak.getX(), toBreak.getY(), toBreak.getZ(), altoClef.getWorld().getBlockState(toBreak))) { // Ostinato: internal BlockStateInterface
+        if (altoClef.getClientBaritone().getWorldQueries().avoidBreaking(toBreak)) { // Ostinato: driver API
             return true;
         }
         // Fall down
@@ -301,11 +298,11 @@ public interface WorldHelper {
             BlockState s = altoClef.getWorld().getBlockState(check);
             boolean tooFarToFall = dy > altoClef.getClientBaritoneSettings().maxFallHeightNoWater.value;
             // Don't fall in lava
-            if (MovementHelper.isLava(s))
+            if (BaritoneQueries.get().isLava(s))
                 return true;
             // Always fall in water
             // TODO: If there's a 1 meter thick layer of water and then a massive drop below, the bot will think it is safe.
-            if (MovementHelper.isWater(s))
+            if (BaritoneQueries.get().isWater(s))
                 return true;
             // We hit ground, depends
             if (WorldHelper.isSolidBlock(check)) {
@@ -417,11 +414,11 @@ public interface WorldHelper {
     }
 
     static boolean fallingBlockSafeToBreak(BlockPos pos) {
-        BlockStateInterface bsi = new BlockStateInterface(BaritoneAPI.getProvider().getPrimaryBaritone().getPlayerContext());
+        baritone.api.utils.IWorldQueries q = BaritoneQueries.get(); // Ostinato: driver API
         World w = MinecraftClient.getInstance().world;
         assert w != null;
         while (isFallingBlock(pos)) {
-            if (MovementHelper.avoidBreaking(bsi, pos.getX(), pos.getY(), pos.getZ(), w.getBlockState(pos)))
+            if (q.avoidBreaking(pos))
                 return false;
             pos = pos.up();
         }

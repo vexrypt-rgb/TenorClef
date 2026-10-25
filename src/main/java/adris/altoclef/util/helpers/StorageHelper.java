@@ -1,5 +1,6 @@
 package adris.altoclef.util.helpers;
 
+import adris.altoclef.util.baritone.BaritoneQueries;
 import adris.altoclef.multiversion.ScreenVer;
 
 import adris.altoclef.AltoClef;
@@ -19,7 +20,6 @@ import adris.altoclef.util.slots.CraftingTableSlot;
 import adris.altoclef.util.slots.CursorSlot;
 import adris.altoclef.util.slots.PlayerSlot;
 import adris.altoclef.util.slots.Slot;
-import baritone.utils.ToolSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
@@ -185,7 +185,7 @@ public class StorageHelper {
                     if (shouldSaveStack(mod,  state.getBlock(), stack)) continue;
 
                     //#if MC < 12102
-                    double speed = ToolSet.calculateSpeedVsBlock(stack, state);
+                    double speed = BaritoneQueries.get().toolSpeedVsBlock(stack, state);
                     //#else
                     //$$ double speed = stack.getMiningSpeedMultiplier(state);
                     //#endif

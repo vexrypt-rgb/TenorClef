@@ -1,5 +1,6 @@
 package adris.altoclef.tasks.construction;
 
+import adris.altoclef.util.baritone.BaritoneQueries;
 import adris.altoclef.AltoClef;
 import adris.altoclef.Debug;
 import adris.altoclef.eventbus.EventBus;
@@ -16,7 +17,6 @@ import adris.altoclef.util.progresscheck.MovementProgressChecker;
 import adris.altoclef.util.time.TimerGame;
 import baritone.api.utils.IPlayerContext;
 import baritone.api.utils.input.Input;
-import baritone.pathing.movement.MovementHelper;
 import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
@@ -190,7 +190,7 @@ public class PlaceBlockNearbyTask extends Task {
             BlockPos bpos = bhit.getBlockPos();//.subtract(bhit.getSide().getVector());
             //Debug.logMessage("TEMP: A: " + bpos);
             IPlayerContext ctx = mod.getClientBaritone().getPlayerContext();
-            if (MovementHelper.canPlaceAgainst(ctx, bpos)) {
+            if (BaritoneQueries.get().canPlaceAgainst(bpos)) {
                 BlockPos placePos = bhit.getBlockPos().add(bhit.getSide().getVector());
                 // Don't place inside the player.
                 if (WorldHelper.isInsidePlayer(placePos)) {

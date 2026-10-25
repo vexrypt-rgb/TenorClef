@@ -546,11 +546,10 @@ public class AltoClef implements ModInitializer {
             };
             //#if MC >= 260000
             //$$ getClientBaritone().setFreecamStatus(status); // Ostinato: typed API
-            //$$ } catch (RuntimeException | LinkageError ignored) {
             //#else
             Class.forName("baritone.behavior.FreecamBehavior").getField("statusSupplier").set(null, status);
-        } catch (ReflectiveOperationException | LinkageError ignored) {
             //#endif
+        } catch (Exception | LinkageError ignored) {
         }
     }
 

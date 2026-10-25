@@ -1,7 +1,7 @@
 Pinned Ostinato Baritone jars. These are authoritative: `build.gradle` uses exactly
 the jar named below for each module, and fails if it is missing or its `.sha256` does
 not match. Sibling `../Ostinato/dist` directories are never read. To try another jar
-without re-pinning, pass `-PostinatoJar=<path>`.
+without re-pinning, pass `-PostinatoJar.<module>=<path>` (for example `-PostinatoJar.26.3=...`), or `-PostinatoJar=<path>` to apply it to every module.
 
 | File | Module | Ostinato source | `fabric.mod.json` version |
 | --- | --- | --- | --- |

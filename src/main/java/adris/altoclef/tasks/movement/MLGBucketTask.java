@@ -8,7 +8,7 @@ import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.helpers.*;
 import adris.altoclef.util.serialization.ItemDeserializer;
 import adris.altoclef.util.serialization.ItemSerializer;
-import baritone.Baritone;
+import baritone.api.IBaritone; // Ostinato: driver API only
 import baritone.api.utils.IPlayerContext;
 import baritone.api.utils.Rotation;
 import baritone.api.utils.RotationUtils;
@@ -438,7 +438,7 @@ public class MLGBucketTask extends Task {
 
     @Override
     protected void onStop(Task interruptTask) {
-        Baritone baritone = AltoClef.getInstance().getClientBaritone();
+        IBaritone baritone = AltoClef.getInstance().getClientBaritone();
         InputControls controls = AltoClef.getInstance().getInputControls();
 
         baritone.getPathingBehavior().forceCancel();

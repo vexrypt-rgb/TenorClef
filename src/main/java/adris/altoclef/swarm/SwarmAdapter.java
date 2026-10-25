@@ -3,9 +3,8 @@ package adris.altoclef.swarm;
 import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
 
-import java.lang.reflect.Field;
+import baritone.api.Settings;
 import java.util.Locale;
-import java.util.Map;
 
 /**
  * TenorClef's view of Ostinato's encrypted swarm link.
@@ -24,7 +23,7 @@ public final class SwarmAdapter {
     /** Whether the loaded Baritone jar has the swarm settings and command. */
     public static boolean available() {
         try {
-            return settings().containsKey(ENABLED.toLowerCase(Locale.ROOT));
+            return BaritoneAPI.getSettings().byLowerName.containsKey(ENABLED.toLowerCase(Locale.ROOT));
         } catch (Throwable t) {
             return false;
         }
@@ -44,13 +43,8 @@ public final class SwarmAdapter {
 
     /** Current value of a swarm setting, or null if absent. */
     public static Object get(String name) {
-        Object setting = setting(name);
-        if (setting == null) return null;
-        try {
-            return valueField(setting).get(setting);
-        } catch (Throwable t) {
-            return null;
-        }
+        Settings.Setting<?> setting = setting(name);
+        return setting == null ? null : setting.value;
     }
 
     public static String getString(String name) {
@@ -63,11 +57,11 @@ public final class SwarmAdapter {
      * @return null on success, else the reason it was refused
      */
     public static String set(String name, String text) {
-        Object setting = setting(name);
+        @SuppressWarnings("unchecked")
+        Settings.Setting<Object> setting = (Settings.Setting<Object>) setting(name);
         if (setting == null) return "no such swarm setting: " + name;
         try {
-            Field f = valueField(setting);
-            Object cur = f.get(setting);
+            Object cur = setting.value;
             Object next;
             String t = text == null ? "" : text.trim();
             if (cur instanceof Boolean) {
@@ -84,7 +78,7 @@ public final class SwarmAdapter {
             } else {
                 return name + " has an unsupported type " + cur.getClass().getSimpleName();
             }
-            f.set(setting, next);
+            setting.value = next;
             return null;
         } catch (NumberFormatException e) {
             return name + " wants a number";
@@ -109,21 +103,12 @@ public final class SwarmAdapter {
         }
     }
 
-    private static Object setting(String name) {
+    // Ostinato: swarm settings are public baritone.api.Settings fields; typed lookup, no reflection.
+    private static Settings.Setting<?> setting(String name) {
         try {
-            return settings().get(name.toLowerCase(Locale.ROOT));
+            return BaritoneAPI.getSettings().byLowerName.get(name.toLowerCase(Locale.ROOT));
         } catch (Throwable t) {
             return null;
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Map<String, Object> settings() throws Exception {
-        Object s = BaritoneAPI.getSettings();
-        return (Map<String, Object>) s.getClass().getField("byLowerName").get(s);
-    }
-
-    private static Field valueField(Object setting) throws NoSuchFieldException {
-        return setting.getClass().getField("value");
     }
 }

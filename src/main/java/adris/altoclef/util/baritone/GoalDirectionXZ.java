@@ -1,6 +1,6 @@
 package adris.altoclef.util.baritone;
 
-import baritone.Baritone;
+import baritone.api.IBaritone; // Ostinato: driver API only
 import baritone.api.BaritoneAPI;
 import baritone.api.pathing.goals.Goal;
 import net.minecraft.util.math.Vec3d;
@@ -28,7 +28,7 @@ public class GoalDirectionXZ implements Goal {
     }
 
     private static String maybeCensor(double value) {
-        return Baritone.settings().censorCoordinates.value ? "<censored>" : Double.toString(value);
+        return BaritoneAPI.getSettings().censorCoordinates.value ? "<censored>" : Double.toString(value);
     }
 
     public boolean isInGoal(int x, int y, int z) {

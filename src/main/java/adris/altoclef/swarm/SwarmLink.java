@@ -2,9 +2,6 @@ package adris.altoclef.swarm;
 
 import baritone.api.BaritoneAPI;
 
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * TenorClef's view of Ostinato's swarm link. Objective messages travel as one sealed, signed,
@@ -40,227 +37,70 @@ public interface SwarmLink {
         void accept(A a, B b, C c);
     }
 
-    /** The link for this build: typed Ostinato API on 26.3, reflection on older lines. */
+    /** The link over the primary Ostinato instance (typed driver API on every line). */
     static SwarmLink create() {
-        //#if MC >= 260000
-        //$$ return new Typed();
-        //#else
-        return new Ostinato();
-        //#endif
+        return new Typed();
     }
 
-    //#if MC >= 260000
-    //$$ /** Ostinato: the link over the typed {@code IBaritone.getSwarm()} API, no reflection. */
-    //$$ final class Typed implements SwarmLink {
-    //$$     private static baritone.api.swarm.ISwarm swarm() {
-    //$$         return BaritoneAPI.getProvider().getPrimaryBaritone().getSwarm();
-    //$$     }
-    //$$
-    //$$     @Override
-    //$$     public String problem() {
-    //$$         baritone.api.swarm.ISwarm s = swarm();
-    //$$         if (s.isOnline()) return null;
-    //$$         return "Ostinato swarm link is not running (" + s.state()
-    //$$                 + "). Set swarmEnabled true, add a roster and keyring; see the Ostinato swarm guide.";
-    //$$     }
-    //$$
-    //$$     @Override
-    //$$     public String self() {
-    //$$         return swarm().self();
-    //$$     }
-    //$$
-    //$$     @Override
-    //$$     public String leader() {
-    //$$         for (baritone.api.swarm.ISwarmGroup g : swarm().myGroups()) {
-    //$$             if (g.lead() != null) return g.lead();
-    //$$         }
-    //$$         return null;
-    //$$     }
-    //$$
-    //$$     @Override
-    //$$     public boolean leads() {
-    //$$         baritone.api.swarm.ISwarm s = swarm();
-    //$$         String me = s.self();
-    //$$         if (me == null) return false;
-    //$$         for (baritone.api.swarm.ISwarmGroup g : s.myGroups()) {
-    //$$             if (me.equals(g.lead())) return true;
-    //$$         }
-    //$$         return false;
-    //$$     }
-    //$$
-    //$$     @Override
-    //$$     public String leadOf(String group) {
-    //$$         baritone.api.swarm.ISwarmGroup g = swarm().group(group);
-    //$$         return g == null ? null : g.lead();
-    //$$     }
-    //$$
-    //$$     @Override
-    //$$     public boolean send(String to, SwarmMessage m) {
-    //$$         baritone.api.swarm.ISwarm s = swarm();
-    //$$         for (baritone.api.swarm.ISwarmGroup g : s.myGroups()) {
-    //$$             if (!g.has(to)) continue;
-    //$$             return s.send(g.id(), to, TYPE, m.encode(), baritone.api.swarm.SwarmPriority.HIGH);
-    //$$         }
-    //$$         return false;
-    //$$     }
-    //$$
-    //$$     @Override
-    //$$     public void onReceive(TriConsumer<String, String, String> handler) {
-    //$$         // Re-registering replaces the handler for TYPE, so this is safe to call every tick and
-    //$$         // picks up a restarted link.
-    //$$         swarm().registerHandler(TYPE, handler::accept);
-    //$$     }
-    //$$ }
-    //#endif
-
-    /**
-     * The real link, backed by the primary Ostinato instance. It talks to Ostinato by reflection so every
-     * Minecraft-version module still compiles against older Ostinato jars; those report a clear
-     * {@link #problem()} instead of failing to build.
-     */
-    final class Ostinato implements SwarmLink {
-        private Object installedOn;
-
-        private static Object call(Object o, String name, Class<?>[] types, Object... args) throws Exception {
-            Method m = o.getClass().getMethod(name, types);
-            m.setAccessible(true);
-            return m.invoke(o, args);
-        }
-
-        private static Object call(Object o, String name) throws Exception {
-            return call(o, name, new Class<?>[0]);
-        }
-
-        private static Object behavior() throws Exception {
-            return call(BaritoneAPI.getProvider().getPrimaryBaritone(), "getSwarmBehavior");
-        }
-
-        /** The SwarmControl, or null when the link is not running. */
-        private static Object control() {
-            try {
-                return call(behavior(), "control");
-            } catch (Throwable t) {
-                return null;
-            }
+    /** Ostinato: the link over the typed {@code IBaritone.getSwarm()} API, no reflection. */
+    final class Typed implements SwarmLink {
+        private static baritone.api.swarm.ISwarm swarm() {
+            return BaritoneAPI.getProvider().getPrimaryBaritone().getSwarm();
         }
 
         @Override
         public String problem() {
-            try {
-                Object b = behavior();
-                if (call(b, "control") != null) {
-                    call(control(), "roster");
-                    Class.forName("baritone.swarm.SwarmControl").getMethod("registerHandler", String.class, Consumer.class);
-                    return null;
-                }
-                return "Ostinato swarm link is not running (" + call(b, "state")
-                        + "). Set swarmEnabled true, add a roster and keyring; see the Ostinato swarm guide.";
-            } catch (NoSuchMethodException e) {
-                return "this Ostinato build is too old for TenorClef swarms (needs registerHandler); update Ostinato";
-            } catch (Throwable t) {
-                return "this Ostinato build has no swarm link";
-            }
-        }
-
-        private static String selfOf(Object c) throws Exception {
-            return (String) call(call(c, "endpoint"), "selfId");
-        }
-
-        @SuppressWarnings("unchecked")
-        private static List<Object> myGroups(Object c) throws Exception {
-            Object roster = call(c, "roster");
-            return (List<Object>) call(roster, "groupsOf", new Class<?>[] {String.class}, selfOf(c));
+            baritone.api.swarm.ISwarm s = swarm();
+            if (s.isOnline()) return null;
+            return "Ostinato swarm link is not running (" + s.state()
+                    + "). Set swarmEnabled true, add a roster and keyring; see the Ostinato swarm guide.";
         }
 
         @Override
         public String self() {
-            try {
-                Object c = control();
-                return c == null ? null : selfOf(c);
-            } catch (Throwable t) {
-                return null;
-            }
+            return swarm().self();
         }
 
         @Override
         public String leader() {
-            try {
-                Object c = control();
-                if (c == null) return null;
-                for (Object g : myGroups(c)) {
-                    String lead = (String) call(g, "lead");
-                    if (lead != null) return lead;
-                }
-            } catch (Throwable t) {
-                // fall through
+            for (baritone.api.swarm.ISwarmGroup g : swarm().myGroups()) {
+                if (g.lead() != null) return g.lead();
             }
             return null;
         }
 
         @Override
         public boolean leads() {
-            try {
-                Object c = control();
-                if (c == null) return false;
-                String me = selfOf(c);
-                for (Object g : myGroups(c)) {
-                    if (me.equals(call(g, "lead"))) return true;
-                }
-            } catch (Throwable t) {
-                // fall through
+            baritone.api.swarm.ISwarm s = swarm();
+            String me = s.self();
+            if (me == null) return false;
+            for (baritone.api.swarm.ISwarmGroup g : s.myGroups()) {
+                if (me.equals(g.lead())) return true;
             }
             return false;
         }
 
         @Override
         public String leadOf(String group) {
-            try {
-                Object c = control();
-                if (c == null) return null;
-                Object g = call(call(c, "roster"), "group", new Class<?>[] {String.class}, group);
-                return g == null ? null : (String) call(g, "lead");
-            } catch (Throwable t) {
-                return null;
-            }
+            baritone.api.swarm.ISwarmGroup g = swarm().group(group);
+            return g == null ? null : g.lead();
         }
 
         @Override
         public boolean send(String to, SwarmMessage m) {
-            try {
-                Object c = control();
-                if (c == null) return false;
-                for (Object g : myGroups(c)) {
-                    if (!(Boolean) call(g, "has", new Class<?>[] {String.class}, to)) continue;
-                    Class<?> prio = Class.forName("baritone.swarm.transport.SwarmPriority");
-                    Object high = prio.getField("HIGH").get(null);
-                    call(call(c, "endpoint"), "send",
-                            new Class<?>[] {String.class, String.class, String.class, String.class, prio},
-                            call(g, "id"), to, TYPE, m.encode(), high);
-                    return true;
-                }
-            } catch (Throwable t) {
-                // fall through
+            baritone.api.swarm.ISwarm s = swarm();
+            for (baritone.api.swarm.ISwarmGroup g : s.myGroups()) {
+                if (!g.has(to)) continue;
+                return s.send(g.id(), to, TYPE, m.encode(), baritone.api.swarm.SwarmPriority.HIGH);
             }
             return false;
         }
 
         @Override
         public void onReceive(TriConsumer<String, String, String> handler) {
-            try {
-                Object c = control();
-                if (c == null || c == installedOn) return;
-                Consumer<Object> h = msg -> {
-                    try {
-                        handler.accept((String) call(msg, "from"), (String) call(msg, "group"), (String) call(msg, "body"));
-                    } catch (Exception e) {
-                        throw new IllegalStateException(e);
-                    }
-                };
-                call(c, "registerHandler", new Class<?>[] {String.class, Consumer.class}, TYPE, h);
-                installedOn = c;
-            } catch (Throwable t) {
-                // problem() explains it
-            }
+            // Re-registering replaces the handler for TYPE, so this is safe to call every tick and
+            // picks up a restarted link.
+            swarm().registerHandler(TYPE, handler::accept);
         }
     }
 }

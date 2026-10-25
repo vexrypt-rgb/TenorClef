@@ -35,8 +35,8 @@ import adris.altoclef.ui.MessagePriority;
 import adris.altoclef.ui.MessageSender;
 import adris.altoclef.util.helpers.InputHelper;
 import adris.altoclef.util.helpers.StorageHelper;
-import baritone.Baritone;
-import baritone.altoclef.AltoClefSettings;
+import baritone.api.IBaritone; // Ostinato: driver API only
+import baritone.api.policy.IAgentPolicy; // Ostinato: driver API
 import baritone.api.BaritoneAPI;
 import baritone.api.Settings;
 import net.fabricmc.api.ModInitializer;
@@ -544,11 +544,7 @@ public class AltoClef implements ModInitializer {
                 java.util.List<adris.altoclef.tasksystem.Task> tasks = chain.getTasks();
                 return tasks.get(tasks.size() - 1).toString();
             };
-            //#if MC >= 260000
-            //$$ getClientBaritone().setFreecamStatus(status); // Ostinato: typed API
-            //#else
-            Class.forName("baritone.behavior.FreecamBehavior").getField("statusSupplier").set(null, status);
-            //#endif
+            getClientBaritone().setFreecamStatus(status); // Ostinato: typed API
         } catch (Exception | LinkageError ignored) {
         }
     }
@@ -634,25 +630,25 @@ public class AltoClef implements ModInitializer {
     /**
      * Baritone access (could just be static honestly)
      */
-    public Baritone getClientBaritone() {
+    public IBaritone getClientBaritone() {
         if (getPlayer() == null) {
-            return (Baritone) BaritoneAPI.getProvider().getPrimaryBaritone();
+            return BaritoneAPI.getProvider().getPrimaryBaritone();
         }
-        return (Baritone) BaritoneAPI.getProvider().getBaritoneForPlayer(getPlayer());
+        return BaritoneAPI.getProvider().getBaritoneForPlayer(getPlayer());
     }
 
     /**
      * Baritone settings access (could just be static honestly)
      */
     public Settings getClientBaritoneSettings() {
-        return Baritone.settings();
+        return BaritoneAPI.getSettings();
     }
 
     /**
      * Baritone settings special to AltoClef (could just be static honestly)
      */
-    public AltoClefSettings getExtraBaritoneSettings() {
-        return AltoClefSettings.getInstance();
+    public IAgentPolicy getExtraBaritoneSettings() {
+        return BaritoneAPI.getProvider().getPrimaryBaritone().getAgentPolicy(); // Ostinato: driver API
     }
 
     /**

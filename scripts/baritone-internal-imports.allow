@@ -1,19 +1,10 @@
 # Ostinato: files that still use Baritone/Ostinato internals (imports or reflective class names).
-# This list only shrinks. MovementEngineAdapter, SwarmLink and AltoClef are typed on 26.3 and keep
-# reflection only for the older lines until the API is backported (coupling plan step 4).
-src/main/java/adris/altoclef/AltoClef.java
-src/main/java/adris/altoclef/BotBehaviour.java
+# This list only shrinks. What is left needs API that does not exist yet: MovementHelper/ToolSet/
+# BlockStateInterface/CalculationContext/MineProcess helpers, and PathBench (1.16.1 sim internals).
 src/main/java/adris/altoclef/benchmark/PathBench.java
-src/main/java/adris/altoclef/chains/MobDefenseChain.java
 src/main/java/adris/altoclef/chains/PreEquipItemChain.java
-src/main/java/adris/altoclef/movement/MovementEngineAdapter.java
-src/main/java/adris/altoclef/swarm/SwarmLink.java
-src/main/java/adris/altoclef/tasks/construction/ClearRegionTask.java
 src/main/java/adris/altoclef/tasks/construction/PlaceBlockNearbyTask.java
 src/main/java/adris/altoclef/tasks/movement/EscapeFromLavaTask.java
 src/main/java/adris/altoclef/tasks/movement/GetOutOfWaterTask.java
-src/main/java/adris/altoclef/tasks/movement/MLGBucketTask.java
-src/main/java/adris/altoclef/tasks/movement/SafeRandomShimmyTask.java
-src/main/java/adris/altoclef/util/baritone/GoalDirectionXZ.java
 src/main/java/adris/altoclef/util/helpers/StorageHelper.java
 src/main/java/adris/altoclef/util/helpers/WorldHelper.java

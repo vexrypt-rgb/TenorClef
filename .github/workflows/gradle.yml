@@ -34,7 +34,7 @@ jobs:
           java-version: '21'
           cache: gradle
       - name: Verify pinned Ostinato 26.3 jar
-        run: ls -la libs/baritone-unoptimized-fabric-ostinato-26.3.jar && sha256sum -c libs/baritone-unoptimized-fabric-ostinato-26.3.jar.sha256 --strict
+        run: ls -la libs/baritone-unoptimized-fabric-ostinato-26.3.jar && (cd libs && sha256sum --strict -c baritone-unoptimized-fabric-ostinato-26.3.jar.sha256)
       - name: Compile 26.3 module
         run: ./gradlew -Porg.gradle.java.installations.fromEnv=JAVA_HOME_25_X64 :26.3:compileJava --stacktrace
       # Unit tests are pure Java (no Minecraft client).

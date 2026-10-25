@@ -5,7 +5,7 @@ without re-pinning, pass `-PostinatoJar.<module>=<path>` (for example `-Postinat
 
 | File | Module | Ostinato source | `fabric.mod.json` version |
 | --- | --- | --- | --- |
-| `baritone-unoptimized-fabric-ostinato-26.3.jar` | 26.3 (primary) | `main`, release `ostinato-mc26.3-unoptimized-fabric-<v>.jar` | `1.23.0` |
+| `baritone-unoptimized-fabric-ostinato-26.3.jar` | 26.3 (primary) | `main` @ `08338118` (Ostinato #101 driver API + #102), `:fabric:build` unoptimized jar | `1.25.0-3-g08338118` |
 | `baritone-unoptimized-fabric-ostinato-1.21.11.jar` | 1.21.11 | branch `1.21.11` | `1.19.2` |
 | `baritone-unoptimized-fabric-1.21.4.jar` | 1.21.4 | branch `1.21.4` | `1.0.2-16-g2fbe6d28` |
 | `baritone-unoptimized-fabric-1.16.1.jar` | 1.16.1 | branch `1.16.1` @ `ostinato-1.16.1.commit` | `1.16.1-ostinato` |

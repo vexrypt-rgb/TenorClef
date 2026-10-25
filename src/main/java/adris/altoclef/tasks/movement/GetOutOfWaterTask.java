@@ -1,5 +1,6 @@
 package adris.altoclef.tasks.movement;
 
+import adris.altoclef.util.baritone.BaritoneQueries;
 import adris.altoclef.AltoClef;
 import adris.altoclef.Debug;
 import adris.altoclef.tasksystem.Task;
@@ -8,7 +9,6 @@ import adris.altoclef.util.helpers.StorageHelper;
 import adris.altoclef.util.time.TimerGame;
 import baritone.api.pathing.goals.Goal;
 import baritone.api.utils.input.Input;
-import baritone.pathing.movement.MovementHelper;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
@@ -137,7 +137,7 @@ public class GetOutOfWaterTask extends CustomBaritoneGoalTask {
 
         private static boolean isWater(int x, int y, int z) {
             if (MinecraftClient.getInstance().world == null) return false;
-            return MovementHelper.isWater(MinecraftClient.getInstance().world.getBlockState(new BlockPos(x, y, z)));
+            return BaritoneQueries.get().isWater(MinecraftClient.getInstance().world.getBlockState(new BlockPos(x, y, z)));
         }
 
         private static boolean isWaterAdjacent(int x, int y, int z) {

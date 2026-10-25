@@ -5,10 +5,10 @@ without re-pinning, pass `-PostinatoJar.<module>=<path>` (for example `-Postinat
 
 | File | Module | Ostinato source | `fabric.mod.json` version |
 | --- | --- | --- | --- |
-| `baritone-unoptimized-fabric-ostinato-26.3.jar` | 26.3 (primary) | `main` @ `08338118` (Ostinato #101 driver API + #102), `:fabric:build` unoptimized jar | `1.25.0-3-g08338118` |
-| `baritone-unoptimized-fabric-ostinato-1.21.11.jar` | 1.21.11 | branch `1.21.11` | `1.19.2` |
-| `baritone-unoptimized-fabric-1.21.4.jar` | 1.21.4 | branch `1.21.4` | `1.0.2-16-g2fbe6d28` |
-| `baritone-unoptimized-fabric-1.16.1.jar` | 1.16.1 | branch `1.16.1` @ `ostinato-1.16.1.commit` | `1.16.1-ostinato` |
+| `baritone-unoptimized-fabric-ostinato-26.3.jar` | 26.3 (primary) | `main` @ `4c5ad635` (driver API #101 + `isSafeToCancel` #108), `:fabric:build` unoptimized jar | `1.25.0-7-g4c5ad635` |
+| `baritone-unoptimized-fabric-ostinato-1.21.11.jar` | 1.21.11 | branch `1.21.11` @ `acd12e2c` (driver API backport #110), `dist/` unoptimized jar | `1.20.0-6-gacd12e2c` |
+| `baritone-unoptimized-fabric-1.21.4.jar` | 1.21.4 | branch `1.21.4` @ `86b762b8` (driver API backport #111), `dist/` unoptimized jar | `1.0.2-10-g86b762b8` |
+| `baritone-unoptimized-fabric-1.16.1.jar` | 1.16.1 | branch `1.16.1` @ `a5926bf5` (driver API backport #112), CI artifact `baritone-unoptimized-fabric-1.16.5.jar` of run 40179824758; commit in `ostinato-1.16.1.commit` | `1.16.1-ostinato` |
 
 Re-pin: replace the jar, run `sha256sum <jar> > <jar>.sha256`, update the table, commit
 all three together. See [docs/OSTINATO_WIRING.md](../docs/OSTINATO_WIRING.md).

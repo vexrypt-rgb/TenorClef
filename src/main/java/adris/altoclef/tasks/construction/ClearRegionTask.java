@@ -4,7 +4,7 @@ import adris.altoclef.multiversion.blockpos.BlockPosVer;
 import adris.altoclef.AltoClef;
 import adris.altoclef.tasksystem.ITaskRequiresGrounded;
 import adris.altoclef.tasksystem.Task;
-import baritone.Baritone;
+import baritone.api.IBaritone; // Ostinato: driver API only
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.BlockPos;
 
@@ -31,7 +31,7 @@ public class ClearRegionTask extends Task implements ITaskRequiresGrounded {
 
     @Override
     protected Task onTick() {
-        Baritone baritone = AltoClef.getInstance().getClientBaritone();
+        IBaritone baritone = AltoClef.getInstance().getClientBaritone();
 
         if (!baritone.getBuilderProcess().isActive()) {
             baritone.getBuilderProcess().clearArea(_from, _to);

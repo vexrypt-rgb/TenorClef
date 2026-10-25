@@ -1,7 +1,7 @@
 package adris.altoclef;
 
 import adris.altoclef.util.slots.Slot;
-import baritone.altoclef.AltoClefSettings;
+import baritone.api.policy.IAgentPolicy; // Ostinato: driver API
 import baritone.api.Settings;
 import baritone.api.utils.RayTraceUtils;
 import net.minecraft.block.BlockState;
@@ -337,7 +337,7 @@ public class BotBehaviour {
             //preferredStairs = s.allowDownward.value;
         }
 
-        private void readExtraState(AltoClefSettings settings) {
+        private void readExtraState(IAgentPolicy settings) {
             synchronized (settings.getBreakMutex()) {
                 synchronized (settings.getPlaceMutex()) {
                     blocksToAvoidBreaking = new HashSet<>(settings.getBlocksToAvoidBreaking());
@@ -366,7 +366,7 @@ public class BotBehaviour {
         /**
          * Make the current state match our copy
          */
-        private void applyState(Settings s, AltoClefSettings sa) {
+        private void applyState(Settings s, IAgentPolicy sa) {
             s.followOffsetDistance.value = followOffsetDistance;
             s.mineScanDroppedItems.value = mineScanDroppedItems;
             s.allowDiagonalAscend.value = allowDiagonalAscend;

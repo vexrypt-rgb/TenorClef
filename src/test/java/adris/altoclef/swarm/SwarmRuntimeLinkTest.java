@@ -29,7 +29,7 @@ class SwarmRuntimeLinkTest {
     @AfterEach
     void reset() {
         SwarmRuntime.leave();
-        SwarmRuntime.useLink(new SwarmLink.Ostinato());
+        SwarmRuntime.useLink(SwarmLink.create());
     }
 
     @Test

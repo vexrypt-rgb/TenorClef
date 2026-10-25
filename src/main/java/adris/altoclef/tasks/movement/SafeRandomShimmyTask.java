@@ -5,7 +5,7 @@ import adris.altoclef.Debug;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.helpers.LookHelper;
 import adris.altoclef.util.time.TimerGame;
-import baritone.Baritone;
+import baritone.api.IBaritone; // Ostinato: driver API only
 import baritone.api.utils.input.Input;
 
 /**
@@ -38,7 +38,7 @@ public class SafeRandomShimmyTask extends Task {
             LookHelper.randomOrientation();
         }
 
-        Baritone baritone = AltoClef.getInstance().getClientBaritone();
+        IBaritone baritone = AltoClef.getInstance().getClientBaritone();
 
         baritone.getInputOverrideHandler().setInputForceState(Input.SNEAK, true);
         baritone.getInputOverrideHandler().setInputForceState(Input.MOVE_FORWARD, true);
@@ -51,7 +51,7 @@ public class SafeRandomShimmyTask extends Task {
 
     @Override
     protected void onStop(Task interruptTask) {
-        Baritone baritone = AltoClef.getInstance().getClientBaritone();
+        IBaritone baritone = AltoClef.getInstance().getClientBaritone();
 
         baritone.getInputOverrideHandler().setInputForceState(Input.MOVE_FORWARD, false);
         baritone.getInputOverrideHandler().setInputForceState(Input.SNEAK, false);

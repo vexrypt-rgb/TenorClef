@@ -19,7 +19,7 @@ import adris.altoclef.util.baritone.CachedProjectile;
 import adris.altoclef.util.helpers.*;
 import adris.altoclef.util.slots.PlayerSlot;
 import adris.altoclef.util.slots.Slot;
-import baritone.Baritone;
+import baritone.api.IBaritone; // Ostinato: driver API only
 import baritone.api.utils.Rotation;
 import baritone.api.utils.input.Input;
 import net.minecraft.block.AbstractFireBlock;
@@ -784,7 +784,7 @@ public class MobDefenseChain extends SingleTaskChain {
     private void putOutFire(AltoClef mod, BlockPos pos) {
         Optional<Rotation> reach = LookHelper.getReach(pos);
         if (reach.isPresent()) {
-            Baritone b = mod.getClientBaritone();
+            IBaritone b = mod.getClientBaritone();
             if (LookHelper.isLookingAt(mod, pos)) {
                 b.getPathingBehavior().requestPause();
                 b.getInputOverrideHandler().setInputForceState(Input.CLICK_LEFT, true);

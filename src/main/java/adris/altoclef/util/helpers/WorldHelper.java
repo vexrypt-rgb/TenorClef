@@ -292,7 +292,7 @@ public interface WorldHelper {
         AltoClef altoClef = AltoClef.getInstance();
 
         // There might be mumbo jumbo next to it, we fall and we get killed by lava or something.
-        if (MovementHelper.avoidBreaking(altoClef.getClientBaritone().bsi, toBreak.getX(), toBreak.getY(), toBreak.getZ(), altoClef.getWorld().getBlockState(toBreak))) {
+        if (MovementHelper.avoidBreaking(((baritone.Baritone) altoClef.getClientBaritone()).bsi, toBreak.getX(), toBreak.getY(), toBreak.getZ(), altoClef.getWorld().getBlockState(toBreak))) { // Ostinato: internal BlockStateInterface
             return true;
         }
         // Fall down

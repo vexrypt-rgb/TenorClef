@@ -532,7 +532,7 @@ public class AltoClef implements ModInitializer {
      */
     /**
      * Ostinato's freecam draws the bot as a translucent ghost with a status tag; feed it the current task.
-     * Reflective because not every Ostinato build has the hook.
+     * Typed Ostinato API on 26.3; reflective on older lines, whose pinned jars predate it.
      */
     private void hookFreecamStatus() {
         try {
@@ -544,8 +544,13 @@ public class AltoClef implements ModInitializer {
                 java.util.List<adris.altoclef.tasksystem.Task> tasks = chain.getTasks();
                 return tasks.get(tasks.size() - 1).toString();
             };
+            //#if MC >= 260000
+            //$$ getClientBaritone().setFreecamStatus(status); // Ostinato: typed API
+            //$$ } catch (RuntimeException | LinkageError ignored) {
+            //#else
             Class.forName("baritone.behavior.FreecamBehavior").getField("statusSupplier").set(null, status);
         } catch (ReflectiveOperationException | LinkageError ignored) {
+            //#endif
         }
     }
 

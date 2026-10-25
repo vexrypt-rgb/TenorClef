@@ -9,8 +9,9 @@ import net.minecraft.entity.LivingEntity;
  * W-tap, strafe, jump reset, shield, axe, bow, gapples, totem). This task only starts it, keeps
  * the other chains out of the way and mirrors its stats.
  * <p>
- * The process is reached by reflection: only the 1.21.4 Ostinato jar has it, and this source is
- * shared with the 1.16.1 and 1.21.11 builds, whose jars don't (there the task ends at once).
+ * On 26.3 the process is reached through Ostinato's typed {@code IBaritone.getPvpProcess()} API. Older
+ * lines still use reflection, because their pinned jars predate that API (1.16.1 has no PvpProcess at all;
+ * there the task ends at once).
  */
 public class PvpTask extends Task {
 
@@ -77,6 +78,59 @@ public class PvpTask extends Task {
         }
     }
 
+    //#if MC >= 260000
+    //$$ // Ostinato: typed driver API (IPvpProcess), no reflection.
+    //$$ private static baritone.api.process.IPvpProcess typed() {
+    //$$     AltoClef mod = AltoClef.getInstance();
+    //$$     return mod == null || mod.getClientBaritone() == null ? null : mod.getClientBaritone().getPvpProcess();
+    //$$ }
+    //$$
+    //$$ @Override
+    //$$ protected void onStart() {
+    //$$     baritone.api.process.IPvpProcess p = typed();
+    //$$     if (p == null) return;
+    //$$     if (mode == Mode.PLAYER) p.attackPlayer(name);
+    //$$     else if (mode == Mode.PLAYERS) p.attackPlayers();
+    //$$     else p.attackHostiles();
+    //$$ }
+    //$$
+    //$$ @Override
+    //$$ protected Task onTick() {
+    //$$     baritone.api.process.IPvpProcess p = typed();
+    //$$     if (p == null) {
+    //$$         setDebugState("PvP needs an Ostinato build with PvpProcess");
+    //$$         return null;
+    //$$     }
+    //$$     touch();
+    //$$     if (!p.isActive()) onStart(); // cancelled from outside (e.g. #stop): pick it back up
+    //$$     baritone.api.process.PvpStats st = p.getStats();
+    //$$     attacks = st.attacks;
+    //$$     crits = st.crits;
+    //$$     sprintHits = st.sprintHits;
+    //$$     axeHits = st.axeHits;
+    //$$     blocks = st.blocks;
+    //$$     gapples = st.gapples;
+    //$$     damageTaken = st.damageTaken;
+    //$$     setDebugState(p.displayName0());
+    //$$     return null;
+    //$$ }
+    //$$
+    //$$ public LivingEntity getTarget() {
+    //$$     baritone.api.process.IPvpProcess p = typed();
+    //$$     return p == null ? null : p.getTarget();
+    //$$ }
+    //$$
+    //$$ public String stats() {
+    //$$     baritone.api.process.IPvpProcess p = typed();
+    //$$     return p == null ? "" : p.stats();
+    //$$ }
+    //$$
+    //$$ @Override
+    //$$ protected void onStop(Task interruptTask) {
+    //$$     baritone.api.process.IPvpProcess p = typed();
+    //$$     if (p != null) p.onLostControl();
+    //$$ }
+    //#else
     @Override
     protected void onStart() {
         Object p = proc();
@@ -124,6 +178,7 @@ public class PvpTask extends Task {
         Object p = proc();
         if (p != null) call(p, "onLostControl");
     }
+    //#endif
 
     @Override
     public boolean isFinished() {

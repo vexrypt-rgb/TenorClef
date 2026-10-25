@@ -60,7 +60,7 @@ The committed jar in `libs/` is the only jar a normal build uses. There is no di
 | 1.21.4 | `libs/baritone-unoptimized-fabric-1.21.4.jar` |
 | 1.16.1 | `libs/baritone-unoptimized-fabric-1.16.1.jar` |
 
-To build against a local Ostinato jar instead, pass `-PostinatoJar=<path>` (checksum not checked). `../Ostinato/dist` is never read implicitly. To re-pin, replace the jar and regenerate its `.sha256` in the same commit (`sha256sum <jar> > <jar>.sha256`).
+To build against a local Ostinato jar instead, pass `-PostinatoJar.<module>=<path>` (one module, e.g. `-PostinatoJar.26.3=...`) or `-PostinatoJar=<path>` (every module); the checksum is not checked. `../Ostinato/dist` is never read implicitly. To re-pin, replace the jar and regenerate its `.sha256` in the same commit (`sha256sum <jar> > <jar>.sha256`).
 
 ### 1.16.1
 

@@ -54,7 +54,7 @@ jobs:
       - name: Verify staged Ostinato 1.21.11 jar
         run: ls -la libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar
       - name: Compile 1.21.11 module
-        run: ./gradlew -Pno26 "-PostinatoJar=${{ steps.stage_ostinato.outputs.jar }}" :1.21.11:compileJava --stacktrace
+        run: ./gradlew -Pno26 "-PostinatoJar.1.21.11=${{ steps.stage_ostinato.outputs.jar }}" :1.21.11:compileJava --stacktrace
       # Unit tests are pure Java (no Minecraft client).
       - name: Unit tests
         run: ./gradlew -Pno26 :1.21.11:test --stacktrace
@@ -97,7 +97,7 @@ jobs:
           java-version: '21'
           cache: gradle
 
-      # Ostinato: build the tip and pass its jar with -PostinatoJar (libs/ stays authoritative otherwise).
+      # Ostinato: build the tip and pass its jar with -PostinatoJar.1.21.11 (libs/ stays authoritative otherwise).
       - name: Checkout Ostinato tip
         uses: actions/checkout@v4
         with:
@@ -129,7 +129,7 @@ jobs:
 
       - name: Compile 1.21.11 module
         if: steps.stage_ostinato.outputs.staged == 'true'
-        run: ./gradlew -Pno26 "-PostinatoJar=${{ steps.stage_ostinato.outputs.jar }}" :1.21.11:compileJava --stacktrace
+        run: ./gradlew -Pno26 "-PostinatoJar.1.21.11=${{ steps.stage_ostinato.outputs.jar }}" :1.21.11:compileJava --stacktrace
 
   build-1161:
     name: Compile Fabric 1.16.1 (Ostinato legacy)

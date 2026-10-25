@@ -201,7 +201,8 @@ dependencies {
     // Thank you georgeagostino for fixing my garbage
         // Ostinato: the committed jar in libs/ is authoritative. No directory scan, no mtime sort.
         // Each pinned jar has a libs/<jar>.sha256 next to it; a mismatch fails the build.
-        // Override for local/tip work only: -PostinatoJar=/path/to/jar (skips the checksum).
+        // Override for local/tip work only (skips the checksum): -PostinatoJar.<module>=/path/to/jar for one module
+        // (e.g. -PostinatoJar.1.21.11=...), or -PostinatoJar=/path/to/jar when building a single module.
         def ostinatoLibsJar = [
             11601 : 'baritone-unoptimized-fabric-1.16.1.jar',
             12104 : 'baritone-unoptimized-fabric-1.21.4.jar',
@@ -209,7 +210,7 @@ dependencies {
             260300: 'baritone-unoptimized-fabric-ostinato-26.3.jar',
         ]
         def resolveOstinatoJar = { int ver ->
-            def override = project.findProperty('ostinatoJar')
+            def override = project.findProperty("ostinatoJar.${project.name}") ?: project.findProperty('ostinatoJar')
             if (override) {
                 def f = file(override.toString())
                 if (!f.isFile()) throw new GradleException("-PostinatoJar=${override} does not exist")

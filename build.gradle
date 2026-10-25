@@ -199,121 +199,54 @@ dependencies {
     shadow('com.fasterxml.jackson.core:jackson-databind:2.16.0')
 
     // Thank you georgeagostino for fixing my garbage
-    // Baritone/Ostinato: 1.16.1 requires the matching Ostinato artifact. The
-    // 1.21.11 port can use its matching Ostinato artifact while it is developed;
-    // do not load that artifact into 1.21 / 1.21.1 projects.
-        def ostinatoDist = file("${rootProject.projectDir}/../Ostinato/dist")
-        def ostinato1161Dist = file("${rootProject.projectDir}/../Ostinato-1.16.1/dist")
-        // In-tree checkouts (CI stages jars here or under libs/).
-        def ostinatoDistInTree = file("${rootProject.projectDir}/Ostinato/dist")
-        def ostinato1161DistInTree = file("${rootProject.projectDir}/Ostinato-1.16.1/dist")
-        def ostinatoLibs = file("${rootProject.projectDir}/libs")
-        def ostinatoSearchDirs = [ostinatoDist, ostinato1161Dist, ostinatoDistInTree, ostinato1161DistInTree, ostinatoLibs]
+        // Ostinato: the committed jar in libs/ is authoritative. No directory scan, no mtime sort.
+        // Each pinned jar has a libs/<jar>.sha256 next to it; a mismatch fails the build.
+        // Override for local/tip work only: -PostinatoJar=/path/to/jar (skips the checksum).
+        def ostinatoLibsJar = [
+            11601 : 'baritone-unoptimized-fabric-1.16.1.jar',
+            12104 : 'baritone-unoptimized-fabric-1.21.4.jar',
+            12111 : 'baritone-unoptimized-fabric-ostinato-1.21.11.jar',
+            260300: 'baritone-unoptimized-fabric-ostinato-26.3.jar',
+        ]
+        def resolveOstinatoJar = { int ver ->
+            def override = project.findProperty('ostinatoJar')
+            if (override) {
+                def f = file(override.toString())
+                if (!f.isFile()) throw new GradleException("-PostinatoJar=${override} does not exist")
+                println "[altoclef] Ostinato Baritone for ${project.name}: ${f} (override, checksum not checked)"
+                return f
+            }
+            def f = file("${rootProject.projectDir}/libs/${ostinatoLibsJar[ver]}")
+            if (!f.isFile()) {
+                throw new GradleException("Missing libs/${ostinatoLibsJar[ver]}. Commit the pinned Ostinato jar, or pass -PostinatoJar=<path> (see libs/README.md).")
+            }
+            def sumFile = file("${f}.sha256")
+            if (!sumFile.isFile()) throw new GradleException("Missing libs/${f.name}.sha256 for the pinned Ostinato jar.")
+            def want = sumFile.text.trim().split(/\s+/)[0].toLowerCase()
+            def got = java.security.MessageDigest.getInstance('SHA-256').digest(f.bytes).encodeHex().toString()
+            if (want != got) throw new GradleException("libs/${f.name} sha256 is ${got}, libs/${f.name}.sha256 says ${want}. Re-pin both together.")
+            println "[altoclef] Ostinato Baritone for ${project.name}: libs/${f.name} (sha256 ok)"
+            return f
+        }
 
         if (mcVersion == 11601) {
-        // Prefer Ostinato 1.16.1 (AltoClef hooks + method_30621 no-op + drops guard).
-        def jars1161 = []
-        ostinatoSearchDirs.each { dir ->
-            if (dir.exists()) {
-                dir.eachFileMatch(~/baritone-unoptimized-fabric-.*1\.16\.1.*\.jar/) { f -> jars1161 << f }
-                dir.eachFileMatch(~/baritone-unoptimized-fabric-ostinato-1\.16\.1\.jar/) { f -> jars1161 << f }
-            }
-        }
-        jars1161 = jars1161.unique { it.absolutePath }.sort { -it.lastModified() }
-        if (jars1161.isEmpty()) {
-            throw new GradleException("Missing Ostinato 1.16.1 Baritone jar. Build Ostinato branch 1.16.1 or place baritone-unoptimized-fabric-ostinato-1.16.1.jar in ../Ostinato/dist (see docs/OSTINATO_WIRING.md).")
-        }
-        def jar = jars1161[0]
-        println "[altoclef] Ostinato Baritone for ${project.name}: ${jar.name}"
-        modImplementation files(jar)
-        // NOTE: deliberately NOT `include files(jar)`.
-        //
-        // Loom's `processIncludeJars` resolves its `jarIds` property and rejects any
-        // candidate that "is not a module component and has no capabilities":
-        //   Attempted to nest artifact baritone-unoptimized-fabric-1.16.1.jar
-        //   which is not a module component and has no capabilities.
-        // A flat-file jar carries no capabilities (and `capabilities { }` is not
-        // available on a FileCollectionDependency), so nesting it fails. This was
-        // latent for a long time because the task stayed cached; it surfaced as soon as
-        // the Ostinato jar was rebuilt and its bytes changed (cost 2 builds on
-        // 2026-09-20, 16m45s + 15m15s).
-        //
-        // Baritone does not need to be nested into the altoclef jar for development or
-        // for runClient: it is a normal runtime mod and is already staged as a Fabric
-        // mod (fabric.mod.json present) alongside altoclef. If a bundled release jar is
-        // ever required, do it as a separate packaging step with a Loom-produced
-        // artifact, not by including a flat file here.
-    } else if (mcVersion == 12104) {
-        // 1.21.4 uses Ostinato branch 1.21.4 (anarchy-server target).
-        def jars1214 = []
-        ostinatoSearchDirs.each { dir ->
-            if (dir.exists()) dir.eachFileMatch(~/baritone-unoptimized-fabric-.*1\.21\.4.*\.jar/) { f -> jars1214 << f }
-        }
-        jars1214 = jars1214.unique { it.absolutePath }.sort { -it.lastModified() }
-        if (jars1214.isEmpty()) {
-            throw new GradleException("Missing Ostinato 1.21.4 Baritone jar. Build Ostinato branch 1.21.4 and place it as libs/baritone-unoptimized-fabric-1.21.4.jar (see docs/OSTINATO_WIRING.md).")
-        }
-        println "[altoclef] Ostinato Baritone for ${project.name}: ${jars1214[0].name}"
-        modImplementation files(jars1214[0])
-    } else if (mcVersion == 260300) {
-        // 26.3 uses Ostinato branch 26.3 (mojmap names, Java 25).
-        def jars263 = []
-        ostinatoSearchDirs.each { dir ->
-            if (dir.exists()) dir.eachFileMatch(~/baritone-unoptimized-fabric-.*26\.3.*\.jar/) { f -> jars263 << f }
-        }
-        jars263 = jars263.unique { it.absolutePath }.sort { -it.lastModified() }
-        if (jars263.isEmpty()) {
-            throw new GradleException("Missing Ostinato 26.3 Baritone jar. Place it as libs/baritone-unoptimized-fabric-ostinato-26.3.jar.")
-        }
-        println "[altoclef] Ostinato Baritone for ${project.name}: ${jars263[0].name}"
-        implementation files(jars263[0])
-    } else {
-        // Only 1.21.11 can use main's matching Ostinato artifact. 1.21 and 1.21.1
-        // must resolve their matching Baritone artifact instead of a 1.21.11 jar.
-        def ostinatoJars = []
-        [ostinatoDist, ostinatoDistInTree].each { dir ->
-            if (dir.exists()) {
-                dir.eachFileMatch(~/baritone-unoptimized-fabric-.*\.jar/) { f ->
-                    if (!f.name.contains("1.16.1") && !f.name.contains("ostinato-1.16") && !f.name.contains("1.21.4") && !f.name.contains("26.3")) {
-                        ostinatoJars << f
-                    }
-                }
-            }
-        }
-        ostinatoJars = ostinatoJars.unique { it.absolutePath }.sort { -it.lastModified() }
-        if (ostinatoJars.isEmpty() && ostinatoLibs.exists()) {
-            ostinatoLibs.eachFileMatch(~/baritone-unoptimized-fabric-ostinato.*\.jar/) { f ->
-                if (!f.name.contains("1.16.1") && !f.name.contains("1.21.4") && !f.name.contains("26.3")) ostinatoJars << f
-            }
-            // Also accept any non-1.16.1 unoptimized fabric jar staged into libs/ by CI.
-            if (ostinatoJars.isEmpty()) {
-                ostinatoLibs.eachFileMatch(~/baritone-unoptimized-fabric-.*\.jar/) { f ->
-                    if (!f.name.contains("1.16.1") && !f.name.contains("ostinato-1.16") && !f.name.contains("1.21.4") && !f.name.contains("26.3")) {
-                        ostinatoJars << f
-                    }
-                }
-            }
-        }
-        // 1.21.11 is built against Ostinato main. Without the jar, skip the dep so the other
-        // modules can still configure; :1.21.11:compileJava itself fails until the jar is staged.
-        if (mcVersion == 12111) {
-            if (!ostinatoJars.isEmpty()) {
-                def jar = ostinatoJars[0]
-                println "[altoclef] Ostinato Baritone for ${project.name}: ${jar.name}"
-                modImplementation files(jar)
-                // Not `include files(jar)`: Loom rejects flat-file jars in processIncludeJars (see the 1.16.1 note above).
-            } else {
-                println "[altoclef] Ostinato tip jar not found for ${project.name} — configure continues without Baritone (stage ../Ostinato/dist or libs/; see docs/DEVELOPMENT.md)"
-            }
-        }
+            // NOTE: deliberately NOT `include files(jar)`: Loom rejects flat-file jars in
+            // processIncludeJars (a flat file carries no capabilities). Users install Ostinato separately.
+            modImplementation files(resolveOstinatoJar(11601))
+        } else if (mcVersion == 12104) {
+            modImplementation files(resolveOstinatoJar(12104))
+        } else if (mcVersion == 260300) {
+            // 26.3 is unobfuscated (mojmap), so plain implementation.
+            implementation files(resolveOstinatoJar(260300))
+        } else if (mcVersion == 12111) {
+            modImplementation files(resolveOstinatoJar(12111))
+        } else {
         // Every other version is a preprocess-only node: TenorClef always runs on Ostinato, and
         // Ostinato has no build for these versions, so they are never compiled or packaged. The
         // preprocessor still resolves types on each node while remapping sources down the chain
         // (without Baritone, calls on its return types such as player.setPitch are left unmapped
         // and 1.16.1 fails), so the matching upstream jar is compile-only here, for that analysis.
-        if (mcVersion != 12111) {
-            modCompileOnly "cabaletta:baritone-unoptimized-fabric:${project.name}"
-        }
+        modCompileOnly "cabaletta:baritone-unoptimized-fabric:${project.name}"
     }
 
     //modImplementation 'baritone-api-fabric:baritone-api-fabric:1.6.3'

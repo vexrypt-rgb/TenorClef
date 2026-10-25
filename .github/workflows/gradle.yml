@@ -33,8 +33,8 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: gradle
-      - name: Verify staged Ostinato 26.3 jar
-        run: ls -la libs/baritone-unoptimized-fabric-ostinato-26.3.jar
+      - name: Verify pinned Ostinato 26.3 jar
+        run: ls -la libs/baritone-unoptimized-fabric-ostinato-26.3.jar && sha256sum -c libs/baritone-unoptimized-fabric-ostinato-26.3.jar.sha256 --strict
       - name: Compile 26.3 module
         run: ./gradlew -Porg.gradle.java.installations.fromEnv=JAVA_HOME_25_X64 :26.3:compileJava --stacktrace
       # Unit tests are pure Java (no Minecraft client).
@@ -54,7 +54,7 @@ jobs:
       - name: Verify staged Ostinato 1.21.11 jar
         run: ls -la libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar
       - name: Compile 1.21.11 module
-        run: ./gradlew -Pno26 :1.21.11:compileJava --stacktrace
+        run: ./gradlew -Pno26 "-PostinatoJar=${{ steps.stage_ostinato.outputs.jar }}" :1.21.11:compileJava --stacktrace
       # Unit tests are pure Java (no Minecraft client).
       - name: Unit tests
         run: ./gradlew -Pno26 :1.21.11:test --stacktrace
@@ -97,8 +97,7 @@ jobs:
           java-version: '21'
           cache: gradle
 
-      # Stage Ostinato tip as sibling ../Ostinato (matches local Windows layout).
-      # build.gradle prefers a jar there over the committed one in libs/.
+      # Ostinato: build the tip and pass its jar with -PostinatoJar (libs/ stays authoritative otherwise).
       - name: Checkout Ostinato tip
         uses: actions/checkout@v4
         with:
@@ -117,7 +116,6 @@ jobs:
             echo "staged=false" >> "$GITHUB_OUTPUT"
             exit 1
           fi
-          mkdir -p "$GITHUB_WORKSPACE/../Ostinato/dist"
           shopt -s nullglob
           jars=(_ostinato_tip/dist/baritone-unoptimized-fabric-*.jar)
           if [ ${#jars[@]} -eq 0 ]; then
@@ -125,13 +123,13 @@ jobs:
             echo "staged=false" >> "$GITHUB_OUTPUT"
             exit 1
           fi
-          cp -v "${jars[@]}" "$GITHUB_WORKSPACE/../Ostinato/dist/"
-          ls -la "$GITHUB_WORKSPACE/../Ostinato/dist"
+          ls -la "${jars[@]}"
+          echo "jar=$GITHUB_WORKSPACE/${jars[0]}" >> "$GITHUB_OUTPUT"
           echo "staged=true" >> "$GITHUB_OUTPUT"
 
       - name: Compile 1.21.11 module
         if: steps.stage_ostinato.outputs.staged == 'true'
-        run: ./gradlew -Pno26 :1.21.11:compileJava --stacktrace
+        run: ./gradlew -Pno26 "-PostinatoJar=${{ steps.stage_ostinato.outputs.jar }}" :1.21.11:compileJava --stacktrace
 
   build-1161:
     name: Compile Fabric 1.16.1 (Ostinato legacy)

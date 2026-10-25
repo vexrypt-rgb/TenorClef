@@ -36,11 +36,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-      - name: Stage Ostinato jar (nodes without a committed jar)
-        if: matrix.ostinato
-        run: |
-          curl -fsSL -o "libs/baritone-unoptimized-fabric-ostinato-${{ matrix.mc }}.jar" \
-            "https://github.com/vexrypt-rgb/Ostinato/releases/download/v1.19.2/${{ matrix.ostinato }}"
+      # Ostinato: every node builds against its pinned libs/ jar (sha256-checked by build.gradle).
       - name: Build ${{ matrix.mc }}
         run: ./gradlew ${{ matrix.mc == '26.3' && '-Porg.gradle.java.installations.fromEnv=JAVA_HOME_25_X64' || '-Pno26' }} :${{ matrix.mc }}:build -x test --stacktrace
       - name: Collect jar

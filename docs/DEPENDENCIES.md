@@ -29,28 +29,12 @@ Removed `org.gradle.java.home` from committed `gradle.properties`. Use:
 
 ## Ostinato jar wiring (`build.gradle`)
 
-Directories probed:
+Each Ostinato module uses exactly one committed jar in `libs/`, verified against `libs/<jar>.sha256` (hard fail on mismatch or if either file is missing). `-PostinatoJar=<path>` overrides it for local or tip builds. No sibling `dist/` directory is read.
 
-- `../Ostinato/dist`
-- `../Ostinato-1.16.1/dist`
-- `libs/` (repo-local)
-
-### 1.16.1 (`mcVersion == 11601`)
-
-- Requires an Ostinato Baritone jar matching `baritone-unoptimized-fabric-*1.16.1*` or `baritone-unoptimized-fabric-ostinato-1.16.1.jar`.
-- **Hard fail** if missing (no Maven fallback for 1.16.1).
-
-### 1.21.4 (`mcVersion == 12104`)
-
-- Requires `libs/baritone-unoptimized-fabric-1.21.4.jar` (Ostinato branch `1.21.4`). **Hard fail** if missing.
-
-### 26.3 (primary)
-
-- Newest `baritone-unoptimized-fabric-*26.3*.jar` from `../Ostinato/dist`, else the committed `libs/baritone-unoptimized-fabric-ostinato-26.3.jar` (the Ostinato `main` release jar). **Hard fail** if missing. Compiles with a JDK 25 toolchain; `-Pno26` leaves the module out.
-
-### 1.21.11
-
-- Newest non-1.16.1, non-1.21.4, non-26.3 jar from `../Ostinato/dist`, else the committed `libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar` (Ostinato branch `1.21.11`). No Maven fallback.
+- 1.16.1: `libs/baritone-unoptimized-fabric-1.16.1.jar` (commit in `libs/ostinato-1.16.1.commit`)
+- 1.21.4: `libs/baritone-unoptimized-fabric-1.21.4.jar`
+- 26.3 (primary): `libs/baritone-unoptimized-fabric-ostinato-26.3.jar`. JDK 25 toolchain; `-Pno26` leaves the module out.
+- 1.21.11: `libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar`
 
 ### Everything else (1.21.1 … 1.16.5)
 
@@ -87,7 +71,7 @@ set JAVA_HOME=<JDK8 home>
 gradlew.bat build -Pbaritone.fabric_build
 ```
 
-Copy `dist/baritone-unoptimized-fabric-*.jar` to `../Ostinato/dist/baritone-unoptimized-fabric-ostinato-1.16.1.jar` (or `altoclef/libs/`).
+Pass `dist/baritone-unoptimized-fabric-*.jar` with `-PostinatoJar=`, or re-pin `libs/baritone-unoptimized-fabric-1.16.1.jar` and its `.sha256`.
 
 ## Working TenorClef build commands
 
@@ -104,7 +88,7 @@ Expect `[altoclef] Ostinato Baritone for <version>: <jar name>` on configure.
 ## CI today (`.github/workflows/gradle.yml`) — **Phase 1**
 
 - JDK 21, `ubuntu-latest`
-- Jobs: `:26.3:compileJava` + `:26.3:test` (primary, committed `libs/baritone-unoptimized-fabric-ostinato-26.3.jar`, JDK 25 toolchain), `:1.21.11:compileJava` + `:1.21.11:test` (committed `libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar`), `:1.21.4:compileJava` + `:1.21.4:test`, `:1.16.1:compileJava` (committed `libs/baritone-unoptimized-fabric-1.16.1.jar`), and a non-blocking `:1.21.11:compileJava` against the tip of Ostinato `1.21.11` (checkout/build → `../Ostinato/dist`)
+- Jobs: `:26.3:compileJava` + `:26.3:test` (primary, committed `libs/baritone-unoptimized-fabric-ostinato-26.3.jar`, JDK 25 toolchain), `:1.21.11:compileJava` + `:1.21.11:test` (committed `libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar`), `:1.21.4:compileJava` + `:1.21.4:test`, `:1.16.1:compileJava` (committed `libs/baritone-unoptimized-fabric-1.16.1.jar`), and a non-blocking `:1.21.11:compileJava` against the tip of Ostinato `1.21.11` (checkout/build, passed with `-PostinatoJar`)
 - See `docs/DEVELOPMENT.md` for clean-runner behavior
 
 ## Other libraries

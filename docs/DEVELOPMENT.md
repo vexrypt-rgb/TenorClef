@@ -16,7 +16,7 @@ Set `JAVA_HOME` (or your IDE Gradle JVM) to JDK 21 before running TenorClef Grad
 REM Windows (example — adjust path to your Adoptium/Temurin install)
 set JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot
 cd C:\Users\redfa\Documents\MinecraftDev\altoclef
-gradlew.bat :1.21.11:compileJava
+gradlew.bat :1.21.11:compileJava -PostinatoJar=..\Ostinato\dist\<jar>
 ```
 
 ```bash
@@ -51,14 +51,16 @@ org.gradle.jvmargs=-Xmx8192M
 
 ## Ostinato jars
 
-TenorClef searches (first hit wins by newest mtime):
+The committed jar in `libs/` is the only jar a normal build uses. There is no directory scan and no mtime ordering, so a local build and CI compile against the same bytes. Each jar has a `libs/<jar>.sha256`; a mismatch fails configuration.
 
-| Layout | Path |
+| Module | Pinned jar |
 | --- | --- |
-| Sibling tip (Windows product layout) | `../Ostinato/dist/` |
-| Sibling 1.16.1 checkout | `../Ostinato-1.16.1/dist/` |
-| In-tree (CI) | `Ostinato/dist/`, `Ostinato-1.16.1/dist/` |
-| Repo libs | `libs/` |
+| 26.3 | `libs/baritone-unoptimized-fabric-ostinato-26.3.jar` |
+| 1.21.11 | `libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar` |
+| 1.21.4 | `libs/baritone-unoptimized-fabric-1.21.4.jar` |
+| 1.16.1 | `libs/baritone-unoptimized-fabric-1.16.1.jar` |
+
+To build against a local Ostinato jar instead, pass `-PostinatoJar=<path>` (checksum not checked). `../Ostinato/dist` is never read implicitly. To re-pin, replace the jar and regenerate its `.sha256` in the same commit (`sha256sum <jar> > <jar>.sha256`).
 
 ### 1.16.1
 
@@ -70,19 +72,19 @@ Build fresh from Ostinato (JDK **8**):
 cd C:\Users\redfa\Documents\MinecraftDev\Ostinato-1.16.1
 set JAVA_HOME=<JDK8 home>
 gradlew.bat build -Pbaritone.fabric_build
-copy dist\baritone-unoptimized-fabric-*.jar ..\Ostinato\dist\baritone-unoptimized-fabric-ostinato-1.16.1.jar
+rem then pass -PostinatoJar=<that jar>, or re-pin libs\baritone-unoptimized-fabric-1.16.1.jar and its .sha256
 ```
 
 ### 1.21.11
 
-Uses the committed `libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar` (Ostinato branch `1.21.11`, JDK 21, `./gradlew :fabric:build`), unless a sibling `../Ostinato/dist` holds an Ostinato fabric jar, which is preferred. To build against a local Ostinato `main`:
+Uses the committed `libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar` (Ostinato branch `1.21.11`, JDK 21, `./gradlew :fabric:build`), To build against a local Ostinato checkout, pass its jar with `-PostinatoJar`:
 
 ```bat
 cd C:\Users\redfa\Documents\MinecraftDev\Ostinato
 set JAVA_HOME=<JDK21 home>
 gradlew.bat build
 cd ..\altoclef
-gradlew.bat :1.21.11:compileJava
+gradlew.bat :1.21.11:compileJava -PostinatoJar=..\Ostinato\dist\<jar>
 ```
 
 ### 1.21.4
@@ -100,7 +102,7 @@ Uses the committed `libs/baritone-unoptimized-fabric-1.21.4.jar` (Ostinato branc
 ## Useful commands
 
 ```bat
-gradlew.bat :1.21.11:compileJava
+gradlew.bat :1.21.11:compileJava -PostinatoJar=..\Ostinato\dist\<jar>
 gradlew.bat :1.21.4:compileJava
 gradlew.bat :1.16.1:compileJava
 gradlew.bat :1.21.11:test
@@ -117,7 +119,7 @@ On push/PR to `main`, `.github/workflows/gradle.yml`:
 2. **1.21.11** (required) — JDK 21, committed `libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar`, `./gradlew -Pno26 :1.21.11:compileJava` then `:1.21.11:test`.
 3. **1.21.4** (required) — JDK 21, committed `libs/baritone-unoptimized-fabric-1.21.4.jar`, `./gradlew :1.21.4:compileJava` then `:1.21.4:test`.
 4. **1.16.1** (required) — JDK 21 for TenorClef Gradle, uses committed `libs/baritone-unoptimized-fabric-1.16.1.jar`, `./gradlew :1.16.1:compileJava`.
-5. **1.21.11 against Ostinato tip** (`continue-on-error`) — checkout + `:fabric:build` of `vexrypt-rgb/Ostinato@1.21.11`, stage its jar to `../Ostinato/dist`, then `./gradlew :1.21.11:compileJava` **only if** staging succeeded. An early warning that the two repositories have drifted; does **not** block merge.
+5. **1.21.11 against Ostinato tip** (`continue-on-error`) — checkout + `:fabric:build` of `vexrypt-rgb/Ostinato@1.21.11`, then `./gradlew :1.21.11:compileJava -PostinatoJar=<tip jar>` **only if** staging succeeded. An early warning that the two repositories have drifted; does **not** block merge.
 
 `Deploy Javadoc` (`.github/workflows/javadoc-publish.yml`) is also **non-blocking** (`continue-on-error`) — generation/deploy failures must not red `main`.
 

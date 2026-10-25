@@ -36,9 +36,9 @@ just report it unavailable), the `@swarm` command, and the Swarm tab of the Teno
 
 | MC module | Ostinato jar (sole source) | CI gate |
 |----|----------|---------|
-| 1.21.1 / 1.21 | Published Baritone artifact (`../Ostinato/dist` ignored) | None (preprocess node only; no CI job builds it) |
+| 1.21.1 / 1.21 | Published Baritone artifact  | None (preprocess node only; no CI job builds it) |
 | 26.3 (primary) | Ostinato `main` → `libs/baritone-unoptimized-fabric-ostinato-26.3.jar` (JDK 25 toolchain) | **Required** (compile + unit tests) |
-| 1.21.11 | Ostinato `1.21.11` → `libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar` (a jar in `../Ostinato/dist` is preferred) | **Required** (compile + unit tests) |
+| 1.21.11 | Ostinato `1.21.11` → `libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar` (pinned by `.sha256`; `-PostinatoJar` overrides) | **Required** (compile + unit tests) |
 | 1.21.4 | Ostinato `1.21.4` → `libs/baritone-unoptimized-fabric-1.21.4.jar` | **Required** (compile + unit tests) |
 | 1.16.1 | Ostinato `1.16.1` → `libs/baritone-unoptimized-fabric-1.16.1.jar` (kinematic backend lives here) | **Required** (compile) |
 

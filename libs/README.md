@@ -1,21 +1,19 @@
-Ostinato Baritone jars (preferred):
+Pinned Ostinato Baritone jars. These are authoritative: `build.gradle` uses exactly
+the jar named below for each module, and fails if it is missing or its `.sha256` does
+not match. Sibling `../Ostinato/dist` directories are never read. To try another jar
+without re-pinning, pass `-PostinatoJar=<path>`.
 
-- Prefer `../Ostinato/dist` after building the matching Ostinato branch. See
-  [docs/OSTINATO_WIRING.md](../docs/OSTINATO_WIRING.md).
-- `baritone-unoptimized-fabric-ostinato-26.3.jar` — Ostinato `main` (Minecraft
-  26.3, Java 25), the release jar `ostinato-mc26.3-unoptimized-fabric-<version>.jar`.
-  Primary pairing.
-- `baritone-unoptimized-fabric-ostinato-1.21.11.jar` — Ostinato branch `1.21.11`
-  (Minecraft 1.21.11, Java 21).
-- `baritone-unoptimized-fabric-1.21.4.jar` — Ostinato branch `1.21.4` (Minecraft
-  1.21.4, Java 21).
-- `baritone-unoptimized-fabric-ostinato-1.16.1.jar` — Ostinato branch `1.16.1`
-  (`method_30621` no-op + `AltoClefSettings`).
-- Legacy name: `baritone-unoptimized-fabric-1.16.1.jar` — same 1.16.1 lineage;
-  TenorClef also accepts this pattern.
+| File | Module | Ostinato source | `fabric.mod.json` version |
+| --- | --- | --- | --- |
+| `baritone-unoptimized-fabric-ostinato-26.3.jar` | 26.3 (primary) | `main`, release `ostinato-mc26.3-unoptimized-fabric-<v>.jar` | `1.23.0` |
+| `baritone-unoptimized-fabric-ostinato-1.21.11.jar` | 1.21.11 | branch `1.21.11` | `1.19.2` |
+| `baritone-unoptimized-fabric-1.21.4.jar` | 1.21.4 | branch `1.21.4` | `1.0.2-16-g2fbe6d28` |
+| `baritone-unoptimized-fabric-1.16.1.jar` | 1.16.1 | branch `1.16.1` @ `ostinato-1.16.1.commit` | `1.16.1-ostinato` |
 
-Do not drop a 1.21.11 Ostinato jar into a 1.21.4 TenorClef build, or the
-reverse.
+Re-pin: replace the jar, run `sha256sum <jar> > <jar>.sha256`, update the table, commit
+all three together. See [docs/OSTINATO_WIRING.md](../docs/OSTINATO_WIRING.md).
+
+Do not drop a 1.21.11 Ostinato jar into a 1.21.4 TenorClef build, or the reverse.
 
 ## Vibe coding / AI use
 

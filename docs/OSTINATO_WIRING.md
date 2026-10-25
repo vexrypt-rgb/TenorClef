@@ -25,14 +25,12 @@ JDK 21 (the preprocessor cannot run on 25); the 26.3 module compiles with a JDK 
 finds among the installed JDKs. Pass `-Pno26` to leave 26.3 out when building only the older lines.
 
 The jars in `libs/` are the unoptimized Fabric jars of an Ostinato release. To refresh one, build the
-matching Ostinato branch and copy its `dist/baritone-unoptimized-fabric-*.jar` over the file in `libs/`:
+matching Ostinato branch and copy its `dist/baritone-unoptimized-fabric-*.jar` over the file in `libs/`, then regenerate `libs/<jar>.sha256` in the same commit:
 
 - `26.3`: JDK 25, Ostinato `main`. Use the `ostinato-mc26.3-unoptimized-fabric-*.jar` from an Ostinato
   release, or build `main` and copy its unoptimized Fabric jar, saved as `libs/baritone-unoptimized-fabric-ostinato-26.3.jar`.
-- `1.21.11`: JDK 21, branch `1.21.11`, `./gradlew :fabric:build`. A jar in a sibling `../Ostinato/dist/` is used
-  ahead of the one in `libs/`, so a local Ostinato checkout on `main` is picked up without copying anything.
-  The newest jar there wins whichever branch it was built from, so clear `../Ostinato/dist/` after
-  building another line in that checkout. The 26.3 module only takes jars with `26.3` in the name.
+- `1.21.11`: JDK 21, branch `1.21.11`, `./gradlew :fabric:build`. Sibling `../Ostinato/dist/` is not read; use
+  `-PostinatoJar=<path>` to try a local build without re-pinning.
 - `1.21.4`: JDK 21, branch `1.21.4`, `./gradlew :fabric:build`.
 - `1.16.1`: JDK 8, `./gradlew build -Pbaritone.fabric_build`.
 

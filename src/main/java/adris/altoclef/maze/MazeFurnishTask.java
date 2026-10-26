@@ -64,7 +64,7 @@ public class MazeFurnishTask extends Task {
         // Ostinato: run16 tug-of-war. Baritone autoTool and TenorClef's equip kept swapping tools on the same block, so it
         // never broke. TenorClef's PlayerInteractionFixChain equips for the block actually being broken; let it own tools.
         prevAutoTool = AltoClef.getInstance().getClientBaritoneSettings().autoTool.value;
-        AltoClef.getInstance().getClientBaritoneSettings().autoTool.value = false;
+        // Ostinato: run18/19 cherry-log stalls with autoTool off (held seeds/dirt, Baritone never reached logs); keep Baritone autoTool on.
         for (String id : materials.keySet()) { Item it = McCompat.item(id); if (it != null) AltoClef.getInstance().getBehaviour().addProtectedItems(it); }
     }
 

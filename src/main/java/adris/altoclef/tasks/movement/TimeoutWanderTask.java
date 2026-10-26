@@ -267,6 +267,8 @@ public class TimeoutWanderTask extends Task implements ITaskRequiresGrounded {
 
         ClientPlayerEntity player = AltoClef.getInstance().getPlayer();
 
+        // Ostinato: run31 crashed the client: MazeFurnishTask polls isFinished() before the first tick, while origin is unset.
+        if (origin == null) return false;
         if (player != null && player.getPos() != null && (player.isOnGround() ||
                 player.isTouchingWater())) {
             double sqDist = player.getPos().squaredDistanceTo(origin);

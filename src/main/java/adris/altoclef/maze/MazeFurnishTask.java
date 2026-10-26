@@ -50,6 +50,12 @@ public class MazeFurnishTask extends Task {
     private int gatherTicks;
     private final java.util.Set<String> skipped = new java.util.HashSet<>();
 
+    // Ostinato: true when a LIGHT step places this id (cladding).
+    private boolean isCladding(String id) {
+        for (MazeFurnishPlan.Step s : plan.steps) if (s.kind() == MazeFurnishPlan.Kind.LIGHT && s.blockIds().contains(id)) return true;
+        return false;
+    }
+
     // Ostinato: true when the id only appears as FILL contents (never placed as a block).
     private boolean lootOnly(String id) {
         boolean inFill = false;
@@ -132,7 +138,11 @@ public class MazeFurnishTask extends Task {
         Task kit = kitTask(mod);
         if (kit != null) return kit;        // Gather first, so the bot is not walking out of the sealed room for one more glowstone.
         // Ostinato: gather once; run23 re-gathered cherry_planks x26 every few placed blocks. Regather only when a step runs dry.
-        if (!gathered) for (Map.Entry<String, Integer> need : materials.entrySet()) {
+        // Ostinato: run24 crafted bowls/barrel from the gathered cherry cladding planks, forcing a 10-min regather. Gather
+        // non-cladding items (loot, containers) first so their crafts eat planks before the cladding count is filled.
+        java.util.List<Map.Entry<String, Integer>> order = new java.util.ArrayList<>(materials.entrySet());
+        order.sort(java.util.Comparator.comparingInt(e -> isCladding(e.getKey()) ? 1 : 0));
+        if (!gathered) for (Map.Entry<String, Integer> need : order) {
             if (skipped.contains(need.getKey())) continue; // Ostinato
             Item item = McCompat.item(need.getKey());
             if (item != null && mod.getItemStorage().getItemCount(item) < need.getValue() && TaskCatalogue.taskExists(item)) {

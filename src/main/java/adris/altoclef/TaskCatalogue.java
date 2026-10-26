@@ -890,6 +890,7 @@ public class TaskCatalogue {
         List<CataloguedResource> result = new ArrayList<>();
         for (WoodType woodType : WoodType.values()) {
             ItemHelper.WoodItems woodItems = ItemHelper.getWoodItems(woodType);
+            if (woodItems == null) continue; // Ostinato: wood type absent in this MC version
             Item match = getMatch.apply(woodItems);
             String cataloguedName = getCatalogueName.apply(woodItems);
             if (match == null) continue;

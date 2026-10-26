@@ -183,14 +183,29 @@ public class MazeFurnishTask extends Task {
             fill = null;
             index++;
         }
-        while (index < plan.steps.size()) {
-            MazeFurnishPlan.Step step = plan.steps.get(index);
-            Task sub = stepTask(mod, step);
-            if (sub != null) {
-                setDebugState(step.kind() + " " + step.x() + " " + step.y() + " " + step.z());
-                return sub;
+        // Ostinato: run32 looped 4min on one ceiling block (builder "Failed to place" from the same spot) toward a FAIL.
+        // A LIGHT step stuck 60s is deferred to a second pass (new approach angle); stuck again there, it is skipped.
+        for (int pass = 0; pass < 2; pass++) {
+            while (index < plan.steps.size()) {
+                MazeFurnishPlan.Step step = plan.steps.get(index);
+                if (!secondPass && deferred.contains(index)) { index++; continue; }
+                Task sub = stepTask(mod, step);
+                if (sub != null) {
+                    if (index != stepIdx) { stepIdx = index; stepTicks = 0; }
+                    if (step.kind() == MazeFurnishPlan.Kind.LIGHT && ++stepTicks > 1200) {
+                        System.out.println("MAZETEST FURNISH " + (secondPass ? "skip-light " : "defer-light ") + step.x() + " " + step.y() + " " + step.z());
+                        if (!secondPass) deferred.add(index);
+                        stuckTicks = 0; stuckRecoveries = 0; stepTicks = 0; index++;
+                        continue;
+                    }
+                    setDebugState(step.kind() + " " + step.x() + " " + step.y() + " " + step.z());
+                    return sub;
+                }
+                index++;
             }
-            index++;
+            if (secondPass || deferred.isEmpty()) break;
+            secondPass = true; index = 0; stepIdx = -1;
+            System.out.println("MAZETEST FURNISH retry-deferred " + deferred.size());
         }
         return null;
     }
@@ -199,6 +214,8 @@ public class MazeFurnishTask extends Task {
     private static final Item[] IRON_ARMOR = {Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS};
     private static final Item[] KEEP = {Items.BREAD, Items.COOKED_BEEF, Items.COOKED_PORKCHOP, Items.COOKED_CHICKEN, Items.COOKED_MUTTON, Items.COOKED_RABBIT, Items.COOKED_COD, Items.COOKED_SALMON, Items.BAKED_POTATO, Items.APPLE, Items.CARROT, Items.WOODEN_PICKAXE, Items.STONE_PICKAXE, Items.IRON_PICKAXE, Items.DIAMOND_PICKAXE, Items.SHIELD}; // Ostinato
     private String lastKit = "";
+    private final java.util.Set<Integer> deferred = new java.util.HashSet<>(); // Ostinato
+    private boolean secondPass; private int stepIdx = -1, stepTicks; // Ostinato
 
     // Ostinato: the next survival-kit step, or null when the bot is armed, fed and armored.
     private Task kitTask(AltoClef mod) {

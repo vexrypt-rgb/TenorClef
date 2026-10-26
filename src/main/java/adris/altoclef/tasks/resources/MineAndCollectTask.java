@@ -167,6 +167,9 @@ public class MineAndCollectTask extends ResourceTask {
         _cursorStackTimer.reset();
         assert MinecraftClient.getInstance().player != null;
         if (_subtask.miningPos() == null) return;
+        // Ostinato: equip for the block Baritone is actually breaking (a log in the path), not the far target, else this
+        // and PlayerInteractionFixChain swap pick<->axe every tick and the path block never breaks (run16).
+        if (mod.getControllerExtras().isBreakingBlock() && !_subtask.miningPos().equals(mod.getControllerExtras().getBreakingBlockPos())) return;
         net.minecraft.block.BlockState mining = mod.getWorld().getBlockState(_subtask.miningPos());
 
         // Prefer inventory/hotbar pick over fist. Cursor-only equip left fist mining

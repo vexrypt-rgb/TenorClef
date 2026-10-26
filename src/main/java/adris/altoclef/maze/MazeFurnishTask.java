@@ -37,6 +37,12 @@ public class MazeFurnishTask extends Task {
     private Task unstick;
     private int unstickTicks;   // Ostinato: wander timeout
     private int watchdogFires;  // Ostinato: repeat-fire count
+    // Ostinato: hard stuck abort. No inventory change and under 8 blocks of travel for 90s fails the run and exits.
+    private int lastInvSig = -1;
+    private BlockPos stuckAnchor;
+    private int stuckTicks;
+    private boolean prevAutoTool;
+    private boolean failed;
 
     public MazeFurnishTask(MazeFurnishPlan plan) {
         this.plan = plan;
@@ -55,6 +61,10 @@ public class MazeFurnishTask extends Task {
         // Ostinato: cobblestone/cobbled_deepslate/andesite sit on the throwaway list, so a full inventory dumped the very
         // cladding being gathered and the mine loop stalled. Protect every planned material for the life of the task.
         AltoClef.getInstance().getBehaviour().push();
+        // Ostinato: run16 tug-of-war. Baritone autoTool and TenorClef's equip kept swapping tools on the same block, so it
+        // never broke. TenorClef's PlayerInteractionFixChain equips for the block actually being broken; let it own tools.
+        prevAutoTool = AltoClef.getInstance().getClientBaritoneSettings().autoTool.value;
+        AltoClef.getInstance().getClientBaritoneSettings().autoTool.value = false;
         for (String id : materials.keySet()) { Item it = McCompat.item(id); if (it != null) AltoClef.getInstance().getBehaviour().addProtectedItems(it); }
     }
 
@@ -62,6 +72,18 @@ public class MazeFurnishTask extends Task {
     protected Task onTick() {
         AltoClef mod = AltoClef.getInstance();
         BlockPos feet = mod.getPlayer().getBlockPos();
+        if (failed) return null;
+        int sig = 0;
+        for (int i = 0; i < mod.getPlayer().getInventory().size(); i++) { net.minecraft.item.ItemStack st = mod.getPlayer().getInventory().getStack(i); sig = sig * 31 + st.getCount() * 7 + net.minecraft.registry.Registries.ITEM.getRawId(st.getItem()); }
+        if (sig != lastInvSig || stuckAnchor == null || stuckAnchor.getSquaredDistance(feet) > 64) { lastInvSig = sig; stuckAnchor = feet; stuckTicks = 0; }
+        else if (++stuckTicks >= 1800) {
+            StringBuilder chain = new StringBuilder();
+            for (Task t = this; t != null; t = t.getSub()) chain.append(" > ").append(t).append(" [").append(t.getDebugState()).append(']');
+            System.out.println("MAZETEST FURNISH FAIL stuck=" + getDebugState() + " for=90s feet=" + feet.toShortString() + " held=" + mod.getPlayer().getMainHandStack().getItem().getTranslationKey() + " emptySlot=" + mod.getPlayer().getInventory().getEmptySlot() + " chain" + chain);
+            failed = true;
+            net.minecraft.client.MinecraftClient.getInstance().scheduleStop();
+            return null;
+        }
         if (feet.equals(lastFeet)) stillTicks++; else { stillTicks = 0; lastFeet = feet; }
         // Ostinato: run13 watchdog fired once, then the wander never reported finished and the bot idled forever.
         // Cap each wander at 30s and let stillness keep counting so the watchdog can fire again.
@@ -179,6 +201,7 @@ public class MazeFurnishTask extends Task {
 
     @Override
     protected void onStop(Task interruptTask) {
+        AltoClef.getInstance().getClientBaritoneSettings().autoTool.value = prevAutoTool; // Ostinato
         AltoClef.getInstance().getBehaviour().pop();
     }
 

@@ -89,9 +89,15 @@ public class CraftInInventoryTask extends ResourceTask {
         // No need to free inventory, output gets picked up.
 
         setDebugState("Crafting in inventory... for " + toGet);
+        //#if MC >= 12102
+        //$$ // Ostinato: recipe-book clicks are a no-op on 1.21.2+ (no NetworkRecipeId), so that path never crafted and
+        //$$ // froze every 2x2 craft (cherry planks, polished deepslate). Always craft by hand.
+        //$$ return new CraftGenericManuallyTask(_target);
+        //#else
         return mod.getModSettings().shouldUseCraftingBookToCraft()
                 ? new CraftGenericWithRecipeBooksTask(_target)
                 : new CraftGenericManuallyTask(_target);
+        //#endif
     }
 
     @Override

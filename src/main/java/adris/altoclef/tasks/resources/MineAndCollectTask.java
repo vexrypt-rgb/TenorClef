@@ -94,6 +94,15 @@ public class MineAndCollectTask extends ResourceTask {
             return new SatisfyMiningRequirementTask(_requirement);
         }
 
+        // Ostinato: StorageHelper.shouldSaveStack force-saves a worn iron pick for non-iron
+        // blocks, so Baritone autoTool refuses it while miningRequirementMet still counts it.
+        // Result (maze run13): forceEquip/autoTool ping-pong, diorite hand-mined, no drops.
+        // When every pick we hold is saved for these blocks, obtain a fresh cheap pick.
+        Task freshPick = getFreshPickIfSaved(mod);
+        if (freshPick != null) {
+            return freshPick;
+        }
+
         if (_subtask.isMining()) {
             makeSureToolIsEquipped(mod);
         }
@@ -124,6 +133,33 @@ public class MineAndCollectTask extends ResourceTask {
         return "Mine And Collect";
     }
 
+    // Ostinato: returns a pickaxe-obtain task when no held pickaxe may be used on _blocksToMine.
+    private Task getFreshPickIfSaved(AltoClef mod) {
+        if (_requirement == MiningRequirement.HAND || _requirement == MiningRequirement.IRON
+                || _requirement == MiningRequirement.DIAMOND || _blocksToMine.length == 0) {
+            return null;
+        }
+        Item[] picks = {Items.WOODEN_PICKAXE, Items.STONE_PICKAXE, Items.IRON_PICKAXE, Items.DIAMOND_PICKAXE, Items.NETHERITE_PICKAXE};
+        boolean anyPick = false;
+        for (Item pick : picks) {
+            for (adris.altoclef.util.slots.Slot slot : mod.getItemStorage().getSlotsWithItemPlayerInventory(true, pick)) {
+                ItemStack stack = StorageHelper.getItemStackInSlot(slot);
+                if (stack.isEmpty()) continue;
+                anyPick = true;
+                if (!StorageHelper.shouldSaveStack(mod, _blocksToMine[0], stack)) {
+                    return null;
+                }
+            }
+        }
+        if (!anyPick) return null; // SatisfyMiningRequirementTask covers the truly-missing case.
+        boolean hasWood = mod.getItemStorage().hasItem(Items.WOODEN_PICKAXE);
+        Item want = Items.STONE_PICKAXE;
+        if (!hasWood && !mod.getItemStorage().hasItem(Items.COBBLESTONE, Items.COBBLED_DEEPSLATE, Items.BLACKSTONE)) {
+            want = Items.WOODEN_PICKAXE;
+        }
+        Debug.logMessage("MAZETEST pick-refresh: held picks saved for " + _blocksToMine[0].getTranslationKey() + ", obtaining " + want.getTranslationKey());
+        return adris.altoclef.TaskCatalogue.getItemTask(want, 1);
+    }
     private void makeSureToolIsEquipped(AltoClef mod) {
         if (!_cursorStackTimer.elapsed() || mod.getFoodChain().needsToEat()) {
             return;

@@ -35,6 +35,8 @@ public class MazeFurnishTask extends Task {
     private BlockPos lastFeet;
     private int stillTicks;
     private Task unstick;
+    private int unstickTicks;   // Ostinato: wander timeout
+    private int watchdogFires;  // Ostinato: repeat-fire count
 
     public MazeFurnishTask(MazeFurnishPlan plan) {
         this.plan = plan;
@@ -61,14 +63,18 @@ public class MazeFurnishTask extends Task {
         AltoClef mod = AltoClef.getInstance();
         BlockPos feet = mod.getPlayer().getBlockPos();
         if (feet.equals(lastFeet)) stillTicks++; else { stillTicks = 0; lastFeet = feet; }
-        if (unstick != null && !unstick.isFinished()) return unstick;
+        // Ostinato: run13 watchdog fired once, then the wander never reported finished and the bot idled forever.
+        // Cap each wander at 30s and let stillness keep counting so the watchdog can fire again.
+        if (unstick != null && !unstick.isFinished() && ++unstickTicks < 600) return unstick;
         unstick = null;
         if (stillTicks >= 2400) {
             StringBuilder chain = new StringBuilder();
             for (Task t = this; t != null; t = t.getSub()) chain.append(" > ").append(t).append(" [").append(t.getDebugState()).append(']');
             Debug.logMessage("Maze furnish watchdog: still at " + feet.toShortString() + " for " + stillTicks + " ticks; chain" + chain + "; wandering to unstick");
-            System.out.println("MAZETEST FURNISH watchdog feet=" + feet.toShortString() + " emptySlot=" + mod.getPlayer().getInventory().getEmptySlot() + " chain" + chain);
+            System.out.println("MAZETEST FURNISH watchdog fire=" + watchdogFires + " held=" + mod.getPlayer().getMainHandStack().getItem().getTranslationKey() + " feet=" + feet.toShortString() + " emptySlot=" + mod.getPlayer().getInventory().getEmptySlot() + " chain" + chain);
             stillTicks = 0;
+            unstickTicks = 0;
+            watchdogFires++;
             unstick = new adris.altoclef.tasks.movement.TimeoutWanderTask(16);
             return unstick;
         }

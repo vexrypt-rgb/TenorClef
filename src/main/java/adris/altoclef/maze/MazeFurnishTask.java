@@ -45,6 +45,20 @@ public class MazeFurnishTask extends Task {
     private boolean prevAutoTool;
     private boolean failed;
     private int stuckRecoveries; // Ostinato: one wander+blacklist recovery before FAIL
+    private boolean gathered;    // Ostinato: gather-once latch
+    private String gatherKey;    // Ostinato: loot-only gather budget
+    private int gatherTicks;
+    private final java.util.Set<String> skipped = new java.util.HashSet<>();
+
+    // Ostinato: true when the id only appears as FILL contents (never placed as a block).
+    private boolean lootOnly(String id) {
+        boolean inFill = false;
+        for (MazeFurnishPlan.Step s : plan.steps) {
+            if (s.kind() == MazeFurnishPlan.Kind.FILL) { for (MazeFurnishPlan.Item it : s.contents()) if (it.id().equals(id)) inFill = true; }
+            else if (s.blockIds() != null && s.blockIds().contains(id)) return false;
+        }
+        return inFill;
+    }
 
     public MazeFurnishTask(MazeFurnishPlan plan) {
         this.plan = plan;
@@ -65,6 +79,7 @@ public class MazeFurnishTask extends Task {
         AltoClef.getInstance().getBehaviour().push();
         AltoClef.getInstance().getBehaviour().addProtectedItems(SWORDS); // Ostinato: kit is never garbage
         AltoClef.getInstance().getBehaviour().addProtectedItems(IRON_ARMOR);
+        AltoClef.getInstance().getBehaviour().addProtectedItems(KEEP); // Ostinato: food and tools are never garbage
         // Ostinato: run16 tug-of-war. Baritone autoTool and TenorClef's equip kept swapping tools on the same block, so it
         // never broke. TenorClef's PlayerInteractionFixChain equips for the block actually being broken; let it own tools.
         prevAutoTool = AltoClef.getInstance().getClientBaritoneSettings().autoTool.value;
@@ -116,13 +131,27 @@ public class MazeFurnishTask extends Task {
         // seeds in hand, starvation risk on long mines. Order: sword -> food buffer -> full iron armor (equipped).
         Task kit = kitTask(mod);
         if (kit != null) return kit;        // Gather first, so the bot is not walking out of the sealed room for one more glowstone.
-        for (Map.Entry<String, Integer> need : materials.entrySet()) {
+        // Ostinato: gather once; run23 re-gathered cherry_planks x26 every few placed blocks. Regather only when a step runs dry.
+        if (!gathered) for (Map.Entry<String, Integer> need : materials.entrySet()) {
+            if (skipped.contains(need.getKey())) continue; // Ostinato
             Item item = McCompat.item(need.getKey());
             if (item != null && mod.getItemStorage().getItemCount(item) < need.getValue() && TaskCatalogue.taskExists(item)) {
+                // Ostinato: loot-only items (string, bowls) are optional; a fill stores whatever is held. Cap each at 3 min
+                // so a spider hunt or cobweb search never blocks the cladding (run22: string x6 ran 5+ min with 0 webs).
+                if (lootOnly(need.getKey())) {
+                    if (!need.getKey().equals(gatherKey)) { gatherKey = need.getKey(); gatherTicks = 0; }
+                    if (++gatherTicks > 3600) {
+                        System.out.println("MAZETEST FURNISH skip-loot " + need.getKey() + " have=" + mod.getItemStorage().getItemCount(item) + "/" + need.getValue());
+                        skipped.add(need.getKey());
+                        continue;
+                    }
+                }
                 setDebugState("Gathering " + need.getKey() + " x" + need.getValue());
                 return TaskCatalogue.getItemTask(item, need.getValue());
             }
         }
+        if (!gathered) System.out.println("MAZETEST FURNISH gathered skipped=" + skipped);
+        gathered = true;
         if (fill != null) {
             if (!fill.isFinished()) {
                 return fill;
@@ -144,6 +173,7 @@ public class MazeFurnishTask extends Task {
 
     private static final Item[] SWORDS = {Items.STONE_SWORD, Items.IRON_SWORD, Items.DIAMOND_SWORD, Items.NETHERITE_SWORD};
     private static final Item[] IRON_ARMOR = {Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS};
+    private static final Item[] KEEP = {Items.BREAD, Items.COOKED_BEEF, Items.COOKED_PORKCHOP, Items.COOKED_CHICKEN, Items.COOKED_MUTTON, Items.COOKED_RABBIT, Items.COOKED_COD, Items.COOKED_SALMON, Items.BAKED_POTATO, Items.APPLE, Items.CARROT, Items.WOODEN_PICKAXE, Items.STONE_PICKAXE, Items.IRON_PICKAXE, Items.DIAMOND_PICKAXE, Items.SHIELD}; // Ostinato
     private String lastKit = "";
 
     // Ostinato: the next survival-kit step, or null when the bot is armed, fed and armored.
@@ -175,7 +205,18 @@ public class MazeFurnishTask extends Task {
                     return new DestroyBlockTask(pos);
                 }
                 Block[] have = wanted.stream().filter(b -> mod.getItemStorage().hasItem(b.asItem())).toArray(Block[]::new);
-                return have.length == 0 ? null : new PlaceBlockTask(pos, have);
+                if (have.length == 0) { // Ostinato: ran dry mid-cladding; regather the planned count instead of skipping the block
+                    for (Block b : wanted) {
+                        String id = net.minecraft.registry.Registries.BLOCK.getId(b).getPath();
+                        if (materials.containsKey(id) && TaskCatalogue.taskExists(b.asItem())) {
+                            if (gathered) System.out.println("MAZETEST FURNISH regather " + id + " x" + materials.get(id));
+                            gathered = false;
+                            return TaskCatalogue.getItemTask(b.asItem(), materials.get(id));
+                        }
+                    }
+                    return null;
+                }
+                return new PlaceBlockTask(pos, have);
             }
             case SEAL: {
                 if (!state.isAir() && state.getFluidState().isEmpty()) {

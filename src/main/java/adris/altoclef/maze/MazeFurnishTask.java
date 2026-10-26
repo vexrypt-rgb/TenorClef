@@ -217,6 +217,11 @@ public class MazeFurnishTask extends Task {
                 if (wanted.isEmpty() || wanted.contains(state.getBlock())) {
                     return null;
                 }
+                // Ostinato: run27 stalled ~90s on every floor block: the bot stood on (or fell into) the block it was replacing.
+                BlockPos me = mod.getPlayer().getBlockPos();
+                if (me.down().equals(pos) || me.equals(pos)) {
+                    return new adris.altoclef.tasks.movement.RunAwayFromPositionTask(2, me.getY(), pos);
+                }
                 if (!state.isAir()) {
                     return new DestroyBlockTask(pos);
                 }

@@ -43,6 +43,7 @@ public class MazeFurnishTask extends Task {
     private int stuckTicks;
     private boolean prevAutoTool;
     private boolean failed;
+    private int stuckRecoveries; // Ostinato: one wander+blacklist recovery before FAIL
 
     public MazeFurnishTask(MazeFurnishPlan plan) {
         this.plan = plan;
@@ -75,8 +76,16 @@ public class MazeFurnishTask extends Task {
         if (failed) return null;
         int sig = 0;
         for (int i = 0; i < mod.getPlayer().getInventory().size(); i++) { net.minecraft.item.ItemStack st = mod.getPlayer().getInventory().getStack(i); sig = sig * 31 + st.getCount() * 7 + net.minecraft.registry.Registries.ITEM.getRawId(st.getItem()); }
-        if (sig != lastInvSig || stuckAnchor == null || stuckAnchor.getSquaredDistance(feet) > 64) { lastInvSig = sig; stuckAnchor = feet; stuckTicks = 0; }
-        else if (++stuckTicks >= 1800) {
+        if (sig != lastInvSig || stuckAnchor == null || stuckAnchor.getSquaredDistance(feet) > 64) { if (sig != lastInvSig) stuckRecoveries = 0; lastInvSig = sig; stuckAnchor = feet; stuckTicks = 0; }
+        else if (++stuckTicks >= 1800 && stuckRecoveries == 0) {
+            // Ostinato: first 90s stall: blacklist the block the chain is fighting, wander 30s, retry. Second stall FAILs.
+            for (Task t = this; t != null; t = t.getSub()) if (t instanceof DestroyBlockTask d) { mod.getBlockScanner().requestBlockUnreachable(d.getPos(), 0); }
+            System.out.println("MAZETEST FURNISH stuck-recover stuck=" + getDebugState() + " feet=" + feet.toShortString());
+            stuckRecoveries++; stuckTicks = 0; stuckAnchor = feet;
+            unstickTicks = 0; unstick = new adris.altoclef.tasks.movement.TimeoutWanderTask(16);
+            return unstick;
+        }
+        else if (stuckTicks >= 1800) {
             StringBuilder chain = new StringBuilder();
             for (Task t = this; t != null; t = t.getSub()) chain.append(" > ").append(t).append(" [").append(t.getDebugState()).append(']');
             System.out.println("MAZETEST FURNISH FAIL stuck=" + getDebugState() + " for=90s feet=" + feet.toShortString() + " held=" + mod.getPlayer().getMainHandStack().getItem().getTranslationKey() + " emptySlot=" + mod.getPlayer().getInventory().getEmptySlot() + " chain" + chain);

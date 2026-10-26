@@ -12,6 +12,7 @@ import adris.altoclef.util.ItemTarget;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;
+import net.minecraft.item.Items;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
@@ -62,6 +63,8 @@ public class MazeFurnishTask extends Task {
         // Ostinato: cobblestone/cobbled_deepslate/andesite sit on the throwaway list, so a full inventory dumped the very
         // cladding being gathered and the mine loop stalled. Protect every planned material for the life of the task.
         AltoClef.getInstance().getBehaviour().push();
+        AltoClef.getInstance().getBehaviour().addProtectedItems(SWORDS); // Ostinato: kit is never garbage
+        AltoClef.getInstance().getBehaviour().addProtectedItems(IRON_ARMOR);
         // Ostinato: run16 tug-of-war. Baritone autoTool and TenorClef's equip kept swapping tools on the same block, so it
         // never broke. TenorClef's PlayerInteractionFixChain equips for the block actually being broken; let it own tools.
         prevAutoTool = AltoClef.getInstance().getClientBaritoneSettings().autoTool.value;
@@ -109,7 +112,10 @@ public class MazeFurnishTask extends Task {
             unstick = new adris.altoclef.tasks.movement.TimeoutWanderTask(16);
             return unstick;
         }
-        // Gather first, so the bot is not walking out of the sealed room for one more glowstone.
+        // Ostinato: survival kit before cladding. Runs 13-21 furnished naked with no food or sword: spider hunts with
+        // seeds in hand, starvation risk on long mines. Order: sword -> food buffer -> full iron armor (equipped).
+        Task kit = kitTask(mod);
+        if (kit != null) return kit;        // Gather first, so the bot is not walking out of the sealed room for one more glowstone.
         for (Map.Entry<String, Integer> need : materials.entrySet()) {
             Item item = McCompat.item(need.getKey());
             if (item != null && mod.getItemStorage().getItemCount(item) < need.getValue() && TaskCatalogue.taskExists(item)) {
@@ -136,6 +142,24 @@ public class MazeFurnishTask extends Task {
         return null;
     }
 
+    private static final Item[] SWORDS = {Items.STONE_SWORD, Items.IRON_SWORD, Items.DIAMOND_SWORD, Items.NETHERITE_SWORD};
+    private static final Item[] IRON_ARMOR = {Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS};
+    private String lastKit = "";
+
+    // Ostinato: the next survival-kit step, or null when the bot is armed, fed and armored.
+    private Task kitTask(AltoClef mod) {
+        String step; Task t;
+        if (!mod.getItemStorage().hasItem(SWORDS)) { step = "stone_sword"; t = TaskCatalogue.getItemTask(Items.STONE_SWORD, 1); }
+        else if (adris.altoclef.util.helpers.StorageHelper.calculateInventoryFoodScore() < 20) { step = "food"; t = new adris.altoclef.tasks.resources.CollectFoodTask(40); }
+        else if (!adris.altoclef.util.helpers.StorageHelper.isArmorEquippedAll(IRON_ARMOR)) { step = "iron_armor"; t = new adris.altoclef.tasks.misc.EquipArmorTask(IRON_ARMOR); }
+        else { step = "ready"; t = null; }
+        if (!step.equals(lastKit)) {
+            System.out.println("MAZETEST FURNISH kit " + step + " food=" + adris.altoclef.util.helpers.StorageHelper.calculateInventoryFoodScore());
+            lastKit = step;
+        }
+        if (t != null) setDebugState("Kit " + step);
+        return t;
+    }
     /** The sub task still needed for this step, or null when the world already matches it. */
     private Task stepTask(AltoClef mod, MazeFurnishPlan.Step step) {
         BlockPos pos = new BlockPos(step.x(), step.y(), step.z());

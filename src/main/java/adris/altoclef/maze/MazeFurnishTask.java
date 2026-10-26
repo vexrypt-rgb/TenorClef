@@ -50,6 +50,11 @@ public class MazeFurnishTask extends Task {
     private int gatherTicks;
     private final java.util.Set<String> skipped = new java.util.HashSet<>();
 
+    // Ostinato: wood-derived items whose recipe chain bottoms out in logs.
+    private static boolean isWoody(String id) {
+        return id.endsWith("planks") || id.endsWith("log") || id.endsWith("wood") || id.endsWith("_slab") && !id.contains("stone") || id.equals("barrel") || id.equals("chest") || id.equals("bowl") || id.equals("stick") || id.equals("crafting_table") || id.equals("bookshelf");
+    }
+
     // Ostinato: true when a LIGHT step places this id (cladding).
     private boolean isCladding(String id) {
         for (MazeFurnishPlan.Step s : plan.steps) if (s.kind() == MazeFurnishPlan.Kind.LIGHT && s.blockIds().contains(id)) return true;
@@ -158,9 +163,12 @@ public class MazeFurnishTask extends Task {
                 }
                 // Ostinato: run26 FAILed at y=43 pathing to a cherry log at y=103 after the string search left it deep in a cave.
                 // Wood grows on the surface: climb back to room level before hunting logs.
-                if ((need.getKey().endsWith("planks") || need.getKey().endsWith("log")) && !plan.steps.isEmpty() && feet.getY() < plan.steps.get(0).y() - 12) {
+                // Ostinato: run29 spent 14min on "Gathering barrel" cave-pathing at room level (the room is underground): any wood-derived
+                // item needs logs, so compare against the real surface (heightmap), not the room Y.
+                int surfaceY = mod.getWorld().getTopY(net.minecraft.world.Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, feet.getX(), feet.getZ());
+                if (isWoody(need.getKey()) && feet.getY() < surfaceY - 6) {
                     setDebugState("Surfacing for " + need.getKey());
-                    return new adris.altoclef.tasks.movement.GetToYTask(plan.steps.get(0).y());
+                    return new adris.altoclef.tasks.movement.GetToYTask(surfaceY + 1);
                 }
                 setDebugState("Gathering " + need.getKey() + " x" + need.getValue());
                 return TaskCatalogue.getItemTask(item, need.getValue());

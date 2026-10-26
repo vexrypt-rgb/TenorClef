@@ -101,7 +101,7 @@ public class MazeFurnishTask extends Task {
         int sig = 0;
         for (int i = 0; i < mod.getPlayer().getInventory().size(); i++) { net.minecraft.item.ItemStack st = mod.getPlayer().getInventory().getStack(i); sig = sig * 31 + st.getCount() * 7 + net.minecraft.registry.Registries.ITEM.getRawId(st.getItem()); }
         if (sig != lastInvSig || stuckAnchor == null || stuckAnchor.getSquaredDistance(feet) > 64) { if (sig != lastInvSig) stuckRecoveries = 0; lastInvSig = sig; stuckAnchor = feet; stuckTicks = 0; }
-        else if (++stuckTicks >= 1800 && stuckRecoveries == 0) {
+        else if (++stuckTicks >= 1800 && stuckRecoveries < 2) { // Ostinato: two recoveries before FAIL
             // Ostinato: first 90s stall: blacklist the block the chain is fighting, wander 30s, retry. Second stall FAILs.
             for (Task t = this; t != null; t = t.getSub()) if (t instanceof DestroyBlockTask d) { mod.getBlockScanner().requestBlockUnreachable(d.getPos(), 0); }
             System.out.println("MAZETEST FURNISH stuck-recover stuck=" + getDebugState() + " feet=" + feet.toShortString());
@@ -155,6 +155,12 @@ public class MazeFurnishTask extends Task {
                         skipped.add(need.getKey());
                         continue;
                     }
+                }
+                // Ostinato: run26 FAILed at y=43 pathing to a cherry log at y=103 after the string search left it deep in a cave.
+                // Wood grows on the surface: climb back to room level before hunting logs.
+                if ((need.getKey().endsWith("planks") || need.getKey().endsWith("log")) && !plan.steps.isEmpty() && feet.getY() < plan.steps.get(0).y() - 12) {
+                    setDebugState("Surfacing for " + need.getKey());
+                    return new adris.altoclef.tasks.movement.GetToYTask(plan.steps.get(0).y());
                 }
                 setDebugState("Gathering " + need.getKey() + " x" + need.getValue());
                 return TaskCatalogue.getItemTask(item, need.getValue());

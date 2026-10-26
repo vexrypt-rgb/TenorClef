@@ -22,7 +22,9 @@ import java.util.Optional;
  * <p>
  * Not useful for custom tasks.
  */
-public class CraftGenericManuallyTask extends Task {
+// Ostinato: marks the grid as in use, else ResourceTask's grid-clearing guard empties every half-filled 2x2 craft
+// and the craft ping-pongs forever (the only craft path on 1.21.2+).
+public class CraftGenericManuallyTask extends Task implements adris.altoclef.tasksystem.ITaskUsesCraftingGrid {
 
     private final RecipeTarget target;
 

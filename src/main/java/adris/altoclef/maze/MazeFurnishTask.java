@@ -31,6 +31,10 @@ public class MazeFurnishTask extends Task {
     private int index;
     private boolean warnedPot;
     private Task fill;
+    // Ostinato: watchdog. A gather that leaves the bot standing still for 2 minutes logs its task chain and wanders off.
+    private BlockPos lastFeet;
+    private int stillTicks;
+    private Task unstick;
 
     public MazeFurnishTask(MazeFurnishPlan plan) {
         this.plan = plan;
@@ -46,11 +50,28 @@ public class MazeFurnishTask extends Task {
         materials = plan.materials(MazeFurnishTask::obtainable);
         index = 0;
         Debug.logMessage("Maze furnish " + plan.summary + ", gathering " + materials);
+        // Ostinato: cobblestone/cobbled_deepslate/andesite sit on the throwaway list, so a full inventory dumped the very
+        // cladding being gathered and the mine loop stalled. Protect every planned material for the life of the task.
+        AltoClef.getInstance().getBehaviour().push();
+        for (String id : materials.keySet()) { Item it = McCompat.item(id); if (it != null) AltoClef.getInstance().getBehaviour().addProtectedItems(it); }
     }
 
     @Override
     protected Task onTick() {
         AltoClef mod = AltoClef.getInstance();
+        BlockPos feet = mod.getPlayer().getBlockPos();
+        if (feet.equals(lastFeet)) stillTicks++; else { stillTicks = 0; lastFeet = feet; }
+        if (unstick != null && !unstick.isFinished()) return unstick;
+        unstick = null;
+        if (stillTicks >= 2400) {
+            StringBuilder chain = new StringBuilder();
+            for (Task t = this; t != null; t = t.getSub()) chain.append(" > ").append(t).append(" [").append(t.getDebugState()).append(']');
+            Debug.logMessage("Maze furnish watchdog: still at " + feet.toShortString() + " for " + stillTicks + " ticks; chain" + chain + "; wandering to unstick");
+            System.out.println("MAZETEST FURNISH watchdog feet=" + feet.toShortString() + " emptySlot=" + mod.getPlayer().getInventory().getEmptySlot() + " chain" + chain);
+            stillTicks = 0;
+            unstick = new adris.altoclef.tasks.movement.TimeoutWanderTask(16);
+            return unstick;
+        }
         // Gather first, so the bot is not walking out of the sealed room for one more glowstone.
         for (Map.Entry<String, Integer> need : materials.entrySet()) {
             Item item = McCompat.item(need.getKey());
@@ -152,6 +173,7 @@ public class MazeFurnishTask extends Task {
 
     @Override
     protected void onStop(Task interruptTask) {
+        AltoClef.getInstance().getBehaviour().pop();
     }
 
     @Override

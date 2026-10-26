@@ -25,6 +25,9 @@ public class CraftGenericWithRecipeBooksTask extends Task implements ITaskUsesCr
 
     private final RecipeTarget target;
     private int bookTicks;
+    // Ostinato: once we fall back to the hand craft we stay there. Run14: the hand craft filled the 2x2 grid, the next
+    // tick this task saw a non-empty grid and ran EnsureFreePlayerCraftingGridTask, emptying it again, forever.
+    private CraftGenericManuallyTask manual;
 
     public CraftGenericWithRecipeBooksTask(RecipeTarget target) {
         this.target = target;
@@ -47,6 +50,7 @@ public class CraftGenericWithRecipeBooksTask extends Task implements ITaskUsesCr
     @Override
     protected Task onTick() {
         AltoClef mod = AltoClef.getInstance();
+        if (manual != null) return manual; // Ostinato: hand-craft latch
 
         // Check if the big crafting UI or player inventory UI is open
         boolean isBigCraftingOpen = StorageHelper.isBigCraftingOpen();
@@ -97,6 +101,7 @@ public class CraftGenericWithRecipeBooksTask extends Task implements ITaskUsesCr
         // Check if the output item matches the target item and the target count has not been reached
         if (target.getOutputItem() == output.getItem() && mod.getItemStorage().getItemCount(target.getOutputItem()) < target.getTargetCount()) {
             // Return a task to receive the crafting output slot
+            bookTicks = 0; // Ostinato: the book is placing, keep using it
             return new ReceiveCraftingOutputSlotTask(outputSlot, target.getTargetCount());
         }
 
@@ -151,7 +156,9 @@ public class CraftGenericWithRecipeBooksTask extends Task implements ITaskUsesCr
         //$$ }
         //$$ if (id == null || ++bookTicks > 40) {
         //$$     setDebugState(id == null ? "No recipe-book entry, crafting by hand" : "Recipe book placed nothing, crafting by hand");
-        //$$     return new CraftGenericManuallyTask(target);
+        //$$     System.out.println("MAZETEST craft fallback-to-hand " + target + (id == null ? " (no book entry)" : " (book placed nothing)"));
+        //$$     manual = new CraftGenericManuallyTask(target);
+        //$$     return manual;
         //$$ }
         //$$ if (mod.getSlotHandler().canDoSlotAction()) {
         //$$     setDebugState("Recipe book: placing " + target);
@@ -159,7 +166,8 @@ public class CraftGenericWithRecipeBooksTask extends Task implements ITaskUsesCr
         //$$     mod.getSlotHandler().registerSlotAction();
         //$$ }
         //#elseif MC >= 12102
-        //$$ if (true) return new CraftGenericManuallyTask(target);
+        //$$ if (manual == null) manual = new CraftGenericManuallyTask(target);
+        //$$ if (true) return manual;
         //#else
         Optional<WrappedRecipeEntry> recipeToSend = JankCraftingRecipeMapping.getMinecraftMappedRecipe(target.getRecipe(), target.getOutputItem());
         if (recipeToSend.isPresent()) {

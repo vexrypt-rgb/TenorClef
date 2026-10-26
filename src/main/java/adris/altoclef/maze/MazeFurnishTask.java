@@ -217,15 +217,10 @@ public class MazeFurnishTask extends Task {
                 if (wanted.isEmpty() || wanted.contains(state.getBlock())) {
                     return null;
                 }
-                // Ostinato: run27 stalled ~90s on every floor block: the bot stood on (or fell into) the block it was replacing.
-                BlockPos me = mod.getPlayer().getBlockPos();
-                if (me.down().equals(pos) || me.equals(pos)) {
-                    return new adris.altoclef.tasks.movement.RunAwayFromPositionTask(2, me.getY(), pos);
-                }
-                if (!state.isAir()) {
-                    return new DestroyBlockTask(pos);
-                }
+                // Ostinato: run27/28 stalled 90s+ per floor block: break, fall in the hole, path back, place. Baritone's builder
+                // replaces a wrong block in one pass (breaks it, then places), so only destroy when nothing placeable is held.
                 Block[] have = wanted.stream().filter(b -> mod.getItemStorage().hasItem(b.asItem())).toArray(Block[]::new);
+                if (have.length > 0) return new PlaceBlockTask(pos, have);
                 if (have.length == 0) { // Ostinato: ran dry mid-cladding; regather the planned count instead of skipping the block
                     for (Block b : wanted) {
                         String id = net.minecraft.registry.Registries.BLOCK.getId(b).getPath();

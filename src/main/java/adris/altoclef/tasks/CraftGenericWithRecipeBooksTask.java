@@ -24,6 +24,7 @@ import java.util.Optional;
 public class CraftGenericWithRecipeBooksTask extends Task implements ITaskUsesCraftingGrid {
 
     private final RecipeTarget target;
+    private int bookTicks;
 
     public CraftGenericWithRecipeBooksTask(RecipeTarget target) {
         this.target = target;
@@ -134,20 +135,43 @@ public class CraftGenericWithRecipeBooksTask extends Task implements ITaskUsesCr
             }
         }
 
+        //#if MC >= 260000
+        //$$ // Ostinato: 1.21.2+ recipe book speaks RecipeDisplayId. Find the client recipe-book entry whose result is our
+        //$$ // output and send handlePlaceRecipe; if the book has no such entry (not unlocked) or placing yields nothing
+        //$$ // for 40 ticks, hand off to the manual 2x2/3x3 craft.
+        //$$ LocalPlayer player = Minecraft.getInstance().player;
+        //$$ assert player != null;
+        //$$ net.minecraft.world.item.crafting.display.RecipeDisplayId id = null;
+        //$$ net.minecraft.util.context.ContextMap ctx = net.minecraft.world.item.crafting.display.SlotDisplayContext.fromLevel(player.level());
+        //$$ for (net.minecraft.client.gui.screens.recipebook.RecipeCollection col : player.getRecipeBook().getCollections()) {
+        //$$     for (net.minecraft.world.item.crafting.display.RecipeDisplayEntry entry : col.getRecipes()) {
+        //$$         if (entry.resultItems(ctx).stream().anyMatch(s -> s.getItem() == target.getOutputItem())) { id = entry.id(); break; }
+        //$$     }
+        //$$     if (id != null) break;
+        //$$ }
+        //$$ if (id == null || ++bookTicks > 40) {
+        //$$     setDebugState(id == null ? "No recipe-book entry, crafting by hand" : "Recipe book placed nothing, crafting by hand");
+        //$$     return new CraftGenericManuallyTask(target);
+        //$$ }
+        //$$ if (mod.getSlotHandler().canDoSlotAction()) {
+        //$$     setDebugState("Recipe book: placing " + target);
+        //$$     mod.getController().handlePlaceRecipe(player.containerMenu.containerId, id, true);
+        //$$     mod.getSlotHandler().registerSlotAction();
+        //$$ }
+        //#elseif MC >= 12102
+        //$$ if (true) return new CraftGenericManuallyTask(target);
+        //#else
         Optional<WrappedRecipeEntry> recipeToSend = JankCraftingRecipeMapping.getMinecraftMappedRecipe(target.getRecipe(), target.getOutputItem());
         if (recipeToSend.isPresent()) {
             if (mod.getSlotHandler().canDoSlotAction()) {
                 ClientPlayerEntity player = MinecraftClient.getInstance().player;
                 assert player != null;
                 // Click the recipe to send it
-                //#if MC >= 12102
-                //$$ // recipe-book clicks need a NetworkRecipeId on 1.21.2+; the recipe map is empty there
-                //#else
                 mod.getController().clickRecipe(player.currentScreenHandler.syncId, recipeToSend.get().asRecipe(), true);
-                //#endif
                 mod.getSlotHandler().registerSlotAction();
             }
         }
+        //#endif
 
         return null;
     }

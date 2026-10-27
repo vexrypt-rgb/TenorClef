@@ -373,7 +373,15 @@ public class MazeFurnishTask extends Task {
         // Ostinato: run50. Replace a worn pick while it can still mine stone, instead of losing it mid-shaft and rebuilding
         // the kit from a wooden pick inside the seal column. One spare when the only pick is under 12 uses.
         else if (pickWorn(mod)) { step = "spare_pickaxe"; hideAllPlaced(mod); t = TaskCatalogue.getItemTask(Items.STONE_PICKAXE, mod.getItemStorage().getItemCount(Items.STONE_PICKAXE) + 1); }
+        // Ostinato: run57 kit-food yo-yo. Food score hit 0 mid-place and the food hunt ran 13 min while the hunger bar was not
+        // urgent, starving fill/seals (fill-stand restarted every 20s cooldown window). Only hunt when hunger is actually low
+        // (bar < 14, not peaceful); otherwise defer and let fill/seals/lights run. Re-arms as soon as the bar drops.
+        else if (food < gate && !foodGaveUp && !hungerUrgent(mod)) {
+            if (!foodDeferred) { System.out.println("MAZETEST FURNISH defer-food food=" + food + " hunger=" + mod.getPlayer().getHungerManager().getFoodLevel()); foodDeferred = true; }
+            foodTicks = 0; step = "ready"; t = null;
+        }
         else if (food < gate && !foodGaveUp) {
+            if (foodDeferred) { System.out.println("MAZETEST FURNISH rearm-food food=" + food + " hunger=" + mod.getPlayer().getHungerManager().getFoodLevel()); foodDeferred = false; }
             // Ostinato: run40 audit. Under 6 the bot starves; give the hunt 4 min and retry after 20s instead of 1.5/1 min.
             if (++foodTicks > (food < 6 ? 4800 : 1800)) {
                 System.out.println("MAZETEST FURNISH skip-food food=" + food);
@@ -399,9 +407,15 @@ public class MazeFurnishTask extends Task {
         if (t != null) setDebugState("Kit " + step);
         // Ostinato: run53. Mid-place kit gathers (stone/spare pick) are nearest-to-player; never run them from hundreds of
         // blocks out while lights/fill are unfinished. Walk back inside the leash first.
-        if (t != null && gathered && homeDist(mod.getPlayer().getBlockPos()) > HOME_LEASH) {
+        // Ostinato: run57. Food sources sat ~65 blocks out: the gather crossed the 64 leash, return-home walked back one block,
+        // the gather resumed and crossed again (13 min "Kit food" <-> "Returning to room for kit food"). Food gets a wider
+        // leash, and a started return runs until well inside it (hysteresis) instead of flipping at the boundary.
+        int kitLeash = "food".equals(step) ? FOOD_LEASH : HOME_LEASH;
+        int kd = homeDist(mod.getPlayer().getBlockPos());
+        if (kitHome != null && (kitHome.isFinished() || kd <= kitLeash - 24 || t == null)) kitHome = null;
+        if (t != null && gathered && (kd > kitLeash || kitHome != null)) {
             BlockPos h = home();
-            if (kitHome == null || kitHome.isFinished()) {
+            if (kitHome == null) {
                 kitHome = new adris.altoclef.tasks.movement.GetToXZTask(h.getX(), h.getZ());
                 System.out.println("MAZETEST FURNISH return-home for=kit-" + step + " dist=" + homeDist(mod.getPlayer().getBlockPos()));
             }
@@ -456,6 +470,13 @@ public class MazeFurnishTask extends Task {
     // walk back near the room first: the woods/stone around the room win, and no wood type is excluded.
     // Once per item, so an item whose only source is far still gets gathered there.
     private static final int HOME_LEASH = 64;
+    private static final int FOOD_LEASH = 128; // Ostinato: run57 food sources are sparse; don't yo-yo at 64
+    private boolean foodDeferred; // Ostinato: run57
+    // Ostinato: run57. Hunger is urgent when the bar is under 14 (sprint stops at 6, regen at 18) and not on peaceful.
+    private static boolean hungerUrgent(AltoClef mod) {
+        if (mod.getWorld().getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) return false;
+        return mod.getPlayer().getHungerManager().getFoodLevel() < 14;
+    }
     private final java.util.Set<String> returnedHome = new java.util.HashSet<>();
     private Task homeTask, kitHome; // Ostinato: run53 kitHome
     private BlockPos home() {

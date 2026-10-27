@@ -62,6 +62,9 @@ public class TaskCatalogue {
     private static final HashMap<String, CataloguedResource> nameToResourceTask = new HashMap<>();
     private static final HashMap<Item, CataloguedResource> itemToResourceTask = new HashMap<>();
     private static final HashSet<Item> resourcesObtainable = new HashSet<>();
+    // Ostinato: mob() writes this from the catalogue static block below. A field declared after that block
+    // is still null when the block runs (run49 crashed on MOB_SOURCE.put during <clinit>).
+    private static final java.util.Map<Item, Class<?>> MOB_SOURCE = new java.util.HashMap<>();
 
     public static void init() {
         nameToItemMatches.keySet();
@@ -852,9 +855,8 @@ public class TaskCatalogue {
         return smith(name, new Item[]{match}, materials, tool);
     }
 
-    // Ostinato: which mob each mob() drop comes from, so callers can tell a drop that cannot exist right now
-    // (run48: maze fill rolled rotten_flesh on peaceful; no zombies spawn, KillAndLootTask wandered 3+ min).
-    private static final java.util.Map<Item, Class<?>> MOB_SOURCE = new java.util.HashMap<>();
+    // MOB_SOURCE is declared with the other static fields. mob() below fills it.
+    // Ostinato: run48 maze fill rolled rotten_flesh on peaceful; no zombies spawn, so KillAndLootTask wandered.
 
     /** Ostinato: true when the item has a catalogue task AND that task can produce it in the current world. */
     public static boolean obtainableNow(Item item) {

@@ -179,7 +179,7 @@ public class MazeCeilingPlaceTask extends Task {
         // Same column, but the head must stay under the target: feet <= target - 2.
         for (int y = target.getY() - 2; y >= target.getY() - 6 && y > mod.getWorld().getBottomY(); y--) {
             BlockPos feet = new BlockPos(target.getX(), y, target.getZ());
-            if (!badStands.contains(feet) && support(mod, feet.down()) && open(mod, feet) && open(mod, feet.up())) return feet;
+            if (standSees(mod, feet)) return feet; // Ostinato: run63
         }
         // Ostinato: a 2-high room (floor right under the hole) or a column already clad below has no such spot.
         // Stand in a neighbouring room column instead; clickFace still lands on the target's face from there.
@@ -187,7 +187,7 @@ public class MazeCeilingPlaceTask extends Task {
             BlockPos c = target.offset(d);
             for (int y = target.getY() - 1; y >= target.getY() - 4 && y > mod.getWorld().getBottomY(); y--) {
                 BlockPos feet = new BlockPos(c.getX(), y, c.getZ());
-                if (!badStands.contains(feet) && support(mod, feet.down()) && open(mod, feet) && open(mod, feet.up())) {
+                if (standSees(mod, feet)) { // Ostinato: run63
                     if (!sideStandLogged) {
                         sideStandLogged = true;
                         System.out.println("MAZETEST FURNISH ceiling-side-stand " + target.toShortString() + " from " + feet.toShortString());
@@ -201,7 +201,7 @@ public class MazeCeilingPlaceTask extends Task {
         // nearest one to the player whose eye has a clear line to the target or to a solid neighbour's face.
         BlockPos feetNow = mod.getPlayer().getBlockPos();
         BlockPos best = null; double bestD = Double.MAX_VALUE;
-        for (int dx = -3; dx <= 3; dx++) for (int dz = -3; dz <= 3; dz++) for (int dy = -4; dy <= 1; dy++) {
+        for (int dx = -4; dx <= 4; dx++) for (int dz = -4; dz <= 4; dz++) for (int dy = -5; dy <= 1; dy++) { // Ostinato: run63 wider ring
             BlockPos feet = target.add(dx, dy, dz);
             if (feet.equals(target) || feet.up().equals(target) || badStands.contains(feet)) continue;
             if (!(support(mod, feet.down()) && open(mod, feet) && open(mod, feet.up()))) continue;
@@ -217,6 +217,18 @@ public class MazeCeilingPlaceTask extends Task {
         }
         if (!badStands.isEmpty()) { badStands.clear(); }
         return new BlockPos(target.getX(), target.getY() - 2, target.getZ());
+    }
+
+    // Ostinato: run63 FAIL light 132/133. Corner wall hole -152,80,13 (cladding above, below and beside it, only its
+    // room-side face open) got stands in the 2-high nook under the wall cladding (-152,77,12..14): standable, but the
+    // plank at -152,79,13 hid the hole, so every pick was a bad stand and the ring search that would have found the
+    // room-floor spot -151,79,13 was never reached. A stand now counts only when its eye, within reach, can raycast
+    // the target or a solid neighbour's face, so wall/corner holes fall through to a room stand that sees the opening.
+    private boolean standSees(AltoClef mod, BlockPos feet) {
+        if (badStands.contains(feet) || feet.equals(target) || feet.up().equals(target)) return false;
+        if (!(support(mod, feet.down()) && open(mod, feet) && open(mod, feet.up()))) return false;
+        Vec3d eye = new Vec3d(feet.getX() + 0.5, feet.getY() + 1.62, feet.getZ() + 0.5);
+        return eye.distanceTo(Vec3d.ofCenter(target)) <= REACH - 0.3 && seesTargetOrFace(mod, eye);
     }
 
     // Ostinato: run58. True when this eye can raycast the target block itself (to mine it) or a solid neighbour's face (to place).

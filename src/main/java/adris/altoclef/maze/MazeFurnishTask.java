@@ -329,7 +329,50 @@ public class MazeFurnishTask extends Task {
             secondPass = true; index = 0; stepIdx = -1;
             System.out.println("MAZETEST FURNISH retry-deferred " + deferred.size());
         }
+        // Ostinato: run62 FAIL one floor plank short. 105,79,-22 was skipped (why=stuck, bot stood over the hole) and
+        // later used as a bad stand; nothing revisited it, so verify saw air (light 132/133). Before handing back,
+        // re-check every planned LIGHT/CONTAINER/SEAL cell and re-place any that are air or wrong (skipped, dug through,
+        // or broken while placing seals/lights) with the direct stand-and-click task. Up to 3 sweeps.
+        if (work != null && index >= work.size() && repairRounds < 3) {
+            java.util.List<Integer> wrong = new java.util.ArrayList<>();
+            StringBuilder cells = new StringBuilder();
+            for (int i = 0; i < work.size(); i++) {
+                if (cellWrong(mod, work.get(i))) {
+                    wrong.add(i);
+                    MazeFurnishPlan.Step s = work.get(i);
+                    if (cells.length() < 400) cells.append(' ').append(s.kind()).append('@').append(s.x()).append(',').append(s.y()).append(',').append(s.z());
+                }
+            }
+            if (!wrong.isEmpty()) {
+                repairRounds++;
+                System.out.println("MAZETEST FURNISH repair-sweep round=" + repairRounds + " cells=" + wrong.size() + cells);
+                deferred.clear(); deferred.addAll(wrong); secondPass = true; index = wrong.get(0); stepIdx = -1; stepTicks = 0;
+                return null;
+            }
+            if (repairRounds > 0 && !repairCleanLogged) { repairCleanLogged = true; System.out.println("MAZETEST FURNISH repair-sweep clean rounds=" + repairRounds); }
+        }
         return null;
+    }
+
+    private int repairRounds; private boolean repairCleanLogged; // Ostinato: run62
+
+    // Ostinato: run62. Pure check (no side effects) that a planned cell is missing or holds the wrong block.
+    private boolean cellWrong(AltoClef mod, MazeFurnishPlan.Step step) {
+        BlockPos pos = new BlockPos(step.x(), step.y(), step.z());
+        BlockState state = mod.getWorld().getBlockState(pos);
+        switch (step.kind()) {
+            case LIGHT:
+            case CONTAINER: {
+                if (skippedFluid.contains(pos)) return false;
+                List<Block> wanted = blocks(step.blockIds());
+                if (step.kind() == MazeFurnishPlan.Kind.LIGHT && woodCell(step)) wanted = withAllPlanks(wanted);
+                return !wanted.isEmpty() && !wanted.contains(state.getBlock());
+            }
+            case SEAL:
+                return state.isAir() || !state.getFluidState().isEmpty();
+            default:
+                return false;
+        }
     }
 
     private static final Item[] SWORDS = {Items.STONE_SWORD, Items.IRON_SWORD, Items.DIAMOND_SWORD, Items.NETHERITE_SWORD};

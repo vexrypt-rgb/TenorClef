@@ -3,10 +3,12 @@ package adris.altoclef.maze;
 import adris.altoclef.Debug;
 import adris.altoclef.TaskCatalogue;
 import adris.altoclef.tasks.misc.EquipArmorTask;
+import adris.altoclef.tasks.movement.GetToBlockTask;
 import adris.altoclef.tasks.misc.PlaceBedAndSetSpawnTask;
 import adris.altoclef.tasks.resources.CollectFoodTask;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.ItemTarget;
+import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -26,7 +28,15 @@ public class TunnelProvisionTask extends Task {
     private Task current;
     private String currentKey;
     private int currentTicks;
-    private static final int NEED_TIMEOUT_TICKS = 20 * 60 * 15;
+    // Ostinato: a pickaxe (hard need) gets the long timeout; soft needs (armor, food, torches, bed, iron upgrade) get a
+    // short one each and share one budget, so the kit never holds the dig hostage for an hour of armor/torch farming.
+    private static final int NEED_TIMEOUT_TICKS = 20 * 60 * 15, SOFT_NEED_TICKS = 20 * 60 * 3, SOFT_BUDGET_TICKS = 20 * 60 * 6;
+    // Ostinato: gather leash. Resource tasks wander to the nearest tree/ore; past LEASH blocks from the dig the need is
+    // dropped and the bot walks back before the next one.
+    private static final int LEASH = 64;
+    private BlockPos home;
+    private int softTicks;
+    private boolean returning;
 
     public TunnelProvisionTask(Map<String, Integer> needs) {
         this.needs = new LinkedHashMap<>(needs);
@@ -35,7 +45,7 @@ public class TunnelProvisionTask extends Task {
     @Override
     protected void onStart() {
         queue.clear();
-        String[] order = {"iron_pickaxe", "equip:", "food", "torch", "bed"};
+        String[] order = {"stone_pickaxe", "iron_pickaxe", "equip:", "food", "torch", "bed"};
         for (String o : order) {
             for (Map.Entry<String, Integer> e : needs.entrySet()) {
                 if (e.getKey().startsWith(o) && !queue.contains(e)) queue.add(e);
@@ -43,6 +53,9 @@ public class TunnelProvisionTask extends Task {
         }
         for (Map.Entry<String, Integer> e : needs.entrySet()) if (!queue.contains(e)) queue.add(e);
         current = null;
+        softTicks = 0;
+        returning = false;
+        home = mod().getPlayer() == null ? null : mod().getPlayer().getBlockPos();
         started = true;
     }
 
@@ -55,12 +68,29 @@ public class TunnelProvisionTask extends Task {
 
     @Override
     protected Task onTick() {
-        if (current != null && (current.isFinished() || ++currentTicks > NEED_TIMEOUT_TICKS)) {
+        boolean hard = currentKey != null && currentKey.endsWith("_pickaxe") && !returning;
+        if (current != null && !hard && !returning) softTicks++;
+        if (current != null && !returning && home != null && mod().getPlayer() != null
+                && horiz(mod().getPlayer().getBlockPos(), home) > LEASH) {
+            Debug.logInternal("[tunnels] need " + currentKey + " left the " + LEASH + "-block leash; walking back");
+            current = new GetToBlockTask(home);
+            currentKey = "return";
+            currentTicks = 0;
+            returning = true;
+        }
+        if (returning && current != null && current.isFinished()) returning = false;
+        int limit = hard || returning ? NEED_TIMEOUT_TICKS : SOFT_NEED_TICKS;
+        if (current != null && (current.isFinished() || ++currentTicks > limit || (!hard && !returning && softTicks > SOFT_BUDGET_TICKS))) {
             Debug.logInternal("[tunnels] need " + currentKey + (current.isFinished() ? " done" : " timed out"));
             current = null;
+            returning = false;
         }
         while (current == null && !queue.isEmpty()) {
             Map.Entry<String, Integer> e = queue.poll();
+            if (!e.getKey().endsWith("_pickaxe") && softTicks > SOFT_BUDGET_TICKS) {
+                Debug.logInternal("[tunnels] soft budget spent; skipping " + e.getKey() + " (Ostinato asks again later)");
+                continue;
+            }
             try {
                 current = make(e.getKey(), e.getValue());
                 if (current == null) Debug.logInternal("[tunnels] no task for " + e.getKey());
@@ -81,6 +111,15 @@ public class TunnelProvisionTask extends Task {
     }
 
     private boolean started;
+
+    private static adris.altoclef.AltoClef mod() {
+        return adris.altoclef.AltoClef.getInstance();
+    }
+
+    private static double horiz(BlockPos a, BlockPos b) {
+        double dx = a.getX() - b.getX(), dz = a.getZ() - b.getZ();
+        return Math.sqrt(dx * dx + dz * dz);
+    }
 
     @Override
     protected void onStop(Task interruptTask) {

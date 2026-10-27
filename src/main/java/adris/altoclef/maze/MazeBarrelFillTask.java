@@ -64,15 +64,32 @@ public class MazeBarrelFillTask extends Task {
         if (containerOpen(mod)) {
             stopPath(mod);
             if (++moveTicks % 3 != 0) return stay("Filling " + target.toShortString());
-            for (ItemTarget t : toStore) {
-                List<Slot> slots = mod.getItemStorage().getSlotsWithItemPlayerInventory(false, t.getMatches());
-                if (!slots.isEmpty()) {
-                    mod.getSlotHandler().clickSlot(slots.get(0), 0, SlotActionType.QUICK_MOVE);
-                    System.out.println("MAZETEST FURNISH fill-move " + Arrays.toString(t.getMatches()) + " into " + target.toShortString());
-                    return stay("Moving fill item");
+            // Ostinato: run54. Pick slots straight from the open handler, not the cached ItemStorage slots.
+            // Those slots are built from the current Screen type (PlayerSlot when the screen isn't a
+            // GenericContainerScreen yet) and list the cursor first; QUICK_MOVE on the cursor maps to window -1,
+            // which SlotHandler turns into a PICKUP at -999 = throw the stack out. Fill flipped between
+            // "Filling" and "No fill items left" while the barrel stayed empty server-side.
+            var h = mod.getPlayer().currentScreenHandler;
+            net.minecraft.item.ItemStack cursor = h.getCursorStack();
+            if (!cursor.isEmpty()) {
+                for (net.minecraft.screen.slot.Slot s : h.slots) {
+                    if (!(s.inventory instanceof net.minecraft.entity.player.PlayerInventory) && s.getStack().isEmpty()) {
+                        MinecraftClient.getInstance().interactionManager.clickSlot(h.syncId, s.id, 0, SlotActionType.PICKUP, mod.getPlayer());
+                        System.out.println("MAZETEST FURNISH fill-move cursor " + cursor.getItem() + " -> window " + s.id + " into " + target.toShortString());
+                        return stay("Placing cursor stack");
+                    }
                 }
             }
-            return stay("No fill items left to move");
+            for (ItemTarget t : toStore) {
+                for (net.minecraft.screen.slot.Slot s : h.slots) {
+                    if (s.inventory instanceof net.minecraft.entity.player.PlayerInventory && !s.getStack().isEmpty() && t.matches(s.getStack().getItem())) {
+                        MinecraftClient.getInstance().interactionManager.clickSlot(h.syncId, s.id, 0, SlotActionType.QUICK_MOVE, mod.getPlayer());
+                        System.out.println("MAZETEST FURNISH fill-move " + s.getStack().getItem() + " window " + s.id + " sync " + h.syncId + " into " + target.toShortString());
+                        return stay("Moving fill item");
+                    }
+                }
+            }
+            return stay("No fill items in inventory");
         }
         moveTicks = 0;
 

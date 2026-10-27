@@ -852,7 +852,22 @@ public class TaskCatalogue {
         return smith(name, new Item[]{match}, materials, tool);
     }
 
+    // Ostinato: which mob each mob() drop comes from, so callers can tell a drop that cannot exist right now
+    // (run48: maze fill rolled rotten_flesh on peaceful; no zombies spawn, KillAndLootTask wandered 3+ min).
+    private static final java.util.Map<Item, Class<?>> MOB_SOURCE = new java.util.HashMap<>();
+
+    /** Ostinato: true when the item has a catalogue task AND that task can produce it in the current world. */
+    public static boolean obtainableNow(Item item) {
+        if (!taskExists(item)) return false;
+        Class<?> src = MOB_SOURCE.get(item);
+        if (src == null) return true;
+        net.minecraft.world.World w = AltoClef.getInstance() == null ? null : AltoClef.getInstance().getWorld();
+        boolean peaceful = w != null && w.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL;
+        return !(peaceful && (net.minecraft.entity.mob.HostileEntity.class.isAssignableFrom(src) || SlimeEntity.class.isAssignableFrom(src)));
+    }
+
     private static CataloguedResource mob(String name, Item[] matches, Class mobClass) {
+        for (Item m : matches) MOB_SOURCE.put(m, mobClass); // Ostinato
         return put(name, matches, count -> new KillAndLootTask(mobClass, new ItemTarget(matches, count)));
     }
 

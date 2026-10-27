@@ -86,7 +86,9 @@ public class MazeFurnishTask extends Task {
 
     static boolean obtainable(String id) {
         Item item = McCompat.item(id);
-        return item != null && (TaskCatalogue.taskExists(item) || AltoClef.getInstance().getItemStorage().hasItem(item));
+        // Ostinato: run48. taskExists said yes to rotten_flesh on peaceful (zombie-only drop), so the fill gather hunted
+        // a mob that never spawns. Ask whether the item can be produced in THIS world; fallbackLoot fills the barrel instead.
+        return item != null && (TaskCatalogue.obtainableNow(item) || AltoClef.getInstance().getItemStorage().hasItem(item));
     }
 
     @Override
@@ -208,7 +210,7 @@ public class MazeFurnishTask extends Task {
             // own cladding: light went 97 -> 89 in two minutes. Ask only for cells that are still wrong, and hide the
             // placed cells from the scanner before mining.
             if (item != null && !lootOnly(need.getKey()) && stillMissing(mod, need.getKey()) <= 0) continue;
-            if (item != null && mod.getItemStorage().getItemCount(item) < need.getValue() && TaskCatalogue.taskExists(item)) {
+            if (item != null && mod.getItemStorage().getItemCount(item) < need.getValue() && TaskCatalogue.obtainableNow(item)) {
                 // Ostinato: loot-only items (string, bowls) are optional; a fill stores whatever is held. Cap each at 3 min
                 // so a spider hunt or cobweb search never blocks the cladding (run22: string x6 ran 5+ min with 0 webs).
                 // Ostinato: run41 yo-yoed 14+ min between "Gathering barrel" and "Surfacing for barrel" in a cobweb mineshaft

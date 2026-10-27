@@ -238,6 +238,12 @@ public class MazeFurnishTask extends Task {
                     if (!need.getKey().equals(gatherKey)) { gatherKey = need.getKey(); gatherTicks = 0; }
                     // Ostinato: run52. book/paper hunts dragged the bot ~350 blocks from the room into a flooded cave before the
                     // cladding gather even started. Optional loot is only worth it near home; past the leash it is skipped.
+                    // Ostinato: run58. string/bowl were skipped at dist=65 (one block past the leash) and the barrel had
+                    // nothing to hold. Walk back to the room once and gather there; skip only if still far after that.
+                    if (lootOnly(need.getKey()) && homeDist(feet) > HOME_LEASH) {
+                        Task home = returnHome(mod, feet, need.getKey());
+                        if (home != null) return home;
+                    }
                     if (lootOnly(need.getKey()) && homeDist(feet) > HOME_LEASH) {
                         System.out.println("MAZETEST FURNISH skip-loot " + need.getKey() + " why=far dist=" + homeDist(feet));
                         skipped.add(need.getKey());
@@ -272,9 +278,15 @@ public class MazeFurnishTask extends Task {
         }
         if (!gathered) System.out.println("MAZETEST FURNISH gathered skipped=" + skipped);
         gathered = true;
+        if (fill != null && fill.isFinished()) { fill = null; index++; } // Ostinato: run58
         if (fill != null) {
             // Ostinato: run40 audit. A FILL that cannot reach/open its barrel gets the same defer-then-skip as a light.
-            if (!fill.isFinished() && ++stepTicks <= 600) {
+            // Ostinato: run58. A starved fill (barrel open, nothing to move) goes back through stepTask, which picks
+            // fallback loot or mines spare cobble, instead of idling at the barrel until skip-fill.
+            if (fill instanceof MazeBarrelFillTask bf && bf.starved() && !bf.isFinished()) {
+                System.out.println("MAZETEST FURNISH fill-regather " + work.get(index).x() + " " + work.get(index).y() + " " + work.get(index).z());
+                fill = null; loggedFill = false;
+            } else if (!fill.isFinished() && ++stepTicks <= 600) {
                 return fill;
             }
             if (!fill.isFinished()) deferStep("timeout");
@@ -293,7 +305,9 @@ public class MazeFurnishTask extends Task {
                     // Ostinato: run40 audit. CONTAINER/FILL/SEAL get the same defer-then-skip as LIGHT (30s each) instead of
                     // burning stuck-recover into a FAIL on one cell. A deferred SEAL retries with throwaway blocks first.
                     boolean placing = sub instanceof PlaceBlockTask || sub instanceof MazeCeilingPlaceTask || sub instanceof StoreInContainerTask || sub instanceof MazeBarrelFillTask;
-                    int budget = step.kind() == MazeFurnishPlan.Kind.LIGHT ? 300 : 600;
+                    // Ostinato: run58. A deferred light retries with the direct stand-and-click task, which walks to a new
+                    // stand cell first; 15s was used up by the walk, so the second pass gets 45s.
+                    int budget = step.kind() == MazeFurnishPlan.Kind.LIGHT ? (secondPass ? 900 : 300) : 600;
                     if (placing && ++stepTicks > budget) {
                         deferStep("timeout");
                         continue;
@@ -567,7 +581,11 @@ public class MazeFurnishTask extends Task {
                 Block[] have = wanted.stream().filter(b -> mod.getItemStorage().hasItem(b.asItem())).toArray(Block[]::new);
                 // Ostinato: interior ceiling. The cell under it is open, so the builder's side-face search wanders
                 // after it breaks the stone. Click the underside of the block above from the floor.
-                if (have.length > 0 && openBelow(mod, pos) && !thinLight(have)) return new MazeCeilingPlaceTask(pos, have);
+                // Ostinato: run58. Wall/corner cells went to Baritone's builder ("Failed to place, wandering timeout") on
+                // both passes, so nine cells were skipped. A deferred light now uses the direct task: mine, pick a stand
+                // inside the room in reach, click a solid neighbour's face.
+                boolean direct = openBelow(mod, pos) || (step.kind() == MazeFurnishPlan.Kind.LIGHT && secondPass && deferred.contains(index));
+                if (have.length > 0 && direct && !thinLight(have)) return new MazeCeilingPlaceTask(pos, have);
                 if (have.length > 0) return new PlaceBlockTask(pos, have);
                 if (have.length == 0) { // Ostinato: ran dry mid-cladding; regather the planned count instead of skipping the block
                     for (Block b : wanted) {

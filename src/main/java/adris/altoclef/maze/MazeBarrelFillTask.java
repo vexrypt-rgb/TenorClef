@@ -42,6 +42,7 @@ public class MazeBarrelFillTask extends Task {
     private BlockPos stand;
     private int standTicks, clickTicks, moveTicks, liveTicks;
     private boolean pathing;
+    private boolean sawFilled, starved; // Ostinato: run58
 
     public MazeBarrelFillTask(BlockPos target, ItemTarget... toStore) {
         this.target = target;
@@ -63,6 +64,16 @@ public class MazeBarrelFillTask extends Task {
         // 1. Our container screen is open: shift-click every fill item in.
         if (containerOpen(mod)) {
             stopPath(mod);
+            // Ostinato: run58. The barrel's own slots are what the server synced to this open screen: once any holds an
+            // item the fill is done, even when the off-thread server read below cannot see it yet.
+            for (net.minecraft.screen.slot.Slot s : mod.getPlayer().currentScreenHandler.slots) {
+                if (!(s.inventory instanceof net.minecraft.entity.player.PlayerInventory) && !s.getStack().isEmpty()) {
+                    if (!sawFilled) System.out.println("MAZETEST FURNISH fill-done " + target.toShortString() + " holds " + s.getStack().getItem() + " x" + s.getStack().getCount());
+                    sawFilled = true; starved = false;
+                    closeIfOpen(mod);
+                    return null;
+                }
+            }
             if (++moveTicks % 3 != 0) return stay("Filling " + target.toShortString());
             // Ostinato: run54. Pick slots straight from the open handler, not the cached ItemStorage slots.
             // Those slots are built from the current Screen type (PlayerSlot when the screen isn't a
@@ -89,6 +100,11 @@ public class MazeBarrelFillTask extends Task {
                     }
                 }
             }
+            // Ostinato: run58. Barrel open and empty, nothing to move: hand back to MazeFurnishTask so it gathers/picks fill
+            // items instead of flipping "Filling" <-> "No fill items in inventory" until skip-fill.
+            if (!starved) System.out.println("MAZETEST FURNISH fill-starved " + target.toShortString() + " wanted=" + Arrays.toString(toStore));
+            starved = true;
+            closeIfOpen(mod);
             return stay("No fill items in inventory");
         }
         moveTicks = 0;
@@ -209,21 +225,34 @@ public class MazeBarrelFillTask extends Task {
         return null;
     }
 
-    /** Server-side container non-empty: the same check MazeTest verify uses. */
+    public boolean starved() { return starved; } // Ostinato: run58
+
+    /**
+     * Server-side container non-empty: the same check MazeTest verify uses.
+     * Ostinato: run58. World.getBlockEntity returns null for a server world read off the server thread, so this was
+     * always false from the render thread: fill stayed 0/1 with sticks already in the barrel. Read on the server thread.
+     */
     public static boolean filled(BlockPos pos) {
         MinecraftClient mc = MinecraftClient.getInstance();
-        net.minecraft.world.World w = mc.world;
-        if (mc.getServer() != null && mc.world != null) {
-            net.minecraft.server.world.ServerWorld sw = mc.getServer().getWorld(mc.world.getRegistryKey());
-            if (sw != null) w = sw;
+        if (mc.world == null) return false;
+        var server = mc.getServer();
+        if (server == null) return mc.world.getBlockEntity(pos) instanceof net.minecraft.inventory.Inventory inv && !inv.isEmpty();
+        var key = mc.world.getRegistryKey();
+        java.util.function.Supplier<Boolean> q = () -> {
+            net.minecraft.server.world.ServerWorld sw = server.getWorld(key);
+            return sw != null && sw.getBlockEntity(pos) instanceof net.minecraft.inventory.Inventory inv && !inv.isEmpty();
+        };
+        if (server.isOnThread()) return q.get();
+        try {
+            return server.submit(q).get(250, java.util.concurrent.TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            return false;
         }
-        if (w == null) return false;
-        return w.getBlockEntity(pos) instanceof net.minecraft.inventory.Inventory inv && !inv.isEmpty();
     }
 
     @Override
     public boolean isFinished() {
-        return filled(target);
+        return sawFilled || filled(target);
     }
 
     @Override

@@ -39,6 +39,8 @@ public class MazeCeilingPlaceTask extends Task {
     private int actTicks;
     private int liveTicks;
     private boolean sideStandLogged; // Ostinato
+    private final java.util.Set<BlockPos> badStands = new java.util.HashSet<>(); // Ostinato: run58
+    private int thereTicks; // Ostinato: run58
 
     public MazeCeilingPlaceTask(BlockPos target, Block[] toPlace) {
         this.target = target;
@@ -79,6 +81,7 @@ public class MazeCeilingPlaceTask extends Task {
                 ? feetNow.getY() <= target.getY() - 2 && feetNow.getY() >= stand.getY() - 1
                 : feetNow.getY() == stand.getY());
         if (!there) {
+            thereTicks = 0;
             release(mod);
             arrived = false;
             if (!stand.equals(going)) {
@@ -86,6 +89,12 @@ public class MazeCeilingPlaceTask extends Task {
                 mod.getClientBaritone().getCustomGoalProcess().setGoalAndPath(new GoalBlock(stand.getX(), stand.getY(), stand.getZ()));
             }
             return stay("Walking under ceiling " + target.toShortString());
+        }
+        // Ostinato: run58. A stand that sees no clickable face / cannot mine for 8s is dropped for the next one.
+        if (++thereTicks > 160) {
+            System.out.println("MAZETEST FURNISH ceiling-bad-stand " + stand.toShortString() + " for " + target.toShortString());
+            badStands.add(stand); thereTicks = 0; going = null;
+            return stay("New stand for " + target.toShortString());
         }
         if (!arrived) {
             mod.getClientBaritone().getCustomGoalProcess().onLostControl();
@@ -144,6 +153,7 @@ public class MazeCeilingPlaceTask extends Task {
         if (MinecraftClient.getInstance().interactionManager.interactBlock(mod.getPlayer(), Hand.MAIN_HAND, bhr) == ActionResult.SUCCESS) {
             mod.getPlayer().swingHand(Hand.MAIN_HAND);
         }
+        if (actTicks > 40) thereTicks = Math.min(thereTicks, 120); // Ostinato: clicking a seen face counts as progress
         return stay("Placing ceiling " + target.toShortString());
     }
 
@@ -169,7 +179,7 @@ public class MazeCeilingPlaceTask extends Task {
         // Same column, but the head must stay under the target: feet <= target - 2.
         for (int y = target.getY() - 2; y >= target.getY() - 6 && y > mod.getWorld().getBottomY(); y--) {
             BlockPos feet = new BlockPos(target.getX(), y, target.getZ());
-            if (support(mod, feet.down()) && open(mod, feet) && open(mod, feet.up())) return feet;
+            if (!badStands.contains(feet) && support(mod, feet.down()) && open(mod, feet) && open(mod, feet.up())) return feet;
         }
         // Ostinato: a 2-high room (floor right under the hole) or a column already clad below has no such spot.
         // Stand in a neighbouring room column instead; clickFace still lands on the target's face from there.
@@ -177,7 +187,7 @@ public class MazeCeilingPlaceTask extends Task {
             BlockPos c = target.offset(d);
             for (int y = target.getY() - 1; y >= target.getY() - 4 && y > mod.getWorld().getBottomY(); y--) {
                 BlockPos feet = new BlockPos(c.getX(), y, c.getZ());
-                if (support(mod, feet.down()) && open(mod, feet) && open(mod, feet.up())) {
+                if (!badStands.contains(feet) && support(mod, feet.down()) && open(mod, feet) && open(mod, feet.up())) {
                     if (!sideStandLogged) {
                         sideStandLogged = true;
                         System.out.println("MAZETEST FURNISH ceiling-side-stand " + target.toShortString() + " from " + feet.toShortString());
@@ -186,7 +196,45 @@ public class MazeCeilingPlaceTask extends Task {
                 }
             }
         }
+        // Ostinato: run58. Wall and corner cells (104,86,-85 / 107,87,-88) have solid shell under them and on most sides,
+        // so neither search above finds a spot. Any standable room cell within reach that sees the target works: the
+        // nearest one to the player whose eye has a clear line to the target or to a solid neighbour's face.
+        BlockPos feetNow = mod.getPlayer().getBlockPos();
+        BlockPos best = null; double bestD = Double.MAX_VALUE;
+        for (int dx = -3; dx <= 3; dx++) for (int dz = -3; dz <= 3; dz++) for (int dy = -4; dy <= 1; dy++) {
+            BlockPos feet = target.add(dx, dy, dz);
+            if (feet.equals(target) || feet.up().equals(target) || badStands.contains(feet)) continue;
+            if (!(support(mod, feet.down()) && open(mod, feet) && open(mod, feet.up()))) continue;
+            Vec3d eye = new Vec3d(feet.getX() + 0.5, feet.getY() + 1.62, feet.getZ() + 0.5);
+            if (eye.distanceTo(Vec3d.ofCenter(target)) > REACH - 0.3) continue;
+            if (!seesTargetOrFace(mod, eye)) continue;
+            double d = feet.getSquaredDistance(feetNow);
+            if (d < bestD) { bestD = d; best = feet; }
+        }
+        if (best != null) {
+            if (!sideStandLogged) { sideStandLogged = true; System.out.println("MAZETEST FURNISH ceiling-ring-stand " + target.toShortString() + " from " + best.toShortString()); }
+            return best;
+        }
+        if (!badStands.isEmpty()) { badStands.clear(); }
         return new BlockPos(target.getX(), target.getY() - 2, target.getZ());
+    }
+
+    // Ostinato: run58. True when this eye can raycast the target block itself (to mine it) or a solid neighbour's face (to place).
+    private boolean seesTargetOrFace(AltoClef mod, Vec3d eye) {
+        BlockState st = mod.getWorld().getBlockState(target);
+        if (!st.isAir()) {
+            Vec3d c = Vec3d.ofCenter(target);
+            for (Direction d : Direction.values()) if (rayHitsBlock(mod, eye, c.add(d.getOffsetX() * 0.45, d.getOffsetY() * 0.45, d.getOffsetZ() * 0.45), target)) return true;
+            return false;
+        }
+        for (Direction fromTarget : Direction.values()) {
+            BlockPos against = target.offset(fromTarget);
+            if (!support(mod, against)) continue;
+            Direction face = fromTarget.getOpposite();
+            Vec3d hit = facePoint(against, face, 0, 0);
+            if (eye.distanceTo(hit) <= REACH && rayHitsFace(mod, eye, hit, against, face)) return true;
+        }
+        return false;
     }
 
     private static boolean open(AltoClef mod, BlockPos p) {

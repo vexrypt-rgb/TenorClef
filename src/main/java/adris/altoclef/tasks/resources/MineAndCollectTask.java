@@ -94,6 +94,15 @@ public class MineAndCollectTask extends ResourceTask {
             return new SatisfyMiningRequirementTask(_requirement);
         }
 
+        // Ostinato: StorageHelper.shouldSaveStack force-saves a worn iron pick for non-iron
+        // blocks, so Baritone autoTool refuses it while miningRequirementMet still counts it.
+        // Result (maze run13): forceEquip/autoTool ping-pong, diorite hand-mined, no drops.
+        // When every pick we hold is saved for these blocks, obtain a fresh cheap pick.
+        Task freshPick = getFreshPickIfSaved(mod);
+        if (freshPick != null) {
+            return freshPick;
+        }
+
         if (_subtask.isMining()) {
             makeSureToolIsEquipped(mod);
         }
@@ -124,6 +133,36 @@ public class MineAndCollectTask extends ResourceTask {
         return "Mine And Collect";
     }
 
+    // Ostinato: returns a pickaxe-obtain task when no held pickaxe may be used on _blocksToMine.
+    private Task getFreshPickIfSaved(AltoClef mod) {
+        if (_requirement == MiningRequirement.HAND || _requirement == MiningRequirement.IRON
+                || _requirement == MiningRequirement.DIAMOND || _blocksToMine.length == 0) {
+            return null;
+        }
+        Item[] picks = {Items.WOODEN_PICKAXE, Items.STONE_PICKAXE, Items.IRON_PICKAXE, Items.DIAMOND_PICKAXE, Items.NETHERITE_PICKAXE};
+        boolean anyPick = false;
+        for (Item pick : picks) {
+            for (adris.altoclef.util.slots.Slot slot : mod.getItemStorage().getSlotsWithItemPlayerInventory(true, pick)) {
+                ItemStack stack = StorageHelper.getItemStackInSlot(slot);
+                if (stack.isEmpty()) continue;
+                anyPick = true;
+                if (!StorageHelper.shouldSaveStack(mod, _blocksToMine[0], stack)) {
+                    return null;
+                }
+            }
+        }
+        if (!anyPick) return null; // SatisfyMiningRequirementTask covers the truly-missing case.
+        boolean hasWood = mod.getItemStorage().hasItem(Items.WOODEN_PICKAXE);
+        Item want = Items.STONE_PICKAXE;
+        if (!hasWood && !mod.getItemStorage().hasItem(Items.COBBLESTONE, Items.COBBLED_DEEPSLATE, Items.BLACKSTONE)) {
+            want = Items.WOODEN_PICKAXE;
+        }
+        // Ostinato: run60 pick-refresh spam. Log once per 30s; stdout only, not chat.
+        long nowPr = System.currentTimeMillis();
+        if (nowPr - lastPickRefreshLogMs > 30000) { lastPickRefreshLogMs = nowPr; System.out.println("MAZETEST pick-refresh: held picks saved for " + _blocksToMine[0].getTranslationKey() + ", obtaining " + want.getTranslationKey()); }
+        return adris.altoclef.TaskCatalogue.getItemTask(want, 1);
+    }
+    private static String lastEquipLog = ""; private static long lastEquipLogMs, lastPickRefreshLogMs; // Ostinato: log throttle
     private void makeSureToolIsEquipped(AltoClef mod) {
         if (!_cursorStackTimer.elapsed() || mod.getFoodChain().needsToEat()) {
             return;
@@ -131,6 +170,9 @@ public class MineAndCollectTask extends ResourceTask {
         _cursorStackTimer.reset();
         assert MinecraftClient.getInstance().player != null;
         if (_subtask.miningPos() == null) return;
+        // Ostinato: equip for the block Baritone is actually breaking (a log in the path), not the far target, else this
+        // and PlayerInteractionFixChain swap pick<->axe every tick and the path block never breaks (run16).
+        if (mod.getControllerExtras().isBreakingBlock() && !_subtask.miningPos().equals(mod.getControllerExtras().getBreakingBlockPos())) return;
         net.minecraft.block.BlockState mining = mod.getWorld().getBlockState(_subtask.miningPos());
 
         // Prefer inventory/hotbar pick over fist. Cursor-only equip left fist mining
@@ -142,8 +184,14 @@ public class MineAndCollectTask extends ResourceTask {
         if (best.isPresent()) {
             ItemStack bestStack = StorageHelper.getItemStackInSlot(best.get());
             if (!bestStack.isEmpty() && bestStack.getItem() != equipped.getItem()) {
-                Debug.logMessage("MineAndCollect: equip " + bestStack.getItem().getTranslationKey()
-                        + " for " + mining.getBlock().getTranslationKey());
+                // Ostinato: run60 logged ~177 "equip stone_sword for cobweb" lines in 30s. Log a tool/block pair once per 30s.
+                String equipKey = bestStack.getItem().getTranslationKey() + "|" + mining.getBlock().getTranslationKey();
+                long now = System.currentTimeMillis();
+                if (!equipKey.equals(lastEquipLog) || now - lastEquipLogMs > 30000) {
+                    lastEquipLog = equipKey; lastEquipLogMs = now;
+                    System.out.println("MAZETEST MineAndCollect: equip " + bestStack.getItem().getTranslationKey()
+                            + " for " + mining.getBlock().getTranslationKey());
+                }
                 mod.getSlotHandler().forceEquipItem(bestStack.getItem());
                 return;
             }
@@ -248,7 +296,7 @@ public class MineAndCollectTask extends ResourceTask {
             if (miningPos != null && !progressChecker.check(mod)) {
                 mod.getClientBaritone().getPathingBehavior().forceCancel();
                 Debug.logMessage("Failed to mine block. Suggesting it may be unreachable.");
-                mod.getBlockScanner().requestBlockUnreachable(miningPos, 2);
+                mod.getBlockScanner().requestBlockUnreachable(miningPos, 1); // Ostinato: 2 -> 1 (fail twice, move on)
                 blacklist.add(miningPos);
                 miningPos = null;
                 progressChecker.reset();

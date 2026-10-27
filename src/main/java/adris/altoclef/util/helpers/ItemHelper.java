@@ -125,9 +125,21 @@ public class ItemHelper {
     private static final Map<Item, Item> logToPlanks = new HashMap<>() {
         {
             put(Items.CHERRY_LOG, Items.CHERRY_PLANKS);
+            //#if MC >= 12104
+            //$$ put(Items.PALE_OAK_LOG, Items.PALE_OAK_PLANKS);
+            //#endif
             put(Items.CHERRY_WOOD, Items.CHERRY_PLANKS);
+            //#if MC >= 12104
+            //$$ put(Items.PALE_OAK_WOOD, Items.PALE_OAK_PLANKS);
+            //#endif
             put(Items.STRIPPED_CHERRY_LOG, Items.CHERRY_PLANKS);
+            //#if MC >= 12104
+            //$$ put(Items.STRIPPED_PALE_OAK_LOG, Items.PALE_OAK_PLANKS);
+            //#endif
             put(Items.STRIPPED_CHERRY_WOOD, Items.CHERRY_PLANKS);
+            //#if MC >= 12104
+            //$$ put(Items.STRIPPED_PALE_OAK_WOOD, Items.PALE_OAK_PLANKS);
+            //#endif
             put(Items.MANGROVE_LOG, Items.MANGROVE_PLANKS);
             put(Items.MANGROVE_WOOD, Items.MANGROVE_PLANKS);
             put(Items.STRIPPED_MANGROVE_LOG, Items.MANGROVE_PLANKS);
@@ -169,6 +181,9 @@ public class ItemHelper {
     private static final Map<Item, Item> planksToLogs = new HashMap<>() {
         {
             put(Items.CHERRY_PLANKS, Items.CHERRY_LOG);
+            //#if MC >= 12104
+            //$$ put(Items.PALE_OAK_PLANKS, Items.PALE_OAK_LOG);
+            //#endif
             put(Items.MANGROVE_PLANKS, Items.MANGROVE_LOG);
             put(Items.ACACIA_PLANKS, Items.ACACIA_LOG);
             put(Items.BIRCH_PLANKS, Items.BIRCH_LOG);
@@ -183,6 +198,9 @@ public class ItemHelper {
     private static final Map<Item, Item> strippedToLogs = new HashMap<>() {
         {
             put(Items.STRIPPED_CHERRY_LOG, Items.CHERRY_LOG);
+            //#if MC >= 12104
+            //$$ put(Items.STRIPPED_PALE_OAK_LOG, Items.PALE_OAK_LOG);
+            //#endif
             put(Items.STRIPPED_MANGROVE_LOG, Items.MANGROVE_LOG);
             put(Items.STRIPPED_ACACIA_LOG, Items.ACACIA_LOG);
             put(Items.STRIPPED_BIRCH_LOG, Items.BIRCH_LOG);
@@ -223,6 +241,9 @@ public class ItemHelper {
     private static final Map<WoodType, WoodItems> woodMap = new HashMap<WoodType, WoodItems>() {
         {
             p(WoodType.CHERRY, "cherry", Items.CHERRY_PLANKS, Items.CHERRY_LOG, Items.STRIPPED_CHERRY_LOG, Items.STRIPPED_CHERRY_WOOD, Items.CHERRY_WOOD, Items.CHERRY_SIGN, Items.CHERRY_HANGING_SIGN, Items.CHERRY_DOOR, Items.CHERRY_BUTTON, Items.CHERRY_STAIRS, Items.CHERRY_SLAB, Items.CHERRY_FENCE, Items.CHERRY_FENCE_GATE, Items.CHERRY_BOAT, Items.CHERRY_SAPLING, Items.CHERRY_LEAVES, Items.CHERRY_PRESSURE_PLATE, Items.CHERRY_TRAPDOOR);
+            //#if MC >= 12104
+            //$$ p(WoodType.PALE_OAK, "pale_oak", Items.PALE_OAK_PLANKS, Items.PALE_OAK_LOG, Items.STRIPPED_PALE_OAK_LOG, Items.STRIPPED_PALE_OAK_WOOD, Items.PALE_OAK_WOOD, Items.PALE_OAK_SIGN, Items.PALE_OAK_HANGING_SIGN, Items.PALE_OAK_DOOR, Items.PALE_OAK_BUTTON, Items.PALE_OAK_STAIRS, Items.PALE_OAK_SLAB, Items.PALE_OAK_FENCE, Items.PALE_OAK_FENCE_GATE, Items.PALE_OAK_BOAT, Items.PALE_OAK_SAPLING, Items.PALE_OAK_LEAVES, Items.PALE_OAK_PRESSURE_PLATE, Items.PALE_OAK_TRAPDOOR);
+            //#endif
             p(WoodType.BAMBOO, "bamboo", null, null, Items.STRIPPED_BAMBOO_BLOCK, null, null, Items.BAMBOO_SIGN, Items.BAMBOO_HANGING_SIGN, Items.BAMBOO_DOOR, Items.BAMBOO_BUTTON, Items.BAMBOO_STAIRS, Items.BAMBOO_SLAB, Items.BAMBOO_FENCE, Items.BAMBOO_FENCE_GATE, Items.BAMBOO_RAFT, Items.BAMBOO, null, Items.BAMBOO_PRESSURE_PLATE, Items.BAMBOO_TRAPDOOR);
             p(WoodType.MANGROVE, "mangrove", Items.MANGROVE_PLANKS, Items.MANGROVE_LOG, Items.STRIPPED_MANGROVE_LOG, Items.STRIPPED_MANGROVE_WOOD, Items.MANGROVE_WOOD, Items.MANGROVE_SIGN, Items.MANGROVE_HANGING_SIGN, Items.MANGROVE_DOOR, Items.MANGROVE_BUTTON, Items.MANGROVE_STAIRS, Items.MANGROVE_SLAB, Items.MANGROVE_FENCE, Items.MANGROVE_FENCE_GATE, Items.MANGROVE_BOAT, Items.MANGROVE_PROPAGULE, Items.MANGROVE_LEAVES, Items.MANGROVE_PRESSURE_PLATE, Items.MANGROVE_TRAPDOOR);
             p(WoodType.ACACIA, "acacia", Items.ACACIA_PLANKS, Items.ACACIA_LOG, Items.STRIPPED_ACACIA_LOG, Items.STRIPPED_ACACIA_WOOD, Items.ACACIA_WOOD, Items.ACACIA_SIGN, Items.ACACIA_HANGING_SIGN, Items.ACACIA_DOOR, Items.ACACIA_BUTTON, Items.ACACIA_STAIRS, Items.ACACIA_SLAB, Items.ACACIA_FENCE, Items.ACACIA_FENCE_GATE, Items.ACACIA_BOAT, Items.ACACIA_SAPLING, Items.ACACIA_LEAVES, Items.ACACIA_PRESSURE_PLATE, Items.ACACIA_TRAPDOOR);

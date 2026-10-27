@@ -62,6 +62,9 @@ public class TaskCatalogue {
     private static final HashMap<String, CataloguedResource> nameToResourceTask = new HashMap<>();
     private static final HashMap<Item, CataloguedResource> itemToResourceTask = new HashMap<>();
     private static final HashSet<Item> resourcesObtainable = new HashSet<>();
+    // Ostinato: mob() writes this from the catalogue static block below. A field declared after that block
+    // is still null when the block runs (run49 crashed on MOB_SOURCE.put during <clinit>).
+    private static final java.util.Map<Item, Class<?>> MOB_SOURCE = new java.util.HashMap<>();
 
     public static void init() {
         nameToItemMatches.keySet();
@@ -140,7 +143,7 @@ public class TaskCatalogue {
             mob("wither_skeleton_skull", Items.WITHER_SKELETON_SKULL, WitherSkeletonEntity.class).forceDimension(Dimension.NETHER);
             mob("ink_sac", Items.INK_SAC, SquidEntity.class); // Warning, this probably won't work.
             mob("glow_ink_sac", Items.GLOW_INK_SAC, Entities.GLOW_SQUID); // Warning, this probably won't work.
-            mob("string", Items.STRING, SpiderEntity.class); // Warning, this probably won't work.
+            put("string", new Item[]{Items.STRING}, count -> new adris.altoclef.tasks.resources.CollectStringTask(count)); // Ostinato: cobweb+sword first, spiders second
             mine("sugar_cane", Items.SUGAR_CANE);
             mine("brown_mushroom", MiningRequirement.HAND, new Block[]{Blocks.BROWN_MUSHROOM, Blocks.BROWN_MUSHROOM_BLOCK}, Items.BROWN_MUSHROOM);
             mine("red_mushroom", MiningRequirement.HAND, new Block[]{Blocks.RED_MUSHROOM, Blocks.RED_MUSHROOM_BLOCK}, Items.RED_MUSHROOM);
@@ -852,7 +855,21 @@ public class TaskCatalogue {
         return smith(name, new Item[]{match}, materials, tool);
     }
 
+    // MOB_SOURCE is declared with the other static fields. mob() below fills it.
+    // Ostinato: run48 maze fill rolled rotten_flesh on peaceful; no zombies spawn, so KillAndLootTask wandered.
+
+    /** Ostinato: true when the item has a catalogue task AND that task can produce it in the current world. */
+    public static boolean obtainableNow(Item item) {
+        if (!taskExists(item)) return false;
+        Class<?> src = MOB_SOURCE.get(item);
+        if (src == null) return true;
+        net.minecraft.world.World w = AltoClef.getInstance() == null ? null : AltoClef.getInstance().getWorld();
+        boolean peaceful = w != null && w.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL;
+        return !(peaceful && (net.minecraft.entity.mob.HostileEntity.class.isAssignableFrom(src) || SlimeEntity.class.isAssignableFrom(src)));
+    }
+
     private static CataloguedResource mob(String name, Item[] matches, Class mobClass) {
+        for (Item m : matches) MOB_SOURCE.put(m, mobClass); // Ostinato
         return put(name, matches, count -> new KillAndLootTask(mobClass, new ItemTarget(matches, count)));
     }
 
@@ -890,6 +907,7 @@ public class TaskCatalogue {
         List<CataloguedResource> result = new ArrayList<>();
         for (WoodType woodType : WoodType.values()) {
             ItemHelper.WoodItems woodItems = ItemHelper.getWoodItems(woodType);
+            if (woodItems == null) continue; // Ostinato: wood type absent in this MC version
             Item match = getMatch.apply(woodItems);
             String cataloguedName = getCatalogueName.apply(woodItems);
             if (match == null) continue;

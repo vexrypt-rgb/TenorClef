@@ -20,6 +20,12 @@ public class MazeFurnishPlanTest {
             new Step(Kind.SEAL, 2, 1, 0, List.of("cobblestone"), List.of())));
 
     @Test
+    void fillRunsAfterPlaceAndSeal() {
+        List<Kind> order = PLAN.placeOrder().stream().map(Step::kind).toList();
+        Assertions.assertEquals(List.of(Kind.LIGHT, Kind.CONTAINER, Kind.FILL, Kind.SEAL, Kind.SEAL), order);
+    }
+
+    @Test
     void materialsPickFirstObtainableAndDropUnobtainableLoot() {
         Set<String> ok = Set.of("glowstone", "chest", "book", "cobblestone");
         Map<String, Integer> m = PLAN.materials(ok::contains);
@@ -37,6 +43,19 @@ public class MazeFurnishPlanTest {
                 new JobStep(StepKind.FILL, 4, 5, 6, List.of(), List.of(new ItemCount("paper", 3))),
                 new JobStep(StepKind.SEAL, 4, 9, 6, List.of("cobblestone"), List.of()));
         public String summary() { return "cell 1,2"; }
+    }
+
+    @Test
+    void deepslateAboveStoneBecomesCobble() {
+        MazeFurnishPlan high = new MazeFurnishPlan("cell", true, List.of(
+                new Step(Kind.LIGHT, 6, 74, 136, List.of("polished_deepslate", "cobbled_deepslate"), List.of()),
+                new Step(Kind.SEAL, 6, 80, 136, List.of("cobbled_deepslate", "deepslate"), List.of())));
+        MazeFurnishPlan fixed = MazeFurnishPlan.stoneIfAboveDeepslate(high);
+        Assertions.assertEquals(List.of("cobblestone"), fixed.steps.get(0).blockIds());
+        Assertions.assertEquals(List.of("cobblestone"), fixed.steps.get(1).blockIds());
+        MazeFurnishPlan low = new MazeFurnishPlan("cell", true, List.of(
+                new Step(Kind.LIGHT, 6, -20, 136, List.of("polished_deepslate"), List.of())));
+        Assertions.assertEquals(List.of("polished_deepslate"), MazeFurnishPlan.stoneIfAboveDeepslate(low).steps.get(0).blockIds());
     }
 
     @Test

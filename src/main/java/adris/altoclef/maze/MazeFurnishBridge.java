@@ -45,7 +45,10 @@ public final class MazeFurnishBridge {
 
     private static boolean accept(Object job) {
         AltoClef mod = AltoClef.getInstance();
-        if (mod == null || mod.getPlayer() == null || mod.getWorld() == null) {
+        // Run44: dig verify passed, then this returned false because the client world was null for that
+        // tick. The job does not need the world to be queued. A missing player still means we are not in game.
+        if (mod == null || mod.getPlayer() == null) {
+            Debug.logInternal("[maze] furnish not ready mod=" + (mod != null));
             return false;
         }
         try {

@@ -46,6 +46,19 @@ public class MazeFurnishPlanTest {
     }
 
     @Test
+    void deepslateAboveStoneBecomesCobble() {
+        MazeFurnishPlan high = new MazeFurnishPlan("cell", true, List.of(
+                new Step(Kind.LIGHT, 6, 74, 136, List.of("polished_deepslate", "cobbled_deepslate"), List.of()),
+                new Step(Kind.SEAL, 6, 80, 136, List.of("cobbled_deepslate", "deepslate"), List.of())));
+        MazeFurnishPlan fixed = MazeFurnishPlan.stoneIfAboveDeepslate(high);
+        Assertions.assertEquals(List.of("cobblestone"), fixed.steps.get(0).blockIds());
+        Assertions.assertEquals(List.of("cobblestone"), fixed.steps.get(1).blockIds());
+        MazeFurnishPlan low = new MazeFurnishPlan("cell", true, List.of(
+                new Step(Kind.LIGHT, 6, -20, 136, List.of("polished_deepslate"), List.of())));
+        Assertions.assertEquals(List.of("polished_deepslate"), MazeFurnishPlan.stoneIfAboveDeepslate(low).steps.get(0).blockIds());
+    }
+
+    @Test
     void readsOstinatoJobByReflection() throws Exception {
         MazeFurnishPlan plan = MazeFurnishPlan.fromOstinato(new Job());
         Assertions.assertTrue(plan.survival);

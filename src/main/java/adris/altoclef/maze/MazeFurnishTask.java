@@ -78,7 +78,7 @@ public class MazeFurnishTask extends Task {
     }
 
     public MazeFurnishTask(MazeFurnishPlan plan) {
-        this.plan = plan;
+        this.plan = MazeFurnishPlan.stoneIfAboveDeepslate(plan);
         // Ostinato: every cell the plan will place into. The surface climb must never mine these, or it eats the
         // cladding it just put in (run42: ceiling cells at y=88 mined away while "Surfacing for barrel").
         for (MazeFurnishPlan.Step s : plan.steps) plannedCells.add(new BlockPos(s.x(), s.y(), s.z()));
@@ -86,10 +86,17 @@ public class MazeFurnishTask extends Task {
 
     static boolean obtainable(String id) {
         Item item = McCompat.item(id);
+        if (item == null) return false;
+        if (AltoClef.getInstance().getItemStorage().hasItem(item)) return true;
+        // Ostinato: run51. Diamond and emerald are real ores, but the nearest vein is not beside the room.
+        // A cave hunt for one emerald hits the same 90s stuck abort that closed the deepslate run. Fill uses fallback loot.
+        if (id.equals("diamond") || id.equals("emerald")) return false;
         // Ostinato: run48. taskExists said yes to rotten_flesh on peaceful (zombie-only drop), so the fill gather hunted
         // a mob that never spawns. Ask whether the item can be produced in THIS world; fallbackLoot fills the barrel instead.
-        return item != null && (TaskCatalogue.obtainableNow(item) || AltoClef.getInstance().getItemStorage().hasItem(item));
+        return TaskCatalogue.obtainableNow(item);
     }
+
+
 
     @Override
     protected void onStart() {
@@ -204,6 +211,8 @@ public class MazeFurnishTask extends Task {
             if (isWoodCladding(need.getKey())) {
                 int pooled = plankCladdingMissing(mod);
                 if (heldPlanks(mod) >= pooled) { satisfied.add(need.getKey()); continue; }
+                Task home = returnHome(mod, feet, need.getKey()); // Ostinato: run52 gather near the room
+                if (home != null) return home;
                 if (needsSurface(mod, feet, need.getKey())) return surfaceClimb(mod, feet, need.getKey());
                 setDebugState("Gathering any planks x" + pooled + " (for " + need.getKey() + ")");
                 return new adris.altoclef.tasks.resources.CollectPlanksTask(pooled);
@@ -224,6 +233,13 @@ public class MazeFurnishTask extends Task {
                 boolean woodyExtra = isWoody(need.getKey()) && !isCladding(need.getKey());
                 if (lootOnly(need.getKey()) || woodyExtra) {
                     if (!need.getKey().equals(gatherKey)) { gatherKey = need.getKey(); gatherTicks = 0; }
+                    // Ostinato: run52. book/paper hunts dragged the bot ~350 blocks from the room into a flooded cave before the
+                    // cladding gather even started. Optional loot is only worth it near home; past the leash it is skipped.
+                    if (lootOnly(need.getKey()) && homeDist(feet) > HOME_LEASH) {
+                        System.out.println("MAZETEST FURNISH skip-loot " + need.getKey() + " why=far dist=" + homeDist(feet));
+                        skipped.add(need.getKey());
+                        continue;
+                    }
                     if (++gatherTicks > (woodyExtra && !lootOnly(need.getKey()) ? 7200 : 3600)) {
                         System.out.println("MAZETEST FURNISH skip-loot " + need.getKey() + " have=" + mod.getItemStorage().getItemCount(item) + "/" + need.getValue());
                         skipped.add(need.getKey());
@@ -241,6 +257,7 @@ public class MazeFurnishTask extends Task {
                 if (isWoody(need.getKey()) && !hasWoodFor(mod, need.getValue()) && needsSurface(mod, feet, need.getKey())) {
                     return surfaceClimb(mod, feet, need.getKey());
                 }
+                if (!lootOnly(need.getKey())) { Task home = returnHome(mod, feet, need.getKey()); if (home != null) return home; } // Ostinato: run52
                 setDebugState("Gathering " + need.getKey() + " x" + need.getValue());
                 hidePlacedCladding(mod, need.getKey()); // Ostinato: never mine the room we are building
                 return TaskCatalogue.getItemTask(item, need.getValue());
@@ -407,6 +424,34 @@ public class MazeFurnishTask extends Task {
 
     // Ostinato: run43. Planks (logs count 4) enough for a woody craft: 8 per item covers barrel (6 planks + slab), chest, bowls.
     private final java.util.Set<String> satisfied = new java.util.HashSet<>();
+    // Ostinato: run52. Gathers ran from wherever the last loot hunt ended (feet ~349 blocks out, y58 in water), so
+    // "Gathering any planks x105" and then polished_diorite pathed 277+ blocks and burned stuck-recovers far from the
+    // room. Nearest-source tasks (CollectPlanksTask over every log type, MineAndCollect) are nearest to the PLAYER, so
+    // walk back near the room first: the woods/stone around the room win, and no wood type is excluded.
+    // Once per item, so an item whose only source is far still gets gathered there.
+    private static final int HOME_LEASH = 64;
+    private final java.util.Set<String> returnedHome = new java.util.HashSet<>();
+    private Task homeTask;
+    private BlockPos home() {
+        if (plannedCells.isEmpty()) return null;
+        long x = 0, z = 0; for (BlockPos c : plannedCells) { x += c.getX(); z += c.getZ(); }
+        return new BlockPos((int) (x / plannedCells.size()), 0, (int) (z / plannedCells.size()));
+    }
+    private int homeDist(BlockPos feet) {
+        BlockPos h = home(); if (h == null) return 0;
+        return (int) Math.sqrt(Math.pow(feet.getX() - h.getX(), 2) + Math.pow(feet.getZ() - h.getZ(), 2));
+    }
+    private Task returnHome(AltoClef mod, BlockPos feet, String key) {
+        BlockPos h = home();
+        if (h == null || returnedHome.contains(key)) return null;
+        int d = homeDist(feet);
+        if (homeTask == null && d <= HOME_LEASH) return null;
+        if (homeTask == null) { homeTask = new adris.altoclef.tasks.movement.GetToXZTask(h.getX(), h.getZ()); System.out.println("MAZETEST FURNISH return-home for=" + key + " dist=" + d); }
+        if (d > 24 && !homeTask.isFinished()) { setDebugState("Returning to room for " + key + " dist=" + d); return homeTask; }
+        returnedHome.add(key); homeTask = null;
+        return null;
+    }
+
     private static boolean hasWoodFor(AltoClef mod, int count) {
         int planks = 0;
         for (Item i : adris.altoclef.util.helpers.ItemHelper.PLANKS) planks += mod.getItemStorage().getItemCount(i);

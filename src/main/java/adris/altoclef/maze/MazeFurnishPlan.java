@@ -79,6 +79,33 @@ public final class MazeFurnishPlan {
         return place;
     }
 
+    /**
+     * Ostinato: run51. A deep-theme room shifted into stone (floor y=73) still listed polished_deepslate.
+     * That block only generates below y=8, so the gather walked to bedrock and the 90s abort closed the client.
+     * Above that band, every deepslate id becomes cobblestone, which the dig already drops from the shell.
+     */
+    public static MazeFurnishPlan stoneIfAboveDeepslate(MazeFurnishPlan plan) {
+        int cladY = Integer.MAX_VALUE;
+        boolean deep = false;
+        for (Step s : plan.steps) {
+            if (s.kind() != Kind.LIGHT && s.kind() != Kind.SEAL) continue;
+            for (String id : s.blockIds()) if (id.contains("deepslate")) deep = true;
+            if (s.kind() == Kind.LIGHT) cladY = Math.min(cladY, s.y());
+        }
+        if (!deep || cladY <= 8) return plan;
+        List<Step> steps = new ArrayList<>();
+        for (Step s : plan.steps) {
+            List<String> ids = new ArrayList<>();
+            for (String id : s.blockIds()) {
+                String use = id.contains("deepslate") ? "cobblestone" : id;
+                if (!ids.contains(use)) ids.add(use);
+            }
+            steps.add(new Step(s.kind(), s.x(), s.y(), s.z(), ids, s.contents()));
+        }
+        System.out.println("MAZETEST FURNISH stone-layer y=" + cladY + " deepslate -> cobblestone");
+        return new MazeFurnishPlan(plan.summary, plan.survival, steps);
+    }
+
     /** First id that passes, or null. */
     public static String pick(List<String> ids, Predicate<String> ok) {
         for (String id : ids) {

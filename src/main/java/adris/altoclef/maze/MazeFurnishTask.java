@@ -257,8 +257,14 @@ public class MazeFurnishTask extends Task {
                 // chop looked underground and GetToYTask cancelled the gather. Climb only under
                 // a real ceiling; once open air is reached, stay there unless we fall back into a cave.
                 // Ostinato: run43. Craft in place when held planks/logs already cover the item; never surface for it.
-                if (isWoody(need.getKey()) && !hasWoodFor(mod, need.getValue()) && needsSurface(mod, feet, need.getKey())) {
-                    return surfaceClimb(mod, feet, need.getKey());
+                // Ostinato: run55. stick x13 asked hasWoodFor(13) = 104 planks, so the held cherry planks still read "no wood" and the
+                // bot yo-yoed "Surfacing for stick" y57-79 for 9+ min. Wood need is now per recipe (sticks: 2 planks per 4), and a
+                // surface climb that cannot get out (6000 ticks) falls back to the normal gather/craft from where the bot stands.
+                if (isWoody(need.getKey()) && !hasWoodFor(mod, need.getKey(), need.getValue()) && !surfaceGaveUp.contains(need.getKey()) && needsSurface(mod, feet, need.getKey())) {
+                    if (++surfaceTicks > 6000) {
+                        System.out.println("MAZETEST FURNISH surface-giveup " + need.getKey() + " gather-in-place feet=" + feet.toShortString());
+                        surfaceGaveUp.add(need.getKey()); surfaceTicks = 0;
+                    } else return surfaceClimb(mod, feet, need.getKey());
                 }
                 if (!lootOnly(need.getKey())) { Task home = returnHome(mod, feet, need.getKey()); if (home != null) return home; } // Ostinato: run52
                 setDebugState("Gathering " + need.getKey() + " x" + need.getValue());
@@ -355,7 +361,7 @@ public class MazeFurnishTask extends Task {
             BlockPos feetNow = mod.getPlayer().getBlockPos();
             // Ostinato: run53. The pick broke during the roof pass with 100+ cherry planks held; this climbed out above the
             // room roof "Surfacing for stick" and pathed ~300 blocks. Sticks come from held planks; surface only without wood.
-            if (!hasWoodFor(mod, 1) && needsSurface(mod, feetNow, "stick")) return surfaceClimb(mod, feetNow, "stick");
+            if (!hasWoodFor(mod, "stick", 1) && !surfaceGaveUp.contains("stick") && needsSurface(mod, feetNow, "stick")) return surfaceClimb(mod, feetNow, "stick");
             step = "stone_sword"; t = TaskCatalogue.getItemTask(Items.STONE_SWORD, 1);
         }
         // Run36: stone pick broke mid-ceiling. MazeCeilingPlaceTask then sat on "No pickaxe" for 60s per cell (31 defers, lights stuck at 79).
@@ -468,11 +474,14 @@ public class MazeFurnishTask extends Task {
         return null;
     }
 
-    private static boolean hasWoodFor(AltoClef mod, int count) {
+    private final java.util.Set<String> surfaceGaveUp = new java.util.HashSet<>(); private int surfaceTicks; // Ostinato: run55
+    // Ostinato: run55. Planks a woody item needs: sticks are 4 per 2 planks; other crafts keep the 8-per-item budget.
+    private static boolean hasWoodFor(AltoClef mod, String key, int count) {
+        int need = key.equals("stick") ? 2 * ((Math.max(1, count) + 3) / 4) : 8 * Math.max(1, count);
         int planks = 0;
         for (Item i : adris.altoclef.util.helpers.ItemHelper.PLANKS) planks += mod.getItemStorage().getItemCount(i);
         for (Item i : adris.altoclef.util.helpers.ItemHelper.LOG) planks += 4 * mod.getItemStorage().getItemCount(i);
-        return planks >= 8 * Math.max(1, count);
+        return planks >= need;
     }
 
     private int surfaceStuckLimit() {

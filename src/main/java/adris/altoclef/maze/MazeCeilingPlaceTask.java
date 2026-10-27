@@ -22,6 +22,7 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.RaycastContext;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.Arrays;
@@ -73,7 +74,9 @@ public class MazeCeilingPlaceTask extends Task {
         boolean sameCol = stand.getX() == target.getX() && stand.getZ() == target.getZ();
         // Feet stay in the stand column: from a neighbour the ray still lands on the target's face, but standing
         // in a third column makes the upward ray hit the wrong cell.
-        boolean there = horiz < 0.75 && (sameCol ? feetNow.getY() <= stand.getY() + 1 && feetNow.getY() >= stand.getY() - 1
+        // Ostinato: run52. feet at stand+1 puts the head inside the target cell, so every place click is rejected.
+        boolean there = horiz < 0.75 && (sameCol
+                ? feetNow.getY() <= target.getY() - 2 && feetNow.getY() >= stand.getY() - 1
                 : feetNow.getY() == stand.getY());
         if (!there) {
             release(mod);
@@ -110,7 +113,7 @@ public class MazeCeilingPlaceTask extends Task {
                 mod.getClientBaritone().getInputOverrideHandler().setInputForceState(Input.CLICK_LEFT, false);
                 return stay("Equipping pickaxe " + target.toShortString());
             }
-            look(mod, Vec3d.ofCenter(target));
+            look(mod, visiblePoint(mod, target));
             // Only swing once the crosshair is on this cell, so a neighbor ceiling is not opened into another hole.
             HitResult hit = MinecraftClient.getInstance().crosshairTarget;
             boolean onTarget = hit instanceof BlockHitResult bhr && bhr.getBlockPos().equals(target);
@@ -196,26 +199,70 @@ public class MazeCeilingPlaceTask extends Task {
         return !s.isAir() && s.getFluidState().isEmpty() && !s.getCollisionShape(mod.getWorld(), p).isEmpty();
     }
 
-    /** Click the face that borders the hole. The underside of the block above is the one we can see from the floor. */
+    /** A face of a solid neighbour that this eye can actually raycast. The underside is preferred only when it is visible. */
     private Click clickFace(AltoClef mod) {
-        BlockPos up = target.up();
-        if (support(mod, up)) {
-            return new Click(up, Direction.DOWN, new Vec3d(target.getX() + 0.5, up.getY(), target.getZ() + 0.5));
-        }
-        for (Direction d : new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST}) {
-            BlockPos n = target.offset(d);
-            if (support(mod, n)) {
-                Vec3d hit = Vec3d.ofCenter(n).add(d.getOpposite().getOffsetX() * 0.5, d.getOpposite().getOffsetY() * 0.5, d.getOpposite().getOffsetZ() * 0.5);
-                return new Click(n, d.getOpposite(), hit);
+        Vec3d eye = mod.getPlayer().getEyePos();
+        Click fallback = null;
+        // UP = the block above the hole (its down face). Sides next. DOWN = the block under the hole.
+        for (Direction fromTarget : new Direction[]{Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.DOWN}) {
+            BlockPos against = target.offset(fromTarget);
+            if (!support(mod, against)) continue;
+            Direction face = fromTarget.getOpposite();
+            for (double ou : new double[]{0.0, -0.22, 0.22}) {
+                for (double ov : new double[]{0.0, -0.22, 0.22}) {
+                    Vec3d hit = facePoint(against, face, ou, ov);
+                    if (eye.distanceTo(hit) > REACH) continue;
+                    Click c = new Click(against, face, hit);
+                    if (fallback == null) fallback = c;
+                    if (rayHitsFace(mod, eye, hit, against, face)) return c;
+                }
             }
         }
-        // Ostinato: wall insert whose only solid neighbour is the block below (the cell above is already clad or
-        // open sky). The ray from a neighbouring column still reaches that block's top face through the hole.
-        BlockPos down = target.down();
-        if (support(mod, down)) {
-            return new Click(down, Direction.UP, new Vec3d(target.getX() + 0.5, down.getY() + 1.0, target.getZ() + 0.5));
+        return fallback;
+    }
+
+    // Ostinato: run52. The center of a dirt cell is often hidden from a side stand, so the click never landed.
+    private Vec3d visiblePoint(AltoClef mod, BlockPos pos) {
+        Vec3d eye = mod.getPlayer().getEyePos();
+        Vec3d center = Vec3d.ofCenter(pos);
+        if (rayHitsBlock(mod, eye, center, pos)) return center;
+        for (Direction d : Direction.values()) {
+            Vec3d p = center.add(d.getOffsetX() * 0.4, d.getOffsetY() * 0.4, d.getOffsetZ() * 0.4);
+            if (rayHitsBlock(mod, eye, p, pos)) return p;
         }
-        return null;
+        return center;
+    }
+
+    private static Vec3d facePoint(BlockPos against, Direction face, double ou, double ov) {
+        Vec3d center = Vec3d.ofCenter(against);
+        double fx = face.getOffsetX();
+        double fy = face.getOffsetY();
+        double fz = face.getOffsetZ();
+        // Two axes on the face, so the sample is inset from the edges and not on a shared corner.
+        double ax;
+        double ay;
+        double az;
+        double bx;
+        double by;
+        double bz;
+        if (fy != 0) {
+            ax = 1; ay = 0; az = 0; bx = 0; by = 0; bz = 1;
+        } else if (fx != 0) {
+            ax = 0; ay = 1; az = 0; bx = 0; by = 0; bz = 1;
+        } else {
+            ax = 1; ay = 0; az = 0; bx = 0; by = 1; bz = 0;
+        }
+        return center.add(fx * 0.48, fy * 0.48, fz * 0.48).add(ax * ou, ay * ou, az * ou).add(bx * ov, by * ov, bz * ov);
+    }
+
+    private static boolean rayHitsFace(AltoClef mod, Vec3d eye, Vec3d hit, BlockPos against, Direction face) {
+        HitResult hr = mod.getWorld().raycast(new RaycastContext(eye, hit, RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mod.getPlayer()));
+        return hr instanceof BlockHitResult bhr && bhr.getBlockPos().equals(against) && bhr.getSide() == face;
+    }
+
+    private static boolean rayHitsBlock(AltoClef mod, Vec3d eye, Vec3d hit, BlockPos pos) {
+        HitResult hr = mod.getWorld().raycast(new RaycastContext(eye, hit, RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mod.getPlayer()));
+        return hr instanceof BlockHitResult bhr && bhr.getBlockPos().equals(pos);
     }
 
     private static void look(AltoClef mod, Vec3d at) {

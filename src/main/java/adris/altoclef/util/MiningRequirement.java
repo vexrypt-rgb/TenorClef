@@ -24,6 +24,13 @@ public enum MiningRequirement implements Comparable<MiningRequirement> {
                     return req;
                 }
             }
+            // Ostinato: run53. Snow, snow_block and powder snow need a SHOVEL (not a pick) for drops, so every path-cost
+            // query over snow logged this warning and returned DIAMOND (worn iron pick force-saved, snow treated as
+            // unminable). A block a vanilla player breaks with a non-pick tool is hand-breakable for pathing; ToolSet
+            // still picks the shovel/axe/shears when one is held.
+            for (Item other : new Item[]{Items.WOODEN_SHOVEL, Items.WOODEN_AXE, Items.WOODEN_HOE, Items.SHEARS}) {
+                if (other.getDefaultStack().isSuitableFor(block.getDefaultState())) return MiningRequirement.HAND;
+            }
             Debug.logWarning("Failed to find ANY effective tool against: " + block + ". I assume netherite is not required anywhere, so something else probably went wrong.");
             return MiningRequirement.DIAMOND;
         }

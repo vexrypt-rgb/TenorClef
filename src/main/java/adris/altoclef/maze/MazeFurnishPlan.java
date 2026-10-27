@@ -89,7 +89,8 @@ public final class MazeFurnishPlan {
         boolean deep = false;
         for (Step s : plan.steps) {
             if (s.kind() != Kind.LIGHT && s.kind() != Kind.SEAL) continue;
-            for (String id : s.blockIds()) if (id.contains("deepslate")) deep = true;
+            // Only the first id. A later cobbled_deepslate fallback on a yellow-office seal is not a deepslate room.
+            if (!s.blockIds().isEmpty() && s.blockIds().get(0).contains("deepslate")) deep = true;
             if (s.kind() == Kind.LIGHT) cladY = Math.min(cladY, s.y());
         }
         if (!deep || cladY <= 8) return plan;

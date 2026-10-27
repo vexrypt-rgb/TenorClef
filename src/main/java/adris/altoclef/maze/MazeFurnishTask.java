@@ -112,7 +112,10 @@ public class MazeFurnishTask extends Task {
         // open seal shaft at -22,88..92,137 (pillar up = place into seal cells, mine them back), seal 0/5 <-> 5/5 for 9 min.
         // A planned cell that holds a solid block is never broken by any subtask (kit, gather, pathing). No step destroys
         // its own cells, so this only stops self-cannibalising; seals stay sealed once placed.
-        AltoClef.getInstance().getBehaviour().avoidBlockBreaking(p -> plannedCells.contains(p) && isSolidCell(p));
+        // Ostinato: run52. Protect a planned cell only once it already is the block the plan wants.
+        // Protecting every solid cell also protected the stone and dirt the ceiling pass has to mine
+        // (8 cells sat on "Mining ceiling" until skip, light 125/133). A finished seal stays protected.
+        AltoClef.getInstance().getBehaviour().avoidBlockBreaking(p -> plannedCells.contains(p) && isSolidCell(p) && cellMatchesPlan(p));
         AltoClef.getInstance().getBehaviour().addProtectedItems(IRON_ARMOR);
         AltoClef.getInstance().getBehaviour().addProtectedItems(KEEP); // Ostinato: food and tools are never garbage
         // Ostinato: run16 tug-of-war. Baritone autoTool and TenorClef's equip kept swapping tools on the same block, so it
@@ -285,7 +288,7 @@ public class MazeFurnishTask extends Task {
                     // Ostinato: only place attempts count toward the 15s defer; a mid-cladding regather used to defer every light.
                     // Ostinato: run40 audit. CONTAINER/FILL/SEAL get the same defer-then-skip as LIGHT (30s each) instead of
                     // burning stuck-recover into a FAIL on one cell. A deferred SEAL retries with throwaway blocks first.
-                    boolean placing = sub instanceof PlaceBlockTask || sub instanceof MazeCeilingPlaceTask || sub instanceof StoreInContainerTask;
+                    boolean placing = sub instanceof PlaceBlockTask || sub instanceof MazeCeilingPlaceTask || sub instanceof StoreInContainerTask || sub instanceof MazeBarrelFillTask;
                     int budget = step.kind() == MazeFurnishPlan.Kind.LIGHT ? 300 : 600;
                     if (placing && ++stepTicks > budget) {
                         deferStep("timeout");
@@ -350,7 +353,9 @@ public class MazeFurnishTask extends Task {
         boolean armed = mod.getItemStorage().hasItem(SWORDS) || mod.getItemStorage().hasItem(PICKS);
         if (!armed) {
             BlockPos feetNow = mod.getPlayer().getBlockPos();
-            if (needsSurface(mod, feetNow, "stick")) return surfaceClimb(mod, feetNow, "stick");
+            // Ostinato: run53. The pick broke during the roof pass with 100+ cherry planks held; this climbed out above the
+            // room roof "Surfacing for stick" and pathed ~300 blocks. Sticks come from held planks; surface only without wood.
+            if (!hasWoodFor(mod, 1) && needsSurface(mod, feetNow, "stick")) return surfaceClimb(mod, feetNow, "stick");
             step = "stone_sword"; t = TaskCatalogue.getItemTask(Items.STONE_SWORD, 1);
         }
         // Run36: stone pick broke mid-ceiling. MazeCeilingPlaceTask then sat on "No pickaxe" for 60s per cell (31 defers, lights stuck at 79).
@@ -382,6 +387,17 @@ public class MazeFurnishTask extends Task {
             lastKit = step;
         }
         if (t != null) setDebugState("Kit " + step);
+        // Ostinato: run53. Mid-place kit gathers (stone/spare pick) are nearest-to-player; never run them from hundreds of
+        // blocks out while lights/fill are unfinished. Walk back inside the leash first.
+        if (t != null && gathered && homeDist(mod.getPlayer().getBlockPos()) > HOME_LEASH) {
+            BlockPos h = home();
+            if (kitHome == null || kitHome.isFinished()) {
+                kitHome = new adris.altoclef.tasks.movement.GetToXZTask(h.getX(), h.getZ());
+                System.out.println("MAZETEST FURNISH return-home for=kit-" + step + " dist=" + homeDist(mod.getPlayer().getBlockPos()));
+            }
+            setDebugState("Returning to room for kit " + step);
+            return kitHome;
+        }
         return t;
     }
 
@@ -431,7 +447,7 @@ public class MazeFurnishTask extends Task {
     // Once per item, so an item whose only source is far still gets gathered there.
     private static final int HOME_LEASH = 64;
     private final java.util.Set<String> returnedHome = new java.util.HashSet<>();
-    private Task homeTask;
+    private Task homeTask, kitHome; // Ostinato: run53 kitHome
     private BlockPos home() {
         if (plannedCells.isEmpty()) return null;
         long x = 0, z = 0; for (BlockPos c : plannedCells) { x += c.getX(); z += c.getZ(); }
@@ -543,6 +559,7 @@ public class MazeFurnishTask extends Task {
                 if (state.isAir()) {
                     return null; // container never got placed; nothing to fill
                 }
+                if (MazeBarrelFillTask.filled(pos)) return null; // Ostinato: run53. server container already holds loot
                 if (McCompat.block("decorated_pot") == state.getBlock()) {
                     if (!warnedPot) {
                         Debug.logMessage("Maze furnish: decorated pot fills are not supported yet, leaving pots empty");
@@ -573,8 +590,10 @@ public class MazeFurnishTask extends Task {
                     }
                     targets.add(fallback);
                 }
-                // one store per container; the step advances when it finishes, and Ostinato's ledger stops refills
-                fill = new StoreInContainerTask(pos, false, targets.toArray(new ItemTarget[0]));
+                // Ostinato: run53. StoreInContainerTask's InteractWithBlockTask fell back to TimeoutWanderTask (explore: a
+                // 272-block path over snow) whenever no open screen showed within 5s; fill stayed 0/1 in run52 and run53.
+                // MazeBarrelFillTask stands beside the barrel, clicks its visible face unsneaked, shift-clicks, never wanders.
+                fill = new MazeBarrelFillTask(pos, targets.toArray(new ItemTarget[0]));
                 return fill;
             }
             default:
@@ -727,6 +746,24 @@ public class MazeFurnishTask extends Task {
 
     // Ostinato: run50. Solid (non-air, non-fluid) block in a planned cell, read from the integrated server world when
     // there is one so the avoider and the seal probe agree (client chunk lag showed placed seals as air).
+    // Ostinato: run52. True when the block already there is one this step accepts, so the kit must not mine it.
+    private boolean cellMatchesPlan(BlockPos p) {
+        if (work == null) return false;
+        net.minecraft.client.MinecraftClient mc = net.minecraft.client.MinecraftClient.getInstance();
+        net.minecraft.world.World w = mc.world;
+        if (mc.getServer() != null && mc.world != null) {
+            net.minecraft.server.world.ServerWorld sw = mc.getServer().getWorld(mc.world.getRegistryKey());
+            if (sw != null) w = sw;
+        }
+        if (w == null) return false;
+        Block have = w.getBlockState(p).getBlock();
+        for (MazeFurnishPlan.Step s : work) {
+            if (s.x() != p.getX() || s.y() != p.getY() || s.z() != p.getZ()) continue;
+            if (blocks(s.blockIds()).contains(have)) return true;
+        }
+        return false;
+    }
+
     private boolean isSolidCell(BlockPos p) {
         net.minecraft.client.MinecraftClient mc = net.minecraft.client.MinecraftClient.getInstance();
         net.minecraft.world.World w = mc.world;

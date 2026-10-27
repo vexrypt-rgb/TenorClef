@@ -79,6 +79,9 @@ public class MazeFurnishTask extends Task {
 
     public MazeFurnishTask(MazeFurnishPlan plan) {
         this.plan = plan;
+        // Ostinato: every cell the plan will place into. The surface climb must never mine these, or it eats the
+        // cladding it just put in (run42: ceiling cells at y=88 mined away while "Surfacing for barrel").
+        for (MazeFurnishPlan.Step s : plan.steps) plannedCells.add(new BlockPos(s.x(), s.y(), s.z()));
     }
 
     static boolean obtainable(String id) {
@@ -184,7 +187,27 @@ public class MazeFurnishTask extends Task {
         order.sort(java.util.Comparator.comparingInt(e -> isCladding(e.getKey()) ? 1 : 0));
         if (!gathered) for (Map.Entry<String, Integer> need : order) {
             if (skipped.contains(need.getKey())) continue; // Ostinato
+            // Ostinato: run43 yo-yo. A seal/light regather sets gathered=false, which re-ran this whole loop; the barrel
+            // was already placed (inventory 0), so the bot went back for another barrel and mined up its own seal shaft.
+            // An item that reached its count once is done here; the step regather path handles real shortfalls.
+            if (satisfied.contains(need.getKey())) continue;
+            // Ostinato: run47. Wood cladding steps accept every nearby wood (MazeFurnishPlanner.wood appends them all), but the
+            // gather pinned each step to one plank id: walls asked for oak_planks x79 with ~1 oak tree around (179 cherry
+            // logs), so the bot wandered 25 min chopping nothing. Pool all wood cladding into one any-planks count.
+            if (isWoodCladding(need.getKey())) {
+                int pooled = plankCladdingMissing(mod);
+                if (heldPlanks(mod) >= pooled) { satisfied.add(need.getKey()); continue; }
+                if (needsSurface(mod, feet, need.getKey())) return surfaceClimb(mod, feet, need.getKey());
+                setDebugState("Gathering any planks x" + pooled + " (for " + need.getKey() + ")");
+                return new adris.altoclef.tasks.resources.CollectPlanksTask(pooled);
+            }
             Item item = McCompat.item(need.getKey());
+            if (item != null && mod.getItemStorage().getItemCount(item) >= need.getValue()) { satisfied.add(need.getKey()); continue; }
+            // Ostinato: run42 self-cannibalised. `materials` is the PLAN total, so a mid-build run-dry asked for the
+            // full count again ("Gathering polished_andesite x53") and the nearest source of that block was the room's
+            // own cladding: light went 97 -> 89 in two minutes. Ask only for cells that are still wrong, and hide the
+            // placed cells from the scanner before mining.
+            if (item != null && !lootOnly(need.getKey()) && stillMissing(mod, need.getKey()) <= 0) continue;
             if (item != null && mod.getItemStorage().getItemCount(item) < need.getValue() && TaskCatalogue.taskExists(item)) {
                 // Ostinato: loot-only items (string, bowls) are optional; a fill stores whatever is held. Cap each at 3 min
                 // so a spider hunt or cobweb search never blocks the cladding (run22: string x6 ran 5+ min with 0 webs).
@@ -207,10 +230,12 @@ public class MazeFurnishTask extends Task {
                 // Ostinato: run35 yo-yo. MOTION_BLOCKING_NO_LEAVES is the tree canopy, so every
                 // chop looked underground and GetToYTask cancelled the gather. Climb only under
                 // a real ceiling; once open air is reached, stay there unless we fall back into a cave.
-                if (isWoody(need.getKey()) && needsSurface(mod, feet, need.getKey())) {
+                // Ostinato: run43. Craft in place when held planks/logs already cover the item; never surface for it.
+                if (isWoody(need.getKey()) && !hasWoodFor(mod, need.getValue()) && needsSurface(mod, feet, need.getKey())) {
                     return surfaceClimb(mod, feet, need.getKey());
                 }
                 setDebugState("Gathering " + need.getKey() + " x" + need.getValue());
+                hidePlacedCladding(mod, need.getKey()); // Ostinato: never mine the room we are building
                 return TaskCatalogue.getItemTask(item, need.getValue());
             }
         }
@@ -343,10 +368,14 @@ public class MazeFurnishTask extends Task {
             BlockState st = mod.getWorld().getBlockState(p);
             if (!st.isAir() && !st.getCollisionShape(mod.getWorld(), p).isEmpty()) solid++;
         }
-        boolean buried = solid >= 3 && feet.getY() < surfaceY - 6;
-        if (!buried) surfacedFor = key;
-        else if (key.equals(surfacedFor) && feet.getY() < surfaceY - 24) surfacedFor = null;
-        return buried && !key.equals(surfacedFor);
+        // Run41: mining one ceiling block used to clear the buried latch at y=33, so barrel gather and
+        // surface swapped every few seconds. Keep climbing until the sky is open.
+        boolean sky = mod.getWorld().isSkyVisible(feet.up());
+        boolean openAbove = solid == 0;
+        boolean near = sky || (openAbove && feet.getY() >= surfaceY - 20);
+        if (near) { surfacedFor = key; return false; }
+        if (key.equals(surfacedFor) && openAbove) return false;
+        return feet.getY() < surfaceY - 6;
     }
 
     // Run37 died at y=28: GetToYTask(surfaceY) sat in a sealed pocket until the 90s abort.
@@ -356,13 +385,23 @@ public class MazeFurnishTask extends Task {
         for (int dy = 2; dy <= 5; dy++) {
             BlockPos p = feet.up(dy);
             BlockState st = mod.getWorld().getBlockState(p);
-            if (!st.isAir() && !st.getCollisionShape(mod.getWorld(), p).isEmpty()) {
+            // Ostinato: never mine a planned cell to get out; the entry shaft is the way up.
+            if (!st.isAir() && !st.getCollisionShape(mod.getWorld(), p).isEmpty() && !plannedCells.contains(p)) {
                 return new DestroyBlockTask(p);
             }
         }
         int surfaceY = mod.getWorld().getTopY(net.minecraft.world.Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, feet.getX(), feet.getZ());
         int goal = Math.min(Math.max(surfaceY, feet.getY() + 1), feet.getY() + 8);
         return new adris.altoclef.tasks.movement.GetToYTask(goal);
+    }
+
+    // Ostinato: run43. Planks (logs count 4) enough for a woody craft: 8 per item covers barrel (6 planks + slab), chest, bowls.
+    private final java.util.Set<String> satisfied = new java.util.HashSet<>();
+    private static boolean hasWoodFor(AltoClef mod, int count) {
+        int planks = 0;
+        for (Item i : adris.altoclef.util.helpers.ItemHelper.PLANKS) planks += mod.getItemStorage().getItemCount(i);
+        for (Item i : adris.altoclef.util.helpers.ItemHelper.LOG) planks += 4 * mod.getItemStorage().getItemCount(i);
+        return planks >= 8 * Math.max(1, count);
     }
 
     private int surfaceStuckLimit() {
@@ -387,6 +426,11 @@ public class MazeFurnishTask extends Task {
                 }
                 // Ostinato: run27/28 stalled 90s+ per floor block: break, fall in the hole, path back, place. Baritone's builder
                 // replaces a wrong block in one pass (breaks it, then places), so only destroy when nothing placeable is held.
+                // Ostinato: run42 audit. A floor insert breaks the block the bot stands on, so the bot drops into the hole
+                // and Baritone can never fill the cell it is standing in (BlockItem.canPlace includes the placer's body).
+                // Five floor cells timed out and were skipped that way. Step onto a neighbouring floor cell first.
+                Task stepOut = stepOutOf(mod, pos);
+                if (stepOut != null) return stepOut;
                 Block[] have = wanted.stream().filter(b -> mod.getItemStorage().hasItem(b.asItem())).toArray(Block[]::new);
                 // Ostinato: interior ceiling. The cell under it is open, so the builder's side-face search wanders
                 // after it breaks the stone. Click the underside of the block above from the floor.
@@ -395,11 +439,24 @@ public class MazeFurnishTask extends Task {
                 if (have.length == 0) { // Ostinato: ran dry mid-cladding; regather the planned count instead of skipping the block
                     for (Block b : wanted) {
                         String id = net.minecraft.registry.Registries.BLOCK.getId(b).getPath();
-                        if (materials.containsKey(id) && TaskCatalogue.taskExists(b.asItem())) {
-                            if (gathered) System.out.println("MAZETEST FURNISH regather " + id + " x" + materials.get(id));
+                        // Ostinato: run47. A dry wood cell takes any planks, not the one wood the plan named first.
+                        if (isWoodCladding(id)) {
+                            int pooled = plankCladdingMissing(mod);
+                            if (pooled <= 0) continue;
+                            if (gathered) System.out.println("MAZETEST FURNISH regather any_planks x" + pooled + " for " + id);
                             gathered = false;
-                            return TaskCatalogue.getItemTask(b.asItem(), materials.get(id));
+                            return new adris.altoclef.tasks.resources.CollectPlanksTask(pooled);
                         }
+                        if (!materials.containsKey(id) || !TaskCatalogue.taskExists(b.asItem())) continue;
+                        // Ostinato: ask for the cells still wrong, not the plan total, and hide the cladding already
+                        // placed so the gather mines natural stone (run42: "Gathering polished_andesite x53" mined the
+                        // room's own walls, light 97 -> 89).
+                        int missing = stillMissing(mod, id);
+                        if (missing <= 0) continue;
+                        if (gathered) System.out.println("MAZETEST FURNISH regather " + id + " x" + missing);
+                        hidePlacedCladding(mod, id);
+                        gathered = false;
+                        return TaskCatalogue.getItemTask(b.asItem(), missing);
                     }
                     return null;
                 }
@@ -485,6 +542,8 @@ public class MazeFurnishTask extends Task {
     }
 
     private final java.util.Set<BlockPos> skippedFluid = new java.util.HashSet<>(); // Ostinato
+    private final java.util.Set<BlockPos> stepOutLogged = new java.util.HashSet<>(); // Ostinato: log a step-out once per cell
+    private BlockPos stepOutPos; private int stepOutTicks; // Ostinato: bounded step-out per cell
 
     // Ostinato: true when lava touches this cell from above or a side.
     private static boolean fluidNext(AltoClef mod, BlockPos pos) {
@@ -502,6 +561,96 @@ public class MazeFurnishTask extends Task {
         BlockState s = mod.getWorld().getBlockState(below);
         return s.isAir() || s.getCollisionShape(mod.getWorld(), below).isEmpty();
     }
+
+    /**
+     * Ostinato: the player's own body blocks a placement into the cell it occupies (BlockItem.canPlace passes the
+     * placer's shape). A floor insert breaks the block the bot stands on, so the bot drops into the hole and the
+     * builder retries forever. Walk onto a neighbouring floor cell and place from there.
+     */
+    private Task stepOutOf(AltoClef mod, BlockPos pos) {
+        BlockPos feet = mod.getPlayer().getBlockPos();
+        boolean inCell = feet.equals(pos);          // floor insert: the bot fell into the hole it broke
+        boolean headInCell = feet.equals(pos.down()); // wall insert at head height
+        if (!inCell && !headInCell) return null;
+        // Ostinato: 5s per cell, then let the normal place path (and its timeout) take over, so a cell we cannot
+        // step out of cannot spin forever.
+        if (!pos.equals(stepOutPos)) { stepOutPos = pos; stepOutTicks = 0; }
+        if (++stepOutTicks > 100) return null;
+        BlockPos base = inCell ? pos.up() : feet;
+        for (net.minecraft.util.math.Direction d : new net.minecraft.util.math.Direction[]{
+                net.minecraft.util.math.Direction.NORTH, net.minecraft.util.math.Direction.SOUTH,
+                net.minecraft.util.math.Direction.EAST, net.minecraft.util.math.Direction.WEST}) {
+            BlockPos stand = base.offset(d);
+            if (standable(mod, stand)) {
+                if (stepOutLogged.add(pos)) System.out.println("MAZETEST FURNISH step-out " + pos.toShortString() + " to " + stand.toShortString());
+                return new adris.altoclef.tasks.movement.GetToBlockTask(stand, false);
+            }
+        }
+        return null;
+    }
+
+    // Ostinato: two open cells over something solid.
+    private static boolean standable(AltoClef mod, BlockPos stand) {
+        BlockState under = mod.getWorld().getBlockState(stand.down());
+        BlockState feet = mod.getWorld().getBlockState(stand);
+        BlockState head = mod.getWorld().getBlockState(stand.up());
+        boolean solidUnder = !under.isAir() && under.getFluidState().isEmpty() && !under.getCollisionShape(mod.getWorld(), stand.down()).isEmpty();
+        boolean clear = (feet.isAir() || feet.getCollisionShape(mod.getWorld(), stand).isEmpty())
+                && (head.isAir() || head.getCollisionShape(mod.getWorld(), stand.up()).isEmpty());
+        return solidUnder && clear;
+    }
+
+    // Ostinato: cells that still need this id (the world does not match the plan yet).
+    // Ostinato: run47. A *_planks id the plan uses as cladding; any wood satisfies those steps.
+    private boolean isWoodCladding(String id) {
+        return id.endsWith("_planks") && isCladding(id);
+    }
+
+    // Ostinato: run47. Cells whose chosen block is a plank and that are still wrong, across every wood.
+    private int plankCladdingMissing(AltoClef mod) {
+        int n = 0;
+        for (MazeFurnishPlan.Step s : plan.steps) {
+            if (s.kind() == MazeFurnishPlan.Kind.FILL) continue;
+            String pick = MazeFurnishPlan.pick(s.blockIds(), MazeFurnishTask::obtainable);
+            if (pick == null || !pick.endsWith("_planks")) continue;
+            String cur = net.minecraft.registry.Registries.BLOCK.getId(mod.getWorld().getBlockState(new BlockPos(s.x(), s.y(), s.z())).getBlock()).getPath();
+            if (!s.blockIds().contains(cur)) n++;
+        }
+        return n;
+    }
+
+    private static int heldPlanks(AltoClef mod) {
+        int n = 0;
+        for (Item i : adris.altoclef.util.helpers.ItemHelper.PLANKS) n += mod.getItemStorage().getItemCount(i);
+        return n;
+    }
+
+    private int stillMissing(AltoClef mod, String id) {
+        int n = 0;
+        for (MazeFurnishPlan.Step s : plan.steps) {
+            if (s.kind() == MazeFurnishPlan.Kind.FILL || !s.blockIds().contains(id)) continue;
+            BlockPos p = new BlockPos(s.x(), s.y(), s.z());
+            String cur = net.minecraft.registry.Registries.BLOCK.getId(mod.getWorld().getBlockState(p).getBlock()).getPath();
+            if (!s.blockIds().contains(cur)) n++;
+        }
+        return n;
+    }
+
+    // Ostinato: the nearest source of a cladding block is the cladding already placed. Hide those cells from the
+    // block scanner for the duration of the gather, so it mines natural stone instead of its own room.
+    private void hidePlacedCladding(AltoClef mod, String id) {
+        int n = 0;
+        for (MazeFurnishPlan.Step s : plan.steps) {
+            if (s.kind() == MazeFurnishPlan.Kind.FILL || !s.blockIds().contains(id)) continue;
+            BlockPos p = new BlockPos(s.x(), s.y(), s.z());
+            String cur = net.minecraft.registry.Registries.BLOCK.getId(mod.getWorld().getBlockState(p).getBlock()).getPath();
+            if (s.blockIds().contains(cur)) { mod.getBlockScanner().requestBlockUnreachable(p, 0); n++; }
+        }
+        if (n > 0 && hiddenLogged.add(id)) System.out.println("MAZETEST FURNISH hide-cladding " + id + " cells=" + n);
+    }
+
+    private final java.util.Set<String> hiddenLogged = new java.util.HashSet<>(); // Ostinato
+    private final java.util.Set<BlockPos> plannedCells = new java.util.HashSet<>(); // Ostinato: never mine these
 
     // Ostinato: blocks of this item that are still the wrong block in the world.
     private int stillNeeded(AltoClef mod, Item item) {

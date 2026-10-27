@@ -37,6 +37,7 @@ public class MazeCeilingPlaceTask extends Task {
     private boolean arrived;
     private int actTicks;
     private int liveTicks;
+    private boolean sideStandLogged; // Ostinato
 
     public MazeCeilingPlaceTask(BlockPos target, Block[] toPlace) {
         this.target = target;
@@ -64,10 +65,16 @@ public class MazeCeilingPlaceTask extends Task {
         mod.getClientBaritone().getBuilderProcess().onLostControl();
         BlockPos stand = standUnder(mod);
         Vec3d eye = mod.getClientBaritone().getPlayerContext().playerHead();
-        double horiz = Math.hypot(eye.x - (target.getX() + 0.5), eye.z - (target.getZ() + 0.5));
-        // Feet stay in this column. Standing in a neighbor makes the upward ray hit the wrong cell.
-        boolean there = horiz < 0.75 && mod.getPlayer().getBlockPos().getY() <= stand.getY() + 1
-                && mod.getPlayer().getBlockPos().getY() >= stand.getY() - 1;
+        BlockPos feetNow = mod.getPlayer().getBlockPos();
+        // Ostinato: measure against the STAND column, not the target column. standUnder may pick a neighbouring
+        // room column when the target cell is at head height (see there); measuring against the target then kept
+        // the bot walking to a spot it could never stand in.
+        double horiz = Math.hypot(eye.x - (stand.getX() + 0.5), eye.z - (stand.getZ() + 0.5));
+        boolean sameCol = stand.getX() == target.getX() && stand.getZ() == target.getZ();
+        // Feet stay in the stand column: from a neighbour the ray still lands on the target's face, but standing
+        // in a third column makes the upward ray hit the wrong cell.
+        boolean there = horiz < 0.75 && (sameCol ? feetNow.getY() <= stand.getY() + 1 && feetNow.getY() >= stand.getY() - 1
+                : feetNow.getY() == stand.getY());
         if (!there) {
             release(mod);
             arrived = false;
@@ -149,12 +156,31 @@ public class MazeCeilingPlaceTask extends Task {
         return ArrayUtils.contains(toPlace, mod.getWorld().getBlockState(target).getBlock());
     }
 
-    /** Feet position on the highest solid under the cell. */
+    /**
+     * Feet position where the player can stand and still see the target, with the target OUTSIDE the player's body.
+     * Ostinato: BlockItem.canPlace passes the placing player's shape, so a cell the player occupies is never filled.
+     * Standing in the target's own column with the target at head height is exactly that, which made every
+     * floor-level ceiling insert and every wall insert over room air time out (run42: 20 skip-light why=timeout).
+     */
     private BlockPos standUnder(AltoClef mod) {
-        for (int y = target.getY() - 1; y >= target.getY() - 6 && y > mod.getWorld().getBottomY(); y--) {
+        // Same column, but the head must stay under the target: feet <= target - 2.
+        for (int y = target.getY() - 2; y >= target.getY() - 6 && y > mod.getWorld().getBottomY(); y--) {
             BlockPos feet = new BlockPos(target.getX(), y, target.getZ());
-            if (support(mod, feet.down()) && open(mod, feet) && open(mod, feet.up())) {
-                return feet;
+            if (support(mod, feet.down()) && open(mod, feet) && open(mod, feet.up())) return feet;
+        }
+        // Ostinato: a 2-high room (floor right under the hole) or a column already clad below has no such spot.
+        // Stand in a neighbouring room column instead; clickFace still lands on the target's face from there.
+        for (Direction d : new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST}) {
+            BlockPos c = target.offset(d);
+            for (int y = target.getY() - 1; y >= target.getY() - 4 && y > mod.getWorld().getBottomY(); y--) {
+                BlockPos feet = new BlockPos(c.getX(), y, c.getZ());
+                if (support(mod, feet.down()) && open(mod, feet) && open(mod, feet.up())) {
+                    if (!sideStandLogged) {
+                        sideStandLogged = true;
+                        System.out.println("MAZETEST FURNISH ceiling-side-stand " + target.toShortString() + " from " + feet.toShortString());
+                    }
+                    return feet;
+                }
             }
         }
         return new BlockPos(target.getX(), target.getY() - 2, target.getZ());
@@ -182,6 +208,12 @@ public class MazeCeilingPlaceTask extends Task {
                 Vec3d hit = Vec3d.ofCenter(n).add(d.getOpposite().getOffsetX() * 0.5, d.getOpposite().getOffsetY() * 0.5, d.getOpposite().getOffsetZ() * 0.5);
                 return new Click(n, d.getOpposite(), hit);
             }
+        }
+        // Ostinato: wall insert whose only solid neighbour is the block below (the cell above is already clad or
+        // open sky). The ray from a neighbouring column still reaches that block's top face through the hole.
+        BlockPos down = target.down();
+        if (support(mod, down)) {
+            return new Click(down, Direction.UP, new Vec3d(target.getX() + 0.5, down.getY() + 1.0, target.getZ() + 0.5));
         }
         return null;
     }

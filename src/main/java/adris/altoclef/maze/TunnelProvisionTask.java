@@ -45,7 +45,7 @@ public class TunnelProvisionTask extends Task {
     @Override
     protected void onStart() {
         queue.clear();
-        String[] order = {"stone_pickaxe", "iron_pickaxe", "equip:", "food", "torch", "bed"};
+        String[] order = {"stone_pickaxe", "copper_pickaxe", "iron_pickaxe", "copper_shovel", "stone_shovel", "copper_sword", "stone_sword", "equip:", "food", "torch", "bed"};
         for (String o : order) {
             for (Map.Entry<String, Integer> e : needs.entrySet()) {
                 if (e.getKey().startsWith(o) && !queue.contains(e)) queue.add(e);

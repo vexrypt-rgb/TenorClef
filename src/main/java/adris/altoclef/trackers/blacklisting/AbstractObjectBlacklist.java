@@ -41,7 +41,11 @@ public abstract class AbstractObjectBlacklist<T> {
             return;
         }
         // For distance, add a slight threshold so it doesn't reset EVERY time we move a tiny bit closer.
-        if (newTool.ordinal() > entry.bestTool.ordinal() || (newDistance < entry.bestDistanceSq - 1)) {
+        // Ostinato: run39 iron_ore. DestroyBlockTask (4) and MineAndCollect (2) report the same pos, so the allowance flipped
+        // 2<->4 and each 1-block-closer approach RESET the count (~40 ores x 6s). Keep the strictest allowance; only a better
+        // tool, or a 3+ block closer approach on the first two attempts, resets.
+        numberOfFailuresAllowed = Math.min(numberOfFailuresAllowed, entry.numberOfFailuresAllowed);
+        if (newTool.ordinal() > entry.bestTool.ordinal() || (entry.totalAttempts <= 2 && newDistance < entry.bestDistanceSq - 9)) {
             if (newTool.ordinal() > entry.bestTool.ordinal()) entry.bestTool = newTool;
             if (newDistance < entry.bestDistanceSq) entry.bestDistanceSq = newDistance;
             entry.numberOfFailures = 0;

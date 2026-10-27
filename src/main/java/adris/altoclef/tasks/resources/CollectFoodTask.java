@@ -243,19 +243,26 @@ public class CollectFoodTask extends Task {
             // - If we have hay/wheat, make it into bread
             // - If we have raw foods, smelt all of them
 
-            // Convert Hay+Wheat -> Bread
-            if (mod.getItemStorage().getItemCount(Items.WHEAT) >= 3) {
+            // Convert Hay+Wheat -> Bread.
+            // A target of 99999999 never finishes: CraftInTableTask waits until that many
+            // bread exist, MoveItemToSlot warns every tick, and the food score stays put.
+            // Craft only the batch the inventory can already pay for.
+            int wheat = mod.getItemStorage().getItemCount(Items.WHEAT);
+            if (wheat >= 3) {
                 setDebugState("Crafting Bread");
+                int have = mod.getItemStorage().getItemCount(Items.BREAD);
+                int make = wheat / 3;
                 Item[] w = new Item[]{Items.WHEAT};
                 Item[] o = null;
-                // jank
-                currentResourceTask = new CraftInTableTask(new RecipeTarget(Items.BREAD, 99999999, CraftingRecipe.newShapedRecipe("bread", new Item[][]{w, w, w, o, o, o, o, o, o}, 1)), false, false);
+                currentResourceTask = new CraftInTableTask(new RecipeTarget(Items.BREAD, have + make, CraftingRecipe.newShapedRecipe("bread", new Item[][]{w, w, w, o, o, o, o, o, o}, 1)), false, false);
                 return currentResourceTask;
             }
-            if (mod.getItemStorage().getItemCount(Items.HAY_BLOCK) >= 1) {
+            int hay = mod.getItemStorage().getItemCount(Items.HAY_BLOCK);
+            if (hay >= 1) {
                 setDebugState("Crafting Wheat");
+                int haveWheat = mod.getItemStorage().getItemCount(Items.WHEAT);
                 Item[] o = null;
-                currentResourceTask = new CraftInInventoryTask(new RecipeTarget(Items.WHEAT, 99999999, CraftingRecipe.newShapedRecipe("wheat", new Item[][]{new Item[]{Items.HAY_BLOCK}, o, o, o}, 9)), false, false);
+                currentResourceTask = new CraftInInventoryTask(new RecipeTarget(Items.WHEAT, haveWheat + hay * 9, CraftingRecipe.newShapedRecipe("wheat", new Item[][]{new Item[]{Items.HAY_BLOCK}, o, o, o}, 9)), false, false);
                 return currentResourceTask;
             }
             // Convert raw foods -> cooked foods

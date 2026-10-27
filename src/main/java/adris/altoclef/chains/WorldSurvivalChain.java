@@ -52,7 +52,7 @@ public class WorldSurvivalChain extends SingleTaskChain {
         handleDrowning(mod);
         // Ostinato: runs 23/25 drowned while Mob Defense pathed underwater (swim-up only fires when not pathing). Below half
         // air, surfacing outranks combat (70).
-        if (mod.getModSettings().shouldAvoidDrowning() && mod.getPlayer().isSubmergedInWater() && mod.getPlayer().getAir() < mod.getPlayer().getMaxAir() / 2) {
+        if (mod.getModSettings().shouldAvoidDrowning() && mod.getPlayer().isSubmergedInWater() && mod.getPlayer().getAir() < mod.getPlayer().getMaxAir() * 2 / 3) { // Ostinato: 1/2 -> 2/3 (run39 drowned)
             setTask(new adris.altoclef.tasks.movement.GetOutOfWaterTask());
             return 100;
         }

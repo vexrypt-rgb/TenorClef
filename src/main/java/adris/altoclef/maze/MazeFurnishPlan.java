@@ -59,6 +59,26 @@ public final class MazeFurnishPlan {
         return Collections.unmodifiableMap(out);
     }
 
+    /**
+     * Ostinato: lights and the container, then the fill, then seals. Ceiling mining drops cobble before
+     * the barrel is filled, and the shaft is still open so the bot can reach it. Seals close the room last.
+     */
+    public List<Step> placeOrder() {
+        List<Step> place = new ArrayList<>();
+        List<Step> fills = new ArrayList<>();
+        List<Step> seals = new ArrayList<>();
+        for (Step step : steps) {
+            switch (step.kind()) {
+                case FILL -> fills.add(step);
+                case SEAL -> seals.add(step);
+                default -> place.add(step);
+            }
+        }
+        place.addAll(fills);
+        place.addAll(seals);
+        return place;
+    }
+
     /** First id that passes, or null. */
     public static String pick(List<String> ids, Predicate<String> ok) {
         for (String id : ids) {

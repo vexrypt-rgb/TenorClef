@@ -20,6 +20,12 @@ public class MazeFurnishPlanTest {
             new Step(Kind.SEAL, 2, 1, 0, List.of("cobblestone"), List.of())));
 
     @Test
+    void fillRunsAfterPlaceAndSeal() {
+        List<Kind> order = PLAN.placeOrder().stream().map(Step::kind).toList();
+        Assertions.assertEquals(List.of(Kind.LIGHT, Kind.CONTAINER, Kind.FILL, Kind.SEAL, Kind.SEAL), order);
+    }
+
+    @Test
     void materialsPickFirstObtainableAndDropUnobtainableLoot() {
         Set<String> ok = Set.of("glowstone", "chest", "book", "cobblestone");
         Map<String, Integer> m = PLAN.materials(ok::contains);

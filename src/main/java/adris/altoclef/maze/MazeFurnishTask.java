@@ -49,6 +49,12 @@ public class MazeFurnishTask extends Task {
     private String gatherKey;    // Ostinato: loot-only gather budget
     private int gatherTicks;
     private final java.util.Set<String> skipped = new java.util.HashSet<>();
+    private java.util.List<MazeFurnishPlan.Step> work; // Ostinato: lights, container, fill, then seals
+    private boolean loggedFill; // Ostinato
+    private int foodTicks;      // Ostinato: kit food budget
+    private int foodCooldown;   // Ostinato: ticks after skip-food before a starve retry
+    private boolean foodGaveUp; // Ostinato
+    private String surfacedFor; // Ostinato: wood gather already reached open air
 
     // Ostinato: wood-derived items whose recipe chain bottoms out in logs.
     private static boolean isWoody(String id) {
@@ -83,6 +89,7 @@ public class MazeFurnishTask extends Task {
     @Override
     protected void onStart() {
         materials = plan.materials(MazeFurnishTask::obtainable);
+        work = plan.placeOrder(); // Ostinato
         index = 0;
         Debug.logMessage("Maze furnish " + plan.summary + ", gathering " + materials);
         // Ostinato: cobblestone/cobbled_deepslate/andesite sit on the throwaway list, so a full inventory dumped the very
@@ -106,7 +113,7 @@ public class MazeFurnishTask extends Task {
         int sig = 0;
         for (int i = 0; i < mod.getPlayer().getInventory().size(); i++) { net.minecraft.item.ItemStack st = mod.getPlayer().getInventory().getStack(i); sig = sig * 31 + st.getCount() * 7 + net.minecraft.registry.Registries.ITEM.getRawId(st.getItem()); }
         if (sig != lastInvSig || stuckAnchor == null || stuckAnchor.getSquaredDistance(feet) > 64) { if (sig != lastInvSig) stuckRecoveries = 0; lastInvSig = sig; stuckAnchor = feet; stuckTicks = 0; }
-        else if (++stuckTicks >= 1800 && stuckRecoveries < 2) { // Ostinato: two recoveries before FAIL
+        else if (++stuckTicks >= 600 && stuckRecoveries < surfaceStuckLimit()) { // Ostinato: 90s -> 30s (user: faster) // Ostinato: two recoveries before FAIL; surfacing gets more (run37)
             // Ostinato: first 90s stall: blacklist the block the chain is fighting, wander 30s, retry. Second stall FAILs.
             for (Task t = this; t != null; t = t.getSub()) if (t instanceof DestroyBlockTask d) { mod.getBlockScanner().requestBlockUnreachable(d.getPos(), 0); }
             System.out.println("MAZETEST FURNISH stuck-recover stuck=" + getDebugState() + " feet=" + feet.toShortString());
@@ -114,7 +121,7 @@ public class MazeFurnishTask extends Task {
             unstickTicks = 0; unstick = new adris.altoclef.tasks.movement.TimeoutWanderTask(16);
             return unstick;
         }
-        else if (stuckTicks >= 1800) {
+        else if (stuckTicks >= 1200) {
             StringBuilder chain = new StringBuilder();
             for (Task t = this; t != null; t = t.getSub()) chain.append(" > ").append(t).append(" [").append(t.getDebugState()).append(']');
             System.out.println("MAZETEST FURNISH FAIL stuck=" + getDebugState() + " for=90s feet=" + feet.toShortString() + " held=" + mod.getPlayer().getMainHandStack().getItem().getTranslationKey() + " emptySlot=" + mod.getPlayer().getInventory().getEmptySlot() + " chain" + chain);
@@ -140,6 +147,13 @@ public class MazeFurnishTask extends Task {
         }
         // Ostinato: survival kit before cladding. Runs 13-21 furnished naked with no food or sword: spider hunts with
         // seeds in hand, starvation risk on long mines. Order: sword -> food buffer -> full iron armor (equipped).
+        // Ostinato: run39 drowned at t=22.7k gathering barrel underground, then spent ~24 min rebuilding the kit.
+        // Air below 2/3 under water: surfacing outranks every kit/gather step (WorldSurvivalChain waits for 1/2).
+        if (mod.getPlayer().isSubmergedInWater() && mod.getPlayer().getAir() < mod.getPlayer().getMaxAir() * 2 / 3) {
+            setDebugState("Out of water (air " + mod.getPlayer().getAir() + ")");
+            stuckTicks = 0;
+            return new adris.altoclef.tasks.movement.GetOutOfWaterTask();
+        }
         Task kit = kitTask(mod);
         if (kit != null) return kit;        // Gather first, so the bot is not walking out of the sealed room for one more glowstone.
         // Ostinato: gather once; run23 re-gathered cherry_planks x26 every few placed blocks. Regather only when a step runs dry.
@@ -165,10 +179,11 @@ public class MazeFurnishTask extends Task {
                 // Wood grows on the surface: climb back to room level before hunting logs.
                 // Ostinato: run29 spent 14min on "Gathering barrel" cave-pathing at room level (the room is underground): any wood-derived
                 // item needs logs, so compare against the real surface (heightmap), not the room Y.
-                int surfaceY = mod.getWorld().getTopY(net.minecraft.world.Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, feet.getX(), feet.getZ());
-                if (isWoody(need.getKey()) && feet.getY() < surfaceY - 6) {
-                    setDebugState("Surfacing for " + need.getKey());
-                    return new adris.altoclef.tasks.movement.GetToYTask(surfaceY + 1);
+                // Ostinato: run35 yo-yo. MOTION_BLOCKING_NO_LEAVES is the tree canopy, so every
+                // chop looked underground and GetToYTask cancelled the gather. Climb only under
+                // a real ceiling; once open air is reached, stay there unless we fall back into a cave.
+                if (isWoody(need.getKey()) && needsSurface(mod, feet, need.getKey())) {
+                    return surfaceClimb(mod, feet, need.getKey());
                 }
                 setDebugState("Gathering " + need.getKey() + " x" + need.getValue());
                 return TaskCatalogue.getItemTask(item, need.getValue());
@@ -186,13 +201,13 @@ public class MazeFurnishTask extends Task {
         // Ostinato: run32 looped 4min on one ceiling block (builder "Failed to place" from the same spot) toward a FAIL.
         // A LIGHT step stuck 60s is deferred to a second pass (new approach angle); stuck again there, it is skipped.
         for (int pass = 0; pass < 2; pass++) {
-            while (index < plan.steps.size()) {
-                MazeFurnishPlan.Step step = plan.steps.get(index);
+            while (work != null && index < work.size()) {
+                MazeFurnishPlan.Step step = work.get(index);
                 if (!secondPass && deferred.contains(index)) { index++; continue; }
                 Task sub = stepTask(mod, step);
                 if (sub != null) {
                     if (index != stepIdx) { stepIdx = index; stepTicks = 0; }
-                    if (step.kind() == MazeFurnishPlan.Kind.LIGHT && ++stepTicks > 1200) {
+                    if (step.kind() == MazeFurnishPlan.Kind.LIGHT && ++stepTicks > 300) {
                         System.out.println("MAZETEST FURNISH " + (secondPass ? "skip-light " : "defer-light ") + step.x() + " " + step.y() + " " + step.z());
                         if (!secondPass) deferred.add(index);
                         stuckTicks = 0; stuckRecoveries = 0; stepTicks = 0; index++;
@@ -211,25 +226,89 @@ public class MazeFurnishTask extends Task {
     }
 
     private static final Item[] SWORDS = {Items.STONE_SWORD, Items.IRON_SWORD, Items.DIAMOND_SWORD, Items.NETHERITE_SWORD};
+    private static final Item[] PICKS = {Items.STONE_PICKAXE, Items.IRON_PICKAXE, Items.DIAMOND_PICKAXE, Items.NETHERITE_PICKAXE};
     private static final Item[] IRON_ARMOR = {Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS};
     private static final Item[] KEEP = {Items.BREAD, Items.COOKED_BEEF, Items.COOKED_PORKCHOP, Items.COOKED_CHICKEN, Items.COOKED_MUTTON, Items.COOKED_RABBIT, Items.COOKED_COD, Items.COOKED_SALMON, Items.BAKED_POTATO, Items.APPLE, Items.CARROT, Items.WOODEN_PICKAXE, Items.STONE_PICKAXE, Items.IRON_PICKAXE, Items.DIAMOND_PICKAXE, Items.SHIELD}; // Ostinato
-    private String lastKit = "";
+    private String lastKit = ""; private int armorTicks; private boolean armorGaveUp, died; // Ostinato
     private final java.util.Set<Integer> deferred = new java.util.HashSet<>(); // Ostinato
     private boolean secondPass; private int stepIdx = -1, stepTicks; // Ostinato
 
     // Ostinato: the next survival-kit step, or null when the bot is armed, fed and armored.
+    // Run35: score dropped to 17 mid-lighting and CollectFoodTask(40) never returned
+    // (infinite bread craft + a 45min hunt), so lights froze at 72 and container/fill/seal never started.
     private Task kitTask(AltoClef mod) {
+        if (foodCooldown > 0) foodCooldown--;
+        if (lastKit.equals("ready") && !mod.getItemStorage().hasItem(SWORDS)) died = true; // Ostinato: lost the kit = died; skip armor rebuild
+        int food = adris.altoclef.util.helpers.StorageHelper.calculateInventoryFoodScore();
+        // Place phase already has a buffer. Topping up from 17 to 40 is what ate the furnish timeout.
+        int gate = gathered ? 8 : 20;
+        if (food >= gate) { foodTicks = 0; foodGaveUp = false; foodCooldown = 0; }
+        boolean starveRetry = foodGaveUp && food < 6 && foodCooldown == 0;
+        if (starveRetry) foodGaveUp = false;
         String step; Task t;
         if (!mod.getItemStorage().hasItem(SWORDS)) { step = "stone_sword"; t = TaskCatalogue.getItemTask(Items.STONE_SWORD, 1); }
-        else if (adris.altoclef.util.helpers.StorageHelper.calculateInventoryFoodScore() < 20) { step = "food"; t = new adris.altoclef.tasks.resources.CollectFoodTask(40); }
-        else if (!adris.altoclef.util.helpers.StorageHelper.isArmorEquippedAll(IRON_ARMOR)) { step = "iron_armor"; t = new adris.altoclef.tasks.misc.EquipArmorTask(IRON_ARMOR); }
+        // Run36: stone pick broke mid-ceiling. MazeCeilingPlaceTask then sat on "No pickaxe" for 60s per cell (31 defers, lights stuck at 79).
+        else if (!mod.getItemStorage().hasItem(PICKS)) { step = "stone_pickaxe"; t = TaskCatalogue.getItemTask(Items.STONE_PICKAXE, 1); }
+        else if (food < gate && !foodGaveUp) {
+            if (++foodTicks > 1800) {
+                System.out.println("MAZETEST FURNISH skip-food food=" + food);
+                foodGaveUp = true; foodTicks = 0; foodCooldown = 1200; // Ostinato: 5 min -> 1 min
+                step = "ready"; t = null;
+            } else {
+                // Match the gate. CollectFoodTask(40) keeps hunting after the kit would already be satisfied.
+                step = "food"; t = new adris.altoclef.tasks.resources.CollectFoodTask(gate);
+            }
+        }
+        // Ostinato: run39 iron armor blocked lights ~11 min (40 unreachable iron_ore tries) and was rebuilt after a drown.
+        // Armor is optional: only before the place phase, only on the first life, 3 min budget.
+        else if (!armorGaveUp && !gathered && !died && !adris.altoclef.util.helpers.StorageHelper.isArmorEquippedAll(IRON_ARMOR)) {
+            if (++armorTicks > 3600) { System.out.println("MAZETEST FURNISH skip-armor"); armorGaveUp = true; step = "ready"; t = null; }
+            else { step = "iron_armor"; t = new adris.altoclef.tasks.misc.EquipArmorTask(IRON_ARMOR); }
+        }
         else { step = "ready"; t = null; }
         if (!step.equals(lastKit)) {
-            System.out.println("MAZETEST FURNISH kit " + step + " food=" + adris.altoclef.util.helpers.StorageHelper.calculateInventoryFoodScore());
+            System.out.println("MAZETEST FURNISH kit " + step + " food=" + food);
             lastKit = step;
         }
         if (t != null) setDebugState("Kit " + step);
         return t;
+    }
+
+    // Ostinato: true when a wood gather is still under a cave ceiling. A tree canopy is not a ceiling.
+    private boolean needsSurface(AltoClef mod, BlockPos feet, String key) {
+        int surfaceY = mod.getWorld().getTopY(net.minecraft.world.Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, feet.getX(), feet.getZ());
+        if (surfaceY <= 0) return false;
+        int solid = 0;
+        for (int dy = 2; dy <= 6; dy++) {
+            BlockPos p = feet.up(dy);
+            BlockState st = mod.getWorld().getBlockState(p);
+            if (!st.isAir() && !st.getCollisionShape(mod.getWorld(), p).isEmpty()) solid++;
+        }
+        boolean buried = solid >= 3 && feet.getY() < surfaceY - 6;
+        if (!buried) surfacedFor = key;
+        else if (key.equals(surfacedFor) && feet.getY() < surfaceY - 24) surfacedFor = null;
+        return buried && !key.equals(surfacedFor);
+    }
+
+    // Run37 died at y=28: GetToYTask(surfaceY) sat in a sealed pocket until the 90s abort.
+    // Mine the closest ceiling, then step up eight. A full-height goal paths sideways and stalls.
+    private Task surfaceClimb(AltoClef mod, BlockPos feet, String key) {
+        setDebugState("Surfacing for " + key);
+        for (int dy = 2; dy <= 5; dy++) {
+            BlockPos p = feet.up(dy);
+            BlockState st = mod.getWorld().getBlockState(p);
+            if (!st.isAir() && !st.getCollisionShape(mod.getWorld(), p).isEmpty()) {
+                return new DestroyBlockTask(p);
+            }
+        }
+        int surfaceY = mod.getWorld().getTopY(net.minecraft.world.Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, feet.getX(), feet.getZ());
+        int goal = Math.min(Math.max(surfaceY, feet.getY() + 1), feet.getY() + 8);
+        return new adris.altoclef.tasks.movement.GetToYTask(goal);
+    }
+
+    private int surfaceStuckLimit() {
+        String state = getDebugState();
+        return state != null && state.startsWith("Surfacing") ? 6 : 2;
     }
     /** The sub task still needed for this step, or null when the world already matches it. */
     private Task stepTask(AltoClef mod, MazeFurnishPlan.Step step) {
@@ -245,6 +324,9 @@ public class MazeFurnishTask extends Task {
                 // Ostinato: run27/28 stalled 90s+ per floor block: break, fall in the hole, path back, place. Baritone's builder
                 // replaces a wrong block in one pass (breaks it, then places), so only destroy when nothing placeable is held.
                 Block[] have = wanted.stream().filter(b -> mod.getItemStorage().hasItem(b.asItem())).toArray(Block[]::new);
+                // Ostinato: interior ceiling. The cell under it is open, so the builder's side-face search wanders
+                // after it breaks the stone. Click the underside of the block above from the floor.
+                if (have.length > 0 && openBelow(mod, pos) && !thinLight(have)) return new MazeCeilingPlaceTask(pos, have);
                 if (have.length > 0) return new PlaceBlockTask(pos, have);
                 if (have.length == 0) { // Ostinato: ran dry mid-cladding; regather the planned count instead of skipping the block
                     for (Block b : wanted) {
@@ -287,7 +369,20 @@ public class MazeFurnishTask extends Task {
                     }
                 }
                 if (targets.isEmpty()) {
-                    return null;
+                    // Ostinato: paper (sugar cane) is often skipped. Store a small stack of something already
+                    // gathered that later steps do not still need, so the barrel is not empty. If nothing is spare,
+                    // mine cobble before this step is allowed to count as done.
+                    ItemTarget fallback = fallbackLoot(mod);
+                    if (fallback == null) {
+                        int keep = stillNeeded(mod, Items.COBBLESTONE);
+                        setDebugState("Spare cobble for barrel");
+                        return TaskCatalogue.getItemTask(Items.COBBLESTONE, Math.max(keep + 8, 8));
+                    }
+                    if (!loggedFill) {
+                        System.out.println("MAZETEST FURNISH fill-fallback " + net.minecraft.registry.Registries.ITEM.getId(fallback.getMatches()[0]).getPath() + " x" + fallback.getTargetCount());
+                        loggedFill = true;
+                    }
+                    targets.add(fallback);
                 }
                 // one store per container; the step advances when it finishes, and Ostinato's ledger stops refills
                 fill = new StoreInContainerTask(pos, false, targets.toArray(new ItemTarget[0]));
@@ -309,9 +404,53 @@ public class MazeFurnishTask extends Task {
         return out;
     }
 
+    // Ostinato: torches and lanterns cannot be clicked onto a ceiling underside. Full blocks can.
+    private static boolean thinLight(Block[] have) {
+        for (Block b : have) {
+            String p = net.minecraft.registry.Registries.BLOCK.getId(b).getPath();
+            if (p.contains("torch") || p.contains("lantern") || p.contains("candle") || p.equals("end_rod")) return true;
+        }
+        return false;
+    }
+
+    // Ostinato: true when the cell under the place target is open room air (interior ceiling).
+    private static boolean openBelow(AltoClef mod, BlockPos pos) {
+        BlockPos below = pos.down();
+        BlockState s = mod.getWorld().getBlockState(below);
+        return s.isAir() || s.getCollisionShape(mod.getWorld(), below).isEmpty();
+    }
+
+    // Ostinato: blocks of this item that are still the wrong block in the world.
+    private int stillNeeded(AltoClef mod, Item item) {
+        String id = net.minecraft.registry.Registries.ITEM.getId(item).getPath();
+        if (work == null || !materials.containsKey(id)) return 0;
+        int need = 0;
+        for (MazeFurnishPlan.Step s : work) {
+            if (s.kind() == MazeFurnishPlan.Kind.FILL) continue;
+            if (!id.equals(MazeFurnishPlan.pick(s.blockIds(), MazeFurnishTask::obtainable))) continue;
+            BlockState st = mod.getWorld().getBlockState(new BlockPos(s.x(), s.y(), s.z()));
+            if (!blocks(s.blockIds()).contains(st.getBlock())) need++;
+        }
+        return need;
+    }
+
+    // Ostinato: one natural stack for the barrel when the rolled loot was never gathered.
+    private ItemTarget fallbackLoot(AltoClef mod) {
+        Item[] junk = {Items.STICK, Items.WHEAT_SEEDS, Items.BEETROOT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS,
+                Items.OAK_SAPLING, Items.SPRUCE_SAPLING, Items.BIRCH_SAPLING,
+                Items.ROTTEN_FLESH, Items.BONE, Items.STRING, Items.FEATHER, Items.ARROW, Items.WHEAT, Items.APPLE,
+                Items.COBBLESTONE, Items.DIRT, Items.OAK_PLANKS, Items.POLISHED_DIORITE};
+        for (Item it : junk) {
+            int have = mod.getItemStorage().getItemCount(it);
+            int keep = stillNeeded(mod, it);
+            if (have > keep) return new ItemTarget(it, Math.min(8, have - keep));
+        }
+        return null;
+    }
+
     @Override
     public boolean isFinished() {
-        return materials != null && index >= plan.steps.size();
+        return materials != null && work != null && index >= work.size();
     }
 
     @Override

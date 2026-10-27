@@ -287,7 +287,7 @@ public class MineAndCollectTask extends ResourceTask {
             if (miningPos != null && !progressChecker.check(mod)) {
                 mod.getClientBaritone().getPathingBehavior().forceCancel();
                 Debug.logMessage("Failed to mine block. Suggesting it may be unreachable.");
-                mod.getBlockScanner().requestBlockUnreachable(miningPos, 2);
+                mod.getBlockScanner().requestBlockUnreachable(miningPos, 1); // Ostinato: 2 -> 1 (fail twice, move on)
                 blacklist.add(miningPos);
                 miningPos = null;
                 progressChecker.reset();

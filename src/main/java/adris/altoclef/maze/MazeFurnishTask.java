@@ -418,6 +418,10 @@ public class MazeFurnishTask extends Task {
             case LIGHT:
             case CONTAINER: {
                 List<Block> wanted = blocks(step.blockIds());
+                // Ostinato: run48. The pooled gather brings back whatever planks it finds (oak from 300 blocks out), but
+                // this step only accepted the plan's cherry_planks: have=[] -> "regather any_planks x105 for cherry_planks"
+                // -> gather loop saw 105 held planks, satisfied -> step again, forever. A wood cladding cell takes any planks.
+                if (step.kind() == MazeFurnishPlan.Kind.LIGHT && woodCell(step)) wanted = withAllPlanks(wanted);
                 if (wanted.isEmpty() || wanted.contains(state.getBlock())) {
                     return null;
                 }
@@ -445,6 +449,8 @@ public class MazeFurnishTask extends Task {
                         if (isWoodCladding(id)) {
                             int pooled = plankCladdingMissing(mod);
                             if (pooled <= 0) continue;
+                            // Ostinato: run48. Held planks already cover the wrong cells; never re-gather (that loop was the stall).
+                            if (heldPlanks(mod) >= pooled) continue;
                             if (gathered) System.out.println("MAZETEST FURNISH regather any_planks x" + pooled + " for " + id);
                             gathered = false;
                             return new adris.altoclef.tasks.resources.CollectPlanksTask(pooled);
@@ -616,9 +622,24 @@ public class MazeFurnishTask extends Task {
             String pick = MazeFurnishPlan.pick(s.blockIds(), MazeFurnishTask::obtainable);
             if (pick == null || !pick.endsWith("_planks")) continue;
             String cur = net.minecraft.registry.Registries.BLOCK.getId(mod.getWorld().getBlockState(new BlockPos(s.x(), s.y(), s.z())).getBlock()).getPath();
-            if (!s.blockIds().contains(cur)) n++;
+            if (!s.blockIds().contains(cur) && !cur.endsWith("_planks")) n++; // Ostinato: run48. Any wood clads a wood cell
         }
         return n;
+    }
+
+    // Ostinato: run48. A LIGHT step whose obtainable pick is a plank: wood cladding, any wood satisfies it.
+    private static boolean woodCell(MazeFurnishPlan.Step s) {
+        String pick = MazeFurnishPlan.pick(s.blockIds(), MazeFurnishTask::obtainable);
+        return pick != null && pick.endsWith("_planks");
+    }
+
+    private static List<Block> withAllPlanks(List<Block> wanted) {
+        List<Block> out = new ArrayList<>(wanted);
+        for (Item i : adris.altoclef.util.helpers.ItemHelper.PLANKS) {
+            Block b = Block.getBlockFromItem(i);
+            if (b != null && !out.contains(b)) out.add(b);
+        }
+        return out;
     }
 
     private static int heldPlanks(AltoClef mod) {

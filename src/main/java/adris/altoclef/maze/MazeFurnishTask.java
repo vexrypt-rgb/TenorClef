@@ -188,9 +188,13 @@ public class MazeFurnishTask extends Task {
             if (item != null && mod.getItemStorage().getItemCount(item) < need.getValue() && TaskCatalogue.taskExists(item)) {
                 // Ostinato: loot-only items (string, bowls) are optional; a fill stores whatever is held. Cap each at 3 min
                 // so a spider hunt or cobweb search never blocks the cladding (run22: string x6 ran 5+ min with 0 webs).
-                if (lootOnly(need.getKey())) {
+                // Ostinato: run41 yo-yoed 14+ min between "Gathering barrel" and "Surfacing for barrel" in a cobweb mineshaft
+                // (y27-40, light 0/133). Non-cladding woody items (barrel/chest/bowl) get a 6 min budget, surfacing included;
+                // past it the item is skipped so lights/seal start and the CONTAINER step defers/skips instead.
+                boolean woodyExtra = isWoody(need.getKey()) && !isCladding(need.getKey());
+                if (lootOnly(need.getKey()) || woodyExtra) {
                     if (!need.getKey().equals(gatherKey)) { gatherKey = need.getKey(); gatherTicks = 0; }
-                    if (++gatherTicks > 3600) {
+                    if (++gatherTicks > (woodyExtra && !lootOnly(need.getKey()) ? 7200 : 3600)) {
                         System.out.println("MAZETEST FURNISH skip-loot " + need.getKey() + " have=" + mod.getItemStorage().getItemCount(item) + "/" + need.getValue());
                         skipped.add(need.getKey());
                         continue;

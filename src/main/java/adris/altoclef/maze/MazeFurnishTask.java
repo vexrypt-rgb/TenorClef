@@ -776,7 +776,7 @@ public class MazeFurnishTask extends Task {
             if (s.kind() == MazeFurnishPlan.Kind.FILL || !s.blockIds().contains(id)) continue;
             BlockPos p = new BlockPos(s.x(), s.y(), s.z());
             String cur = net.minecraft.registry.Registries.BLOCK.getId(mod.getWorld().getBlockState(p).getBlock()).getPath();
-            if (s.blockIds().contains(cur)) { mod.getBlockScanner().requestBlockUnreachable(p, 0); n++; }
+            if (s.blockIds().contains(cur)) { if (!mod.getBlockScanner().isUnreachable(p)) mod.getBlockScanner().requestBlockUnreachable(p, 0); n++; } // Ostinato: run57 skip already-hidden cells (was re-marked every tick -> HARD-CAP spam)
         }
         if (n > 0 && hiddenLogged.add(id)) System.out.println("MAZETEST FURNISH hide-cladding " + id + " cells=" + n);
     }
@@ -816,7 +816,7 @@ public class MazeFurnishTask extends Task {
     // Ostinato: run50. Kit gathers (stone pick, spare pick) must not take cobble from the room or its seal shaft.
     private void hideAllPlaced(AltoClef mod) {
         int n = 0;
-        for (BlockPos p : plannedCells) if (isSolidCell(p)) { mod.getBlockScanner().requestBlockUnreachable(p, 0); n++; }
+        for (BlockPos p : plannedCells) if (isSolidCell(p)) { if (!mod.getBlockScanner().isUnreachable(p)) mod.getBlockScanner().requestBlockUnreachable(p, 0); n++; } // Ostinato: run57 skip already-hidden cells
         if (n > 0 && hiddenLogged.add("*kit")) System.out.println("MAZETEST FURNISH hide-placed kit cells=" + n);
     }
 

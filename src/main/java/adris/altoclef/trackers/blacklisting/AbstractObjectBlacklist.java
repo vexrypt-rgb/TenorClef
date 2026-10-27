@@ -16,6 +16,7 @@ import java.util.HashMap;
 public abstract class AbstractObjectBlacklist<T> {
 
     private final HashMap<T, BlacklistEntry> entries = new HashMap<>();
+    private int hardCapCount = 0; // Ostinato: run57
 
     public void blackListItem(AltoClef mod, T item, int numberOfFailuresAllowed) {
         if (!entries.containsKey(item)) {
@@ -28,6 +29,8 @@ public abstract class AbstractObjectBlacklist<T> {
             entries.put(item, entry);
         }
         BlacklistEntry entry = entries.get(item);
+        // Ostinato: run57. Already hard-capped: stay unreachable, do not count or re-log (19k HARD-CAP lines, 42 MB log).
+        if (entry.hardCapped) return;
         entry.totalAttempts++;
         double newDistance = getPos(item).squaredDistanceTo(mod.getPlayer().getPos());
         MiningRequirement newTool = StorageHelper.getCurrentMiningRequirement();
@@ -36,8 +39,10 @@ public abstract class AbstractObjectBlacklist<T> {
         if (entry.totalAttempts > hardCap) {
             entry.numberOfFailures = numberOfFailuresAllowed + 1;
             entry.numberOfFailuresAllowed = numberOfFailuresAllowed;
+            entry.hardCapped = true; // Ostinato: run57 log once per pos
+            hardCapCount++;
             Debug.logMessage("Blacklist HARD-CAP: " + item.toString()
-                    + " after " + entry.totalAttempts + " attempts (allowed=" + numberOfFailuresAllowed + ")");
+                    + " after " + entry.totalAttempts + " attempts (allowed=" + numberOfFailuresAllowed + ") total-capped=" + hardCapCount);
             return;
         }
         // For distance, add a slight threshold so it doesn't reset EVERY time we move a tiny bit closer.
@@ -68,6 +73,7 @@ public abstract class AbstractObjectBlacklist<T> {
 
     public void clear() {
         entries.clear();
+        hardCapCount = 0; // Ostinato: run57
     }
 
     // Key: BlockPos
@@ -77,5 +83,6 @@ public abstract class AbstractObjectBlacklist<T> {
         public int totalAttempts;
         public double bestDistanceSq;
         public MiningRequirement bestTool;
+        public boolean hardCapped; // Ostinato: run57
     }
 }

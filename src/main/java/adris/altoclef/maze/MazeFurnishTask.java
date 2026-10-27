@@ -207,7 +207,9 @@ public class MazeFurnishTask extends Task {
                 Task sub = stepTask(mod, step);
                 if (sub != null) {
                     if (index != stepIdx) { stepIdx = index; stepTicks = 0; }
-                    if (step.kind() == MazeFurnishPlan.Kind.LIGHT && ++stepTicks > 300) {
+                    // Ostinato: only place attempts count toward the 15s defer; a mid-cladding regather used to defer every light.
+                    boolean placing = sub instanceof PlaceBlockTask || sub instanceof MazeCeilingPlaceTask;
+                    if (step.kind() == MazeFurnishPlan.Kind.LIGHT && placing && ++stepTicks > 300) {
                         System.out.println("MAZETEST FURNISH " + (secondPass ? "skip-light " : "defer-light ") + step.x() + " " + step.y() + " " + step.z());
                         if (!secondPass) deferred.add(index);
                         stuckTicks = 0; stuckRecoveries = 0; stepTicks = 0; index++;
@@ -246,7 +248,14 @@ public class MazeFurnishTask extends Task {
         boolean starveRetry = foodGaveUp && food < 6 && foodCooldown == 0;
         if (starveRetry) foodGaveUp = false;
         String step; Task t;
-        if (!mod.getItemStorage().hasItem(SWORDS)) { step = "stone_sword"; t = TaskCatalogue.getItemTask(Items.STONE_SWORD, 1); }
+        // Run39: the harness pick is enough to mine. Forcing a stone sword first sent MineAndCollect
+        // at a log 39 blocks above the room (-102,112,55 from y=73) and the 90s abort closed the client.
+        boolean armed = mod.getItemStorage().hasItem(SWORDS) || mod.getItemStorage().hasItem(PICKS);
+        if (!armed) {
+            BlockPos feetNow = mod.getPlayer().getBlockPos();
+            if (needsSurface(mod, feetNow, "stick")) return surfaceClimb(mod, feetNow, "stick");
+            step = "stone_sword"; t = TaskCatalogue.getItemTask(Items.STONE_SWORD, 1);
+        }
         // Run36: stone pick broke mid-ceiling. MazeCeilingPlaceTask then sat on "No pickaxe" for 60s per cell (31 defers, lights stuck at 79).
         else if (!mod.getItemStorage().hasItem(PICKS)) { step = "stone_pickaxe"; t = TaskCatalogue.getItemTask(Items.STONE_PICKAXE, 1); }
         else if (food < gate && !foodGaveUp) {
@@ -319,6 +328,11 @@ public class MazeFurnishTask extends Task {
             case CONTAINER: {
                 List<Block> wanted = blocks(step.blockIds());
                 if (wanted.isEmpty() || wanted.contains(state.getBlock())) {
+                    return null;
+                }
+                // Ostinato: breaking a wall/ceiling cell next to lava pours it onto the bot standing under it. Leave it.
+                if (step.kind() == MazeFurnishPlan.Kind.LIGHT && !state.isAir() && fluidNext(mod, pos)) {
+                    if (skippedFluid.add(pos)) System.out.println("MAZETEST FURNISH skip-fluid " + pos.toShortString());
                     return null;
                 }
                 // Ostinato: run27/28 stalled 90s+ per floor block: break, fall in the hole, path back, place. Baritone's builder
@@ -409,6 +423,18 @@ public class MazeFurnishTask extends Task {
         for (Block b : have) {
             String p = net.minecraft.registry.Registries.BLOCK.getId(b).getPath();
             if (p.contains("torch") || p.contains("lantern") || p.contains("candle") || p.equals("end_rod")) return true;
+        }
+        return false;
+    }
+
+    private final java.util.Set<BlockPos> skippedFluid = new java.util.HashSet<>(); // Ostinato
+
+    // Ostinato: true when lava touches this cell from above or a side.
+    private static boolean fluidNext(AltoClef mod, BlockPos pos) {
+        for (net.minecraft.util.math.Direction d : net.minecraft.util.math.Direction.values()) {
+            if (d == net.minecraft.util.math.Direction.DOWN) continue;
+            net.minecraft.fluid.Fluid fluid = mod.getWorld().getBlockState(pos.offset(d)).getFluidState().getFluid();
+            if (fluid == net.minecraft.fluid.Fluids.LAVA || fluid == net.minecraft.fluid.Fluids.FLOWING_LAVA) return true;
         }
         return false;
     }

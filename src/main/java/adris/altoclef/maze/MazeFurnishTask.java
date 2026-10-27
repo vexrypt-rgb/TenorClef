@@ -227,6 +227,14 @@ public class MazeFurnishTask extends Task {
             // own cladding: light went 97 -> 89 in two minutes. Ask only for cells that are still wrong, and hide the
             // placed cells from the scanner before mining.
             if (item != null && !lootOnly(need.getKey()) && stillMissing(mod, need.getKey()) <= 0) continue;
+            // Ostinato: run60. Barrel FILL contents listed string, so the loot gather ran CollectStringTask and the bot left
+            // the room on a mineshaft cobweb expedition ("Gathering string x8"). The profile removed the string hunt from
+            // furnish: string is fill-only loot, so the fill stores what is already held and fallback junk covers the rest.
+            if (item != null && lootOnly(need.getKey()) && NO_HUNT_LOOT.contains(need.getKey())) {
+                System.out.println("MAZETEST FURNISH skip-loot " + need.getKey() + " why=no-hunt have=" + mod.getItemStorage().getItemCount(item) + "/" + need.getValue());
+                skipped.add(need.getKey());
+                continue;
+            }
             if (item != null && mod.getItemStorage().getItemCount(item) < need.getValue() && TaskCatalogue.obtainableNow(item)) {
                 // Ostinato: loot-only items (string, bowls) are optional; a fill stores whatever is held. Cap each at 3 min
                 // so a spider hunt or cobweb search never blocks the cladding (run22: string x6 ran 5+ min with 0 webs).
@@ -328,6 +336,8 @@ public class MazeFurnishTask extends Task {
     private static final Item[] PICKS = {Items.STONE_PICKAXE, Items.IRON_PICKAXE, Items.DIAMOND_PICKAXE, Items.NETHERITE_PICKAXE};
     private static final Item[] IRON_ARMOR = {Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS};
     private static final Item[] KEEP = {Items.BREAD, Items.COOKED_BEEF, Items.COOKED_PORKCHOP, Items.COOKED_CHICKEN, Items.COOKED_MUTTON, Items.COOKED_RABBIT, Items.COOKED_COD, Items.COOKED_SALMON, Items.BAKED_POTATO, Items.APPLE, Items.CARROT, Items.WOODEN_PICKAXE, Items.STONE_PICKAXE, Items.IRON_PICKAXE, Items.DIAMOND_PICKAXE, Items.SHIELD}; // Ostinato
+    // Ostinato: run60. Fill-only loot that needs a long hunt (cobwebs/spiders). Used from inventory only, never gathered.
+    private static final java.util.Set<String> NO_HUNT_LOOT = java.util.Set.of("string");
     private String lastKit = ""; private int armorTicks; private boolean armorGaveUp, died; // Ostinato
     private final java.util.Set<Integer> deferred = new java.util.HashSet<>(); // Ostinato
     private boolean secondPass; private int stepIdx = -1, stepTicks; // Ostinato

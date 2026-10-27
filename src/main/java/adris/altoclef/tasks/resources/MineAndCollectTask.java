@@ -157,9 +157,12 @@ public class MineAndCollectTask extends ResourceTask {
         if (!hasWood && !mod.getItemStorage().hasItem(Items.COBBLESTONE, Items.COBBLED_DEEPSLATE, Items.BLACKSTONE)) {
             want = Items.WOODEN_PICKAXE;
         }
-        Debug.logMessage("MAZETEST pick-refresh: held picks saved for " + _blocksToMine[0].getTranslationKey() + ", obtaining " + want.getTranslationKey());
+        // Ostinato: run60 pick-refresh spam. Log once per 30s; stdout only, not chat.
+        long nowPr = System.currentTimeMillis();
+        if (nowPr - lastPickRefreshLogMs > 30000) { lastPickRefreshLogMs = nowPr; System.out.println("MAZETEST pick-refresh: held picks saved for " + _blocksToMine[0].getTranslationKey() + ", obtaining " + want.getTranslationKey()); }
         return adris.altoclef.TaskCatalogue.getItemTask(want, 1);
     }
+    private static String lastEquipLog = ""; private static long lastEquipLogMs, lastPickRefreshLogMs; // Ostinato: log throttle
     private void makeSureToolIsEquipped(AltoClef mod) {
         if (!_cursorStackTimer.elapsed() || mod.getFoodChain().needsToEat()) {
             return;
@@ -181,8 +184,14 @@ public class MineAndCollectTask extends ResourceTask {
         if (best.isPresent()) {
             ItemStack bestStack = StorageHelper.getItemStackInSlot(best.get());
             if (!bestStack.isEmpty() && bestStack.getItem() != equipped.getItem()) {
-                Debug.logMessage("MineAndCollect: equip " + bestStack.getItem().getTranslationKey()
-                        + " for " + mining.getBlock().getTranslationKey());
+                // Ostinato: run60 logged ~177 "equip stone_sword for cobweb" lines in 30s. Log a tool/block pair once per 30s.
+                String equipKey = bestStack.getItem().getTranslationKey() + "|" + mining.getBlock().getTranslationKey();
+                long now = System.currentTimeMillis();
+                if (!equipKey.equals(lastEquipLog) || now - lastEquipLogMs > 30000) {
+                    lastEquipLog = equipKey; lastEquipLogMs = now;
+                    System.out.println("MAZETEST MineAndCollect: equip " + bestStack.getItem().getTranslationKey()
+                            + " for " + mining.getBlock().getTranslationKey());
+                }
                 mod.getSlotHandler().forceEquipItem(bestStack.getItem());
                 return;
             }

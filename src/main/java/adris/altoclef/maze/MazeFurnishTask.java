@@ -101,6 +101,11 @@ public class MazeFurnishTask extends Task {
         // cladding being gathered and the mine loop stalled. Protect every planned material for the life of the task.
         AltoClef.getInstance().getBehaviour().push();
         AltoClef.getInstance().getBehaviour().addProtectedItems(SWORDS); // Ostinato: kit is never garbage
+        // Ostinato: run50 seal yo-yo. The stone pick broke mid-lighting; the stone_pickaxe kit then mined cobble out of the
+        // open seal shaft at -22,88..92,137 (pillar up = place into seal cells, mine them back), seal 0/5 <-> 5/5 for 9 min.
+        // A planned cell that holds a solid block is never broken by any subtask (kit, gather, pathing). No step destroys
+        // its own cells, so this only stops self-cannibalising; seals stay sealed once placed.
+        AltoClef.getInstance().getBehaviour().avoidBlockBreaking(p -> plannedCells.contains(p) && isSolidCell(p));
         AltoClef.getInstance().getBehaviour().addProtectedItems(IRON_ARMOR);
         AltoClef.getInstance().getBehaviour().addProtectedItems(KEEP); // Ostinato: food and tools are never garbage
         // Ostinato: run16 tug-of-war. Baritone autoTool and TenorClef's equip kept swapping tools on the same block, so it
@@ -332,7 +337,10 @@ public class MazeFurnishTask extends Task {
             step = "stone_sword"; t = TaskCatalogue.getItemTask(Items.STONE_SWORD, 1);
         }
         // Run36: stone pick broke mid-ceiling. MazeCeilingPlaceTask then sat on "No pickaxe" for 60s per cell (31 defers, lights stuck at 79).
-        else if (!mod.getItemStorage().hasItem(PICKS)) { step = "stone_pickaxe"; t = TaskCatalogue.getItemTask(Items.STONE_PICKAXE, 1); }
+        else if (!mod.getItemStorage().hasItem(PICKS)) { step = "stone_pickaxe"; hideAllPlaced(mod); t = TaskCatalogue.getItemTask(Items.STONE_PICKAXE, 1); }
+        // Ostinato: run50. Replace a worn pick while it can still mine stone, instead of losing it mid-shaft and rebuilding
+        // the kit from a wooden pick inside the seal column. One spare when the only pick is under 12 uses.
+        else if (pickWorn(mod)) { step = "spare_pickaxe"; hideAllPlaced(mod); t = TaskCatalogue.getItemTask(Items.STONE_PICKAXE, mod.getItemStorage().getItemCount(Items.STONE_PICKAXE) + 1); }
         else if (food < gate && !foodGaveUp) {
             // Ostinato: run40 audit. Under 6 the bot starves; give the hunt 4 min and retry after 20s instead of 1.5/1 min.
             if (++foodTicks > (food < 6 ? 4800 : 1800)) {
@@ -670,6 +678,38 @@ public class MazeFurnishTask extends Task {
             if (s.blockIds().contains(cur)) { mod.getBlockScanner().requestBlockUnreachable(p, 0); n++; }
         }
         if (n > 0 && hiddenLogged.add(id)) System.out.println("MAZETEST FURNISH hide-cladding " + id + " cells=" + n);
+    }
+
+    // Ostinato: run50. Solid (non-air, non-fluid) block in a planned cell, read from the integrated server world when
+    // there is one so the avoider and the seal probe agree (client chunk lag showed placed seals as air).
+    private boolean isSolidCell(BlockPos p) {
+        net.minecraft.client.MinecraftClient mc = net.minecraft.client.MinecraftClient.getInstance();
+        net.minecraft.world.World w = mc.world;
+        if (mc.getServer() != null && mc.world != null) {
+            net.minecraft.server.world.ServerWorld sw = mc.getServer().getWorld(mc.world.getRegistryKey());
+            if (sw != null) w = sw;
+        }
+        if (w == null) return false;
+        BlockState st = w.getBlockState(p);
+        return !st.isAir() && st.getFluidState().isEmpty();
+    }
+
+    // Ostinato: run50. Kit gathers (stone pick, spare pick) must not take cobble from the room or its seal shaft.
+    private void hideAllPlaced(AltoClef mod) {
+        int n = 0;
+        for (BlockPos p : plannedCells) if (isSolidCell(p)) { mod.getBlockScanner().requestBlockUnreachable(p, 0); n++; }
+        if (n > 0 && hiddenLogged.add("*kit")) System.out.println("MAZETEST FURNISH hide-placed kit cells=" + n);
+    }
+
+    // Ostinato: run50. True when every held pick is stone-or-better with under 12 uses left (no spare).
+    private boolean pickWorn(AltoClef mod) {
+        int good = 0; boolean worn = false;
+        for (int i = 0; i < mod.getPlayer().getInventory().size(); i++) {
+            net.minecraft.item.ItemStack st = mod.getPlayer().getInventory().getStack(i);
+            if (st.isEmpty() || !java.util.Arrays.asList(PICKS).contains(st.getItem())) continue;
+            if (st.getMaxDamage() - st.getDamage() < 12) worn = true; else good++;
+        }
+        return worn && good == 0;
     }
 
     private final java.util.Set<String> hiddenLogged = new java.util.HashSet<>(); // Ostinato

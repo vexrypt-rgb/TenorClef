@@ -260,11 +260,9 @@ public class MazeFurnishTask extends Task {
                 // Ostinato: run55. stick x13 asked hasWoodFor(13) = 104 planks, so the held cherry planks still read "no wood" and the
                 // bot yo-yoed "Surfacing for stick" y57-79 for 9+ min. Wood need is now per recipe (sticks: 2 planks per 4), and a
                 // surface climb that cannot get out (6000 ticks) falls back to the normal gather/craft from where the bot stands.
-                if (isWoody(need.getKey()) && !hasWoodFor(mod, need.getKey(), need.getValue()) && !surfaceGaveUp.contains(need.getKey()) && needsSurface(mod, feet, need.getKey())) {
-                    if (++surfaceTicks > 6000) {
-                        System.out.println("MAZETEST FURNISH surface-giveup " + need.getKey() + " gather-in-place feet=" + feet.toShortString());
-                        surfaceGaveUp.add(need.getKey()); surfaceTicks = 0;
-                    } else return surfaceClimb(mod, feet, need.getKey());
+                if (isWoody(need.getKey()) && !hasWoodFor(mod, need.getKey(), need.getValue()) && needsSurface(mod, feet, need.getKey())) {
+                    Task climb = surfaceOrGiveUp(mod, feet, need.getKey(), need.getValue()); // Ostinato: run56 shared, persistent budget
+                    if (climb != null) return climb;
                 }
                 if (!lootOnly(need.getKey())) { Task home = returnHome(mod, feet, need.getKey()); if (home != null) return home; } // Ostinato: run52
                 setDebugState("Gathering " + need.getKey() + " x" + need.getValue());
@@ -361,7 +359,13 @@ public class MazeFurnishTask extends Task {
             BlockPos feetNow = mod.getPlayer().getBlockPos();
             // Ostinato: run53. The pick broke during the roof pass with 100+ cherry planks held; this climbed out above the
             // room roof "Surfacing for stick" and pathed ~300 blocks. Sticks come from held planks; surface only without wood.
-            if (!hasWoodFor(mod, "stick", 1) && !surfaceGaveUp.contains("stick") && needsSurface(mod, feetNow, "stick")) return surfaceClimb(mod, feetNow, "stick");
+            // Ostinato: run56. This kit path surfaced with no budget at all (the run55 6000-tick give-up only lived in the gather
+            // loop), so an unarmed bot yo-yoed "Surfacing for stick" y85-93 from t=100 to t=12000+ with no surface-giveup line.
+            // A held stick already covers the sword/pick; otherwise the same persistent give-up applies.
+            if (mod.getItemStorage().getItemCount(Items.STICK) < 1 && !hasWoodFor(mod, "stick", 1) && needsSurface(mod, feetNow, "stick")) {
+                Task climb = surfaceOrGiveUp(mod, feetNow, "stick", 1);
+                if (climb != null) return climb;
+            }
             step = "stone_sword"; t = TaskCatalogue.getItemTask(Items.STONE_SWORD, 1);
         }
         // Run36: stone pick broke mid-ceiling. MazeCeilingPlaceTask then sat on "No pickaxe" for 60s per cell (31 defers, lights stuck at 79).
@@ -474,7 +478,31 @@ public class MazeFurnishTask extends Task {
         return null;
     }
 
-    private final java.util.Set<String> surfaceGaveUp = new java.util.HashSet<>(); private int surfaceTicks; // Ostinato: run55
+    // Ostinato: run56. The surface budget is keyed by room + item and kept for the whole client run (static), so neither a
+    // stuck-recover wander, a stall reset, nor the bridge re-creating this task can restart it. Ticks only count while a
+    // climb is actually being returned; once spent, that item is gathered/crafted from where the bot stands.
+    private static final java.util.Map<String, Integer> SURFACE_TICKS = new java.util.HashMap<>();
+    private static final java.util.Set<String> SURFACE_GAVE_UP = new java.util.HashSet<>();
+    private static final int SURFACE_BUDGET = 6000;
+    private String surfaceKey(String key) { return plan.summary + "|" + key; }
+    private Task surfaceOrGiveUp(AltoClef mod, BlockPos feet, String key, int count) {
+        String k = surfaceKey(key);
+        if (SURFACE_GAVE_UP.contains(k)) return null;
+        int t = SURFACE_TICKS.merge(k, 1, Integer::sum);
+        if (t == 1 || t % 1200 == 0) System.out.println("MAZETEST FURNISH surface-for " + key + " x" + count + " ticks=" + t + "/" + SURFACE_BUDGET + " " + woodInv(mod) + " feet=" + feet.toShortString());
+        if (t > SURFACE_BUDGET) {
+            System.out.println("MAZETEST FURNISH surface-giveup " + key + " gather-in-place ticks=" + t + " " + woodInv(mod) + " feet=" + feet.toShortString());
+            SURFACE_GAVE_UP.add(k);
+            return null;
+        }
+        return surfaceClimb(mod, feet, key);
+    }
+    private static String woodInv(AltoClef mod) {
+        int planks = 0, logs = 0;
+        for (Item i : adris.altoclef.util.helpers.ItemHelper.PLANKS) planks += mod.getItemStorage().getItemCount(i);
+        for (Item i : adris.altoclef.util.helpers.ItemHelper.LOG) logs += mod.getItemStorage().getItemCount(i);
+        return "inv planks=" + planks + " logs=" + logs + " sticks=" + mod.getItemStorage().getItemCount(Items.STICK);
+    }
     // Ostinato: run55. Planks a woody item needs: sticks are 4 per 2 planks; other crafts keep the 8-per-item budget.
     private static boolean hasWoodFor(AltoClef mod, String key, int count) {
         int need = key.equals("stick") ? 2 * ((Math.max(1, count) + 3) / 4) : 8 * Math.max(1, count);

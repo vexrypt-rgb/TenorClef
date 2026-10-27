@@ -116,6 +116,9 @@ public class MazeFurnishTask extends Task {
         else if (++stuckTicks >= 600 && stuckRecoveries < surfaceStuckLimit()) { // Ostinato: 90s -> 30s (user: faster) // Ostinato: two recoveries before FAIL; surfacing gets more (run37)
             // Ostinato: first 90s stall: blacklist the block the chain is fighting, wander 30s, retry. Second stall FAILs.
             for (Task t = this; t != null; t = t.getSub()) if (t instanceof DestroyBlockTask d) { mod.getBlockScanner().requestBlockUnreachable(d.getPos(), 0); }
+            // Ostinato: run40 audit. A stuck CONTAINER/FILL/SEAL cell burned both recoveries then FAILed the run. Blacklist the
+            // cell itself: defer it to the second pass (skip it there) instead of wandering back to the same face.
+            if (inStep()) { deferStep("stuck"); stuckRecoveries = 0; stuckTicks = 0; stuckAnchor = feet; return null; }
             System.out.println("MAZETEST FURNISH stuck-recover stuck=" + getDebugState() + " feet=" + feet.toShortString());
             stuckRecoveries++; stuckTicks = 0; stuckAnchor = feet;
             unstickTicks = 0; unstick = new adris.altoclef.tasks.movement.TimeoutWanderTask(16);
@@ -149,10 +152,28 @@ public class MazeFurnishTask extends Task {
         // seeds in hand, starvation risk on long mines. Order: sword -> food buffer -> full iron armor (equipped).
         // Ostinato: run39 drowned at t=22.7k gathering barrel underground, then spent ~24 min rebuilding the kit.
         // Air below 2/3 under water: surfacing outranks every kit/gather step (WorldSurvivalChain waits for 1/2).
-        if (mod.getPlayer().isSubmergedInWater() && mod.getPlayer().getAir() < mod.getPlayer().getMaxAir() * 2 / 3) {
-            setDebugState("Out of water (air " + mod.getPlayer().getAir() + ")");
-            stuckTicks = 0;
-            return new adris.altoclef.tasks.movement.GetOutOfWaterTask();
+        // Ostinato: run40 audit. The escape let go once the head cleared and the gather pathed straight back under. Latch it
+        // until feet are dry and grounded. Hold jump after 5s still submerged (flooded enclosed pocket, no path out). 60s cap.
+        if (!escapingWater && mod.getPlayer().isSubmergedInWater() && mod.getPlayer().getAir() < mod.getPlayer().getMaxAir() * 2 / 3) {
+            escapingWater = true; escapeTicks = 0; escapeTask = null;
+            System.out.println("MAZETEST FURNISH water-escape air=" + mod.getPlayer().getAir() + " feet=" + feet.toShortString());
+        }
+        if (escapingWater) {
+            boolean dry = !mod.getPlayer().isTouchingWater() && mod.getPlayer().isOnGround();
+            if (dry || ++escapeTicks > 1200) {
+                System.out.println("MAZETEST FURNISH water-escape " + (dry ? "done" : "timeout") + " ticks=" + escapeTicks);
+                escapingWater = false; escapeTask = null;
+                if (jumpHeld) { mod.getInputControls().release(baritone.api.utils.input.Input.JUMP); jumpHeld = false; }
+            } else {
+                setDebugState("Out of water (air " + mod.getPlayer().getAir() + ")");
+                stuckTicks = 0;
+                if (mod.getPlayer().isSubmergedInWater() && escapeTicks > 100) { mod.getInputControls().hold(baritone.api.utils.input.Input.JUMP); jumpHeld = true; }
+                else if (jumpHeld) { mod.getInputControls().release(baritone.api.utils.input.Input.JUMP); jumpHeld = false; }
+                if (escapeTask == null) escapeTask = new adris.altoclef.tasks.movement.GetOutOfWaterTask();
+                // Head is clear but feet are still in water: swim to shore instead of idling at the surface.
+                else if (escapeTask.isFinished()) escapeTask = new adris.altoclef.tasks.movement.TimeoutWanderTask(8);
+                return escapeTask;
+            }
         }
         Task kit = kitTask(mod);
         if (kit != null) return kit;        // Gather first, so the bot is not walking out of the sealed room for one more glowstone.
@@ -192,11 +213,12 @@ public class MazeFurnishTask extends Task {
         if (!gathered) System.out.println("MAZETEST FURNISH gathered skipped=" + skipped);
         gathered = true;
         if (fill != null) {
-            if (!fill.isFinished()) {
+            // Ostinato: run40 audit. A FILL that cannot reach/open its barrel gets the same defer-then-skip as a light.
+            if (!fill.isFinished() && ++stepTicks <= 600) {
                 return fill;
             }
-            fill = null;
-            index++;
+            if (!fill.isFinished()) deferStep("timeout");
+            else { fill = null; index++; }
         }
         // Ostinato: run32 looped 4min on one ceiling block (builder "Failed to place" from the same spot) toward a FAIL.
         // A LIGHT step stuck 60s is deferred to a second pass (new approach angle); stuck again there, it is skipped.
@@ -208,11 +230,12 @@ public class MazeFurnishTask extends Task {
                 if (sub != null) {
                     if (index != stepIdx) { stepIdx = index; stepTicks = 0; }
                     // Ostinato: only place attempts count toward the 15s defer; a mid-cladding regather used to defer every light.
-                    boolean placing = sub instanceof PlaceBlockTask || sub instanceof MazeCeilingPlaceTask;
-                    if (step.kind() == MazeFurnishPlan.Kind.LIGHT && placing && ++stepTicks > 300) {
-                        System.out.println("MAZETEST FURNISH " + (secondPass ? "skip-light " : "defer-light ") + step.x() + " " + step.y() + " " + step.z());
-                        if (!secondPass) deferred.add(index);
-                        stuckTicks = 0; stuckRecoveries = 0; stepTicks = 0; index++;
+                    // Ostinato: run40 audit. CONTAINER/FILL/SEAL get the same defer-then-skip as LIGHT (30s each) instead of
+                    // burning stuck-recover into a FAIL on one cell. A deferred SEAL retries with throwaway blocks first.
+                    boolean placing = sub instanceof PlaceBlockTask || sub instanceof MazeCeilingPlaceTask || sub instanceof StoreInContainerTask;
+                    int budget = step.kind() == MazeFurnishPlan.Kind.LIGHT ? 300 : 600;
+                    if (placing && ++stepTicks > budget) {
+                        deferStep("timeout");
                         continue;
                     }
                     setDebugState(step.kind() + " " + step.x() + " " + step.y() + " " + step.z());
@@ -234,6 +257,27 @@ public class MazeFurnishTask extends Task {
     private String lastKit = ""; private int armorTicks; private boolean armorGaveUp, died; // Ostinato
     private final java.util.Set<Integer> deferred = new java.util.HashSet<>(); // Ostinato
     private boolean secondPass; private int stepIdx = -1, stepTicks; // Ostinato
+    private boolean escapingWater, jumpHeld; private int escapeTicks; private Task escapeTask; // Ostinato: water latch
+    private final java.util.Set<BlockPos> sealFallback = new java.util.HashSet<>(); // Ostinato: deferred seals use throwaways
+
+    // Ostinato: true while the current tick is working a plan step (not kit, gather or water).
+    private boolean inStep() {
+        String st = getDebugState();
+        if (!gathered || work == null || index >= work.size() || st == null) return false;
+        for (MazeFurnishPlan.Kind k : MazeFurnishPlan.Kind.values()) if (st.startsWith(k + " ")) return true;
+        return false;
+    }
+
+    // Ostinato: defer the current step to the second pass, or skip it when already there. Logs defer-/skip-<kind>.
+    private void deferStep(String why) {
+        MazeFurnishPlan.Step step = work.get(index);
+        String kind = step.kind().name().toLowerCase();
+        System.out.println("MAZETEST FURNISH " + (secondPass ? "skip-" : "defer-") + kind + " " + step.x() + " " + step.y() + " " + step.z() + " why=" + why
+                + (secondPass && step.kind() == MazeFurnishPlan.Kind.SEAL ? " SEAL-LEFT-OPEN" : ""));
+        if (!secondPass) deferred.add(index);
+        if (step.kind() == MazeFurnishPlan.Kind.SEAL) sealFallback.add(new BlockPos(step.x(), step.y(), step.z()));
+        fill = null; stuckTicks = 0; stuckRecoveries = 0; stepTicks = 0; index++;
+    }
 
     // Ostinato: the next survival-kit step, or null when the bot is armed, fed and armored.
     // Run35: score dropped to 17 mid-lighting and CollectFoodTask(40) never returned
@@ -259,9 +303,10 @@ public class MazeFurnishTask extends Task {
         // Run36: stone pick broke mid-ceiling. MazeCeilingPlaceTask then sat on "No pickaxe" for 60s per cell (31 defers, lights stuck at 79).
         else if (!mod.getItemStorage().hasItem(PICKS)) { step = "stone_pickaxe"; t = TaskCatalogue.getItemTask(Items.STONE_PICKAXE, 1); }
         else if (food < gate && !foodGaveUp) {
-            if (++foodTicks > 1800) {
+            // Ostinato: run40 audit. Under 6 the bot starves; give the hunt 4 min and retry after 20s instead of 1.5/1 min.
+            if (++foodTicks > (food < 6 ? 4800 : 1800)) {
                 System.out.println("MAZETEST FURNISH skip-food food=" + food);
-                foodGaveUp = true; foodTicks = 0; foodCooldown = 1200; // Ostinato: 5 min -> 1 min
+                foodGaveUp = true; foodTicks = 0; foodCooldown = food < 6 ? 400 : 1200; // Ostinato: 5 min -> 1 min
                 step = "ready"; t = null;
             } else {
                 // Match the gate. CollectFoodTask(40) keeps hunting after the kit would already be satisfied.
@@ -270,7 +315,8 @@ public class MazeFurnishTask extends Task {
         }
         // Ostinato: run39 iron armor blocked lights ~11 min (40 unreachable iron_ore tries) and was rebuilt after a drown.
         // Armor is optional: only before the place phase, only on the first life, 3 min budget.
-        else if (!armorGaveUp && !gathered && !died && !adris.altoclef.util.helpers.StorageHelper.isArmorEquippedAll(IRON_ARMOR)) {
+        // Ostinato: run40 audit. Never mine iron for armor on an empty stomach (food < 6); food comes first.
+        else if (food >= 6 && !armorGaveUp && !gathered && !died && !adris.altoclef.util.helpers.StorageHelper.isArmorEquippedAll(IRON_ARMOR)) {
             if (++armorTicks > 3600) { System.out.println("MAZETEST FURNISH skip-armor"); armorGaveUp = true; step = "ready"; t = null; }
             else { step = "iron_armor"; t = new adris.altoclef.tasks.misc.EquipArmorTask(IRON_ARMOR); }
         }
@@ -361,6 +407,13 @@ public class MazeFurnishTask extends Task {
                 }
                 List<Block> wanted = blocks(step.blockIds());
                 Block[] have = wanted.stream().filter(b -> mod.getItemStorage().hasItem(b.asItem())).toArray(Block[]::new);
+                // Ostinato: a deferred seal retries with any held throwaway (the planned block's face may be the problem).
+                if (sealFallback.contains(pos)) {
+                    java.util.List<Block> alt = new ArrayList<>(java.util.Arrays.asList(have));
+                    for (Block b : new Block[]{net.minecraft.block.Blocks.COBBLESTONE, net.minecraft.block.Blocks.COBBLED_DEEPSLATE, net.minecraft.block.Blocks.DIRT, net.minecraft.block.Blocks.STONE, net.minecraft.block.Blocks.NETHERRACK})
+                        if (!alt.contains(b) && mod.getItemStorage().hasItem(b.asItem())) alt.add(b);
+                    have = alt.toArray(new Block[0]);
+                }
                 // Falls back to throwaways (dirt, cobble) so the shaft is never left open.
                 return new PlaceBlockTask(pos, have.length == 0 ? wanted.toArray(new Block[0]) : have, true, false);
             }

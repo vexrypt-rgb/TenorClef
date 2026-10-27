@@ -63,6 +63,7 @@ public class TunnelProvisionTask extends Task {
         if (key.equals("food")) return new CollectFoodTask(count);
         if (key.equals("bed")) return new PlaceBedAndSetSpawnTask();
         if (key.startsWith("equip:")) return new EquipArmorTask(new ItemTarget(key.substring(6), 1));
+        if (key.equals("stick")) return TaskCatalogue.getItemTask("stick", count);
         return TaskCatalogue.getItemTask(key, count);
     }
 
@@ -91,17 +92,34 @@ public class TunnelProvisionTask extends Task {
                 Debug.logInternal("[tunnels] soft budget spent; skipping " + e.getKey() + " (Ostinato asks again later)");
                 continue;
             }
+            // Ostinato: a pickaxe craft needs 2 sticks per pick still to make. Provision them (logs -> planks -> sticks via
+            // CollectSticksTask) as their own step BEFORE the pick recipe, so the table never tries MoveItemToSlot with
+            // no sticks (run71 froze on that). Also take the best pick the inventory can already make: copper -> iron -> stone.
+            if (e.getKey().endsWith("_pickaxe")) {
+                String pick = bestPick(e.getKey());
+                if (!pick.equals(e.getKey())) e = Map.entry(pick, have(pick) + 1); // one fresh better pick, not the stone count
+                int toMake = Math.max(0, e.getValue() - have(e.getKey()));
+                int sticksNeeded = 2 * toMake;
+                if (toMake > 0 && have("stick") < sticksNeeded && !"stick".equals(currentKey)) {
+                    Debug.logInternal("[tunnels] pick " + e.getKey() + " needs " + sticksNeeded + " sticks, have " + have("stick") + "; sticks first");
+                    queue.addFirst(e);
+                    e = Map.entry("stick", sticksNeeded);
+                }
+            }
             try {
                 current = make(e.getKey(), e.getValue());
                 if (current == null) Debug.logInternal("[tunnels] no task for " + e.getKey());
                 currentKey = e.getKey();
+                currentCount = e.getValue();
                 currentTicks = 0;
             } catch (RuntimeException ex) {
                 Debug.logInternal("[tunnels] cannot make task for " + e.getKey() + ": " + ex);
             }
         }
         if (current == null) return null;
-        setDebugState("Tunnel kit: " + currentKey + " (" + queue.size() + " more)");
+        // Ostinato: show the item count (have/want) next to the queue, so "needs={stone_pickaxe=2}" and the kit line agree;
+        // the old "(0 more)" was the queue length and read like "0 pickaxes still needed".
+        setDebugState("Tunnel kit: " + currentKey + " have " + have(currentKey) + "/" + currentCount + " (" + queue.size() + " needs queued)");
         return current;
     }
 
@@ -111,6 +129,25 @@ public class TunnelProvisionTask extends Task {
     }
 
     private boolean started;
+    private int currentCount;
+
+    private static int have(String key) {
+        if (key == null || mod().getItemStorage() == null) return 0;
+        if (key.startsWith("equip:") || key.equals("food") || key.equals("bed") || key.equals("return")) return 0;
+        try {
+            return mod().getItemStorage().getItemCount(TaskCatalogue.getItemMatches(key));
+        } catch (RuntimeException ex) {
+            return 0;
+        }
+    }
+
+    /** Ostinato: copper -> iron -> stone. Use a better metal only when 3 ingots are already held (no extra gathering). */
+    private static String bestPick(String asked) {
+        if (!asked.equals("stone_pickaxe")) return asked;
+        if (have("copper_ingot") >= 3 && TaskCatalogue.taskExists("copper_pickaxe")) return "copper_pickaxe";
+        if (have("iron_ingot") >= 3) return "iron_pickaxe";
+        return asked;
+    }
 
     private static adris.altoclef.AltoClef mod() {
         return adris.altoclef.AltoClef.getInstance();

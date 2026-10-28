@@ -221,8 +221,11 @@ public class AllBlocksTask extends Task {
             if (t != null) return t;
         }
 
+        inBunker = false;
         Task night = nightStep(mod);
-        if (night != null) return night;
+        // In the closed pit there is nothing to do but wait: falling through sent the kit out for a bed at night and
+        // a zombie killed the bot.
+        if (night != null || inBunker) return night;
 
         if (gathering == null) {
             Task k = kit.tick(mod, ticks);
@@ -421,8 +424,11 @@ public class AllBlocksTask extends Task {
             return new PlaceBlockTask(top, new Block[0], true, true);
         }
         setDebugState("Night: in the bunker");
+        inBunker = true;
         return null;
     }
+
+    private boolean inBunker;
 
     // ---------------------------------------------------------------- site
 

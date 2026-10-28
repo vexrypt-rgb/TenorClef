@@ -41,6 +41,8 @@ public class TunnelProvisionTask extends Task {
     private static final int BED_LEASH = 192;
     // Ostinato: the leash was horizontal only; run80's iron-boots ore hunt went 56 blocks straight down (y 74 -> 18) and
     // the dig then started from the cave. VLEASH caps the drop/climb; the round also ends with a walk back (homed).
+    // Ostinato: down only. Trees are on the surface; with the dig at y 69 every wood run tripped it at y 102 and the
+    // stick need looped walk-out/walk-back for 30+ min with no pick (live tunnels run, dug=89).
     private static final int VLEASH = 32;
     private boolean homed;
     private BlockPos home;
@@ -95,7 +97,7 @@ public class TunnelProvisionTask extends Task {
         boolean bed = currentKey != null && currentKey.startsWith("bed");
         if (current != null && !hard && !bed && !returning) softTicks++;
         if (current != null && !returning && !"bed_home".equals(currentKey) && home != null && mod().getPlayer() != null
-                && (horiz(mod().getPlayer().getBlockPos(), home) > leash() || Math.abs(mod().getPlayer().getBlockPos().getY() - home.getY()) > vleash())) {
+                && (horiz(mod().getPlayer().getBlockPos(), home) > leash() || home.getY() - mod().getPlayer().getBlockPos().getY() > vleash())) {
             Debug.logHarness("[tunnels] need " + currentKey + " left the " + leash() + "/" + vleash() + "-block leash at "
                     + mod().getPlayer().getBlockPos().toShortString() + "; walking back");
             // Ostinato: re-queue the interrupted need once, so it restarts from home instead of being dropped. run74's bed
@@ -133,6 +135,13 @@ public class TunnelProvisionTask extends Task {
                 if (!pick.equals(e.getKey())) e = Map.entry(pick, have(pick) + 1); // one fresh better pick, not the stone count
                 int toMake = Math.max(0, e.getValue() - have(e.getKey()));
                 int sticksNeeded = 2 * toMake;
+                // Ostinato: with no usable pick, craft what the sticks on hand allow first (2 sticks = 1 pick) instead of
+                // gathering for the full count; the dig resumes and Ostinato asks for spares later.
+                if (toMake > 0 && !usablePick && have("stick") >= 2 && have("stick") < sticksNeeded) {
+                    e = Map.entry(e.getKey(), have(e.getKey()) + have("stick") / 2);
+                    toMake = have("stick") / 2;
+                    sticksNeeded = 2 * toMake;
+                }
                 if (toMake > 0 && have("stick") < sticksNeeded && !"stick".equals(currentKey)) {
                     Debug.logHarness("[tunnels] pick " + e.getKey() + " needs " + sticksNeeded + " sticks, have " + have("stick") + "; sticks first");
                     queue.addFirst(e);

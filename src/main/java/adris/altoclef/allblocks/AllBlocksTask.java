@@ -3,6 +3,7 @@ package adris.altoclef.allblocks;
 import adris.altoclef.AltoClef;
 import adris.altoclef.Debug;
 import adris.altoclef.TaskCatalogue;
+import adris.altoclef.tasks.InteractWithBlockTask;
 import adris.altoclef.tasks.construction.DestroyBlockTask;
 import adris.altoclef.tasks.construction.PlaceBlockTask;
 import adris.altoclef.tasks.container.StoreInContainerTask;
@@ -27,6 +28,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -127,6 +129,8 @@ public class AllBlocksTask extends Task {
         String world = AllBlocks.worldKey();
         file = AllBlocksProgress.file(MinecraftClient.getInstance().runDirectory.toPath(), world);
         progress = AllBlocksProgress.load(file, world);
+        // Crops used to be skipped for want of farmland; the place step tills it now.
+        progress.placeSkipped.values().removeIf(r -> r.startsWith("crop:") || r.equals("needs farmland"));
         plan = AllBlocksPlan.build();
         byId.clear();
         for (AllBlocksPlan.Entry e : plan) byId.put(e.id, e);
@@ -646,7 +650,7 @@ public class AllBlocksTask extends Task {
      * for the night. Those go in the chest only when a spare is carried.
      */
     private static boolean kitItem(String id) {
-        return id.endsWith("_pickaxe") || id.endsWith("_sword") || id.endsWith("_bed");
+        return id.endsWith("_pickaxe") || id.endsWith("_sword") || id.endsWith("_bed") || id.endsWith("_hoe");
     }
 
     private boolean depositable(String id) {
@@ -747,14 +751,31 @@ public class AllBlocksTask extends Task {
 
     private boolean needsPlacement(AllBlocksPlan.Entry e) {
         if (!e.placeable() || progress.placed.containsKey(e.id) || progress.placeSkipped.containsKey(e.id)) return false;
-        Block b = e.block();
-        if (b instanceof CropBlock || b instanceof StemBlock) {
-            // Crops stand only on farmland, which the grid does not make (no hoeing step yet).
-            progress.placeSkipped.put(e.id, "crop: needs farmland (hoed dirt), which the grid does not make");
-            Debug.logMessage("ALLBLOCKS PLACE-SKIP " + e.id + ": needs farmland");
-            return false;
-        }
         return true;
+    }
+
+    /** Crops (seeds, potatoes, stems, torchflower, pitcher pod) stand only on farmland: the place step hoes the floor. */
+    static boolean needsFarmland(Block b) {
+        return b instanceof CropBlock || b instanceof StemBlock || b == Blocks.PITCHER_CROP;
+    }
+
+    private static final Item[] HOES = {Items.NETHERITE_HOE, Items.DIAMOND_HOE, Items.IRON_HOE, Items.GOLDEN_HOE,
+            Items.STONE_HOE, Items.WOODEN_HOE};
+
+    /** Dirt floor tilled to farmland for a crop. Null when the farmland is there. */
+    private Task farmlandStep(AltoClef mod, BlockPos cell, int cellIndex) {
+        BlockPos floor = cell.down();
+        if (mod.getWorld().getBlockState(floor).getBlock() == Blocks.FARMLAND) return null;
+        if (mod.getWorld().getBlockState(floor).getBlock() != Blocks.DIRT && spare(Items.DIRT) < 1) {
+            return startStep("get dirt floor for cell " + cellIndex, TaskCatalogue.getItemTask(Items.DIRT, count(Items.DIRT) + 1), 10);
+        }
+        Task t = prepareCell(mod, cell, "cell " + cellIndex, Blocks.DIRT);
+        if (t != null) return t;
+        if (!mod.getItemStorage().hasItem(HOES)) {
+            return startStep("get a hoe to till cell " + cellIndex, TaskCatalogue.getItemTask("wooden_hoe", 1), 10);
+        }
+        return startStep("till the floor of cell " + cellIndex,
+                new InteractWithBlockTask(new ItemTarget(HOES, 1), Direction.UP, floor, false), 3);
     }
 
     private Task placeStep(AltoClef mod) {
@@ -802,6 +823,16 @@ public class AllBlocksTask extends Task {
             progress.badCells.put(placingCell, "fluid in the cell");
             placingCell = -1;
             return null;
+        }
+        if (needsFarmland(block)) {
+            Task till = farmlandStep(mod, cell, placingCell);
+            if (till != null) return till;
+            if (!block.getDefaultState().canPlaceAt(mod.getWorld(), cell)) {
+                skipPlacement(e, "crop: canPlaceAt false on tilled farmland (too dark?)");
+                return null;
+            }
+            allowedBreak = cell;
+            return startStep("place " + e.id + " in cell " + placingCell, new PlaceBlockTask(cell, block), PLACE_MINUTES);
         }
         Block floorBlock = null;
         if (floorTry >= 0) {

@@ -28,23 +28,30 @@ two clear blocks above it.
 - **Labels**: a sign at chest + (0, 0, 1): `ALLBLOCKS k`, the first item id, `to`, the last item id.
 - **Grid**: cell n at O + (2·(n mod 32), 0, 12 + 2·(n div 32)), one block per cell with a gap between cells so that
   beds, doors and redstone do not interfere. A block that cannot stand on the default floor gets dirt, sand, soul sand
-  (nether wart) or end stone (chorus) under it instead; when none works it is skipped with the reason.
+  (nether wart) or end stone (chorus) under it instead; when none works it is skipped with the reason. Crops (seeds,
+  potatoes, carrots, stems, torchflower, pitcher pod) get a dirt floor tilled to farmland with a hoe (a wooden hoe is
+  made when none is carried).
 
 ## What happens each tick
 
 1. A sign edit screen (a label was just placed) gets the label text and closes.
-2. **Survival kit**, before every gather: a pickaxe with life left (copper, then iron, then stone; a wooden pickaxe
-   does not count), food score 10 or more, armor in every slot (copper, then iron, then leather). Each need gets 12
-   minutes; a need that runs out of time cools down for 30 minutes and the next choice is tried.
-3. **Deposit**, when 8 gathered items wait, fewer than 5 inventory slots are free, the bot is within 24 blocks of
-   home, or nothing is left to gather. It places the chest and its label first when they are missing, puts one of
-   each item in, and records an item as stored only when the chest's contents show it.
-4. **Place**: a stored block with a spare copy in the inventory goes into the next grid cell.
-5. **Gather** the next item, cheapest first: 2 of a placeable block (one for the chest, one for the grid), 1 of
+2. **Night**: at dusk the bot drops off what it carries and goes home; at night it sleeps in its bed. When it cannot
+   sleep within a minute (no bed, monsters nearby) it digs a two-deep pit beside the storage area, closes it over its
+   head and waits for morning.
+3. **Survival kit**, before every gather: a pickaxe with life left (copper, then iron, then stone; a wooden pickaxe
+   does not count), a sword (copper, then iron, then stone), food score 10 or more, a bed, and armor in every slot
+   (copper, then iron, then leather). Each need gets 12 minutes; a need that runs out of time cools down for 30 minutes
+   and the next choice is tried. The bot keeps one of each kit item (and its food) out of the chests.
+4. **Deposit**, when 4 gathered items wait, fewer than 5 inventory slots are free, the bot is within 24 blocks of
+   home, or nothing is left to gather. It places the chest and its label first when they are missing, puts exactly one of
+   each item in, and records an item as stored only when the chest's contents show it. Near home, each chest is
+   opened once per session and any extra copies are taken back out, so a chest never holds a stack.
+5. **Place**: a stored block with a spare copy in the inventory goes into the next grid cell.
+6. **Gather** the next item, cheapest first: 2 of a placeable block (one for the chest, one for the grid), 1 of
    anything else. The first try gets 10 minutes; when it fails, the rest of its family (the same first word:
    `acacia_`, `red_`, ...) waits until everything else has had a try. The retry gets 25 minutes; an item that fails
    both is reported as stuck.
-6. **Blocks sweep**: a stored block that was never placed is gathered once more and placed.
+7. **Blocks sweep**: a stored block that was never placed is gathered once more and placed.
 
 Items gathered but not yet in a chest are protected from being thrown away. If one is used up as an ingredient, it is
 gathered again later.
@@ -60,7 +67,7 @@ gathered again later.
 - **Stuck** (reported as `STUCK`): an item whose gather failed twice. The report shows the task chain that was running
   when it gave up.
 - **Not placed**: items that are not blocks (tools, food, entities such as boats, buckets of fluid) are only stored.
-  Blocks that cannot stand on any floor the grid offers (they need water, a wall or farmland) are reported as
+  Blocks that cannot stand on any floor the grid offers (they need water or a wall) are reported as
   `PLACE-SKIP`.
 
 ## Gather paths on 26.3

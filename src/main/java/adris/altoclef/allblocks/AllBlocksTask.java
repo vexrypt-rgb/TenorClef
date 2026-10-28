@@ -20,6 +20,7 @@ import net.minecraft.block.BedBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CropBlock;
+import net.minecraft.block.MushroomPlantBlock;
 import net.minecraft.block.StemBlock;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
@@ -134,7 +135,8 @@ public class AllBlocksTask extends Task {
         file = AllBlocksProgress.file(MinecraftClient.getInstance().runDirectory.toPath(), world);
         progress = AllBlocksProgress.load(file, world);
         // Crops used to be skipped for want of farmland; the place step tills it now.
-        progress.placeSkipped.values().removeIf(r -> r.startsWith("crop:") || r.equals("needs farmland"));
+        progress.placeSkipped.values().removeIf(r -> r.startsWith("crop:") || r.equals("needs farmland")
+                || r.contains("farmland or other support")); // older, vaguer reason: tried again for the exact one
         plan = AllBlocksPlan.build();
         byId.clear();
         for (AllBlocksPlan.Entry e : plan) byId.put(e.id, e);
@@ -1012,8 +1014,13 @@ public class AllBlocksTask extends Task {
             } while (floorTry < FLOORS.length && (!floorWorth(block, FLOORS[floorTry])
                     || McCompat.item(FLOORS[floorTry]) == null || !TaskCatalogue.taskExists(McCompat.item(FLOORS[floorTry]))));
             if (floorTry >= FLOORS.length) {
-                skipPlacement(e, "cannot stand on a cobblestone, dirt or sand floor (canPlaceAt false):"
-                        + " needs water, a wall, farmland or other support");
+                if (block instanceof MushroomPlantBlock) {
+                    skipPlacement(e, "mushroom: canPlaceAt needs light below 13 or a podzol/mycelium floor (both silk"
+                            + " touch); the grid is out in daylight");
+                } else {
+                    skipPlacement(e, "cannot stand on a cobblestone, dirt, sand, soul sand or end stone floor (canPlaceAt"
+                            + " false): needs water, a wall or other support");
+                }
             }
             return null;
         }

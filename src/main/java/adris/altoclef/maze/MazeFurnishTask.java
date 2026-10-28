@@ -44,6 +44,7 @@ public class MazeFurnishTask extends Task {
     private int stuckTicks;
     private boolean prevAutoTool;
     private boolean failed;
+    private int escalations; // Ostinato: run86 stall escalations this room (skip + walk home) before FAIL
     private int stuckRecoveries; // Ostinato: one wander+blacklist recovery before FAIL
     private boolean gathered;    // Ostinato: gather-once latch
     private String gatherKey;    // Ostinato: loot-only gather budget
@@ -144,6 +145,20 @@ public class MazeFurnishTask extends Task {
             unstickTicks = 0; unstick = new adris.altoclef.tasks.movement.TimeoutWanderTask(16);
             return unstick;
         }
+        else if (stuckTicks >= 1200 && escalations < 4 && home() != null) {
+            // Ostinato: run86 (forever expand) FAILed and closed the client on one stuck "Gathering stick x6" 73 blocks out.
+            // A stall now escalates first: skip that optional gather, walk back to the room, retry from there. FAIL only
+            // after 4 escalations in this room.
+            escalations++;
+            String ds = getDebugState() == null ? "" : getDebugState();
+            String key = ds.startsWith("Gathering ") && ds.contains(" x") ? ds.substring(10, ds.indexOf(" x")).trim() : null;
+            if (key != null && materials.containsKey(key) && !isCladding(key)) skipped.add(key); else key = null;
+            System.out.println("MAZETEST FURNISH escalate " + escalations + "/4 stuck=" + ds + " skip=" + key + " dist=" + homeDist(feet) + " feet=" + feet.toShortString());
+            stuckRecoveries = 0; stuckTicks = 0; stuckAnchor = feet;
+            BlockPos h = home();
+            unstickTicks = 0; unstick = new adris.altoclef.tasks.movement.GetToXZTask(h.getX(), h.getZ());
+            return unstick;
+        }
         else if (stuckTicks >= 1200) {
             StringBuilder chain = new StringBuilder();
             for (Task t = this; t != null; t = t.getSub()) chain.append(" > ").append(t).append(" [").append(t.getDebugState()).append(']');
@@ -155,7 +170,8 @@ public class MazeFurnishTask extends Task {
         if (feet.equals(lastFeet)) stillTicks++; else { stillTicks = 0; lastFeet = feet; }
         // Ostinato: run13 watchdog fired once, then the wander never reported finished and the bot idled forever.
         // Cap each wander at 30s and let stillness keep counting so the watchdog can fire again.
-        if (unstick != null && !unstick.isFinished() && ++unstickTicks < 600) return unstick;
+        // Ostinato: an escalation walk home (GetToXZ) gets 2 min, a wander 30 s.
+        if (unstick != null && !unstick.isFinished() && ++unstickTicks < (unstick instanceof adris.altoclef.tasks.movement.GetToXZTask ? 2400 : 600)) return unstick;
         unstick = null;
         if (stillTicks >= 2400) {
             StringBuilder chain = new StringBuilder();
@@ -217,6 +233,7 @@ public class MazeFurnishTask extends Task {
                 Task home = returnHome(mod, feet, need.getKey()); // Ostinato: run52 gather near the room
                 if (home != null) return home;
                 if (needsSurface(mod, feet, need.getKey())) return surfaceClimb(mod, feet, need.getKey());
+                Task leash = gatherLeash(mod, feet, need.getKey(), true); if (leash != null) return leash; // Ostinato: run66
                 setDebugState("Gathering any planks x" + pooled + " (for " + need.getKey() + ")");
                 return new adris.altoclef.tasks.resources.CollectPlanksTask(pooled);
             }
@@ -279,6 +296,16 @@ public class MazeFurnishTask extends Task {
                     if (climb != null) return climb;
                 }
                 if (!lootOnly(need.getKey())) { Task home = returnHome(mod, feet, need.getKey()); if (home != null) return home; } // Ostinato: run52
+                // Ostinato: run65/66. After the one-shot return the gather was unbounded (book/barrel/planks drifted 65-100+ blocks).
+                if (homeDist(feet) > GATHER_LEASH) {
+                    if (!isCladding(need.getKey())) { System.out.println("MAZETEST FURNISH skip-gather " + need.getKey() + " why=leash dist=" + homeDist(feet)); skipped.add(need.getKey()); continue; }
+                    Task leash = gatherLeash(mod, feet, need.getKey(), false); if (leash != null) return leash;
+                }
+                // Ostinato: run66. Baritone paused on "Missing materials for 1x crafting_table" while gathering barrel; get the table first.
+                if (isWoody(need.getKey()) && !need.getKey().equals("crafting_table") && !mod.getItemStorage().hasItem(Items.CRAFTING_TABLE) && hasWoodFor(mod, "crafting_table", 1)) {
+                    setDebugState("Crafting table for " + need.getKey());
+                    return TaskCatalogue.getItemTask(Items.CRAFTING_TABLE, 1);
+                }
                 setDebugState("Gathering " + need.getKey() + " x" + need.getValue());
                 hidePlacedCladding(mod, need.getKey()); // Ostinato: never mine the room we are building
                 return TaskCatalogue.getItemTask(item, need.getValue());
@@ -539,6 +566,22 @@ public class MazeFurnishTask extends Task {
     private static final int HOME_LEASH = 64;
     private static final int FOOD_LEASH = 128; // Ostinato: run57 food sources are sparse; don't yo-yo at 64
     private boolean foodDeferred; // Ostinato: run57
+    // Ostinato: run66. Hard gather leash with hysteresis for every furnish gather (not once per item like returnHome).
+    private static final int GATHER_LEASH = 96;
+    private int homeTicks, leashTicks, leashTrips;
+    private Task leashHome;
+    private Task gatherLeash(AltoClef mod, BlockPos feet, String key, boolean check) {
+        int d = homeDist(feet); BlockPos h = home();
+        if (h == null || leashTrips > 6) return null;
+        if (leashHome != null && (leashHome.isFinished() || d <= GATHER_LEASH - 40 || ++leashTicks > 3600)) { leashHome = null; return null; }
+        if (leashHome == null) {
+            if (check && d <= GATHER_LEASH) return null;
+            leashHome = new adris.altoclef.tasks.movement.GetToXZTask(h.getX(), h.getZ()); leashTicks = 0; leashTrips++;
+            System.out.println("MAZETEST FURNISH gather-leash for=" + key + " dist=" + d + " trip=" + leashTrips);
+        }
+        setDebugState("Leash back to room for " + key + " dist=" + d);
+        return leashHome;
+    }
     // Ostinato: run57. Hunger is urgent when the bar is under 14 (sprint stops at 6, regen at 18) and not on peaceful.
     private static boolean hungerUrgent(AltoClef mod) {
         if (mod.getWorld().getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) return false;
@@ -560,7 +603,9 @@ public class MazeFurnishTask extends Task {
         if (h == null || returnedHome.contains(key)) return null;
         int d = homeDist(feet);
         if (homeTask == null && d <= HOME_LEASH) return null;
-        if (homeTask == null) { homeTask = new adris.altoclef.tasks.movement.GetToXZTask(h.getX(), h.getZ()); System.out.println("MAZETEST FURNISH return-home for=" + key + " dist=" + d); }
+        if (homeTask == null) { homeTask = new adris.altoclef.tasks.movement.GetToXZTask(h.getX(), h.getZ()); homeTicks = 0; System.out.println("MAZETEST FURNISH return-home for=" + key + " dist=" + d); }
+        // Ostinato: run65. "Returning to room for book dist=65" never finished (wandered 65-81). Cap the walk at 2 min.
+        if (++homeTicks > 2400) { System.out.println("MAZETEST FURNISH return-home giveup for=" + key + " dist=" + d); returnedHome.add(key); homeTask = null; return null; }
         if (d > 24 && !homeTask.isFinished()) { setDebugState("Returning to room for " + key + " dist=" + d); return homeTask; }
         returnedHome.add(key); homeTask = null;
         return null;

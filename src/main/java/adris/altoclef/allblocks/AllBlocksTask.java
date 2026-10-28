@@ -921,7 +921,10 @@ public class AllBlocksTask extends Task {
                 return null;
             }
             allowedBreak = cell;
-            return startStep("place " + e.id + " in cell " + placingCell, new PlaceBlockTask(cell, block), PLACE_MINUTES);
+            // Planted the way a player does, with the seed on the farmland's top face: the builder behind
+            // PlaceBlockTask would not place against farmland (not a full block) and wandered off.
+            return startStep("plant " + e.id + " in cell " + placingCell,
+                    new InteractWithBlockTask(new ItemTarget(e.item, 1), Direction.UP, cell.down(), false), PLACE_MINUTES);
         }
         Block floorBlock = null;
         if (floorTry >= 0) {
@@ -1103,6 +1106,12 @@ public class AllBlocksTask extends Task {
         if (stepKey.startsWith("till the floor of cell ") && placingCell >= 0
                 && mod.getWorld().getBlockState(AllBlocks.cellPos(origin, placingCell).down()).getBlock() == Blocks.FARMLAND) {
             Debug.logMessage("ALLBLOCKS tilled the floor of cell " + placingCell);
+            stepTask = null;
+            stepKey = null;
+            return null;
+        }
+        if (stepKey.startsWith("plant ") && placingId != null && placingCell >= 0
+                && mod.getWorld().getBlockState(AllBlocks.cellPos(origin, placingCell)).getBlock() == byId.get(placingId).block()) {
             stepTask = null;
             stepKey = null;
             return null;

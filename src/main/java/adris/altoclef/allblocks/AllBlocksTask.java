@@ -356,6 +356,12 @@ public class AllBlocksTask extends Task {
     private Task nightStep(AltoClef mod) {
         long time = mod.getWorld().getTimeOfDay() % 24000;
         boolean night = time >= 12542 && time <= 23460;
+        // Without a bed, or swimming, the bot cannot sleep at nightfall: start digging in at dusk instead, so it is
+        // underground before the monsters come out (swimming ashore and digging after dark got it killed).
+        if (!night && time >= 11800 && time < 12542 && WorldHelper.getCurrentDimension() == Dimension.OVERWORLD
+                && (!mod.getItemStorage().hasItem(ItemHelper.BED) && !nearBed(mod) || mod.getPlayer().isTouchingWater())) {
+            night = true;
+        }
         // Dusk: bank what is carried and get home, so the bed (and the night) is next to the chests. Items carried
         // into the night were lost with every death.
         boolean dusk = time >= 11200 && time < 12542;

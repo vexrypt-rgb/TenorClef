@@ -44,6 +44,9 @@ public class TunnelProvisionTask extends Task {
     // Ostinato: down only. Trees are on the surface; with the dig at y 69 every wood run tripped it at y 102 and the
     // stick need looped walk-out/walk-back for 30+ min with no pick (live tunnels run, dug=89).
     private static final int VLEASH = 32;
+    // Ostinato: wall-clock cap for a round while a usable pick is held; no loop shape may hold the dig longer than this.
+    private static final long ROUND_CAP_MS = 20 * 60 * 1000L;
+    private long roundStartMs;
     private boolean homed;
     private BlockPos home;
     private int softTicks;
@@ -57,6 +60,16 @@ public class TunnelProvisionTask extends Task {
 
     @Override
     protected void onStart() {
+        // Ostinato: a survival-chain interrupt (GetOutOfWaterTask, mobs, eating) stops and re-starts this same task. Re-running
+        // the round setup zeroed every timeout and moved home into the water; run84 sat 6 h at dug=122 restarting an
+        // iron_pickaxe ask 2769 times. Resume instead: keep timers + home, re-queue the interrupted need.
+        if (started) {
+            if (current != null && currentKey != null && !"return".equals(currentKey)) queue.addFirst(Map.entry(currentKey, currentCount));
+            current = null;
+            returning = false;
+            return;
+        }
+        roundStartMs = System.currentTimeMillis();
         queue.clear();
         String[] order = {"stone_pickaxe", "copper_pickaxe", "iron_pickaxe", "copper_shovel", "stone_shovel", "copper_sword", "stone_sword", "food", "torch", "equip:", "bed"};
         // Ostinato: cheap needs (food, torches) before armor; 4 copper pieces ate the shared soft budget and left torches 32 s (run74).
@@ -89,6 +102,11 @@ public class TunnelProvisionTask extends Task {
     @Override
     protected Task onTick() {
         boolean usablePick = usablePick();
+        if (usablePick && (current != null || !queue.isEmpty()) && !"return".equals(currentKey) && System.currentTimeMillis() - roundStartMs > ROUND_CAP_MS) {
+            Debug.logHarness("[tunnels] round cap " + (ROUND_CAP_MS / 60000) + " min with a usable pick; dropping " + queue + " and " + currentKey + " (Ostinato asks again later)");
+            queue.clear();
+            current = null;
+        }
         // Ostinato: a pickaxe ask is hard (long timeout) only while no usable pick is held. With one in hand it is Ostinato's
         // soft spare/upgrade ask; run79 sat 7+ min on a worn-copper spare (stuck pathing to ore) while the held pick could dig.
         boolean hard = currentKey != null && currentKey.endsWith("_pickaxe") && !returning && !usablePick;

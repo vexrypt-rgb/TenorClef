@@ -16,6 +16,7 @@ import adris.altoclef.util.ItemTarget;
 import adris.altoclef.util.helpers.ItemHelper;
 import adris.altoclef.util.helpers.WorldHelper;
 import net.minecraft.block.AbstractSignBlock;
+import net.minecraft.block.BedBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CropBlock;
@@ -311,10 +312,13 @@ public class AllBlocksTask extends Task {
         }
         if (!night || ticks < nightCooldownUntil || WorldHelper.getCurrentDimension() != Dimension.OVERWORLD
                 || (sleepTask == null && !AllBlocksKit.hasBed(mod))) {
-            if (sleepTask != null && !night) Debug.logMessage("ALLBLOCKS morning");
+            if (sleepTask != null && !night) {
+                Debug.logMessage("ALLBLOCKS morning");
+                if (bedPos != null) bedPickupUntil = ticks + 60L * 20;
+            }
             sleepTask = null;
             bunkered = false;
-            return null;
+            return bedPickupStep(mod);
         }
         if (sleepTask == null) {
             sleepTask = new adris.altoclef.tasks.misc.SleepThroughNightTask();
@@ -336,8 +340,33 @@ public class AllBlocksTask extends Task {
         if (gathering != null) gatherStart++;
         if (stepTask != null) stepStart++;
         kit.hold();
+        if (mod.getPlayer().isSleeping()) mod.getPlayer().getSleepingPosition().ifPresent(p -> bedPos = p);
         setDebugState("Night: sleeping");
         return sleepTask;
+    }
+
+    private BlockPos bedPos;
+    private long bedPickupUntil;
+
+    /** In the morning, take the bed along: one left behind every night cost three wool a day. */
+    private Task bedPickupStep(AltoClef mod) {
+        if (bedPos == null) return null;
+        if (ticks > bedPickupUntil) {
+            bedPos = null;
+            return null;
+        }
+        if (mod.getWorld().getBlockState(bedPos).getBlock() instanceof BedBlock) {
+            setDebugState("Morning: picking up the bed");
+            allowedBreak = bedPos;
+            return new DestroyBlockTask(bedPos);
+        }
+        if (!mod.getItemStorage().hasItem(ItemHelper.BED)) {
+            setDebugState("Morning: collecting the bed");
+            return new adris.altoclef.tasks.movement.PickupDroppedItemTask(new ItemTarget(ItemHelper.BED, 1), true);
+        }
+        Debug.logMessage("ALLBLOCKS morning: took the bed along");
+        bedPos = null;
+        return null;
     }
 
     private boolean bunkered;

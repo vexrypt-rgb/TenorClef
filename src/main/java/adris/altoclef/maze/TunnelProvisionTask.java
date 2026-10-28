@@ -39,6 +39,10 @@ public class TunnelProvisionTask extends Task {
     private static final int LEASH = 64;
     // Ostinato: sheep roam far from a dig face; bed_home walks the bed back, so its gather gets a wider leash (run76: 2 x dropped at 64).
     private static final int BED_LEASH = 192;
+    // Ostinato: the leash was horizontal only; run80's iron-boots ore hunt went 56 blocks straight down (y 74 -> 18) and
+    // the dig then started from the cave. VLEASH caps the drop/climb; the round also ends with a walk back (homed).
+    private static final int VLEASH = 32;
+    private boolean homed;
     private BlockPos home;
     private int softTicks;
     private boolean returning;
@@ -65,6 +69,7 @@ public class TunnelProvisionTask extends Task {
         returning = false;
         leashRetried.clear();
         bedTries = 0;
+        homed = false;
         home = mod().getPlayer() == null ? null : mod().getPlayer().getBlockPos();
         started = true;
     }
@@ -90,8 +95,9 @@ public class TunnelProvisionTask extends Task {
         boolean bed = currentKey != null && currentKey.startsWith("bed");
         if (current != null && !hard && !bed && !returning) softTicks++;
         if (current != null && !returning && !"bed_home".equals(currentKey) && home != null && mod().getPlayer() != null
-                && horiz(mod().getPlayer().getBlockPos(), home) > leash()) {
-            Debug.logHarness("[tunnels] need " + currentKey + " left the " + leash() + "-block leash; walking back");
+                && (horiz(mod().getPlayer().getBlockPos(), home) > leash() || Math.abs(mod().getPlayer().getBlockPos().getY() - home.getY()) > vleash())) {
+            Debug.logHarness("[tunnels] need " + currentKey + " left the " + leash() + "/" + vleash() + "-block leash at "
+                    + mod().getPlayer().getBlockPos().toShortString() + "; walking back");
             // Ostinato: re-queue the interrupted need once, so it restarts from home instead of being dropped. run74's bed
             // step started 70+ blocks out (where the copper kit left the bot) and was dropped 10 s in without a try.
             if (!"return".equals(currentKey) && leashRetried.add(currentKey)) {
@@ -161,6 +167,19 @@ public class TunnelProvisionTask extends Task {
                 Debug.logHarness("[tunnels] cannot make task for " + e.getKey() + ": " + ex);
             }
         }
+        if (current == null && queue.isEmpty() && !homed && home != null && mod().getPlayer() != null) {
+            homed = true;
+            BlockPos at = mod().getPlayer().getBlockPos();
+            if (horiz(at, home) > 6 || Math.abs(at.getY() - home.getY()) > 3) {
+                // Ostinato: hand the bot back at the dig face, not wherever the last gather ended.
+                Debug.logHarness("[tunnels] kit done at " + at.toShortString() + "; walking back to " + home.toShortString());
+                current = new GetToBlockTask(home);
+                currentKey = "return";
+                currentCount = 1;
+                currentTicks = 0;
+                returning = true;
+            }
+        }
         if (current == null) return null;
         // Ostinato: show the item count (have/want) next to the queue, so "needs={stone_pickaxe=2}" and the kit line agree;
         // the old "(0 more)" was the queue length and read like "0 pickaxes still needed".
@@ -199,6 +218,10 @@ public class TunnelProvisionTask extends Task {
 
     private int leash() {
         return "bed_item".equals(currentKey) ? BED_LEASH : LEASH;
+    }
+
+    private int vleash() {
+        return "bed_item".equals(currentKey) ? BED_LEASH : VLEASH;
     }
 
     private static int beds() {

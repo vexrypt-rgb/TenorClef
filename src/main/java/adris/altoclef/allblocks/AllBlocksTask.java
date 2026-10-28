@@ -121,10 +121,13 @@ public class AllBlocksTask extends Task {
     @Override
     protected void onStart() {
         AltoClef mod = AltoClef.getInstance();
-        mod.getBehaviour().push();
-        // The bot's own gathering dug the first chest's floor out from under it (it mines wherever the closest block
-        // is). Nothing breaks blocks in the storage area and grid except the step clearing a cell.
-        mod.getBehaviour().avoidBlockBreaking(this::protectedArea);
+        if (!guarded) {
+            // The bot's own gathering dug the first chest's floor out from under it (it mines wherever the closest
+            // block is). Nothing breaks blocks in the storage area and grid except the step clearing a cell.
+            mod.getBehaviour().push();
+            mod.getBehaviour().avoidBlockBreaking(this::protectedArea);
+            guarded = true;
+        }
         if (progress != null) {
             // Resumed after another chain (eating, mob defense) had control: keep the state.
             protectedNow.clear();
@@ -172,9 +175,13 @@ public class AllBlocksTask extends Task {
     @Override
     protected void onStop(Task interruptTask) {
         if (progress != null) progress.save(file);
-        AltoClef.getInstance().getBehaviour().pop();
         // TenorClef also stops (not interrupts) the user chain while a survival chain has control; the task resumes
-        // afterwards, so "stopped" is logged by AllBlocks.stop() instead.
+        // afterwards, so "stopped" is logged by AllBlocks.stop() instead. The layout stays protected through those
+        // pauses: mob defense and eating ran unguarded and broke a placed log out of the grid.
+        if (AllBlocks.stopping || isFinished()) {
+            AltoClef.getInstance().getBehaviour().pop();
+            guarded = false;
+        }
     }
 
     @Override
@@ -936,7 +943,29 @@ public class AllBlocksTask extends Task {
                 new InteractWithBlockTask(new ItemTarget(HOES, 1), Direction.UP, floor, false), 3);
     }
 
+    /** Cells whose block went missing after it was placed: the block goes back into the same cell. */
+    private final Map<String, Integer> repairs = new HashMap<>();
+    private long lastPlacedCheck = -1200;
+
+    /** Every minute near home: a placed cell that is empty again (broken by a fight or a path) is placed again. */
+    private void checkPlaced(AltoClef mod) {
+        if (ticks - lastPlacedCheck < 1200 || origin == null) return;
+        lastPlacedCheck = ticks;
+        for (Map.Entry<String, Integer> en : new ArrayList<>(progress.placed.entrySet())) {
+            BlockPos cell = AllBlocks.cellPos(origin, en.getValue());
+            if (!mod.getChunkTracker().isChunkLoaded(cell) || cell.getSquaredDistance(mod.getPlayer().getBlockPos()) > 48 * 48) continue;
+            AllBlocksPlan.Entry e = byId.get(en.getKey());
+            if (e == null || mod.getWorld().getBlockState(cell).getBlock() == e.block()) continue;
+            if (!mod.getWorld().getBlockState(cell).isAir()) continue;
+            progress.placed.remove(en.getKey());
+            repairs.put(en.getKey(), en.getValue());
+            Debug.logMessage("ALLBLOCKS cell " + en.getValue() + " lost its " + en.getKey() + "; placing it again there");
+            progress.save(file);
+        }
+    }
+
     private Task placeStep(AltoClef mod) {
+        checkPlaced(mod);
         adoptPlaced(mod);
         if (placingId == null) {
             for (AllBlocksPlan.Entry e : plan) {
@@ -962,7 +991,7 @@ public class AllBlocksTask extends Task {
         if (placingCell < 0) {
             int n = progress.nextCell;
             while (progress.badCells.containsKey(n)) n++;
-            placingCell = n;
+            placingCell = repairs.getOrDefault(placingId, n);
         }
         BlockPos cell = AllBlocks.cellPos(origin, placingCell);
         Task home = goHomeFirst(mod, cell, "place " + e.id);
@@ -970,7 +999,7 @@ public class AllBlocksTask extends Task {
         BlockState cellState = mod.getWorld().getBlockState(cell);
         if (cellState.getBlock() == block) {
             progress.placed.put(e.id, placingCell);
-            progress.nextCell = Math.max(progress.nextCell, placingCell + 1);
+            if (repairs.remove(e.id) == null) progress.nextCell = Math.max(progress.nextCell, placingCell + 1);
             Debug.logMessage("ALLBLOCKS PLACED " + e.id + " in cell " + placingCell + " at " + cell.toShortString()
                     + " (placed " + progress.placed.size() + ")");
             placingId = null;
@@ -1120,6 +1149,7 @@ public class AllBlocksTask extends Task {
     }
 
     private BlockPos allowedBreak;
+    private boolean guarded;
     private final Map<Integer, Integer> cellTimeouts = new HashMap<>();
 
     /**
@@ -1128,19 +1158,7 @@ public class AllBlocksTask extends Task {
      * forest (no trunk or leaf inside it could be cut to get there).
      */
     private boolean protectedArea(BlockPos p) {
-        if (origin == null || p.equals(allowedBreak)) return false;
-        int dx = p.getX() - origin.getX(), dy = p.getY() - origin.getY(), dz = p.getZ() - origin.getZ();
-        // The structure block itself and the column under it (holes are filled from the bottom up, and the bot's own
-        // gathering mined the filler back out from under the first chest's stand cell).
-        if (dy > 0 || dy < -8) return false;
-        if (dx < 0 || dx % 2 != 0) return false;
-        if (dz >= -1 && dz < AllBlocks.GRID_Z) {
-            if (dx > 2 * (AllBlocks.CHESTS_PER_ROW - 1)) return false;
-            int m = Math.floorMod(dz, 3);
-            if (m == 2) return dy < 0; // stand cell north of a chest: its floor, not the cell
-            return true;                // chest (3r) or its label (3r + 1)
-        }
-        return dz >= AllBlocks.GRID_Z && (dz - AllBlocks.GRID_Z) % 2 == 0 && dx <= 2 * (AllBlocks.CELLS_PER_ROW - 1);
+        return origin != null && !p.equals(allowedBreak) && AllBlocks.inLayout(origin, p);
     }
 
     // ---------------------------------------------------------------- steps

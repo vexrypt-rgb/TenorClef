@@ -191,11 +191,37 @@ public final class AllBlocks {
         AltoClef mod = AltoClef.getInstance();
         if (mod != null && current != null && current.isActive()) {
             String status = current.statusLine();
-            mod.stopTasks();
+            stopping = true;
+            try {
+                mod.stopTasks();
+            } finally {
+                stopping = false;
+            }
             Debug.logMessage("ALLBLOCKS stopped. " + status);
             return "allblocks: stopped (progress kept; start resumes)";
         }
         return "allblocks: not running";
+    }
+
+    /** True while {@link #stop()} stops the run (as opposed to a survival chain pausing it). */
+    static boolean stopping;
+
+    /**
+     * A chest, label sign or grid cell of the layout at {@code origin}, or the column under one (holes are filled from
+     * the bottom up, and the bot's own gathering mined the filler back out from under a chest's stand cell). Only the
+     * structures: protecting the whole footprint walled the first chest in when the site was a forest.
+     */
+    static boolean inLayout(BlockPos origin, BlockPos p) {
+        int dx = p.getX() - origin.getX(), dy = p.getY() - origin.getY(), dz = p.getZ() - origin.getZ();
+        if (dy > 0 || dy < -8) return false;
+        if (dx < 0 || dx % 2 != 0) return false;
+        if (dz >= -1 && dz < GRID_Z) {
+            if (dx > 2 * (CHESTS_PER_ROW - 1)) return false;
+            int m = Math.floorMod(dz, 3);
+            if (m == 2) return dy < 0; // stand cell north of a chest: its floor, not the cell
+            return true;                // chest (3r) or its label (3r + 1)
+        }
+        return dz >= GRID_Z && (dz - GRID_Z) % 2 == 0 && dx <= 2 * (CELLS_PER_ROW - 1);
     }
 
     /** Walks to the chest-room and grid views and holds each for 10 seconds (for screenshots). */

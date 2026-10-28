@@ -22,6 +22,7 @@ public class AllBlocksTourTask extends Task {
     private int index;
     private int held;
     private boolean logged;
+    private boolean guarded;
 
     public AllBlocksTourTask(BlockPos origin, int chests, int cells) {
         this.origin = origin;
@@ -40,6 +41,12 @@ public class AllBlocksTourTask extends Task {
     protected void onStart() {
         // Nothing to reset: mob defense and eating interrupt the tour, and starting over from the first view each
         // time kept it from ever reaching the grid.
+        if (!guarded) {
+            // Walking between the views must not cut through the grid: a tour path broke a placed log.
+            AltoClef.getInstance().getBehaviour().push();
+            AltoClef.getInstance().getBehaviour().avoidBlockBreaking(p -> AllBlocks.inLayout(origin, p));
+            guarded = true;
+        }
     }
 
     @Override
@@ -74,6 +81,10 @@ public class AllBlocksTourTask extends Task {
 
     @Override
     protected void onStop(Task interruptTask) {
+        if (AllBlocks.stopping || isFinished()) {
+            AltoClef.getInstance().getBehaviour().pop();
+            guarded = false;
+        }
     }
 
     @Override

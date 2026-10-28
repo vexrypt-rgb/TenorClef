@@ -73,7 +73,7 @@ public class TunnelProvisionTask extends Task {
         if (current != null && !hard && !returning) softTicks++;
         if (current != null && !returning && home != null && mod().getPlayer() != null
                 && horiz(mod().getPlayer().getBlockPos(), home) > LEASH) {
-            Debug.logInternal("[tunnels] need " + currentKey + " left the " + LEASH + "-block leash; walking back");
+            Debug.logHarness("[tunnels] need " + currentKey + " left the " + LEASH + "-block leash; walking back");
             current = new GetToBlockTask(home);
             currentKey = "return";
             currentTicks = 0;
@@ -82,14 +82,16 @@ public class TunnelProvisionTask extends Task {
         if (returning && current != null && current.isFinished()) returning = false;
         int limit = hard || returning ? NEED_TIMEOUT_TICKS : SOFT_NEED_TICKS;
         if (current != null && (current.isFinished() || ++currentTicks > limit || (!hard && !returning && softTicks > SOFT_BUDGET_TICKS))) {
-            Debug.logInternal("[tunnels] need " + currentKey + (current.isFinished() ? " done" : " timed out"));
+            // Ostinato: harness-visible (logInternal is muted at NORMAL), with the counts that prove the order sticks -> pick.
+            Debug.logHarness("[tunnels] need " + currentKey + (current.isFinished() ? " done" : " timed out") + " have "
+                    + have(currentKey) + "/" + currentCount + " sticks=" + have("stick") + " planks=" + have("planks"));
             current = null;
             returning = false;
         }
         while (current == null && !queue.isEmpty()) {
             Map.Entry<String, Integer> e = queue.poll();
             if (!e.getKey().endsWith("_pickaxe") && softTicks > SOFT_BUDGET_TICKS) {
-                Debug.logInternal("[tunnels] soft budget spent; skipping " + e.getKey() + " (Ostinato asks again later)");
+                Debug.logHarness("[tunnels] soft budget spent; skipping " + e.getKey() + " (Ostinato asks again later)");
                 continue;
             }
             // Ostinato: a pickaxe craft needs 2 sticks per pick still to make. Provision them (logs -> planks -> sticks via
@@ -101,19 +103,21 @@ public class TunnelProvisionTask extends Task {
                 int toMake = Math.max(0, e.getValue() - have(e.getKey()));
                 int sticksNeeded = 2 * toMake;
                 if (toMake > 0 && have("stick") < sticksNeeded && !"stick".equals(currentKey)) {
-                    Debug.logInternal("[tunnels] pick " + e.getKey() + " needs " + sticksNeeded + " sticks, have " + have("stick") + "; sticks first");
+                    Debug.logHarness("[tunnels] pick " + e.getKey() + " needs " + sticksNeeded + " sticks, have " + have("stick") + "; sticks first");
                     queue.addFirst(e);
                     e = Map.entry("stick", sticksNeeded);
                 }
             }
             try {
                 current = make(e.getKey(), e.getValue());
-                if (current == null) Debug.logInternal("[tunnels] no task for " + e.getKey());
+                Debug.logHarness("[tunnels] need " + e.getKey() + " x" + e.getValue() + " start have " + have(e.getKey())
+                        + " sticks=" + have("stick") + " planks=" + have("planks"));
+                if (current == null) Debug.logHarness("[tunnels] no task for " + e.getKey());
                 currentKey = e.getKey();
                 currentCount = e.getValue();
                 currentTicks = 0;
             } catch (RuntimeException ex) {
-                Debug.logInternal("[tunnels] cannot make task for " + e.getKey() + ": " + ex);
+                Debug.logHarness("[tunnels] cannot make task for " + e.getKey() + ": " + ex);
             }
         }
         if (current == null) return null;

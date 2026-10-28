@@ -17,6 +17,8 @@ import adris.altoclef.util.helpers.WorldHelper;
 import net.minecraft.block.AbstractSignBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.CropBlock;
+import net.minecraft.block.StemBlock;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -384,6 +386,7 @@ public class AllBlocksTask extends Task {
         boolean stored = progress.stored.containsKey(next.id);
         sweep = stored;
         gatherWant = stored ? 1 : (needsPlacement(next) ? 2 : 1);
+        if (kitItem(next.id) || adris.altoclef.multiversion.item.ItemVer.getFoodComponent(next.item) != null) gatherWant++; // keep one for the kit
         ResourceTaskHolder holder = new ResourceTaskHolder(next, gatherWant);
         if (holder.task == null) {
             fail(next.id, next.unsupportedReason() != null ? next.unsupportedReason() : "TaskCatalogue.getItemTask returned null");
@@ -430,7 +433,8 @@ public class AllBlocksTask extends Task {
         }
         AllBlocksPlan.Entry retry = null, later = null;
         for (AllBlocksPlan.Entry e : plan) {
-            if (!e.candidate() || progress.stored.containsKey(e.id) || pending.contains(e.id)) continue;
+            // (A kit item held back for the kit is still gathered: the spare is what goes in the chest.)
+            if (!e.candidate() || progress.stored.containsKey(e.id) || (pending.contains(e.id) && depositable(e.id))) continue;
             if (e.unsupportedReason() != null) continue;
             AllBlocksProgress.Failure f = progress.failures.get(e.id);
             if (f == null || f.attempts == 0) {
@@ -502,7 +506,10 @@ public class AllBlocksTask extends Task {
     }
 
     private boolean shouldDeposit(AltoClef mod) {
-        if (pending.size() >= DEPOSIT_BATCH || freeSlots(mod) < MIN_FREE_SLOTS) return true;
+        int ready = 0;
+        for (String id : pending) if (depositable(id)) ready++;
+        if (ready == 0) return false;
+        if (ready >= DEPOSIT_BATCH || freeSlots(mod) < MIN_FREE_SLOTS) return true;
         // Close to home anyway: drop things off.
         return WorldHelper.getCurrentDimension() == Dimension.OVERWORLD
                 && mod.getPlayer().getBlockPos().getSquaredDistance(origin) < 24 * 24;
@@ -514,7 +521,8 @@ public class AllBlocksTask extends Task {
             return new DefaultGoToDimensionTask(Dimension.OVERWORLD);
         }
         int chest = Integer.MAX_VALUE;
-        for (String id : pending) chest = Math.min(chest, progress.chestOf.getOrDefault(id, 0));
+        for (String id : pending) if (depositable(id)) chest = Math.min(chest, progress.chestOf.getOrDefault(id, 0));
+        if (chest == Integer.MAX_VALUE) return null;
         BlockPos pos = AllBlocks.chestPos(origin, chest);
         Task home = goHomeFirst(mod, pos, "deposit");
         if (home != null) return home;
@@ -536,7 +544,7 @@ public class AllBlocksTask extends Task {
         }
         List<ItemTarget> targets = new ArrayList<>();
         for (String id : pending) {
-            if (progress.chestOf.getOrDefault(id, -1) == chest && count(byId.get(id).item) > 0) {
+            if (progress.chestOf.getOrDefault(id, -1) == chest && depositable(id)) {
                 targets.add(new ItemTarget(byId.get(id).item, 1));
             }
         }
@@ -556,6 +564,22 @@ public class AllBlocksTask extends Task {
         }
         setDebugState("Heading home to " + why);
         return new adris.altoclef.tasks.movement.GetToBlockTask(spot.north(2));
+    }
+
+    /**
+     * Kit items (pickaxes, swords, beds) are also on the list: depositing the only one took the bot's tool or its bed
+     * for the night. Those go in the chest only when a spare is carried.
+     */
+    private static boolean kitItem(String id) {
+        return id.endsWith("_pickaxe") || id.endsWith("_sword") || id.endsWith("_bed");
+    }
+
+    private boolean depositable(String id) {
+        Item item = byId.get(id).item;
+        int have = count(item);
+        // Food too: depositing the last of it sent the kit back out hunting.
+        boolean keepOne = kitItem(id) || adris.altoclef.multiversion.item.ItemVer.getFoodComponent(item) != null;
+        return have > (keepOne ? 1 : 0);
     }
 
     private int depositChest = -1;
@@ -647,10 +671,19 @@ public class AllBlocksTask extends Task {
     // ---------------------------------------------------------------- placement
 
     private boolean needsPlacement(AllBlocksPlan.Entry e) {
-        return e.placeable() && !progress.placed.containsKey(e.id) && !progress.placeSkipped.containsKey(e.id);
+        if (!e.placeable() || progress.placed.containsKey(e.id) || progress.placeSkipped.containsKey(e.id)) return false;
+        Block b = e.block();
+        if (b instanceof CropBlock || b instanceof StemBlock) {
+            // Crops stand only on farmland, which the grid does not make (no hoeing step yet).
+            progress.placeSkipped.put(e.id, "crop: needs farmland (hoed dirt), which the grid does not make");
+            Debug.logMessage("ALLBLOCKS PLACE-SKIP " + e.id + ": needs farmland");
+            return false;
+        }
+        return true;
     }
 
     private Task placeStep(AltoClef mod) {
+        adoptPlaced(mod);
         if (placingId == null) {
             for (AllBlocksPlan.Entry e : plan) {
                 if (!e.candidate() || !progress.stored.containsKey(e.id) || !needsPlacement(e)) continue;
@@ -721,6 +754,30 @@ public class AllBlocksTask extends Task {
         }
         allowedBreak = cell;
         return startStep("place " + e.id + " in cell " + placingCell, new PlaceBlockTask(cell, block), PLACE_MINUTES);
+    }
+
+    /**
+     * A block placed in the next free cell whose record was lost (the session ended between placing and noting it):
+     * note it now instead of gathering it again.
+     */
+    private void adoptPlaced(AltoClef mod) {
+        if (origin == null) return;
+        int n = progress.nextCell;
+        while (progress.badCells.containsKey(n)) n++;
+        BlockPos cell = AllBlocks.cellPos(origin, n);
+        if (!mod.getChunkTracker().isChunkLoaded(cell)) return;
+        Block there = mod.getWorld().getBlockState(cell).getBlock();
+        if (there == Blocks.AIR) return;
+        for (AllBlocksPlan.Entry e : plan) {
+            if (e.candidate() && e.block() == there && progress.stored.containsKey(e.id) && needsPlacement(e)) {
+                progress.placed.put(e.id, n);
+                progress.nextCell = n + 1;
+                Debug.logMessage("ALLBLOCKS PLACED " + e.id + " in cell " + n + " at " + cell.toShortString() + " (found there; placed " + progress.placed.size() + ")");
+                if (e.id.equals(placingId)) placingId = null;
+                progress.save(file);
+                return;
+            }
+        }
     }
 
     /** Only lay a special floor where it can matter (soul sand for nether wart, end stone for chorus). */

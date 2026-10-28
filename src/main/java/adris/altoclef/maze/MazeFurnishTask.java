@@ -47,6 +47,8 @@ public class MazeFurnishTask extends Task {
     private int escalations; // Ostinato: run86 stall escalations this room (skip + walk home) before FAIL
     private int stuckRecoveries; // Ostinato: one wander+blacklist recovery before FAIL
     private boolean gathered;    // Ostinato: gather-once latch
+    private boolean treesReplanted; private adris.altoclef.tasks.resources.ReplantTreesTask replantTask; // Ostinato: wood farm, once per room
+    private final java.util.Set<String> lootDone = new java.util.HashSet<>(); private String lootKey; private int lootTicks; // Ostinato: loot at FILL
     private String gatherKey;    // Ostinato: loot-only gather budget
     private int gatherTicks;
     private final java.util.Set<String> skipped = new java.util.HashSet<>();
@@ -224,12 +226,26 @@ public class MazeFurnishTask extends Task {
             // was already placed (inventory 0), so the bot went back for another barrel and mined up its own seal shaft.
             // An item that reached its count once is done here; the step regather path handles real shortfalls.
             if (satisfied.contains(need.getKey())) continue;
+            // Ostinato: run86/88. Loot (paper, seeds, string...) was gathered before the first light: a paper hunt sent the
+            // bot 70 blocks out at 0/133 lights. Loot is now gathered at the FILL step (after lights + container), where it
+            // is actually used; the sugar cane farm also gets the whole build to regrow.
+            if (lootOnly(need.getKey())) continue;
             // Ostinato: run47. Wood cladding steps accept every nearby wood (MazeFurnishPlanner.wood appends them all), but the
             // gather pinned each step to one plank id: walls asked for oak_planks x79 with ~1 oak tree around (179 cherry
             // logs), so the bot wandered 25 min chopping nothing. Pool all wood cladding into one any-planks count.
             if (isWoodCladding(need.getKey())) {
                 int pooled = plankCladdingMissing(mod);
-                if (heldPlanks(mod) >= pooled) { satisfied.add(need.getKey()); continue; }
+                if (heldPlanks(mod) >= pooled) {
+                    // Ostinato: wood is a farm. Replant where the trees were just cut, once per room (1 min cap), so later
+                    // rooms of a forever expand still have wood near them instead of hunting farther every room.
+                    if (!treesReplanted) {
+                        if (replantTask == null) replantTask = new adris.altoclef.tasks.resources.ReplantTreesTask(3, 1200);
+                        if (!replantTask.isFinished()) { setDebugState("Replanting trees"); return replantTask; }
+                        System.out.println("MAZETEST FURNISH replant-trees planted=" + replantTask.planted() + " feet=" + feet.toShortString());
+                        treesReplanted = true;
+                    }
+                    satisfied.add(need.getKey()); continue;
+                }
                 Task home = returnHome(mod, feet, need.getKey()); // Ostinato: run52 gather near the room
                 if (home != null) return home;
                 if (needsSurface(mod, feet, need.getKey())) return surfaceClimb(mod, feet, need.getKey());
@@ -297,7 +313,7 @@ public class MazeFurnishTask extends Task {
                 }
                 if (!lootOnly(need.getKey())) { Task home = returnHome(mod, feet, need.getKey()); if (home != null) return home; } // Ostinato: run52
                 // Ostinato: run65/66. After the one-shot return the gather was unbounded (book/barrel/planks drifted 65-100+ blocks).
-                if (homeDist(feet) > GATHER_LEASH) {
+                if (homeDist(feet) > leashFor(need.getKey())) {
                     if (!isCladding(need.getKey())) { System.out.println("MAZETEST FURNISH skip-gather " + need.getKey() + " why=leash dist=" + homeDist(feet)); skipped.add(need.getKey()); continue; }
                     Task leash = gatherLeash(mod, feet, need.getKey(), false); if (leash != null) return leash;
                 }
@@ -570,14 +586,18 @@ public class MazeFurnishTask extends Task {
     private static final int GATHER_LEASH = 96;
     private int homeTicks, leashTicks, leashTrips;
     private Task leashHome;
+    // Ostinato: run88. Oak within 96 of the room was chopped out: 5 trips walked home to 56 and straight back out to the same
+    // trees at 97 (14 min flat, light 0/133). The leash now widens by 32 per trip for that item, so the next trip reaches it.
+    private final java.util.Map<String, Integer> keyTrips = new java.util.HashMap<>();
+    private int leashFor(String key) { return GATHER_LEASH + 32 * keyTrips.getOrDefault(key, 0); }
     private Task gatherLeash(AltoClef mod, BlockPos feet, String key, boolean check) {
         int d = homeDist(feet); BlockPos h = home();
         if (h == null || leashTrips > 6) return null;
-        if (leashHome != null && (leashHome.isFinished() || d <= GATHER_LEASH - 40 || ++leashTicks > 3600)) { leashHome = null; return null; }
+        if (leashHome != null && (leashHome.isFinished() || d <= leashFor(key) - 40 || ++leashTicks > 3600)) { leashHome = null; return null; }
         if (leashHome == null) {
-            if (check && d <= GATHER_LEASH) return null;
-            leashHome = new adris.altoclef.tasks.movement.GetToBlockTask(h); leashTicks = 0; leashTrips++;
-            System.out.println("MAZETEST FURNISH gather-leash for=" + key + " dist=" + d + " trip=" + leashTrips);
+            if (check && d <= leashFor(key)) return null;
+            leashHome = new adris.altoclef.tasks.movement.GetToBlockTask(h); leashTicks = 0; leashTrips++; keyTrips.merge(key, 1, Integer::sum);
+            System.out.println("MAZETEST FURNISH gather-leash for=" + key + " dist=" + d + " trip=" + leashTrips + " nextLeash=" + leashFor(key));
         }
         setDebugState("Leash back to room for " + key + " dist=" + d);
         return leashHome;
@@ -744,6 +764,20 @@ public class MazeFurnishTask extends Task {
                         warnedPot = true;
                     }
                     return null;
+                }
+                // Ostinato: deferred loot gather (see the pre-gather loop). 3 min per item, leashed, farm-aware catalogue tasks.
+                BlockPos lootFeet = mod.getPlayer().getBlockPos();
+                for (MazeFurnishPlan.Item it : step.contents()) {
+                    Item li = McCompat.item(it.id());
+                    if (li == null || lootDone.contains(it.id()) || skipped.contains(it.id()) || NO_HUNT_LOOT.contains(it.id())) continue;
+                    if (mod.getItemStorage().getItemCount(li) >= it.count() || !TaskCatalogue.obtainableNow(li)) { lootDone.add(it.id()); continue; }
+                    if (!it.id().equals(lootKey)) { lootKey = it.id(); lootTicks = 0; System.out.println("MAZETEST FURNISH loot-gather " + it.id() + " x" + it.count() + " have=" + mod.getItemStorage().getItemCount(li)); }
+                    if (++lootTicks > 3600 || homeDist(lootFeet) > GATHER_LEASH) {
+                        System.out.println("MAZETEST FURNISH loot-skip " + it.id() + " have=" + mod.getItemStorage().getItemCount(li) + "/" + it.count() + " ticks=" + lootTicks + " dist=" + homeDist(lootFeet));
+                        lootDone.add(it.id());
+                        continue;
+                    }
+                    return TaskCatalogue.getItemTask(li, it.count());
                 }
                 List<ItemTarget> targets = new ArrayList<>();
                 for (MazeFurnishPlan.Item it : step.contents()) {

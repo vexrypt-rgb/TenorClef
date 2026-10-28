@@ -144,7 +144,7 @@ public class TaskCatalogue {
             mob("ink_sac", Items.INK_SAC, SquidEntity.class); // Warning, this probably won't work.
             mob("glow_ink_sac", Items.GLOW_INK_SAC, Entities.GLOW_SQUID); // Warning, this probably won't work.
             put("string", new Item[]{Items.STRING}, count -> new adris.altoclef.tasks.resources.CollectStringTask(count)); // Ostinato: cobweb+sword first, spiders second
-            mine("sugar_cane", Items.SUGAR_CANE);
+            simple("sugar_cane", Items.SUGAR_CANE, adris.altoclef.tasks.resources.FarmSugarCaneTask::new); // Ostinato: harvest above the base + replant/extend the patch (was: mine whole stalks)
             mine("brown_mushroom", MiningRequirement.HAND, new Block[]{Blocks.BROWN_MUSHROOM, Blocks.BROWN_MUSHROOM_BLOCK}, Items.BROWN_MUSHROOM);
             mine("red_mushroom", MiningRequirement.HAND, new Block[]{Blocks.RED_MUSHROOM, Blocks.RED_MUSHROOM_BLOCK}, Items.RED_MUSHROOM);
             mine("mushroom", MiningRequirement.HAND, new Block[]{Blocks.BROWN_MUSHROOM, Blocks.BROWN_MUSHROOM_BLOCK, Blocks.RED_MUSHROOM, Blocks.RED_MUSHROOM_BLOCK}, Items.BROWN_MUSHROOM, Items.RED_MUSHROOM);

@@ -51,6 +51,11 @@ public class ContainerCache {
         }
     }
 
+    /** Every item in the container and how many (a copy). */
+    public java.util.Map<Item, Integer> getItemCounts() {
+        return new HashMap<>(itemCounts);
+    }
+
     public int getItemCount(Item... items) {
         int result = 0;
         for (Item item : items) {

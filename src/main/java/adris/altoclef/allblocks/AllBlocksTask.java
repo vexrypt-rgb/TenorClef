@@ -237,11 +237,41 @@ public class AllBlocksTask extends Task {
             if (t != null) return t;
         }
 
+        Task trim = trimStep(mod);
+        if (trim != null) return trim;
+
         Task place = placeStep(mod);
         if (place != null) return place;
 
         return gatherStep(mod);
     }
+
+    private final Set<Integer> trimmed = new LinkedHashSet<>();
+
+    /**
+     * One of each item, not a stack: earlier deposits on 26.3 stored whole stacks. Near home, each storage chest is
+     * opened once per session (or again when its contents show a duplicate) and the extra copies are taken back out.
+     */
+    private Task trimStep(AltoClef mod) {
+        if (stepTask != null && stepKey != null && stepKey.startsWith("trim chest ")) return stepTask;
+        if (WorldHelper.getCurrentDimension() != Dimension.OVERWORLD
+                || mod.getPlayer().getBlockPos().getSquaredDistance(origin) > 24 * 24 || freeSlots(mod) < MIN_FREE_SLOTS) {
+            return null;
+        }
+        for (int chest : new java.util.TreeSet<>(progress.stored.values())) {
+            BlockPos pos = AllBlocks.chestPos(origin, chest);
+            if (mod.getWorld().getBlockState(pos).getBlock() != Blocks.CHEST) continue;
+            Optional<ContainerCache> cache = mod.getItemStorage().getContainerAtPosition(pos);
+            boolean dup = cache.isPresent() && cache.get().getItemCounts().values().stream().anyMatch(n -> n > 1);
+            if (trimmed.contains(chest) && !dup) continue;
+            if (trimmed.contains(chest) && trimTries.merge(chest, 1, Integer::sum) > 3) continue;
+            trimmed.add(chest);
+            return startStep("trim chest " + chest, new AllBlocksTrimTask(pos), 3);
+        }
+        return null;
+    }
+
+    private final Map<Integer, Integer> trimTries = new HashMap<>();
 
     // ---------------------------------------------------------------- night
 
@@ -568,6 +598,24 @@ public class AllBlocksTask extends Task {
         if (!Boolean.TRUE.equals(progress.labeled.get(chest)) && !labelFailed.contains(chest) && stepTask == null) {
             Task t = labelStep(mod, chest);
             if (t != null) return t;
+        }
+        // Already in the chest (a deposit that was not recorded, e.g. cut short by a crash): record it, do not add another.
+        Optional<ContainerCache> known = mod.getItemStorage().getContainerAtPosition(pos);
+        if (known.isPresent()) {
+            boolean changed = false;
+            for (String id : new ArrayList<>(pending)) {
+                if (progress.chestOf.getOrDefault(id, -1) == chest && known.get().getItemCount(byId.get(id).item) > 0) {
+                    progress.stored.put(id, chest);
+                    pending.remove(id);
+                    changed = true;
+                    Debug.logMessage("ALLBLOCKS DEPOSIT " + id + " -> chest " + chest + " at " + pos.toShortString()
+                            + " (already in chest; stored " + progress.stored.size() + ")");
+                }
+            }
+            if (changed) {
+                protectPending(mod);
+                progress.save(file);
+            }
         }
         List<ItemTarget> targets = new ArrayList<>();
         for (String id : pending) {

@@ -8,6 +8,7 @@ import adris.altoclef.trackers.storage.ContainerCache;
 import adris.altoclef.util.ItemTarget;
 import adris.altoclef.util.helpers.StorageHelper;
 import adris.altoclef.util.slots.Slot;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 
@@ -25,6 +26,8 @@ public class StoreInContainerTask extends AbstractDoToStorageContainerTask {
     private final ItemTarget[] toStore;
 
     private ContainerStoredTracker storedItems;
+    /** Item counts in the container when this task first saw it open (see {@link #storedCount}). */
+    private java.util.Map<Item, Integer> baseline;
 
     public StoreInContainerTask(BlockPos targetContainer, boolean getIfNotPresent, ItemTarget... toStore) {
         this.targetContainer = targetContainer;
@@ -72,8 +75,14 @@ public class StoreInContainerTask extends AbstractDoToStorageContainerTask {
 
     @Override
     protected Task onContainerOpenSubtask(AltoClef mod, ContainerCache containerCache) {
+        if (baseline == null) {
+            baseline = new java.util.HashMap<>();
+            for (ItemTarget target : toStore) {
+                for (Item item : target.getMatches()) baseline.put(item, containerCache.getItemCount(item));
+            }
+        }
         // Move all items that aren't in the container
-        for (ItemTarget target : storedItems.getUnstoredItemTargetsYouCanStore(mod, toStore)) {
+        for (ItemTarget target : unstored(mod)) {
             setDebugState("Dumping " + target);
             // Grab the item from the current chest that most closely matches our requirements
             List<Slot> potentials = mod.getItemStorage().getSlotsWithItemPlayerInventory(false, target.getMatches());
@@ -104,7 +113,31 @@ public class StoreInContainerTask extends AbstractDoToStorageContainerTask {
     @Override
     public boolean isFinished() {
         // We've stored all items
-        return storedItems != null && storedItems.getUnstoredItemTargetsYouCanStore(AltoClef.getInstance(), toStore).length == 0;
+        return storedItems != null && unstored(AltoClef.getInstance()).length == 0;
+    }
+
+    /**
+     * How many of the target this task has put in the container. The slot-click tracker misses every click on 26.3
+     * (the mixin it relies on does not see them), which made the task store whole stacks one item at a time when only
+     * one was asked for. So the container's own contents count too: what it gained since this task first opened it.
+     */
+    private int storedCount(AltoClef mod, ItemTarget target) {
+        int tracked = storedItems.getStoredCount(target.getMatches());
+        if (baseline == null) return tracked;
+        Optional<ContainerCache> cache = mod.getItemStorage().getContainerAtPosition(targetContainer);
+        if (cache.isEmpty()) return tracked;
+        int gained = 0;
+        for (Item item : target.getMatches()) {
+            gained += cache.get().getItemCount(item) - baseline.getOrDefault(item, 0);
+        }
+        return Math.max(tracked, gained);
+    }
+
+    private ItemTarget[] unstored(AltoClef mod) {
+        return Arrays.stream(toStore)
+                .filter(t -> storedCount(mod, t) < t.getTargetCount() && mod.getItemStorage().hasItem(t.getMatches()))
+                .map(t -> new ItemTarget(t, Math.min(t.getTargetCount() - storedCount(mod, t), mod.getItemStorage().getItemCount(t))))
+                .toArray(ItemTarget[]::new);
     }
 
     @Override

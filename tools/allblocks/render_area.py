@@ -5,7 +5,8 @@
     python3 tools/allblocks/render_area.py <world dir> <progress.json> <client.jar> <out.png>
 
 Each block column of the area is drawn with the texture of the highest block from y+1 down to y-5 (below y shaded).
-Chests are outlined and numbered; placed grid cells are outlined green. Reads the world only, so it shows what is
+Chests are outlined and numbered; placed grid cells are outlined green. A legend below lists each placed
+cell's block and each chest's items as the world holds them. Reads the world only, so it shows what is
 really there, not what the bot's log says.
 """
 import io
@@ -84,6 +85,33 @@ def main():
         x, _, z = cell_pos(o, n)
         px, pz = (x - x0) * PX, (z - z0) * PX
         draw.rectangle([px, pz, px + PX - 1, pz + PX - 1], outline=(0, 255, 0, 255), width=1)
+    # Legend under the map: what the world holds in each placed cell and each chest (read from the save, not the log).
+    lines = []
+    for iid, n in sorted(prog.get('placed', {}).items(), key=lambda kv: kv[1]):
+        b = reg.block(*cell_pos(o, n))
+        lines.append(f'cell {n:>3}: {iid:<28} world: {(b or "?").replace("minecraft:", "")}')
+    for k in chests:
+        be = reg.block_entity(*chest_pos(o, k))
+        if be is None:
+            continue
+        items = ' '.join(str(it['id']).replace('minecraft:', '') + ('' if int(it.get('count', 1)) == 1 else 'x' + str(int(it.get('count', 1))))
+                         for it in be.get('Items', []))
+        lines.append(f'chest {k:>2}: {items}')
+    wrapped = []
+    width = img.size[0] // 7
+    for line in lines:
+        while len(line) > width:
+            wrapped.append(line[:width])
+            line = '    ' + line[width:]
+        wrapped.append(line)
+    legend = Image.new('RGBA', (img.size[0], 14 * len(wrapped) + 8), (20, 20, 20, 255))
+    ld = ImageDraw.Draw(legend)
+    for i, line in enumerate(wrapped):
+        ld.text((6, 4 + 14 * i), line, fill=(230, 230, 230, 255))
+    full = Image.new('RGBA', (img.size[0], img.size[1] + legend.size[1]), (20, 20, 20, 255))
+    full.paste(img, (0, 0))
+    full.paste(legend, (0, img.size[1]))
+    img = full
     img.save(out)
     print(f'{out}: {img.size[0]}x{img.size[1]}, {len(chests)} chests assigned, {len(prog.get("placed", {}))} cells placed')
 

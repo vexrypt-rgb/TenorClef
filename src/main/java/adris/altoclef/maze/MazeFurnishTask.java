@@ -156,7 +156,7 @@ public class MazeFurnishTask extends Task {
             System.out.println("MAZETEST FURNISH escalate " + escalations + "/4 stuck=" + ds + " skip=" + key + " dist=" + homeDist(feet) + " feet=" + feet.toShortString());
             stuckRecoveries = 0; stuckTicks = 0; stuckAnchor = feet;
             BlockPos h = home();
-            unstickTicks = 0; unstick = new adris.altoclef.tasks.movement.GetToXZTask(h.getX(), h.getZ());
+            unstickTicks = 0; unstick = new adris.altoclef.tasks.movement.GetToBlockTask(h);
             return unstick;
         }
         else if (stuckTicks >= 1200) {
@@ -171,7 +171,7 @@ public class MazeFurnishTask extends Task {
         // Ostinato: run13 watchdog fired once, then the wander never reported finished and the bot idled forever.
         // Cap each wander at 30s and let stillness keep counting so the watchdog can fire again.
         // Ostinato: an escalation walk home (GetToXZ) gets 2 min, a wander 30 s.
-        if (unstick != null && !unstick.isFinished() && ++unstickTicks < (unstick instanceof adris.altoclef.tasks.movement.GetToXZTask ? 2400 : 600)) return unstick;
+        if (unstick != null && !unstick.isFinished() && ++unstickTicks < (unstick instanceof adris.altoclef.tasks.movement.GetToBlockTask ? 2400 : 600)) return unstick;
         unstick = null;
         if (stillTicks >= 2400) {
             StringBuilder chain = new StringBuilder();
@@ -510,7 +510,7 @@ public class MazeFurnishTask extends Task {
         if (t != null && gathered && (kd > kitLeash || kitHome != null)) {
             BlockPos h = home();
             if (kitHome == null) {
-                kitHome = new adris.altoclef.tasks.movement.GetToXZTask(h.getX(), h.getZ());
+                kitHome = new adris.altoclef.tasks.movement.GetToBlockTask(h);
                 System.out.println("MAZETEST FURNISH return-home for=kit-" + step + " dist=" + homeDist(mod.getPlayer().getBlockPos()));
             }
             setDebugState("Returning to room for kit " + step);
@@ -576,7 +576,7 @@ public class MazeFurnishTask extends Task {
         if (leashHome != null && (leashHome.isFinished() || d <= GATHER_LEASH - 40 || ++leashTicks > 3600)) { leashHome = null; return null; }
         if (leashHome == null) {
             if (check && d <= GATHER_LEASH) return null;
-            leashHome = new adris.altoclef.tasks.movement.GetToXZTask(h.getX(), h.getZ()); leashTicks = 0; leashTrips++;
+            leashHome = new adris.altoclef.tasks.movement.GetToBlockTask(h); leashTicks = 0; leashTrips++;
             System.out.println("MAZETEST FURNISH gather-leash for=" + key + " dist=" + d + " trip=" + leashTrips);
         }
         setDebugState("Leash back to room for " + key + " dist=" + d);
@@ -591,19 +591,23 @@ public class MazeFurnishTask extends Task {
     private Task homeTask, kitHome; // Ostinato: run53 kitHome
     private BlockPos home() {
         if (plannedCells.isEmpty()) return null;
-        long x = 0, z = 0; for (BlockPos c : plannedCells) { x += c.getX(); z += c.getZ(); }
-        return new BlockPos((int) (x / plannedCells.size()), 0, (int) (z / plannedCells.size()));
+        // Ostinato: run87. home had y=0 and every leash was horizontal: an andesite gather 50 blocks under the room read as
+        // dist=4, so the walk home finished at once and the bot stayed in the cave. home is now on top of the roof: right at the
+        // room but outside it (a sealed room cannot be pathed into without breaking protected cells).
+        long x = 0, z = 0; int maxY = Integer.MIN_VALUE; for (BlockPos c : plannedCells) { x += c.getX(); z += c.getZ(); maxY = Math.max(maxY, c.getY()); }
+        return new BlockPos((int) (x / plannedCells.size()), maxY + 1, (int) (z / plannedCells.size()));
     }
     private int homeDist(BlockPos feet) {
         BlockPos h = home(); if (h == null) return 0;
-        return (int) Math.sqrt(Math.pow(feet.getX() - h.getX(), 2) + Math.pow(feet.getZ() - h.getZ(), 2));
+        // Ostinato: run87. Depth counts past 16 blocks above/below the room (a cave under the room is not "home").
+        return (int) Math.sqrt(Math.pow(feet.getX() - h.getX(), 2) + Math.pow(feet.getZ() - h.getZ(), 2)) + Math.max(0, Math.abs(feet.getY() - h.getY()) - 16);
     }
     private Task returnHome(AltoClef mod, BlockPos feet, String key) {
         BlockPos h = home();
         if (h == null || returnedHome.contains(key)) return null;
         int d = homeDist(feet);
         if (homeTask == null && d <= HOME_LEASH) return null;
-        if (homeTask == null) { homeTask = new adris.altoclef.tasks.movement.GetToXZTask(h.getX(), h.getZ()); homeTicks = 0; System.out.println("MAZETEST FURNISH return-home for=" + key + " dist=" + d); }
+        if (homeTask == null) { homeTask = new adris.altoclef.tasks.movement.GetToBlockTask(h); homeTicks = 0; System.out.println("MAZETEST FURNISH return-home for=" + key + " dist=" + d); }
         // Ostinato: run65. "Returning to room for book dist=65" never finished (wandered 65-81). Cap the walk at 2 min.
         if (++homeTicks > 2400) { System.out.println("MAZETEST FURNISH return-home giveup for=" + key + " dist=" + d); returnedHome.add(key); homeTask = null; return null; }
         if (d > 24 && !homeTask.isFinished()) { setDebugState("Returning to room for " + key + " dist=" + d); return homeTask; }

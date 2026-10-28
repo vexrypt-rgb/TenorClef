@@ -96,7 +96,10 @@ public class TunnelProvisionTask extends Task {
         // is queued last, so armor + torches used to eat the whole budget every round and spawn was never set (run73).
         boolean bed = currentKey != null && currentKey.startsWith("bed");
         if (current != null && !hard && !bed && !returning) softTicks++;
-        if (current != null && !returning && !"bed_home".equals(currentKey) && home != null && mod().getPlayer() != null
+        // Ostinato: a pick need (or its sticks) with no usable pick is never leashed: walking back pickless only restarts the
+        // same gather, and the hard gate blocks the dig anyway (run82: 73 stick + 13 stone_pickaxe leash trips, 30+ min loop).
+        boolean pickChain = !usablePick && currentKey != null && (currentKey.endsWith("_pickaxe") || currentKey.equals("stick"));
+        if (current != null && !returning && !pickChain && !"bed_home".equals(currentKey) && home != null && mod().getPlayer() != null
                 && (horiz(mod().getPlayer().getBlockPos(), home) > leash() || home.getY() - mod().getPlayer().getBlockPos().getY() > vleash())) {
             Debug.logHarness("[tunnels] need " + currentKey + " left the " + leash() + "/" + vleash() + "-block leash at "
                     + mod().getPlayer().getBlockPos().toShortString() + "; walking back");
@@ -145,7 +148,8 @@ public class TunnelProvisionTask extends Task {
                 if (toMake > 0 && have("stick") < sticksNeeded && !"stick".equals(currentKey)) {
                     Debug.logHarness("[tunnels] pick " + e.getKey() + " needs " + sticksNeeded + " sticks, have " + have("stick") + "; sticks first");
                     queue.addFirst(e);
-                    e = Map.entry("stick", sticksNeeded);
+                    // Ostinato: keep a reserve (one log = 8 sticks) so the next worn stone pick needs no surface wood trip.
+                    e = Map.entry("stick", Math.max(8, sticksNeeded));
                 }
             }
             // Ostinato: bed = get the bed item (wherever the sheep are), walk back home (the dig face), then place it and

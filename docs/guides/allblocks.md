@@ -40,7 +40,7 @@ two clear blocks above it.
    head and waits for morning.
 3. **Survival kit**, before every gather: a pickaxe with life left (copper, then iron, then stone; a wooden pickaxe
    does not count), a sword (copper, then iron, then stone), food score 10 or more, a bed, and armor in every slot
-   (copper, then iron, then leather). Each need gets 12 minutes; a need that runs out of time cools down for 30 minutes
+   (copper, then iron, then leather). A placed bed does not count for the kit. Each need gets 12 minutes; a need that runs out of time cools down for 30 minutes
    and the next choice is tried. The bot keeps one of each kit item (and its food) out of the chests.
 4. **Deposit**, when 4 gathered items wait, fewer than 5 inventory slots are free, the bot is within 24 blocks of
    home, or nothing is left to gather. It places the chest and its label first when they are missing, puts exactly one of

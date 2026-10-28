@@ -63,6 +63,9 @@ final class AllBlocksKit {
                     Debug.logMessage("ALLBLOCKS kit: gave up on " + need + " for " + COOLDOWN_MINUTES + " min");
                 } else {
                     Debug.logMessage("ALLBLOCKS kit: " + need + " ok");
+                    // Not asked again for a minute: a need that flickers between met and unmet must not stop the bot
+                    // every tick.
+                    cooldownUntil.put(need, now + TICKS_PER_MINUTE);
                 }
                 need = null;
                 needTask = null;
@@ -136,11 +139,12 @@ final class AllBlocksKit {
     }
 
     /**
-     * A bed in the inventory, or one placed close by (the night step sleeps in it). A bed left far away does not count:
-     * the bot walked to one in the dark and died.
+     * A bed carried. A placed one does not count for the kit: "within 24 blocks" flickered as the bot walked past the
+     * edge, and each flip restarted the kit and stopped the bot in its tracks. (The night step still sleeps in a
+     * placed bed close by.)
      */
     static boolean hasBed(AltoClef mod) {
-        return mod.getItemStorage().hasItem(adris.altoclef.util.helpers.ItemHelper.BED) || AllBlocksTask.nearBed(mod);
+        return mod.getItemStorage().hasItem(adris.altoclef.util.helpers.ItemHelper.BED);
     }
 
     /** A tool of one of these kinds with more than {@value #MIN_DURABILITY} of its durability left. */

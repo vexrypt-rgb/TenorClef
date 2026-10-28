@@ -37,6 +37,8 @@ public class TunnelProvisionTask extends Task {
     // Ostinato: gather leash. Resource tasks wander to the nearest tree/ore; past LEASH blocks from the dig the need is
     // dropped and the bot walks back before the next one.
     private static final int LEASH = 64;
+    // Ostinato: sheep roam far from a dig face; bed_home walks the bed back, so its gather gets a wider leash (run76: 2 x dropped at 64).
+    private static final int BED_LEASH = 192;
     private BlockPos home;
     private int softTicks;
     private boolean returning;
@@ -85,8 +87,8 @@ public class TunnelProvisionTask extends Task {
         boolean bed = currentKey != null && currentKey.startsWith("bed");
         if (current != null && !hard && !bed && !returning) softTicks++;
         if (current != null && !returning && home != null && mod().getPlayer() != null
-                && horiz(mod().getPlayer().getBlockPos(), home) > LEASH) {
-            Debug.logHarness("[tunnels] need " + currentKey + " left the " + LEASH + "-block leash; walking back");
+                && horiz(mod().getPlayer().getBlockPos(), home) > leash()) {
+            Debug.logHarness("[tunnels] need " + currentKey + " left the " + leash() + "-block leash; walking back");
             // Ostinato: re-queue the interrupted need once, so it restarts from home instead of being dropped. run74's bed
             // step started 70+ blocks out (where the copper kit left the bot) and was dropped 10 s in without a try.
             if (!"return".equals(currentKey) && leashRetried.add(currentKey)) {
@@ -180,6 +182,10 @@ public class TunnelProvisionTask extends Task {
         } catch (RuntimeException ex) {
             return 0;
         }
+    }
+
+    private int leash() {
+        return "bed_item".equals(currentKey) ? BED_LEASH : LEASH;
     }
 
     private static int beds() {

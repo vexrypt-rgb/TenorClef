@@ -86,7 +86,7 @@ public class TunnelProvisionTask extends Task {
         // is queued last, so armor + torches used to eat the whole budget every round and spawn was never set (run73).
         boolean bed = currentKey != null && currentKey.startsWith("bed");
         if (current != null && !hard && !bed && !returning) softTicks++;
-        if (current != null && !returning && home != null && mod().getPlayer() != null
+        if (current != null && !returning && !"bed_home".equals(currentKey) && home != null && mod().getPlayer() != null
                 && horiz(mod().getPlayer().getBlockPos(), home) > leash()) {
             Debug.logHarness("[tunnels] need " + currentKey + " left the " + leash() + "-block leash; walking back");
             // Ostinato: re-queue the interrupted need once, so it restarts from home instead of being dropped. run74's bed

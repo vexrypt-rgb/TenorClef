@@ -1098,6 +1098,15 @@ public class AllBlocksTask extends Task {
             labelLines = null;
             return null;
         }
+        // Interact steps never finish by themselves: a till step is done once the floor is farmland. (It went on
+        // clicking for its whole 3 minutes, and the dry farmland turned back to dirt before the crop went in.)
+        if (stepKey.startsWith("till the floor of cell ") && placingCell >= 0
+                && mod.getWorld().getBlockState(AllBlocks.cellPos(origin, placingCell).down()).getBlock() == Blocks.FARMLAND) {
+            Debug.logMessage("ALLBLOCKS tilled the floor of cell " + placingCell);
+            stepTask = null;
+            stepKey = null;
+            return null;
+        }
         if (!stepTask.isFinished() && !timedOut) {
             setDebugState(stepKey);
             return stepTask;

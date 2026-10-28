@@ -48,7 +48,8 @@ import java.util.Set;
  *   <li>Place: a stored block with a spare copy in the inventory goes into the next grid cell.</li>
  *   <li>Gather the next item (2 of a placeable block: one for the chest, one for the grid), cheapest first. A gather
  *   that times out or ends without the item is retried once after everything else, then reported as stuck.</li>
- *   <li>Blocks sweep: a stored block that was never placed is gathered once more and placed.</li>
+ *   <li>Blocks sweep: a stored block whose grid copy was used up is gathered once more and placed (first try
+ *   right away, a retry at the end).</li>
  * </ol>
  * All gathering goes through TaskCatalogue (mining, crafting, smelting, mobs, loot); the run never sends a command.
  */
@@ -419,6 +420,14 @@ public class AllBlocksTask extends Task {
      * session, since they usually share the missing source.
      */
     private AllBlocksPlan.Entry nextToGather() {
+        // A stored block whose grid copy got used up (dirt and cobblestone double as building filler): get it again
+        // now, while its source is near, rather than in a sweep at the very end.
+        for (AllBlocksPlan.Entry e : plan) {
+            if (!e.candidate() || !progress.stored.containsKey(e.id) || !needsPlacement(e) || count(e.item) > 0) continue;
+            AllBlocksProgress.Failure f = progress.failures.get("sweep:" + e.id);
+            if (f != null && (f.stuck || f.attempts > 0)) continue;
+            return e;
+        }
         AllBlocksPlan.Entry retry = null, later = null;
         for (AllBlocksPlan.Entry e : plan) {
             if (!e.candidate() || progress.stored.containsKey(e.id) || pending.contains(e.id)) continue;
@@ -710,6 +719,7 @@ public class AllBlocksTask extends Task {
             }
             return null;
         }
+        allowedBreak = cell;
         return startStep("place " + e.id + " in cell " + placingCell, new PlaceBlockTask(cell, block), PLACE_MINUTES);
     }
 
@@ -846,7 +856,8 @@ public class AllBlocksTask extends Task {
                 Debug.logMessage("ALLBLOCKS label for chest " + chest + " not written; retried next session");
             }
             progress.save(file);
-        } else if (key.startsWith("place ") && timedOut && placingId != null) {
+        } else if (key.startsWith("place ") && timedOut && placingId != null && count(byId.get(placingId).item) > 0) {
+            // (Only with the block still in hand: one lost to a death is gathered again, not held against it.)
             AllBlocksProgress.Failure f = progress.failure("place:" + placingId);
             f.attempts++;
             f.last = "PlaceBlockTask did not place it in " + PLACE_MINUTES + " min";

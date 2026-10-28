@@ -35,6 +35,7 @@ import net.minecraft.client.gui.screen.ingame.*;
 //$$ import net.minecraft.client.gui.screens.inventory.SmokerScreen;
 //#endif
 import net.minecraft.item.Item;
+import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.screen.ScreenHandler;
 import adris.altoclef.util.Pair;
 import net.minecraft.util.hit.BlockHitResult;
@@ -117,8 +118,11 @@ public class ContainerSubTracker extends Tracker {
                 + " screen=" + adris.altoclef.multiversion.ScreenVer.current(MinecraftClient.getInstance()) + " handler=" + MinecraftClient.getInstance().player.currentScreenHandler;
         // Ostinato: #allblocks. On 26.3 the screen-open hook never marked a chest screen as a container, so nothing
         // was ever stored: also trust the open menu when it matches the block we last clicked.
+        // The close hook does not fire there either: with only the player's own inventory open, nothing is open.
         ScreenHandler openHandler = MinecraftClient.getInstance().player.currentScreenHandler;
-        if (!containerOpen && lastBlockInteraction != null && openHandler != null
+        if (openHandler == null || openHandler instanceof PlayerScreenHandler) {
+            if (containerOpen) onScreenClose();
+        } else if (!containerOpen && lastBlockInteraction != null
                 && ContainerType.screenHandlerMatches(ContainerType.getFromBlock(lastBlockInteraction), openHandler)) {
             containerOpen = true;
         }
@@ -143,7 +147,8 @@ public class ContainerSubTracker extends Tracker {
                 ContainerType currentType = dimCache.get(containerPos).getContainerType();
                 if (!ContainerType.screenHandlerMatches(currentType, handler)) {
                     if (!hasSentError) {
-                        Debug.logMessage("Mismatched container screen at " + containerPos.toShortString() + ", will overwrite container data: " + handler.getType() + " ?=> " + currentType);
+                        // getType() throws for menus without a type (the player's inventory).
+                        Debug.logMessage("Mismatched container screen at " + containerPos.toShortString() + ", will overwrite container data: " + handler.getClass().getSimpleName() + " ?=> " + currentType);
                         hasSentError = true;
                     }
                     dimCache.remove(containerPos);

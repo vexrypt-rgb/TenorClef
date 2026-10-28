@@ -23,6 +23,7 @@ import java.util.Objects;
  * <ol>
  *   <li>A pickaxe with life left. Copper first, then iron, then stone. A wooden pickaxe does not count, so the run
  *   never digs stone bare-handed or with a pick that is about to break.</li>
+ *   <li>A sword: copper, then iron, then stone. Night mobs killed every early run that had none.</li>
  *   <li>Food in the inventory (food score {@value #FOOD_MIN} or more).</li>
  *   <li>Armor in every slot: copper, then iron, then leather.</li>
  * </ol>
@@ -40,6 +41,8 @@ final class AllBlocksKit {
 
     private static final String[] PICKS = {"copper_pickaxe", "iron_pickaxe", "stone_pickaxe"};
     private static final String[] GOOD_PICKS = {"netherite_pickaxe", "diamond_pickaxe", "iron_pickaxe", "copper_pickaxe"};
+    private static final String[] SWORDS = {"copper_sword", "iron_sword", "stone_sword"};
+    private static final String[] ANY_SWORD = {"netherite_sword", "diamond_sword", "iron_sword", "copper_sword", "stone_sword", "golden_sword"};
     private static final String[] ARMOR_TIERS = {"copper", "iron", "leather"};
     private static final String[] SLOTS = {"helmet", "chestplate", "leggings", "boots"};
     private static final String[] ALL_TIERS = {"netherite", "diamond", "iron", "copper", "chainmail", "golden", "leather", "turtle"};
@@ -92,6 +95,11 @@ final class AllBlocksKit {
                 if (ready(p, now) && TaskCatalogue.taskExists(p)) return p;
             }
         }
+        if (!hasPick(mod, ANY_SWORD)) {
+            for (String sw : SWORDS) {
+                if (ready(sw, now) && TaskCatalogue.taskExists(sw)) return sw;
+            }
+        }
         if (StorageHelper.calculateInventoryFoodScore() < FOOD_MIN && ready("food", now)) return "food";
         for (String slot : SLOTS) {
             if (wearing(slot)) continue;
@@ -119,7 +127,7 @@ final class AllBlocksKit {
         return hasPick(mod, new String[]{key});
     }
 
-    /** A pickaxe of one of these kinds with more than {@value #MIN_DURABILITY} of its durability left. */
+    /** A tool of one of these kinds with more than {@value #MIN_DURABILITY} of its durability left. */
     static boolean hasPick(AltoClef mod, String[] kinds) {
         for (String k : kinds) {
             Item item = McCompat.item(k);

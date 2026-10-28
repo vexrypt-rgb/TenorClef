@@ -209,6 +209,9 @@ public class AllBlocksTask extends Task {
             if (t != null) return t;
         }
 
+        Task night = nightStep(mod);
+        if (night != null) return night;
+
         if (gathering == null) {
             Task k = kit.tick(mod, ticks);
             if (k != null) {
@@ -231,6 +234,42 @@ public class AllBlocksTask extends Task {
         if (place != null) return place;
 
         return gatherStep(mod);
+    }
+
+    // ---------------------------------------------------------------- night
+
+    private Task sleepTask;
+    private long sleepStart;
+    private long nightCooldownUntil;
+
+    /**
+     * At night (in the overworld), sleep: TenorClef's bed task places a bed, sets the spawn point there and stays in
+     * it until morning. Mobs at night killed every early run. A gather in progress waits (its timer is held). After 8
+     * minutes without sleeping the bot gives up for 10 minutes.
+     */
+    private Task nightStep(AltoClef mod) {
+        long time = mod.getWorld().getTimeOfDay() % 24000;
+        boolean night = time >= 12542 && time <= 23460;
+        if (!night || ticks < nightCooldownUntil || WorldHelper.getCurrentDimension() != Dimension.OVERWORLD) {
+            if (sleepTask != null && !night) Debug.logMessage("ALLBLOCKS morning");
+            sleepTask = null;
+            return null;
+        }
+        if (sleepTask == null) {
+            sleepTask = new adris.altoclef.tasks.misc.SleepThroughNightTask();
+            sleepStart = ticks;
+            Debug.logMessage("ALLBLOCKS night: going to bed" + (gathering != null ? " (holding gather of " + gathering.id + ")" : ""));
+        }
+        if (ticks - sleepStart > 8L * TPM && !mod.getPlayer().isSleeping()) {
+            Debug.logMessage("ALLBLOCKS night: no sleep after 8 min (" + chain(sleepTask) + "); carrying on");
+            nightCooldownUntil = ticks + 10L * TPM;
+            sleepTask = null;
+            return null;
+        }
+        if (gathering != null) gatherStart++;
+        if (stepTask != null) stepStart++;
+        setDebugState("Night: sleeping");
+        return sleepTask;
     }
 
     // ---------------------------------------------------------------- site

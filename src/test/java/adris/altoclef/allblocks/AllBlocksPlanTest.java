@@ -26,7 +26,7 @@ public class AllBlocksPlanTest {
     @Test
     void generatedCatalogueLinesAreWellFormed() throws Exception {
         Set<String> ordered = new HashSet<>();
-        int craft = 0;
+        int craft = 0, gaps = 0;
         try (InputStream in = AllBlocksPlanTest.class.getResourceAsStream("/allblocks/catalogue-26.3.txt")) {
             Assertions.assertNotNull(in, "allblocks/catalogue-26.3.txt is on the classpath");
             BufferedReader r = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
@@ -52,11 +52,17 @@ public class AllBlocksPlanTest {
                         Assertions.assertEquals(4, p.length, l);
                         Assertions.assertTrue(Set.of("OVERWORLD", "NETHER", "END").contains(p[3]), l);
                     }
+                    case "gap" -> {
+                        Assertions.assertTrue(p.length >= 4, l);
+                        Assertions.assertTrue(ordered.contains(p[1]), "gap item is a registry item: " + l);
+                        gaps++;
+                    }
                     default -> Assertions.fail("unknown line: " + l);
                 }
             }
         }
         Assertions.assertTrue(ordered.size() > 1500, "every 26.3 item has an order line");
         Assertions.assertTrue(craft > 1000);
+        Assertions.assertEquals(ordered.size(), gaps, "every item has a gap line (its root cause when unsupported)");
     }
 }

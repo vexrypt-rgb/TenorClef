@@ -3,6 +3,7 @@
 # craft <item> <count> <grid 2|3> <slot>...: slot "-" is empty, "a|b" are alternatives (catalogue names first).
 # smelt <item> <ingredient alternatives>   mine <item> <block> <HAND|WOOD|STONE|IRON|DIAMOND> <dimension>
 # kill <item> <entity> <dimension>: a mob that drops it   shear <item> <block>: shear the block
+# gap <item> <category> <why>: the root cause when the item has no gather path at run time
 order dirt 1
 order oak_log 1
 order oak_planks 1.25
@@ -3142,3 +3143,1661 @@ kill tipped_arrow parched OVERWORLD
 kill totem_of_undying evoker OVERWORLD
 kill tropical_fish tropical_fish OVERWORLD
 kill wither_skeleton_skull wither_skeleton NETHER
+gap abandoned_camp_map loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap acacia_boat ingredient an ingredient of its recipe has no TaskCatalogue path
+gap acacia_button ingredient an ingredient of its recipe has no TaskCatalogue path
+gap acacia_chest_boat ingredient an ingredient of its recipe has no TaskCatalogue path
+gap acacia_door ingredient an ingredient of its recipe has no TaskCatalogue path
+gap acacia_fence ingredient an ingredient of its recipe has no TaskCatalogue path
+gap acacia_fence_gate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap acacia_hanging_sign ingredient recipe needs stripped_acacia_log (no path)
+gap acacia_leaves no-task listed with a raw cost but TaskCatalogue has no task for it
+gap acacia_log no-task listed with a raw cost but TaskCatalogue has no task for it
+gap acacia_planks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap acacia_pressure_plate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap acacia_sapling no-task listed with a raw cost but TaskCatalogue has no task for it
+gap acacia_shelf ingredient recipe needs stripped_acacia_log (no path)
+gap acacia_sign ingredient an ingredient of its recipe has no TaskCatalogue path
+gap acacia_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap acacia_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap acacia_trapdoor ingredient an ingredient of its recipe has no TaskCatalogue path
+gap acacia_wood ingredient an ingredient of its recipe has no TaskCatalogue path
+gap activator_rail ingredient an ingredient of its recipe has no TaskCatalogue path
+gap air no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap allay_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap allium no-task listed with a raw cost but TaskCatalogue has no task for it
+gap amethyst_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap amethyst_cluster silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap amethyst_shard no-task listed with a raw cost but TaskCatalogue has no task for it
+gap ancient_debris no-task listed with a raw cost but TaskCatalogue has no task for it
+gap andesite ingredient an ingredient of its recipe has no TaskCatalogue path
+gap andesite_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap andesite_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap andesite_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap angler_pottery_sherd loot-brushing brushing suspicious sand or gravel in ruins
+gap anvil ingredient an ingredient of its recipe has no TaskCatalogue path
+gap apple no-task listed with a raw cost but TaskCatalogue has no task for it
+gap archer_pottery_sherd loot-brushing brushing suspicious sand or gravel in ruins
+gap armadillo_scute loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap armadillo_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap armor_stand ingredient an ingredient of its recipe has no TaskCatalogue path
+gap arms_up_pottery_sherd loot-brushing brushing suspicious sand or gravel in ruins
+gap arrow ingredient an ingredient of its recipe has no TaskCatalogue path
+gap axolotl_bucket mob-bucket a water bucket used on the mob
+gap axolotl_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap azalea no-task listed with a raw cost but TaskCatalogue has no task for it
+gap azalea_leaves no-task listed with a raw cost but TaskCatalogue has no task for it
+gap azure_bluet no-task listed with a raw cost but TaskCatalogue has no task for it
+gap baked_potato ingredient an ingredient of its recipe has no TaskCatalogue path
+gap bamboo no-task listed with a raw cost but TaskCatalogue has no task for it
+gap bamboo_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap bamboo_button ingredient an ingredient of its recipe has no TaskCatalogue path
+gap bamboo_chest_raft ingredient an ingredient of its recipe has no TaskCatalogue path
+gap bamboo_door ingredient an ingredient of its recipe has no TaskCatalogue path
+gap bamboo_fence ingredient an ingredient of its recipe has no TaskCatalogue path
+gap bamboo_fence_gate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap bamboo_hanging_sign ingredient recipe needs stripped_bamboo_block (no path)
+gap bamboo_mosaic ingredient an ingredient of its recipe has no TaskCatalogue path
+gap bamboo_mosaic_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap bamboo_mosaic_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap bamboo_planks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap bamboo_pressure_plate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap bamboo_raft ingredient an ingredient of its recipe has no TaskCatalogue path
+gap bamboo_shelf ingredient recipe needs stripped_bamboo_block (no path)
+gap bamboo_sign ingredient an ingredient of its recipe has no TaskCatalogue path
+gap bamboo_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap bamboo_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap bamboo_trapdoor ingredient an ingredient of its recipe has no TaskCatalogue path
+gap barrel ingredient an ingredient of its recipe has no TaskCatalogue path
+gap barrier no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap basalt no-task listed with a raw cost but TaskCatalogue has no task for it
+gap bat_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap beacon loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap bedrock no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap bee_nest silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap bee_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap beef no-task listed with a raw cost but TaskCatalogue has no task for it
+gap beehive ingredient an ingredient of its recipe has no TaskCatalogue path
+gap beetroot no-task listed with a raw cost but TaskCatalogue has no task for it
+gap beetroot_seeds no-task listed with a raw cost but TaskCatalogue has no task for it
+gap beetroot_soup ingredient an ingredient of its recipe has no TaskCatalogue path
+gap bell no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap big_dripleaf no-task listed with a raw cost but TaskCatalogue has no task for it
+gap birch_boat ingredient an ingredient of its recipe has no TaskCatalogue path
+gap birch_button ingredient an ingredient of its recipe has no TaskCatalogue path
+gap birch_chest_boat ingredient an ingredient of its recipe has no TaskCatalogue path
+gap birch_door ingredient an ingredient of its recipe has no TaskCatalogue path
+gap birch_fence ingredient an ingredient of its recipe has no TaskCatalogue path
+gap birch_fence_gate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap birch_hanging_sign ingredient recipe needs stripped_birch_log (no path)
+gap birch_leaves no-task listed with a raw cost but TaskCatalogue has no task for it
+gap birch_log no-task listed with a raw cost but TaskCatalogue has no task for it
+gap birch_planks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap birch_pressure_plate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap birch_sapling no-task listed with a raw cost but TaskCatalogue has no task for it
+gap birch_shelf ingredient recipe needs stripped_birch_log (no path)
+gap birch_sign ingredient an ingredient of its recipe has no TaskCatalogue path
+gap birch_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap birch_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap birch_trapdoor ingredient an ingredient of its recipe has no TaskCatalogue path
+gap birch_wood ingredient an ingredient of its recipe has no TaskCatalogue path
+gap black_banner ingredient an ingredient of its recipe has no TaskCatalogue path
+gap black_bed ingredient an ingredient of its recipe has no TaskCatalogue path
+gap black_bundle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap black_candle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap black_carpet ingredient an ingredient of its recipe has no TaskCatalogue path
+gap black_concrete no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap black_concrete_powder ingredient an ingredient of its recipe has no TaskCatalogue path
+gap black_concrete_slab ingredient recipe needs black_concrete (no path)
+gap black_concrete_stairs ingredient recipe needs black_concrete (no path)
+gap black_cushion ingredient an ingredient of its recipe has no TaskCatalogue path
+gap black_dye ingredient recipe needs wither_rose (no path)
+gap black_glazed_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap black_harness ingredient an ingredient of its recipe has no TaskCatalogue path
+gap black_shulker_box ingredient an ingredient of its recipe has no TaskCatalogue path
+gap black_stained_glass silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap black_stained_glass_pane silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap black_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap black_wool ingredient an ingredient of its recipe has no TaskCatalogue path
+gap black_wool_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap black_wool_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap blackstone no-task listed with a raw cost but TaskCatalogue has no task for it
+gap blackstone_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap blackstone_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap blackstone_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap blade_pottery_sherd loot-brushing brushing suspicious sand or gravel in ruins
+gap blast_furnace ingredient an ingredient of its recipe has no TaskCatalogue path
+gap blaze_powder ingredient an ingredient of its recipe has no TaskCatalogue path
+gap blaze_rod no-task listed with a raw cost but TaskCatalogue has no task for it
+gap blaze_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap blue_banner ingredient an ingredient of its recipe has no TaskCatalogue path
+gap blue_bed ingredient an ingredient of its recipe has no TaskCatalogue path
+gap blue_bundle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap blue_candle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap blue_carpet ingredient an ingredient of its recipe has no TaskCatalogue path
+gap blue_concrete no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap blue_concrete_powder ingredient an ingredient of its recipe has no TaskCatalogue path
+gap blue_concrete_slab ingredient recipe needs blue_concrete (no path)
+gap blue_concrete_stairs ingredient recipe needs blue_concrete (no path)
+gap blue_cushion ingredient an ingredient of its recipe has no TaskCatalogue path
+gap blue_dye ingredient an ingredient of its recipe has no TaskCatalogue path
+gap blue_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap blue_glazed_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap blue_harness ingredient an ingredient of its recipe has no TaskCatalogue path
+gap blue_ice silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap blue_orchid no-task listed with a raw cost but TaskCatalogue has no task for it
+gap blue_shulker_box ingredient an ingredient of its recipe has no TaskCatalogue path
+gap blue_stained_glass silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap blue_stained_glass_pane silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap blue_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap blue_wool ingredient an ingredient of its recipe has no TaskCatalogue path
+gap blue_wool_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap blue_wool_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap bogged_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap bolt_armor_trim_smithing_template loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap bone no-task listed with a raw cost but TaskCatalogue has no task for it
+gap bone_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap bone_meal ingredient an ingredient of its recipe has no TaskCatalogue path
+gap book ingredient an ingredient of its recipe has no TaskCatalogue path
+gap bookshelf silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap bordure_indented_banner_pattern loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap bow ingredient an ingredient of its recipe has no TaskCatalogue path
+gap bowl ingredient an ingredient of its recipe has no TaskCatalogue path
+gap brain_coral silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap brain_coral_block silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap brain_coral_fan silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap bread ingredient an ingredient of its recipe has no TaskCatalogue path
+gap breeze_rod no-task listed with a raw cost but TaskCatalogue has no task for it
+gap breeze_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap brewer_pottery_sherd loot-brushing brushing suspicious sand or gravel in ruins
+gap brewing_stand ingredient an ingredient of its recipe has no TaskCatalogue path
+gap brick ingredient an ingredient of its recipe has no TaskCatalogue path
+gap brick_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap brick_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap brick_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap bricks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap brown_banner ingredient an ingredient of its recipe has no TaskCatalogue path
+gap brown_bed ingredient an ingredient of its recipe has no TaskCatalogue path
+gap brown_bundle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap brown_candle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap brown_carpet ingredient an ingredient of its recipe has no TaskCatalogue path
+gap brown_concrete no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap brown_concrete_powder ingredient an ingredient of its recipe has no TaskCatalogue path
+gap brown_concrete_slab ingredient recipe needs brown_concrete (no path)
+gap brown_concrete_stairs ingredient recipe needs brown_concrete (no path)
+gap brown_cushion ingredient an ingredient of its recipe has no TaskCatalogue path
+gap brown_dye ingredient an ingredient of its recipe has no TaskCatalogue path
+gap brown_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap brown_glazed_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap brown_harness ingredient an ingredient of its recipe has no TaskCatalogue path
+gap brown_mushroom no-task listed with a raw cost but TaskCatalogue has no task for it
+gap brown_mushroom_block silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap brown_shulker_box ingredient an ingredient of its recipe has no TaskCatalogue path
+gap brown_stained_glass silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap brown_stained_glass_pane silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap brown_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap brown_wool ingredient an ingredient of its recipe has no TaskCatalogue path
+gap brown_wool_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap brown_wool_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap brush ingredient an ingredient of its recipe has no TaskCatalogue path
+gap bubble_coral silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap bubble_coral_block silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap bubble_coral_fan silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap bucket ingredient an ingredient of its recipe has no TaskCatalogue path
+gap budding_amethyst no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap bundle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap buried_ancient_city_map loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap buried_mineshaft_map loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap buried_treasure_map loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap buried_trial_chambers_map loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap burn_pottery_sherd loot-brushing brushing suspicious sand or gravel in ruins
+gap bush no-task listed with a raw cost but TaskCatalogue has no task for it
+gap cactus no-task listed with a raw cost but TaskCatalogue has no task for it
+gap cactus_flower no-task listed with a raw cost but TaskCatalogue has no task for it
+gap cake ingredient recipe needs milk_bucket (no path)
+gap calcite no-task listed with a raw cost but TaskCatalogue has no task for it
+gap calibrated_sculk_sensor silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap camel_husk_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap camel_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap campfire silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap candle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap carrot no-task listed with a raw cost but TaskCatalogue has no task for it
+gap carrot_on_a_stick ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cartography_table ingredient an ingredient of its recipe has no TaskCatalogue path
+gap carved_pumpkin no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap cat_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap cauldron ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cave_spider_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap chain_command_block no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap chainmail_boots no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap chainmail_chestplate no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap chainmail_helmet no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap chainmail_leggings no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap charcoal ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cherry_boat ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cherry_button ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cherry_chest_boat ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cherry_door ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cherry_fence ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cherry_fence_gate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cherry_hanging_sign ingredient recipe needs stripped_cherry_log (no path)
+gap cherry_leaves no-task listed with a raw cost but TaskCatalogue has no task for it
+gap cherry_log no-task listed with a raw cost but TaskCatalogue has no task for it
+gap cherry_planks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cherry_pressure_plate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cherry_sapling no-task listed with a raw cost but TaskCatalogue has no task for it
+gap cherry_shelf ingredient recipe needs stripped_cherry_log (no path)
+gap cherry_sign ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cherry_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cherry_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cherry_trapdoor ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cherry_wood ingredient an ingredient of its recipe has no TaskCatalogue path
+gap chest ingredient an ingredient of its recipe has no TaskCatalogue path
+gap chest_minecart ingredient an ingredient of its recipe has no TaskCatalogue path
+gap chicken no-task listed with a raw cost but TaskCatalogue has no task for it
+gap chicken_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap chipped_anvil no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap chiseled_bookshelf silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap chiseled_cinnabar ingredient an ingredient of its recipe has no TaskCatalogue path
+gap chiseled_copper ingredient an ingredient of its recipe has no TaskCatalogue path
+gap chiseled_deepslate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap chiseled_nether_bricks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap chiseled_polished_blackstone ingredient an ingredient of its recipe has no TaskCatalogue path
+gap chiseled_quartz_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap chiseled_red_sandstone ingredient an ingredient of its recipe has no TaskCatalogue path
+gap chiseled_resin_bricks ingredient recipe needs resin_brick_slab (no path)
+gap chiseled_sandstone ingredient an ingredient of its recipe has no TaskCatalogue path
+gap chiseled_stone_bricks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap chiseled_sulfur ingredient an ingredient of its recipe has no TaskCatalogue path
+gap chiseled_tuff ingredient an ingredient of its recipe has no TaskCatalogue path
+gap chiseled_tuff_bricks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap chorus_flower no-task listed with a raw cost but TaskCatalogue has no task for it
+gap chorus_fruit no-task listed with a raw cost but TaskCatalogue has no task for it
+gap chorus_plant no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap cinnabar no-task listed with a raw cost but TaskCatalogue has no task for it
+gap cinnabar_brick_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cinnabar_brick_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cinnabar_brick_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cinnabar_bricks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cinnabar_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cinnabar_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cinnabar_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap clay silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap clay_ball no-task listed with a raw cost but TaskCatalogue has no task for it
+gap clock ingredient an ingredient of its recipe has no TaskCatalogue path
+gap closed_eyeblossom no-task listed with a raw cost but TaskCatalogue has no task for it
+gap coal ingredient recipe needs coal_ore,deepslate_coal_ore (no path)
+gap coal_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap coal_ore silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap coarse_dirt ingredient an ingredient of its recipe has no TaskCatalogue path
+gap coast_armor_trim_smithing_template loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap cobbled_deepslate no-task listed with a raw cost but TaskCatalogue has no task for it
+gap cobbled_deepslate_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cobbled_deepslate_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cobbled_deepslate_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cobblestone no-task listed with a raw cost but TaskCatalogue has no task for it
+gap cobblestone_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cobblestone_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cobblestone_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cobweb no-task listed with a raw cost but TaskCatalogue has no task for it
+gap cocoa_beans no-task listed with a raw cost but TaskCatalogue has no task for it
+gap cod no-task listed with a raw cost but TaskCatalogue has no task for it
+gap cod_bucket mob-bucket a water bucket used on the mob
+gap cod_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap command_block no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap command_block_minecart no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap comparator ingredient an ingredient of its recipe has no TaskCatalogue path
+gap compass ingredient an ingredient of its recipe has no TaskCatalogue path
+gap composter ingredient an ingredient of its recipe has no TaskCatalogue path
+gap conduit loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap cooked_beef ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cooked_chicken ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cooked_cod ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cooked_mutton ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cooked_porkchop ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cooked_rabbit ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cooked_salmon ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cookie ingredient an ingredient of its recipe has no TaskCatalogue path
+gap copper_axe ingredient an ingredient of its recipe has no TaskCatalogue path
+gap copper_bars ingredient an ingredient of its recipe has no TaskCatalogue path
+gap copper_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap copper_boots ingredient an ingredient of its recipe has no TaskCatalogue path
+gap copper_bulb ingredient an ingredient of its recipe has no TaskCatalogue path
+gap copper_chain ingredient an ingredient of its recipe has no TaskCatalogue path
+gap copper_chest ingredient an ingredient of its recipe has no TaskCatalogue path
+gap copper_chestplate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap copper_door ingredient an ingredient of its recipe has no TaskCatalogue path
+gap copper_golem_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap copper_golem_statue no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap copper_grate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap copper_helmet ingredient an ingredient of its recipe has no TaskCatalogue path
+gap copper_hoe ingredient an ingredient of its recipe has no TaskCatalogue path
+gap copper_horse_armor loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap copper_ingot ingredient recipe needs copper_ore,deepslate_copper_ore (no path)
+gap copper_lantern ingredient an ingredient of its recipe has no TaskCatalogue path
+gap copper_leggings ingredient an ingredient of its recipe has no TaskCatalogue path
+gap copper_nautilus_armor loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap copper_nugget ingredient an ingredient of its recipe has no TaskCatalogue path
+gap copper_ore silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap copper_pickaxe ingredient an ingredient of its recipe has no TaskCatalogue path
+gap copper_shovel ingredient an ingredient of its recipe has no TaskCatalogue path
+gap copper_spear ingredient an ingredient of its recipe has no TaskCatalogue path
+gap copper_sword ingredient an ingredient of its recipe has no TaskCatalogue path
+gap copper_torch ingredient an ingredient of its recipe has no TaskCatalogue path
+gap copper_trapdoor ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cornflower no-task listed with a raw cost but TaskCatalogue has no task for it
+gap cow_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap cracked_deepslate_bricks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cracked_deepslate_tiles ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cracked_nether_bricks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cracked_polished_blackstone_bricks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cracked_stone_bricks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap crafter ingredient an ingredient of its recipe has no TaskCatalogue path
+gap crafting_table ingredient an ingredient of its recipe has no TaskCatalogue path
+gap creaking_heart silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap creaking_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap creeper_banner_pattern loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap creeper_head no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap creeper_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap crimson_button ingredient an ingredient of its recipe has no TaskCatalogue path
+gap crimson_door ingredient an ingredient of its recipe has no TaskCatalogue path
+gap crimson_fence ingredient an ingredient of its recipe has no TaskCatalogue path
+gap crimson_fence_gate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap crimson_fungus no-task listed with a raw cost but TaskCatalogue has no task for it
+gap crimson_hanging_sign ingredient recipe needs stripped_crimson_stem (no path)
+gap crimson_hyphae ingredient an ingredient of its recipe has no TaskCatalogue path
+gap crimson_nylium silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap crimson_planks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap crimson_pressure_plate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap crimson_roots no-task listed with a raw cost but TaskCatalogue has no task for it
+gap crimson_shelf ingredient recipe needs stripped_crimson_stem (no path)
+gap crimson_sign ingredient an ingredient of its recipe has no TaskCatalogue path
+gap crimson_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap crimson_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap crimson_stem no-task listed with a raw cost but TaskCatalogue has no task for it
+gap crimson_trapdoor ingredient an ingredient of its recipe has no TaskCatalogue path
+gap crossbow ingredient an ingredient of its recipe has no TaskCatalogue path
+gap crying_obsidian no-task listed with a raw cost but TaskCatalogue has no task for it
+gap cut_copper ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cut_copper_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cut_copper_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cut_red_sandstone ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cut_red_sandstone_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cut_sandstone ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cut_sandstone_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cyan_banner ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cyan_bed ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cyan_bundle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cyan_candle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cyan_carpet ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cyan_concrete no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap cyan_concrete_powder ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cyan_concrete_slab ingredient recipe needs cyan_concrete (no path)
+gap cyan_concrete_stairs ingredient recipe needs cyan_concrete (no path)
+gap cyan_cushion ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cyan_dye ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cyan_glazed_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cyan_harness ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cyan_shulker_box ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cyan_stained_glass silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap cyan_stained_glass_pane silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap cyan_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cyan_wool ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cyan_wool_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cyan_wool_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap damaged_anvil no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap dandelion no-task listed with a raw cost but TaskCatalogue has no task for it
+gap danger_pottery_sherd loot-brushing brushing suspicious sand or gravel in ruins
+gap dark_oak_boat ingredient an ingredient of its recipe has no TaskCatalogue path
+gap dark_oak_button ingredient an ingredient of its recipe has no TaskCatalogue path
+gap dark_oak_chest_boat ingredient an ingredient of its recipe has no TaskCatalogue path
+gap dark_oak_door ingredient an ingredient of its recipe has no TaskCatalogue path
+gap dark_oak_fence ingredient an ingredient of its recipe has no TaskCatalogue path
+gap dark_oak_fence_gate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap dark_oak_hanging_sign ingredient recipe needs stripped_dark_oak_log (no path)
+gap dark_oak_leaves no-task listed with a raw cost but TaskCatalogue has no task for it
+gap dark_oak_log no-task listed with a raw cost but TaskCatalogue has no task for it
+gap dark_oak_planks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap dark_oak_pressure_plate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap dark_oak_sapling no-task listed with a raw cost but TaskCatalogue has no task for it
+gap dark_oak_shelf ingredient recipe needs stripped_dark_oak_log (no path)
+gap dark_oak_sign ingredient an ingredient of its recipe has no TaskCatalogue path
+gap dark_oak_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap dark_oak_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap dark_oak_trapdoor ingredient an ingredient of its recipe has no TaskCatalogue path
+gap dark_oak_wood ingredient an ingredient of its recipe has no TaskCatalogue path
+gap dark_prismarine ingredient an ingredient of its recipe has no TaskCatalogue path
+gap dark_prismarine_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap dark_prismarine_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap daylight_detector ingredient an ingredient of its recipe has no TaskCatalogue path
+gap dead_brain_coral coral coral placed out of water dies; live coral needs silk touch
+gap dead_brain_coral_block coral coral placed out of water dies; live coral needs silk touch
+gap dead_brain_coral_fan coral coral placed out of water dies; live coral needs silk touch
+gap dead_bubble_coral coral coral placed out of water dies; live coral needs silk touch
+gap dead_bubble_coral_block coral coral placed out of water dies; live coral needs silk touch
+gap dead_bubble_coral_fan coral coral placed out of water dies; live coral needs silk touch
+gap dead_bush coral coral placed out of water dies; live coral needs silk touch
+gap dead_fire_coral coral coral placed out of water dies; live coral needs silk touch
+gap dead_fire_coral_block coral coral placed out of water dies; live coral needs silk touch
+gap dead_fire_coral_fan coral coral placed out of water dies; live coral needs silk touch
+gap dead_horn_coral coral coral placed out of water dies; live coral needs silk touch
+gap dead_horn_coral_block coral coral placed out of water dies; live coral needs silk touch
+gap dead_horn_coral_fan coral coral placed out of water dies; live coral needs silk touch
+gap dead_tube_coral coral coral placed out of water dies; live coral needs silk touch
+gap dead_tube_coral_block coral coral placed out of water dies; live coral needs silk touch
+gap dead_tube_coral_fan coral coral placed out of water dies; live coral needs silk touch
+gap debug_stick no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap decorated_pot ingredient an ingredient of its recipe has no TaskCatalogue path
+gap deepslate silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap deepslate_brick_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap deepslate_brick_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap deepslate_brick_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap deepslate_bricks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap deepslate_coal_ore silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap deepslate_copper_ore silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap deepslate_diamond_ore silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap deepslate_emerald_ore silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap deepslate_gold_ore silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap deepslate_iron_ore silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap deepslate_lapis_ore silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap deepslate_redstone_ore silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap deepslate_tile_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap deepslate_tile_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap deepslate_tile_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap deepslate_tiles ingredient an ingredient of its recipe has no TaskCatalogue path
+gap desert_pyramid_map loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap desert_village_map loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap detector_rail ingredient an ingredient of its recipe has no TaskCatalogue path
+gap diamond ingredient recipe needs deepslate_diamond_ore,diamond_ore (no path)
+gap diamond_axe ingredient an ingredient of its recipe has no TaskCatalogue path
+gap diamond_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap diamond_boots ingredient an ingredient of its recipe has no TaskCatalogue path
+gap diamond_chestplate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap diamond_helmet ingredient an ingredient of its recipe has no TaskCatalogue path
+gap diamond_hoe ingredient an ingredient of its recipe has no TaskCatalogue path
+gap diamond_horse_armor loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap diamond_leggings ingredient an ingredient of its recipe has no TaskCatalogue path
+gap diamond_nautilus_armor loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap diamond_ore silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap diamond_pickaxe ingredient an ingredient of its recipe has no TaskCatalogue path
+gap diamond_shovel ingredient an ingredient of its recipe has no TaskCatalogue path
+gap diamond_spear ingredient an ingredient of its recipe has no TaskCatalogue path
+gap diamond_sword ingredient an ingredient of its recipe has no TaskCatalogue path
+gap diorite ingredient an ingredient of its recipe has no TaskCatalogue path
+gap diorite_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap diorite_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap diorite_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap dirt no-task listed with a raw cost but TaskCatalogue has no task for it
+gap dirt_path no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap disc_fragment_5 no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap dispenser ingredient an ingredient of its recipe has no TaskCatalogue path
+gap dolphin_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap donkey_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap dragon_breath brewing-bottles brewing stand, bottling or trading
+gap dragon_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap dragon_head no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap dried_ghast ingredient an ingredient of its recipe has no TaskCatalogue path
+gap dried_kelp ingredient an ingredient of its recipe has no TaskCatalogue path
+gap dried_kelp_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap dripstone_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap dropper ingredient an ingredient of its recipe has no TaskCatalogue path
+gap drowned_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap dune_armor_trim_smithing_template loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap echo_shard loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap egg no-task listed with a raw cost but TaskCatalogue has no task for it
+gap elder_guardian_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap elytra loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap emerald ingredient recipe needs deepslate_emerald_ore,emerald_ore (no path)
+gap emerald_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap emerald_ore silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap enchanted_book loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap enchanted_golden_apple loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap enchanting_table ingredient an ingredient of its recipe has no TaskCatalogue path
+gap end_crystal ingredient an ingredient of its recipe has no TaskCatalogue path
+gap end_portal_frame no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap end_rod ingredient an ingredient of its recipe has no TaskCatalogue path
+gap end_stone no-task listed with a raw cost but TaskCatalogue has no task for it
+gap end_stone_brick_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap end_stone_brick_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap end_stone_brick_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap end_stone_bricks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap ender_chest silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap ender_dragon_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap ender_eye ingredient an ingredient of its recipe has no TaskCatalogue path
+gap ender_pearl no-task listed with a raw cost but TaskCatalogue has no task for it
+gap enderman_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap endermite_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap evoker_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap experience_bottle brewing-bottles brewing stand, bottling or trading
+gap explorer_pottery_sherd loot-brushing brushing suspicious sand or gravel in ruins
+gap exposed_chiseled_copper copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap exposed_copper copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap exposed_copper_bars copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap exposed_copper_bulb copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap exposed_copper_chain copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap exposed_copper_chest copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap exposed_copper_door copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap exposed_copper_golem_statue copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap exposed_copper_grate copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap exposed_copper_lantern copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap exposed_copper_trapdoor copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap exposed_cut_copper copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap exposed_cut_copper_slab copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap exposed_cut_copper_stairs copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap exposed_lightning_rod copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap eye_armor_trim_smithing_template loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap farmland no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap feather no-task listed with a raw cost but TaskCatalogue has no task for it
+gap fermented_spider_eye ingredient an ingredient of its recipe has no TaskCatalogue path
+gap fern no-task listed with a raw cost but TaskCatalogue has no task for it
+gap field_masoned_banner_pattern loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap filled_map loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap fire_charge ingredient an ingredient of its recipe has no TaskCatalogue path
+gap fire_coral silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap fire_coral_block silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap fire_coral_fan silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap firefly_bush no-task listed with a raw cost but TaskCatalogue has no task for it
+gap firework_rocket ingredient an ingredient of its recipe has no TaskCatalogue path
+gap firework_star loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap fishing_rod ingredient an ingredient of its recipe has no TaskCatalogue path
+gap fletching_table ingredient an ingredient of its recipe has no TaskCatalogue path
+gap flint no-task listed with a raw cost but TaskCatalogue has no task for it
+gap flint_and_steel ingredient an ingredient of its recipe has no TaskCatalogue path
+gap flow_armor_trim_smithing_template loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap flow_banner_pattern loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap flow_pottery_sherd loot-brushing brushing suspicious sand or gravel in ruins
+gap flower_banner_pattern loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap flower_pot ingredient an ingredient of its recipe has no TaskCatalogue path
+gap flowering_azalea no-task listed with a raw cost but TaskCatalogue has no task for it
+gap flowering_azalea_leaves no-task listed with a raw cost but TaskCatalogue has no task for it
+gap fox_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap friend_pottery_sherd loot-brushing brushing suspicious sand or gravel in ruins
+gap frog_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap frogspawn no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap furnace ingredient an ingredient of its recipe has no TaskCatalogue path
+gap furnace_minecart ingredient an ingredient of its recipe has no TaskCatalogue path
+gap ghast_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap ghast_tear no-task listed with a raw cost but TaskCatalogue has no task for it
+gap gilded_blackstone no-task listed with a raw cost but TaskCatalogue has no task for it
+gap glass silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap glass_bottle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap glass_pane silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap glistering_melon_slice ingredient an ingredient of its recipe has no TaskCatalogue path
+gap globe_banner_pattern loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap glow_berries no-task listed with a raw cost but TaskCatalogue has no task for it
+gap glow_ink_sac no-task listed with a raw cost but TaskCatalogue has no task for it
+gap glow_item_frame ingredient an ingredient of its recipe has no TaskCatalogue path
+gap glow_lichen no-task listed with a raw cost but TaskCatalogue has no task for it
+gap glow_squid_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap glowstone silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap glowstone_dust no-task listed with a raw cost but TaskCatalogue has no task for it
+gap goat_horn loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap goat_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap gold_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap gold_ingot ingredient recipe needs deepslate_gold_ore,gold_ore,nether_gold_ore (no path)
+gap gold_nugget ingredient an ingredient of its recipe has no TaskCatalogue path
+gap gold_ore silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap golden_apple ingredient an ingredient of its recipe has no TaskCatalogue path
+gap golden_axe ingredient an ingredient of its recipe has no TaskCatalogue path
+gap golden_boots ingredient an ingredient of its recipe has no TaskCatalogue path
+gap golden_carrot ingredient an ingredient of its recipe has no TaskCatalogue path
+gap golden_chestplate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap golden_dandelion ingredient an ingredient of its recipe has no TaskCatalogue path
+gap golden_helmet ingredient an ingredient of its recipe has no TaskCatalogue path
+gap golden_hoe ingredient an ingredient of its recipe has no TaskCatalogue path
+gap golden_horse_armor loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap golden_leggings ingredient an ingredient of its recipe has no TaskCatalogue path
+gap golden_nautilus_armor loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap golden_pickaxe ingredient an ingredient of its recipe has no TaskCatalogue path
+gap golden_shovel ingredient an ingredient of its recipe has no TaskCatalogue path
+gap golden_spear ingredient an ingredient of its recipe has no TaskCatalogue path
+gap golden_sword ingredient an ingredient of its recipe has no TaskCatalogue path
+gap granite ingredient an ingredient of its recipe has no TaskCatalogue path
+gap granite_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap granite_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap granite_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap grass_block silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap gravel no-task listed with a raw cost but TaskCatalogue has no task for it
+gap gray_banner ingredient an ingredient of its recipe has no TaskCatalogue path
+gap gray_bed ingredient an ingredient of its recipe has no TaskCatalogue path
+gap gray_bundle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap gray_candle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap gray_carpet ingredient an ingredient of its recipe has no TaskCatalogue path
+gap gray_concrete no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap gray_concrete_powder ingredient an ingredient of its recipe has no TaskCatalogue path
+gap gray_concrete_slab ingredient recipe needs gray_concrete (no path)
+gap gray_concrete_stairs ingredient recipe needs gray_concrete (no path)
+gap gray_cushion ingredient an ingredient of its recipe has no TaskCatalogue path
+gap gray_dye ingredient an ingredient of its recipe has no TaskCatalogue path
+gap gray_glazed_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap gray_harness ingredient an ingredient of its recipe has no TaskCatalogue path
+gap gray_shulker_box ingredient an ingredient of its recipe has no TaskCatalogue path
+gap gray_stained_glass silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap gray_stained_glass_pane silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap gray_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap gray_wool ingredient an ingredient of its recipe has no TaskCatalogue path
+gap gray_wool_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap gray_wool_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap green_banner ingredient an ingredient of its recipe has no TaskCatalogue path
+gap green_bed ingredient an ingredient of its recipe has no TaskCatalogue path
+gap green_bundle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap green_candle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap green_carpet ingredient an ingredient of its recipe has no TaskCatalogue path
+gap green_concrete no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap green_concrete_powder ingredient an ingredient of its recipe has no TaskCatalogue path
+gap green_concrete_slab ingredient recipe needs green_concrete (no path)
+gap green_concrete_stairs ingredient recipe needs green_concrete (no path)
+gap green_cushion ingredient an ingredient of its recipe has no TaskCatalogue path
+gap green_dye ingredient an ingredient of its recipe has no TaskCatalogue path
+gap green_glazed_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap green_harness ingredient an ingredient of its recipe has no TaskCatalogue path
+gap green_shulker_box ingredient an ingredient of its recipe has no TaskCatalogue path
+gap green_stained_glass silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap green_stained_glass_pane silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap green_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap green_wool ingredient an ingredient of its recipe has no TaskCatalogue path
+gap green_wool_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap green_wool_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap grindstone ingredient an ingredient of its recipe has no TaskCatalogue path
+gap guardian_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap gunpowder no-task listed with a raw cost but TaskCatalogue has no task for it
+gap guster_banner_pattern loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap guster_pottery_sherd loot-brushing brushing suspicious sand or gravel in ruins
+gap hanging_roots no-task listed with a raw cost but TaskCatalogue has no task for it
+gap happy_ghast_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap hay_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap heart_of_the_sea loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap heart_pottery_sherd loot-brushing brushing suspicious sand or gravel in ruins
+gap heartbreak_pottery_sherd loot-brushing brushing suspicious sand or gravel in ruins
+gap heavy_core loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap heavy_weighted_pressure_plate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap hoglin_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap honey_block ingredient recipe needs honey_bottle (no path)
+gap honey_bottle brewing-bottles brewing stand, bottling or trading
+gap honeycomb no-task listed with a raw cost but TaskCatalogue has no task for it
+gap honeycomb_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap hopper ingredient an ingredient of its recipe has no TaskCatalogue path
+gap hopper_minecart ingredient an ingredient of its recipe has no TaskCatalogue path
+gap horn_coral silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap horn_coral_block silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap horn_coral_fan silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap horse_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap host_armor_trim_smithing_template loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap howl_pottery_sherd loot-brushing brushing suspicious sand or gravel in ruins
+gap husk_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap ice silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap infested_chiseled_stone_bricks silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap infested_cobblestone silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap infested_cracked_stone_bricks silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap infested_deepslate silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap infested_mossy_stone_bricks silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap infested_stone silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap infested_stone_bricks silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap ink_sac no-task listed with a raw cost but TaskCatalogue has no task for it
+gap iron_axe ingredient an ingredient of its recipe has no TaskCatalogue path
+gap iron_bars ingredient an ingredient of its recipe has no TaskCatalogue path
+gap iron_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap iron_boots ingredient an ingredient of its recipe has no TaskCatalogue path
+gap iron_chain ingredient an ingredient of its recipe has no TaskCatalogue path
+gap iron_chestplate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap iron_door ingredient an ingredient of its recipe has no TaskCatalogue path
+gap iron_golem_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap iron_helmet ingredient an ingredient of its recipe has no TaskCatalogue path
+gap iron_hoe ingredient an ingredient of its recipe has no TaskCatalogue path
+gap iron_horse_armor loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap iron_ingot ingredient recipe needs deepslate_iron_ore,iron_ore (no path)
+gap iron_leggings ingredient an ingredient of its recipe has no TaskCatalogue path
+gap iron_nautilus_armor loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap iron_nugget ingredient an ingredient of its recipe has no TaskCatalogue path
+gap iron_ore silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap iron_pickaxe ingredient an ingredient of its recipe has no TaskCatalogue path
+gap iron_shovel ingredient an ingredient of its recipe has no TaskCatalogue path
+gap iron_spear ingredient an ingredient of its recipe has no TaskCatalogue path
+gap iron_sword ingredient an ingredient of its recipe has no TaskCatalogue path
+gap iron_trapdoor ingredient an ingredient of its recipe has no TaskCatalogue path
+gap item_frame ingredient an ingredient of its recipe has no TaskCatalogue path
+gap jack_o_lantern ingredient recipe needs carved_pumpkin (no path)
+gap jigsaw no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap jukebox ingredient an ingredient of its recipe has no TaskCatalogue path
+gap jungle_boat ingredient an ingredient of its recipe has no TaskCatalogue path
+gap jungle_button ingredient an ingredient of its recipe has no TaskCatalogue path
+gap jungle_chest_boat ingredient an ingredient of its recipe has no TaskCatalogue path
+gap jungle_door ingredient an ingredient of its recipe has no TaskCatalogue path
+gap jungle_fence ingredient an ingredient of its recipe has no TaskCatalogue path
+gap jungle_fence_gate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap jungle_hanging_sign ingredient recipe needs stripped_jungle_log (no path)
+gap jungle_leaves no-task listed with a raw cost but TaskCatalogue has no task for it
+gap jungle_log no-task listed with a raw cost but TaskCatalogue has no task for it
+gap jungle_planks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap jungle_pressure_plate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap jungle_pyramid_map loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap jungle_sapling no-task listed with a raw cost but TaskCatalogue has no task for it
+gap jungle_shelf ingredient recipe needs stripped_jungle_log (no path)
+gap jungle_sign ingredient an ingredient of its recipe has no TaskCatalogue path
+gap jungle_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap jungle_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap jungle_trapdoor ingredient an ingredient of its recipe has no TaskCatalogue path
+gap jungle_wood ingredient an ingredient of its recipe has no TaskCatalogue path
+gap kelp no-task listed with a raw cost but TaskCatalogue has no task for it
+gap knowledge_book no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap ladder ingredient an ingredient of its recipe has no TaskCatalogue path
+gap lantern ingredient an ingredient of its recipe has no TaskCatalogue path
+gap lapis_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap lapis_lazuli ingredient recipe needs deepslate_lapis_ore,lapis_ore (no path)
+gap lapis_ore silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap large_amethyst_bud silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap large_fern no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap lava_bucket no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap lead ingredient an ingredient of its recipe has no TaskCatalogue path
+gap leaf_litter ingredient an ingredient of its recipe has no TaskCatalogue path
+gap leather ingredient an ingredient of its recipe has no TaskCatalogue path
+gap leather_boots ingredient an ingredient of its recipe has no TaskCatalogue path
+gap leather_chestplate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap leather_helmet ingredient an ingredient of its recipe has no TaskCatalogue path
+gap leather_horse_armor loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap leather_leggings ingredient an ingredient of its recipe has no TaskCatalogue path
+gap lectern ingredient an ingredient of its recipe has no TaskCatalogue path
+gap lever ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap light_blue_banner ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_blue_bed ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_blue_bundle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_blue_candle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_blue_carpet ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_blue_concrete no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap light_blue_concrete_powder ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_blue_concrete_slab ingredient recipe needs light_blue_concrete (no path)
+gap light_blue_concrete_stairs ingredient recipe needs light_blue_concrete (no path)
+gap light_blue_cushion ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_blue_dye ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_blue_glazed_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_blue_harness ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_blue_shulker_box ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_blue_stained_glass silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap light_blue_stained_glass_pane silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap light_blue_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_blue_wool ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_blue_wool_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_blue_wool_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_gray_banner ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_gray_bed ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_gray_bundle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_gray_candle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_gray_carpet ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_gray_concrete no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap light_gray_concrete_powder ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_gray_concrete_slab ingredient recipe needs light_gray_concrete (no path)
+gap light_gray_concrete_stairs ingredient recipe needs light_gray_concrete (no path)
+gap light_gray_cushion ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_gray_dye ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_gray_glazed_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_gray_harness ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_gray_shulker_box ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_gray_stained_glass silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap light_gray_stained_glass_pane silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap light_gray_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_gray_wool ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_gray_wool_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_gray_wool_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap light_weighted_pressure_plate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap lightning_rod ingredient an ingredient of its recipe has no TaskCatalogue path
+gap lilac no-task listed with a raw cost but TaskCatalogue has no task for it
+gap lily_of_the_valley no-task listed with a raw cost but TaskCatalogue has no task for it
+gap lily_pad no-task listed with a raw cost but TaskCatalogue has no task for it
+gap lime_banner ingredient an ingredient of its recipe has no TaskCatalogue path
+gap lime_bed ingredient an ingredient of its recipe has no TaskCatalogue path
+gap lime_bundle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap lime_candle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap lime_carpet ingredient an ingredient of its recipe has no TaskCatalogue path
+gap lime_concrete no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap lime_concrete_powder ingredient an ingredient of its recipe has no TaskCatalogue path
+gap lime_concrete_slab ingredient recipe needs lime_concrete (no path)
+gap lime_concrete_stairs ingredient recipe needs lime_concrete (no path)
+gap lime_cushion ingredient an ingredient of its recipe has no TaskCatalogue path
+gap lime_dye ingredient an ingredient of its recipe has no TaskCatalogue path
+gap lime_glazed_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap lime_harness ingredient an ingredient of its recipe has no TaskCatalogue path
+gap lime_shulker_box ingredient an ingredient of its recipe has no TaskCatalogue path
+gap lime_stained_glass silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap lime_stained_glass_pane silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap lime_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap lime_wool ingredient an ingredient of its recipe has no TaskCatalogue path
+gap lime_wool_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap lime_wool_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap lingering_potion brewing-bottles brewing stand, bottling or trading
+gap llama_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap lodestone ingredient an ingredient of its recipe has no TaskCatalogue path
+gap loom ingredient an ingredient of its recipe has no TaskCatalogue path
+gap mace loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap magenta_banner ingredient an ingredient of its recipe has no TaskCatalogue path
+gap magenta_bed ingredient an ingredient of its recipe has no TaskCatalogue path
+gap magenta_bundle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap magenta_candle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap magenta_carpet ingredient an ingredient of its recipe has no TaskCatalogue path
+gap magenta_concrete no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap magenta_concrete_powder ingredient an ingredient of its recipe has no TaskCatalogue path
+gap magenta_concrete_slab ingredient recipe needs magenta_concrete (no path)
+gap magenta_concrete_stairs ingredient recipe needs magenta_concrete (no path)
+gap magenta_cushion ingredient an ingredient of its recipe has no TaskCatalogue path
+gap magenta_dye ingredient an ingredient of its recipe has no TaskCatalogue path
+gap magenta_glazed_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap magenta_harness ingredient an ingredient of its recipe has no TaskCatalogue path
+gap magenta_shulker_box ingredient an ingredient of its recipe has no TaskCatalogue path
+gap magenta_stained_glass silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap magenta_stained_glass_pane silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap magenta_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap magenta_wool ingredient an ingredient of its recipe has no TaskCatalogue path
+gap magenta_wool_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap magenta_wool_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap magma_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap magma_cream ingredient an ingredient of its recipe has no TaskCatalogue path
+gap magma_cube_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap mangrove_boat ingredient an ingredient of its recipe has no TaskCatalogue path
+gap mangrove_button ingredient an ingredient of its recipe has no TaskCatalogue path
+gap mangrove_chest_boat ingredient an ingredient of its recipe has no TaskCatalogue path
+gap mangrove_door ingredient an ingredient of its recipe has no TaskCatalogue path
+gap mangrove_fence ingredient an ingredient of its recipe has no TaskCatalogue path
+gap mangrove_fence_gate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap mangrove_hanging_sign ingredient recipe needs stripped_mangrove_log (no path)
+gap mangrove_leaves no-task listed with a raw cost but TaskCatalogue has no task for it
+gap mangrove_log no-task listed with a raw cost but TaskCatalogue has no task for it
+gap mangrove_planks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap mangrove_pressure_plate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap mangrove_propagule no-task listed with a raw cost but TaskCatalogue has no task for it
+gap mangrove_roots no-task listed with a raw cost but TaskCatalogue has no task for it
+gap mangrove_shelf ingredient recipe needs stripped_mangrove_log (no path)
+gap mangrove_sign ingredient an ingredient of its recipe has no TaskCatalogue path
+gap mangrove_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap mangrove_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap mangrove_trapdoor ingredient an ingredient of its recipe has no TaskCatalogue path
+gap mangrove_wood ingredient an ingredient of its recipe has no TaskCatalogue path
+gap map ingredient an ingredient of its recipe has no TaskCatalogue path
+gap medium_amethyst_bud silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap melon silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap melon_seeds ingredient an ingredient of its recipe has no TaskCatalogue path
+gap melon_slice no-task listed with a raw cost but TaskCatalogue has no task for it
+gap milk_bucket no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap minecart ingredient an ingredient of its recipe has no TaskCatalogue path
+gap miner_pottery_sherd loot-brushing brushing suspicious sand or gravel in ruins
+gap mojang_banner_pattern loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap mooshroom_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap moss_block no-task listed with a raw cost but TaskCatalogue has no task for it
+gap moss_carpet ingredient an ingredient of its recipe has no TaskCatalogue path
+gap mossy_cobblestone ingredient an ingredient of its recipe has no TaskCatalogue path
+gap mossy_cobblestone_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap mossy_cobblestone_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap mossy_cobblestone_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap mossy_stone_brick_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap mossy_stone_brick_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap mossy_stone_brick_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap mossy_stone_bricks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap mourner_pottery_sherd loot-brushing brushing suspicious sand or gravel in ruins
+gap mud no-task listed with a raw cost but TaskCatalogue has no task for it
+gap mud_brick_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap mud_brick_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap mud_brick_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap mud_bricks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap muddy_mangrove_roots ingredient an ingredient of its recipe has no TaskCatalogue path
+gap mule_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap mushroom_stem silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap mushroom_stew ingredient an ingredient of its recipe has no TaskCatalogue path
+gap music_disc_11 loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap music_disc_13 loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap music_disc_5 loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap music_disc_blocks loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap music_disc_bounce loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap music_disc_cat loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap music_disc_chirp loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap music_disc_creator loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap music_disc_creator_music_box loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap music_disc_far loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap music_disc_lava_chicken loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap music_disc_mall loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap music_disc_mellohi loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap music_disc_otherside loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap music_disc_pigstep loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap music_disc_precipice loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap music_disc_relic loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap music_disc_stal loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap music_disc_strad loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap music_disc_tears loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap music_disc_wait loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap music_disc_ward loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap mutton no-task listed with a raw cost but TaskCatalogue has no task for it
+gap mycelium silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap name_tag ingredient an ingredient of its recipe has no TaskCatalogue path
+gap nautilus_shell no-task listed with a raw cost but TaskCatalogue has no task for it
+gap nautilus_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap nether_brick ingredient an ingredient of its recipe has no TaskCatalogue path
+gap nether_brick_fence ingredient an ingredient of its recipe has no TaskCatalogue path
+gap nether_brick_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap nether_brick_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap nether_brick_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap nether_bricks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap nether_gold_ore silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap nether_quartz_ore silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap nether_sprouts no-task listed with a raw cost but TaskCatalogue has no task for it
+gap nether_star loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap nether_wart no-task listed with a raw cost but TaskCatalogue has no task for it
+gap nether_wart_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap netherite_axe no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap netherite_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap netherite_boots no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap netherite_chestplate no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap netherite_helmet no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap netherite_hoe no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap netherite_horse_armor loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap netherite_ingot ingredient an ingredient of its recipe has no TaskCatalogue path
+gap netherite_leggings no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap netherite_nautilus_armor loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap netherite_pickaxe no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap netherite_scrap ingredient an ingredient of its recipe has no TaskCatalogue path
+gap netherite_shovel no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap netherite_spear no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap netherite_sword no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap netherite_upgrade_smithing_template loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap netherrack no-task listed with a raw cost but TaskCatalogue has no task for it
+gap note_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap oak_boat ingredient an ingredient of its recipe has no TaskCatalogue path
+gap oak_button ingredient an ingredient of its recipe has no TaskCatalogue path
+gap oak_chest_boat ingredient an ingredient of its recipe has no TaskCatalogue path
+gap oak_door ingredient an ingredient of its recipe has no TaskCatalogue path
+gap oak_fence ingredient an ingredient of its recipe has no TaskCatalogue path
+gap oak_fence_gate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap oak_hanging_sign ingredient recipe needs stripped_oak_log (no path)
+gap oak_leaves no-task listed with a raw cost but TaskCatalogue has no task for it
+gap oak_log no-task listed with a raw cost but TaskCatalogue has no task for it
+gap oak_planks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap oak_pressure_plate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap oak_sapling no-task listed with a raw cost but TaskCatalogue has no task for it
+gap oak_shelf ingredient recipe needs stripped_oak_log (no path)
+gap oak_sign ingredient an ingredient of its recipe has no TaskCatalogue path
+gap oak_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap oak_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap oak_trapdoor ingredient an ingredient of its recipe has no TaskCatalogue path
+gap oak_wood ingredient an ingredient of its recipe has no TaskCatalogue path
+gap observer ingredient an ingredient of its recipe has no TaskCatalogue path
+gap obsidian no-task listed with a raw cost but TaskCatalogue has no task for it
+gap ocean_monument_map loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap ocelot_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap ochre_froglight no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap ominous_bottle brewing-bottles brewing stand, bottling or trading
+gap ominous_trial_key loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap open_eyeblossom no-task listed with a raw cost but TaskCatalogue has no task for it
+gap orange_banner ingredient an ingredient of its recipe has no TaskCatalogue path
+gap orange_bed ingredient an ingredient of its recipe has no TaskCatalogue path
+gap orange_bundle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap orange_candle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap orange_carpet ingredient an ingredient of its recipe has no TaskCatalogue path
+gap orange_concrete no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap orange_concrete_powder ingredient an ingredient of its recipe has no TaskCatalogue path
+gap orange_concrete_slab ingredient recipe needs orange_concrete (no path)
+gap orange_concrete_stairs ingredient recipe needs orange_concrete (no path)
+gap orange_cushion ingredient an ingredient of its recipe has no TaskCatalogue path
+gap orange_dye ingredient an ingredient of its recipe has no TaskCatalogue path
+gap orange_glazed_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap orange_harness ingredient an ingredient of its recipe has no TaskCatalogue path
+gap orange_poplar_leaves no-task listed with a raw cost but TaskCatalogue has no task for it
+gap orange_shulker_box ingredient an ingredient of its recipe has no TaskCatalogue path
+gap orange_stained_glass silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap orange_stained_glass_pane silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap orange_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap orange_tulip no-task listed with a raw cost but TaskCatalogue has no task for it
+gap orange_wool ingredient an ingredient of its recipe has no TaskCatalogue path
+gap orange_wool_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap orange_wool_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap oxeye_daisy no-task listed with a raw cost but TaskCatalogue has no task for it
+gap oxidized_chiseled_copper copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap oxidized_copper copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap oxidized_copper_bars copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap oxidized_copper_bulb copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap oxidized_copper_chain copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap oxidized_copper_chest copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap oxidized_copper_door copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap oxidized_copper_golem_statue copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap oxidized_copper_grate copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap oxidized_copper_lantern copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap oxidized_copper_trapdoor copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap oxidized_cut_copper copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap oxidized_cut_copper_slab copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap oxidized_cut_copper_stairs copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap oxidized_lightning_rod copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap packed_ice silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap packed_mud ingredient an ingredient of its recipe has no TaskCatalogue path
+gap painting ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pale_hanging_moss no-task listed with a raw cost but TaskCatalogue has no task for it
+gap pale_moss_block no-task listed with a raw cost but TaskCatalogue has no task for it
+gap pale_moss_carpet ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pale_oak_boat ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pale_oak_button ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pale_oak_chest_boat ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pale_oak_door ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pale_oak_fence ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pale_oak_fence_gate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pale_oak_hanging_sign ingredient recipe needs stripped_pale_oak_log (no path)
+gap pale_oak_leaves no-task listed with a raw cost but TaskCatalogue has no task for it
+gap pale_oak_log no-task listed with a raw cost but TaskCatalogue has no task for it
+gap pale_oak_planks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pale_oak_pressure_plate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pale_oak_sapling no-task listed with a raw cost but TaskCatalogue has no task for it
+gap pale_oak_shelf ingredient recipe needs stripped_pale_oak_log (no path)
+gap pale_oak_sign ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pale_oak_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pale_oak_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pale_oak_trapdoor ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pale_oak_wood ingredient an ingredient of its recipe has no TaskCatalogue path
+gap panda_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap paper ingredient an ingredient of its recipe has no TaskCatalogue path
+gap parched_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap parrot_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap pearlescent_froglight no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap peony no-task listed with a raw cost but TaskCatalogue has no task for it
+gap petrified_oak_slab no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap phantom_membrane no-task listed with a raw cost but TaskCatalogue has no task for it
+gap phantom_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap pig_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap piglin_banner_pattern loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap piglin_brute_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap piglin_head no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap piglin_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap pillager_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap pink_banner ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pink_bed ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pink_bundle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pink_candle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pink_carpet ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pink_concrete no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap pink_concrete_powder ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pink_concrete_slab ingredient recipe needs pink_concrete (no path)
+gap pink_concrete_stairs ingredient recipe needs pink_concrete (no path)
+gap pink_cushion ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pink_dye ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pink_glazed_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pink_harness ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pink_petals no-task listed with a raw cost but TaskCatalogue has no task for it
+gap pink_shulker_box ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pink_stained_glass silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap pink_stained_glass_pane silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap pink_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pink_tulip no-task listed with a raw cost but TaskCatalogue has no task for it
+gap pink_wool ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pink_wool_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pink_wool_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap piston ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pitcher_plant no-task listed with a raw cost but TaskCatalogue has no task for it
+gap pitcher_pod no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap plains_village_map loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap player_head no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap plenty_pottery_sherd loot-brushing brushing suspicious sand or gravel in ruins
+gap podzol silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap pointed_dripstone no-task listed with a raw cost but TaskCatalogue has no task for it
+gap poisonous_potato no-task listed with a raw cost but TaskCatalogue has no task for it
+gap polar_bear_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap polished_andesite ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_andesite_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_andesite_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_basalt ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_blackstone ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_blackstone_brick_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_blackstone_brick_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_blackstone_brick_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_blackstone_bricks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_blackstone_button ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_blackstone_pressure_plate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_blackstone_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_blackstone_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_blackstone_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_cinnabar ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_cinnabar_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_cinnabar_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_cinnabar_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_deepslate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_deepslate_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_deepslate_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_deepslate_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_diorite ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_diorite_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_diorite_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_granite ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_granite_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_granite_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_sulfur ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_sulfur_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_sulfur_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_sulfur_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_tuff ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_tuff_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_tuff_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap polished_tuff_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap poplar_boat ingredient an ingredient of its recipe has no TaskCatalogue path
+gap poplar_button ingredient an ingredient of its recipe has no TaskCatalogue path
+gap poplar_chest_boat ingredient an ingredient of its recipe has no TaskCatalogue path
+gap poplar_door ingredient an ingredient of its recipe has no TaskCatalogue path
+gap poplar_fence ingredient an ingredient of its recipe has no TaskCatalogue path
+gap poplar_fence_gate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap poplar_hanging_sign ingredient recipe needs stripped_poplar_log (no path)
+gap poplar_log no-task listed with a raw cost but TaskCatalogue has no task for it
+gap poplar_planks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap poplar_pressure_plate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap poplar_sapling no-task listed with a raw cost but TaskCatalogue has no task for it
+gap poplar_shelf ingredient recipe needs stripped_poplar_log (no path)
+gap poplar_sign ingredient an ingredient of its recipe has no TaskCatalogue path
+gap poplar_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap poplar_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap poplar_trapdoor ingredient an ingredient of its recipe has no TaskCatalogue path
+gap poplar_wood ingredient an ingredient of its recipe has no TaskCatalogue path
+gap popped_chorus_fruit ingredient an ingredient of its recipe has no TaskCatalogue path
+gap poppy no-task listed with a raw cost but TaskCatalogue has no task for it
+gap porkchop no-task listed with a raw cost but TaskCatalogue has no task for it
+gap potato no-task listed with a raw cost but TaskCatalogue has no task for it
+gap potent_sulfur ingredient an ingredient of its recipe has no TaskCatalogue path
+gap potion brewing-bottles brewing stand, bottling or trading
+gap powder_snow_bucket no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap powered_rail ingredient an ingredient of its recipe has no TaskCatalogue path
+gap prismarine ingredient an ingredient of its recipe has no TaskCatalogue path
+gap prismarine_brick_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap prismarine_brick_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap prismarine_bricks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap prismarine_crystals no-task listed with a raw cost but TaskCatalogue has no task for it
+gap prismarine_shard no-task listed with a raw cost but TaskCatalogue has no task for it
+gap prismarine_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap prismarine_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap prismarine_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap prize_pottery_sherd loot-brushing brushing suspicious sand or gravel in ruins
+gap pufferfish no-task listed with a raw cost but TaskCatalogue has no task for it
+gap pufferfish_bucket mob-bucket a water bucket used on the mob
+gap pufferfish_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap pumpkin no-task listed with a raw cost but TaskCatalogue has no task for it
+gap pumpkin_pie ingredient an ingredient of its recipe has no TaskCatalogue path
+gap pumpkin_seeds ingredient an ingredient of its recipe has no TaskCatalogue path
+gap purple_banner ingredient an ingredient of its recipe has no TaskCatalogue path
+gap purple_bed ingredient an ingredient of its recipe has no TaskCatalogue path
+gap purple_bundle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap purple_candle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap purple_carpet ingredient an ingredient of its recipe has no TaskCatalogue path
+gap purple_concrete no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap purple_concrete_powder ingredient an ingredient of its recipe has no TaskCatalogue path
+gap purple_concrete_slab ingredient recipe needs purple_concrete (no path)
+gap purple_concrete_stairs ingredient recipe needs purple_concrete (no path)
+gap purple_cushion ingredient an ingredient of its recipe has no TaskCatalogue path
+gap purple_dye ingredient an ingredient of its recipe has no TaskCatalogue path
+gap purple_glazed_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap purple_harness ingredient an ingredient of its recipe has no TaskCatalogue path
+gap purple_shulker_box ingredient an ingredient of its recipe has no TaskCatalogue path
+gap purple_stained_glass silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap purple_stained_glass_pane silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap purple_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap purple_wool ingredient an ingredient of its recipe has no TaskCatalogue path
+gap purple_wool_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap purple_wool_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap purpur_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap purpur_pillar ingredient an ingredient of its recipe has no TaskCatalogue path
+gap purpur_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap purpur_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap quartz ingredient recipe needs nether_quartz_ore (no path)
+gap quartz_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap quartz_bricks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap quartz_pillar ingredient an ingredient of its recipe has no TaskCatalogue path
+gap quartz_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap quartz_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap rabbit no-task listed with a raw cost but TaskCatalogue has no task for it
+gap rabbit_foot no-task listed with a raw cost but TaskCatalogue has no task for it
+gap rabbit_hide no-task listed with a raw cost but TaskCatalogue has no task for it
+gap rabbit_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap rabbit_stew ingredient an ingredient of its recipe has no TaskCatalogue path
+gap rail ingredient an ingredient of its recipe has no TaskCatalogue path
+gap raiser_armor_trim_smithing_template loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap ravager_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap raw_copper ingredient an ingredient of its recipe has no TaskCatalogue path
+gap raw_copper_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap raw_gold ingredient an ingredient of its recipe has no TaskCatalogue path
+gap raw_gold_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap raw_iron ingredient an ingredient of its recipe has no TaskCatalogue path
+gap raw_iron_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap recovery_compass loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap red_banner ingredient an ingredient of its recipe has no TaskCatalogue path
+gap red_bed ingredient an ingredient of its recipe has no TaskCatalogue path
+gap red_bundle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap red_candle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap red_carpet ingredient an ingredient of its recipe has no TaskCatalogue path
+gap red_concrete no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap red_concrete_powder ingredient an ingredient of its recipe has no TaskCatalogue path
+gap red_concrete_slab ingredient recipe needs red_concrete (no path)
+gap red_concrete_stairs ingredient recipe needs red_concrete (no path)
+gap red_cushion ingredient an ingredient of its recipe has no TaskCatalogue path
+gap red_dye ingredient an ingredient of its recipe has no TaskCatalogue path
+gap red_glazed_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap red_harness ingredient an ingredient of its recipe has no TaskCatalogue path
+gap red_mushroom no-task listed with a raw cost but TaskCatalogue has no task for it
+gap red_mushroom_block silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap red_nether_brick_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap red_nether_brick_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap red_nether_brick_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap red_nether_bricks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap red_poplar_leaves no-task listed with a raw cost but TaskCatalogue has no task for it
+gap red_sand no-task listed with a raw cost but TaskCatalogue has no task for it
+gap red_sandstone ingredient an ingredient of its recipe has no TaskCatalogue path
+gap red_sandstone_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap red_sandstone_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap red_sandstone_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap red_shrub no-task listed with a raw cost but TaskCatalogue has no task for it
+gap red_shulker_box ingredient an ingredient of its recipe has no TaskCatalogue path
+gap red_stained_glass silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap red_stained_glass_pane silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap red_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap red_tulip no-task listed with a raw cost but TaskCatalogue has no task for it
+gap red_wool ingredient an ingredient of its recipe has no TaskCatalogue path
+gap red_wool_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap red_wool_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap redstone ingredient recipe needs deepslate_redstone_ore,redstone_ore (no path)
+gap redstone_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap redstone_lamp ingredient an ingredient of its recipe has no TaskCatalogue path
+gap redstone_ore silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap redstone_torch ingredient an ingredient of its recipe has no TaskCatalogue path
+gap reinforced_deepslate no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap repeater ingredient an ingredient of its recipe has no TaskCatalogue path
+gap repeating_command_block no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap resin_block ingredient recipe needs resin_clump (no path)
+gap resin_brick ingredient recipe needs resin_clump (no path)
+gap resin_brick_slab ingredient recipe needs resin_bricks (no path)
+gap resin_brick_stairs ingredient recipe needs resin_bricks (no path)
+gap resin_brick_wall ingredient recipe needs resin_bricks (no path)
+gap resin_bricks ingredient recipe needs resin_brick (no path)
+gap resin_clump ingredient recipe needs resin_block (no path)
+gap respawn_anchor ingredient an ingredient of its recipe has no TaskCatalogue path
+gap rib_armor_trim_smithing_template loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap rooted_dirt no-task listed with a raw cost but TaskCatalogue has no task for it
+gap rose_bush no-task listed with a raw cost but TaskCatalogue has no task for it
+gap rotten_flesh no-task listed with a raw cost but TaskCatalogue has no task for it
+gap saddle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap salmon no-task listed with a raw cost but TaskCatalogue has no task for it
+gap salmon_bucket mob-bucket a water bucket used on the mob
+gap salmon_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap sand no-task listed with a raw cost but TaskCatalogue has no task for it
+gap sandstone ingredient an ingredient of its recipe has no TaskCatalogue path
+gap sandstone_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap sandstone_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap sandstone_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap savanna_village_map loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap scaffolding ingredient an ingredient of its recipe has no TaskCatalogue path
+gap scrape_pottery_sherd loot-brushing brushing suspicious sand or gravel in ruins
+gap sculk silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap sculk_catalyst silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap sculk_sensor silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap sculk_shrieker silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap sculk_vein silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap sea_lantern silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap sea_pickle no-task listed with a raw cost but TaskCatalogue has no task for it
+gap seagrass no-task listed with a raw cost but TaskCatalogue has no task for it
+gap sentry_armor_trim_smithing_template loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap shaper_armor_trim_smithing_template loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap sheaf_pottery_sherd loot-brushing brushing suspicious sand or gravel in ruins
+gap shears ingredient an ingredient of its recipe has no TaskCatalogue path
+gap sheep_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap shelf_mushroom no-task listed with a raw cost but TaskCatalogue has no task for it
+gap shelter_pottery_sherd loot-brushing brushing suspicious sand or gravel in ruins
+gap shield ingredient an ingredient of its recipe has no TaskCatalogue path
+gap short_dry_grass no-task listed with a raw cost but TaskCatalogue has no task for it
+gap short_grass no-task listed with a raw cost but TaskCatalogue has no task for it
+gap shroomlight no-task listed with a raw cost but TaskCatalogue has no task for it
+gap shulker_box ingredient an ingredient of its recipe has no TaskCatalogue path
+gap shulker_shell no-task listed with a raw cost but TaskCatalogue has no task for it
+gap shulker_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap silence_armor_trim_smithing_template loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap silverfish_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap skeleton_horse_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap skeleton_skull no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap skeleton_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap skull_banner_pattern loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap skull_pottery_sherd loot-brushing brushing suspicious sand or gravel in ruins
+gap slime_ball ingredient an ingredient of its recipe has no TaskCatalogue path
+gap slime_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap slime_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap small_amethyst_bud silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap small_dripleaf no-task listed with a raw cost but TaskCatalogue has no task for it
+gap smithing_table ingredient an ingredient of its recipe has no TaskCatalogue path
+gap smoker ingredient an ingredient of its recipe has no TaskCatalogue path
+gap smooth_basalt ingredient an ingredient of its recipe has no TaskCatalogue path
+gap smooth_quartz ingredient an ingredient of its recipe has no TaskCatalogue path
+gap smooth_quartz_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap smooth_quartz_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap smooth_red_sandstone ingredient an ingredient of its recipe has no TaskCatalogue path
+gap smooth_red_sandstone_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap smooth_red_sandstone_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap smooth_sandstone ingredient an ingredient of its recipe has no TaskCatalogue path
+gap smooth_sandstone_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap smooth_sandstone_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap smooth_stone ingredient an ingredient of its recipe has no TaskCatalogue path
+gap smooth_stone_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap sniffer_egg loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap sniffer_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap snort_pottery_sherd loot-brushing brushing suspicious sand or gravel in ruins
+gap snout_armor_trim_smithing_template loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap snow ingredient recipe needs snow_block (no path)
+gap snow_block silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap snow_golem_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap snowball no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap snowy_village_map loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap soul_campfire silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap soul_lantern ingredient an ingredient of its recipe has no TaskCatalogue path
+gap soul_sand no-task listed with a raw cost but TaskCatalogue has no task for it
+gap soul_soil no-task listed with a raw cost but TaskCatalogue has no task for it
+gap soul_torch ingredient an ingredient of its recipe has no TaskCatalogue path
+gap spawner no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap spectral_arrow ingredient an ingredient of its recipe has no TaskCatalogue path
+gap spider_eye no-task listed with a raw cost but TaskCatalogue has no task for it
+gap spider_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap spire_armor_trim_smithing_template loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap splash_potion brewing-bottles brewing stand, bottling or trading
+gap sponge ingredient an ingredient of its recipe has no TaskCatalogue path
+gap spore_blossom no-task listed with a raw cost but TaskCatalogue has no task for it
+gap spruce_boat ingredient an ingredient of its recipe has no TaskCatalogue path
+gap spruce_button ingredient an ingredient of its recipe has no TaskCatalogue path
+gap spruce_chest_boat ingredient an ingredient of its recipe has no TaskCatalogue path
+gap spruce_door ingredient an ingredient of its recipe has no TaskCatalogue path
+gap spruce_fence ingredient an ingredient of its recipe has no TaskCatalogue path
+gap spruce_fence_gate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap spruce_hanging_sign ingredient recipe needs stripped_spruce_log (no path)
+gap spruce_leaves no-task listed with a raw cost but TaskCatalogue has no task for it
+gap spruce_log no-task listed with a raw cost but TaskCatalogue has no task for it
+gap spruce_planks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap spruce_pressure_plate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap spruce_sapling no-task listed with a raw cost but TaskCatalogue has no task for it
+gap spruce_shelf ingredient recipe needs stripped_spruce_log (no path)
+gap spruce_sign ingredient an ingredient of its recipe has no TaskCatalogue path
+gap spruce_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap spruce_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap spruce_trapdoor ingredient an ingredient of its recipe has no TaskCatalogue path
+gap spruce_wood ingredient an ingredient of its recipe has no TaskCatalogue path
+gap spyglass ingredient an ingredient of its recipe has no TaskCatalogue path
+gap squid_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap stick ingredient an ingredient of its recipe has no TaskCatalogue path
+gap sticky_piston ingredient an ingredient of its recipe has no TaskCatalogue path
+gap stone silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap stone_axe ingredient an ingredient of its recipe has no TaskCatalogue path
+gap stone_brick_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap stone_brick_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap stone_brick_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap stone_bricks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap stone_button ingredient an ingredient of its recipe has no TaskCatalogue path
+gap stone_hoe ingredient an ingredient of its recipe has no TaskCatalogue path
+gap stone_pickaxe ingredient an ingredient of its recipe has no TaskCatalogue path
+gap stone_pressure_plate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap stone_shovel ingredient an ingredient of its recipe has no TaskCatalogue path
+gap stone_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap stone_spear ingredient an ingredient of its recipe has no TaskCatalogue path
+gap stone_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap stone_sword ingredient an ingredient of its recipe has no TaskCatalogue path
+gap stonecutter ingredient an ingredient of its recipe has no TaskCatalogue path
+gap straw_bed ingredient an ingredient of its recipe has no TaskCatalogue path
+gap stray_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap strider_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap string no-task listed with a raw cost but TaskCatalogue has no task for it
+gap stripped_acacia_log no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap stripped_acacia_wood ingredient recipe needs stripped_acacia_log (no path)
+gap stripped_bamboo_block no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap stripped_birch_log no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap stripped_birch_wood ingredient recipe needs stripped_birch_log (no path)
+gap stripped_cherry_log no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap stripped_cherry_wood ingredient recipe needs stripped_cherry_log (no path)
+gap stripped_crimson_hyphae ingredient recipe needs stripped_crimson_stem (no path)
+gap stripped_crimson_stem no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap stripped_dark_oak_log no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap stripped_dark_oak_wood ingredient recipe needs stripped_dark_oak_log (no path)
+gap stripped_jungle_log no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap stripped_jungle_wood ingredient recipe needs stripped_jungle_log (no path)
+gap stripped_mangrove_log no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap stripped_mangrove_wood ingredient recipe needs stripped_mangrove_log (no path)
+gap stripped_oak_log no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap stripped_oak_wood ingredient recipe needs stripped_oak_log (no path)
+gap stripped_pale_oak_log no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap stripped_pale_oak_wood ingredient recipe needs stripped_pale_oak_log (no path)
+gap stripped_poplar_log no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap stripped_poplar_wood ingredient recipe needs stripped_poplar_log (no path)
+gap stripped_spruce_log no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap stripped_spruce_wood ingredient recipe needs stripped_spruce_log (no path)
+gap stripped_warped_hyphae ingredient recipe needs stripped_warped_stem (no path)
+gap stripped_warped_stem no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap structure_block no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap structure_void no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap sugar ingredient recipe needs honey_bottle (no path)
+gap sugar_cane no-task listed with a raw cost but TaskCatalogue has no task for it
+gap sulfur ingredient an ingredient of its recipe has no TaskCatalogue path
+gap sulfur_brick_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap sulfur_brick_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap sulfur_brick_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap sulfur_bricks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap sulfur_cube_bucket mob-bucket a water bucket used on the mob
+gap sulfur_cube_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap sulfur_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap sulfur_spike no-task listed with a raw cost but TaskCatalogue has no task for it
+gap sulfur_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap sulfur_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap sunflower no-task listed with a raw cost but TaskCatalogue has no task for it
+gap suspicious_gravel no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap suspicious_sand no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap suspicious_stew ingredient recipe needs wither_rose (no path)
+gap swamp_hut_map loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap sweet_berries no-task listed with a raw cost but TaskCatalogue has no task for it
+gap tadpole_bucket mob-bucket a water bucket used on the mob
+gap tadpole_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap taiga_village_map loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap tall_dry_grass no-task listed with a raw cost but TaskCatalogue has no task for it
+gap tall_grass no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap target ingredient an ingredient of its recipe has no TaskCatalogue path
+gap terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap test_block no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap test_instance_block no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap tide_armor_trim_smithing_template loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap tinted_glass ingredient an ingredient of its recipe has no TaskCatalogue path
+gap tipped_arrow no-task listed with a raw cost but TaskCatalogue has no task for it
+gap tnt ingredient an ingredient of its recipe has no TaskCatalogue path
+gap tnt_minecart ingredient an ingredient of its recipe has no TaskCatalogue path
+gap torch ingredient an ingredient of its recipe has no TaskCatalogue path
+gap torchflower no-task listed with a raw cost but TaskCatalogue has no task for it
+gap torchflower_seeds no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap totem_of_undying no-task listed with a raw cost but TaskCatalogue has no task for it
+gap trader_llama_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap trapped_chest ingredient an ingredient of its recipe has no TaskCatalogue path
+gap trial_key no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap trial_spawner no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap trident loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap tripwire_hook ingredient an ingredient of its recipe has no TaskCatalogue path
+gap tropical_fish no-task listed with a raw cost but TaskCatalogue has no task for it
+gap tropical_fish_bucket mob-bucket a water bucket used on the mob
+gap tropical_fish_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap tube_coral silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap tube_coral_block silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap tube_coral_fan silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap tuff no-task listed with a raw cost but TaskCatalogue has no task for it
+gap tuff_brick_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap tuff_brick_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap tuff_brick_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap tuff_bricks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap tuff_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap tuff_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap tuff_wall ingredient an ingredient of its recipe has no TaskCatalogue path
+gap turtle_egg silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap turtle_helmet loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap turtle_scute no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap turtle_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap twisting_vines no-task listed with a raw cost but TaskCatalogue has no task for it
+gap vault no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap verdant_froglight no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap vex_armor_trim_smithing_template loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap vex_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap villager_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap vindicator_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap vine no-task listed with a raw cost but TaskCatalogue has no task for it
+gap wandering_trader_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap ward_armor_trim_smithing_template loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap warden_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap warm_ocean_ruins_map loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap warped_button ingredient an ingredient of its recipe has no TaskCatalogue path
+gap warped_door ingredient an ingredient of its recipe has no TaskCatalogue path
+gap warped_fence ingredient an ingredient of its recipe has no TaskCatalogue path
+gap warped_fence_gate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap warped_fungus no-task listed with a raw cost but TaskCatalogue has no task for it
+gap warped_fungus_on_a_stick ingredient an ingredient of its recipe has no TaskCatalogue path
+gap warped_hanging_sign ingredient recipe needs stripped_warped_stem (no path)
+gap warped_hyphae ingredient an ingredient of its recipe has no TaskCatalogue path
+gap warped_nylium silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap warped_planks ingredient an ingredient of its recipe has no TaskCatalogue path
+gap warped_pressure_plate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap warped_roots no-task listed with a raw cost but TaskCatalogue has no task for it
+gap warped_shelf ingredient recipe needs stripped_warped_stem (no path)
+gap warped_sign ingredient an ingredient of its recipe has no TaskCatalogue path
+gap warped_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap warped_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap warped_stem no-task listed with a raw cost but TaskCatalogue has no task for it
+gap warped_trapdoor ingredient an ingredient of its recipe has no TaskCatalogue path
+gap warped_wart_block no-task listed with a raw cost but TaskCatalogue has no task for it
+gap water_bucket no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap waxed_chiseled_copper ingredient an ingredient of its recipe has no TaskCatalogue path
+gap waxed_copper_bars ingredient an ingredient of its recipe has no TaskCatalogue path
+gap waxed_copper_block ingredient an ingredient of its recipe has no TaskCatalogue path
+gap waxed_copper_bulb ingredient an ingredient of its recipe has no TaskCatalogue path
+gap waxed_copper_chain ingredient an ingredient of its recipe has no TaskCatalogue path
+gap waxed_copper_chest ingredient an ingredient of its recipe has no TaskCatalogue path
+gap waxed_copper_door ingredient an ingredient of its recipe has no TaskCatalogue path
+gap waxed_copper_golem_statue ingredient recipe needs copper_golem_statue (no path)
+gap waxed_copper_grate ingredient an ingredient of its recipe has no TaskCatalogue path
+gap waxed_copper_lantern ingredient an ingredient of its recipe has no TaskCatalogue path
+gap waxed_copper_trapdoor ingredient an ingredient of its recipe has no TaskCatalogue path
+gap waxed_cut_copper ingredient an ingredient of its recipe has no TaskCatalogue path
+gap waxed_cut_copper_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap waxed_cut_copper_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap waxed_exposed_chiseled_copper copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_exposed_copper copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_exposed_copper_bars copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_exposed_copper_bulb copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_exposed_copper_chain copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_exposed_copper_chest copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_exposed_copper_door copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_exposed_copper_golem_statue copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_exposed_copper_grate copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_exposed_copper_lantern copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_exposed_copper_trapdoor copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_exposed_cut_copper copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_exposed_cut_copper_slab copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_exposed_cut_copper_stairs copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_exposed_lightning_rod copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_lightning_rod ingredient an ingredient of its recipe has no TaskCatalogue path
+gap waxed_oxidized_chiseled_copper copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_oxidized_copper copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_oxidized_copper_bars copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_oxidized_copper_bulb copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_oxidized_copper_chain copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_oxidized_copper_chest copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_oxidized_copper_door copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_oxidized_copper_golem_statue copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_oxidized_copper_grate copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_oxidized_copper_lantern copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_oxidized_copper_trapdoor copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_oxidized_cut_copper copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_oxidized_cut_copper_slab copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_oxidized_cut_copper_stairs copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_oxidized_lightning_rod copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_weathered_chiseled_copper copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_weathered_copper copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_weathered_copper_bars copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_weathered_copper_bulb copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_weathered_copper_chain copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_weathered_copper_chest copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_weathered_copper_door copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_weathered_copper_golem_statue copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_weathered_copper_grate copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_weathered_copper_lantern copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_weathered_copper_trapdoor copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_weathered_cut_copper copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_weathered_cut_copper_slab copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_weathered_cut_copper_stairs copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap waxed_weathered_lightning_rod copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap wayfinder_armor_trim_smithing_template loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap weathered_chiseled_copper copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap weathered_copper copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap weathered_copper_bars copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap weathered_copper_bulb copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap weathered_copper_chain copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap weathered_copper_chest copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap weathered_copper_door copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap weathered_copper_golem_statue copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap weathered_copper_grate copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap weathered_copper_lantern copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap weathered_copper_trapdoor copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap weathered_cut_copper copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap weathered_cut_copper_slab copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap weathered_cut_copper_stairs copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap weathered_lightning_rod copper-aging placed copper ages over in-game days; waxed kinds then need honeycomb on the aged block
+gap weeping_vines no-task listed with a raw cost but TaskCatalogue has no task for it
+gap wet_sponge no-task listed with a raw cost but TaskCatalogue has no task for it
+gap wheat ingredient an ingredient of its recipe has no TaskCatalogue path
+gap wheat_seeds no-task listed with a raw cost but TaskCatalogue has no task for it
+gap white_banner ingredient an ingredient of its recipe has no TaskCatalogue path
+gap white_bed ingredient an ingredient of its recipe has no TaskCatalogue path
+gap white_bundle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap white_candle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap white_carpet ingredient an ingredient of its recipe has no TaskCatalogue path
+gap white_concrete no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap white_concrete_powder ingredient an ingredient of its recipe has no TaskCatalogue path
+gap white_concrete_slab ingredient recipe needs white_concrete (no path)
+gap white_concrete_stairs ingredient recipe needs white_concrete (no path)
+gap white_cushion ingredient an ingredient of its recipe has no TaskCatalogue path
+gap white_dye ingredient an ingredient of its recipe has no TaskCatalogue path
+gap white_glazed_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap white_harness ingredient an ingredient of its recipe has no TaskCatalogue path
+gap white_shulker_box ingredient an ingredient of its recipe has no TaskCatalogue path
+gap white_stained_glass silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap white_stained_glass_pane silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap white_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap white_tulip no-task listed with a raw cost but TaskCatalogue has no task for it
+gap white_wool ingredient an ingredient of its recipe has no TaskCatalogue path
+gap white_wool_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap white_wool_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap wild_armor_trim_smithing_template loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap wildflowers no-task listed with a raw cost but TaskCatalogue has no task for it
+gap wind_charge ingredient an ingredient of its recipe has no TaskCatalogue path
+gap witch_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap wither_rose no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap wither_skeleton_skull no-task listed with a raw cost but TaskCatalogue has no task for it
+gap wither_skeleton_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap wither_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap wolf_armor loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap wolf_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap wooden_axe ingredient an ingredient of its recipe has no TaskCatalogue path
+gap wooden_hoe ingredient an ingredient of its recipe has no TaskCatalogue path
+gap wooden_pickaxe ingredient an ingredient of its recipe has no TaskCatalogue path
+gap wooden_shovel ingredient an ingredient of its recipe has no TaskCatalogue path
+gap wooden_spear ingredient an ingredient of its recipe has no TaskCatalogue path
+gap wooden_sword ingredient an ingredient of its recipe has no TaskCatalogue path
+gap woodland_mansion_map loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap writable_book ingredient an ingredient of its recipe has no TaskCatalogue path
+gap written_book loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap yellow_banner ingredient an ingredient of its recipe has no TaskCatalogue path
+gap yellow_bed ingredient an ingredient of its recipe has no TaskCatalogue path
+gap yellow_bundle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap yellow_candle ingredient an ingredient of its recipe has no TaskCatalogue path
+gap yellow_carpet ingredient an ingredient of its recipe has no TaskCatalogue path
+gap yellow_concrete no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap yellow_concrete_powder ingredient an ingredient of its recipe has no TaskCatalogue path
+gap yellow_concrete_slab ingredient recipe needs yellow_concrete (no path)
+gap yellow_concrete_stairs ingredient recipe needs yellow_concrete (no path)
+gap yellow_cushion ingredient an ingredient of its recipe has no TaskCatalogue path
+gap yellow_dye ingredient an ingredient of its recipe has no TaskCatalogue path
+gap yellow_glazed_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap yellow_harness ingredient an ingredient of its recipe has no TaskCatalogue path
+gap yellow_poplar_leaves no-task listed with a raw cost but TaskCatalogue has no task for it
+gap yellow_shulker_box ingredient an ingredient of its recipe has no TaskCatalogue path
+gap yellow_stained_glass silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap yellow_stained_glass_pane silk-touch drops itself only to a silk touch tool (needs enchanting)
+gap yellow_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
+gap yellow_wool ingredient an ingredient of its recipe has no TaskCatalogue path
+gap yellow_wool_slab ingredient an ingredient of its recipe has no TaskCatalogue path
+gap yellow_wool_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
+gap zoglin_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap zombie_head no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap zombie_horse_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap zombie_nautilus_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap zombie_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap zombie_villager_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap zombified_piglin_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data

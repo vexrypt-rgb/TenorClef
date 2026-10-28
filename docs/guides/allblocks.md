@@ -63,7 +63,20 @@ gathered again later.
   (bedrock, end portal frame, reinforced deepslate, budding amethyst, spawners, vaults, farmland, dirt path, petrified
   oak slab, chorus plant, frogspawn, player head, suspicious sand and gravel, infested blocks).
 - **Unsupported** (reported as `UNSUPPORTED`): an obtainable item with no TaskCatalogue path. These are capability
-  gaps, not exclusions.
+  gaps, not exclusions. The report groups them by root cause (`GAP <cause> (n): items`), from the `gap` lines the
+  generator writes:
+
+  | Cause | What the bot would need |
+  | --- | --- |
+  | `silk-touch` | An enchanted silk touch tool (ores, grass block, podzol, mycelium, ice, coral blocks, sculk, mushroom blocks, ...). |
+  | `copper-aging` | Placing copper and waiting in-game days for it to age (then honeycomb for the waxed kinds). |
+  | `coral` | Live coral (silk touch) placed out of water to die. |
+  | `loot-boss-trade` | Structure loot, a boss, a villager trade or a rare mob (discs, templates, horse armor, elytra, ...). |
+  | `loot-brushing` | Brushing suspicious sand or gravel (pottery sherds). |
+  | `mob-bucket` | A water bucket used on a fish, axolotl or tadpole. |
+  | `brewing-bottles` | A brewing stand or bottling. |
+  | `ingredient` | A recipe whose ingredient has no path (resin, honey, poplar wood, snow, ...). |
+  | `no-source` | Something the jar data does not tie to a recipe, block or plain mob drop (eggs of other chicken kinds, chainmail, mob heads, froglights, sniffer seeds, ...). |
 - **Stuck** (reported as `STUCK`): an item whose gather failed twice. The report shows the task chain that was running
   when it gave up.
 - **Not placed**: items that are not blocks (tools, food, entities such as boats, buckets of fluid) are only stored.
@@ -80,6 +93,7 @@ Besides the hand-written catalogue, 26.3 loads `src/main/resources/allblocks/cat
 - `mine` lines: natural blocks that drop themselves without silk touch and have no recipe, with the pickaxe tier
   from the block tags and the dimension they generate in.
 - `order` lines: a rough cost per item, used for the gather order.
+- `gap` lines: for every item, the root cause to report when it has no path at run time.
 
 Re-run the generator when the Minecraft version changes.
 

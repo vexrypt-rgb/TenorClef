@@ -74,8 +74,17 @@ public final class AllBlocksPlan {
         /** Null when TaskCatalogue has a path for the item, else why not (the code path that fails). */
         public String unsupportedReason() {
             if (TaskCatalogue.taskExists(item)) return null;
-            return "no gather path: TaskCatalogue.taskExists(" + id + ") is false (no hand-written entry and no"
-                    + " resolvable line in allblocks/catalogue-26.3.txt)";
+            String[] gap = GAPS.get(id);
+            return "[" + (gap != null ? gap[0] : "unknown") + "] " + (gap != null ? gap[1] + "; " : "")
+                    + "TaskCatalogue.taskExists(" + id + ") is false (no hand-written entry and no resolvable line in"
+                    + " allblocks/catalogue-26.3.txt)";
+        }
+
+        /** Root-cause category of an unsupported item ("silk-touch", "copper-aging", ...), or null when supported. */
+        public String gapCategory() {
+            if (TaskCatalogue.taskExists(item)) return null;
+            String[] gap = GAPS.get(id);
+            return gap != null ? gap[0] : "unknown";
         }
     }
 
@@ -101,6 +110,24 @@ public final class AllBlocksPlan {
         // Stable: equal costs keep registry order.
         entries.sort((a, b) -> Double.compare(a.cost, b.cost));
         return Collections.unmodifiableList(entries);
+    }
+
+    /** "gap" lines of the generated catalogue: item id to {category, why}. */
+    private static final Map<String, String[]> GAPS = readGaps();
+
+    private static Map<String, String[]> readGaps() {
+        Map<String, String[]> gaps = new HashMap<>();
+        try (InputStream in = AllBlocksPlan.class.getResourceAsStream("/allblocks/catalogue-26.3.txt")) {
+            if (in == null) return gaps;
+            BufferedReader r = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+            for (String l; (l = r.readLine()) != null; ) {
+                if (!l.startsWith("gap ")) continue;
+                String[] p = l.split(" ", 4);
+                if (p.length == 4) gaps.put(p[1], new String[]{p[2], p[3]});
+            }
+        } catch (IOException | RuntimeException ignored) {
+        }
+        return gaps;
     }
 
     private static Map<String, Double> readCosts() {

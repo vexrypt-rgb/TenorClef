@@ -297,8 +297,18 @@ public final class AllBlocks {
                 stuck.add("STUCK " + e.id + ": " + p.failures.get(e.id).last);
             }
         }
+        // Unsupported items by root cause: one line per cause with its count and the items, then one line per item.
+        Map<String, List<String>> byCause = new java.util.TreeMap<>();
+        for (AllBlocksPlan.Entry e : plan) {
+            if (!e.candidate() || p != null && p.stored.containsKey(e.id)) continue;
+            String cat = e.gapCategory();
+            if (cat != null) byCause.computeIfAbsent(cat, k -> new ArrayList<>()).add(e.id);
+        }
         List<String> all = new ArrayList<>(stuck);
         all.addAll(placeSkip);
+        for (Map.Entry<String, List<String>> c : byCause.entrySet()) {
+            all.add("GAP " + c.getKey() + " (" + c.getValue().size() + "): " + String.join(" ", c.getValue()));
+        }
         all.addAll(unsupported);
         all.addAll(rule);
         return all;

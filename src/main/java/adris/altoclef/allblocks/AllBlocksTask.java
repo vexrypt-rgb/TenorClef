@@ -279,6 +279,7 @@ public class AllBlocksTask extends Task {
                 || (sleepTask == null && !AllBlocksKit.hasBed(mod))) {
             if (sleepTask != null && !night) Debug.logMessage("ALLBLOCKS morning");
             sleepTask = null;
+            bunkered = false;
             return null;
         }
         if (sleepTask == null) {
@@ -286,17 +287,43 @@ public class AllBlocksTask extends Task {
             sleepStart = ticks;
             Debug.logMessage("ALLBLOCKS night: going to bed" + (gathering != null ? " (holding gather of " + gathering.id + ")" : ""));
         }
-        if (ticks - sleepStart > 8L * TPM && !mod.getPlayer().isSleeping()) {
-            Debug.logMessage("ALLBLOCKS night: no sleep after 8 min (" + chain(sleepTask) + "); carrying on");
-            nightCooldownUntil = ticks + 10L * TPM;
-            sleepTask = null;
-            return null;
+        if (!mod.getPlayer().isSleeping() && (bunkered || ticks - sleepStart > 60L * 20) && origin != null) {
+            // No sleep (monsters nearby, no bed): a capped pit two deep next to the storage area keeps mobs off.
+            if (!bunkered) Debug.logMessage("ALLBLOCKS night: no sleep after 60s (" + chain(sleepTask) + "); bunkering");
+            bunkered = true;
+            if (gathering != null) gatherStart++;
+            kit.hold();
+            return bunkerStep(mod);
         }
         if (gathering != null) gatherStart++;
         if (stepTask != null) stepStart++;
         kit.hold();
         setDebugState("Night: sleeping");
         return sleepTask;
+    }
+
+    private boolean bunkered;
+
+    private Task bunkerStep(AltoClef mod) {
+        BlockPos top = origin.add(-4, 0, -4), head = top.down(), feet = top.down(2);
+        if (!mod.getWorld().getBlockState(head).isAir() && !mod.getPlayer().getBlockPos().equals(feet)) {
+            setDebugState("Night: digging the bunker");
+            return new DestroyBlockTask(head);
+        }
+        if (!mod.getWorld().getBlockState(feet).isAir() && !mod.getPlayer().getBlockPos().equals(feet)) {
+            setDebugState("Night: digging the bunker");
+            return new DestroyBlockTask(feet);
+        }
+        if (!mod.getPlayer().getBlockPos().equals(feet)) {
+            setDebugState("Night: getting into the bunker");
+            return new adris.altoclef.tasks.movement.GetToBlockTask(feet);
+        }
+        if (!WorldHelper.isSolidBlock(top)) {
+            setDebugState("Night: closing the bunker");
+            return new PlaceBlockTask(top, new Block[0], true, true);
+        }
+        setDebugState("Night: in the bunker");
+        return null;
     }
 
     // ---------------------------------------------------------------- site

@@ -13,7 +13,7 @@ import net.minecraft.util.math.BlockPos;
 public class AllBlocksTourTask extends Task {
 
     private static final int HOLD_TICKS = 200;
-    private static final int VIEW_HEIGHT = 4;
+    private static final int VIEW_HEIGHT = 0;
 
     private final BlockPos origin;
     private final BlockPos[] spots;
@@ -21,18 +21,19 @@ public class AllBlocksTourTask extends Task {
     private final String[] names = {"chests", "grid"};
     private int index;
     private int held;
+    private boolean logged;
 
     public AllBlocksTourTask(BlockPos origin, int chests, int cells) {
         this.origin = origin;
         int chestRows = Math.max(1, (chests + AllBlocks.CHESTS_PER_ROW - 1) / AllBlocks.CHESTS_PER_ROW);
         int gridRows = Math.max(1, (cells + AllBlocks.CELLS_PER_ROW - 1) / AllBlocks.CELLS_PER_ROW);
-        // North of the chest rows and of the grid (the -z side), facing south. Raised 4 blocks (the bot pillars up):
-        // from the ground, trees and uneven terrain in a forest hid the grid.
+        // North of the chest rows and of the grid (the -z side), facing south. At ground level: a raised view ended up
+        // inside the spruce canopy of a forest site.
         this.spots = new BlockPos[]{
                 origin.add(Math.min(chests, AllBlocks.CHESTS_PER_ROW) - 1, VIEW_HEIGHT, -3),
                 // An odd x is a gap of the layout: the pillar never stands on a chest, label or cell.
                 origin.add((Math.min(cells, AllBlocks.CELLS_PER_ROW) - 1) | 1, VIEW_HEIGHT, AllBlocks.GRID_Z - 3)};
-        this.looks = new float[][]{{0f, 40f + 4f * chestRows}, {0f, 45f + 3f * gridRows}};
+        this.looks = new float[][]{{0f, 20f + 5f * chestRows}, {0f, 20f + 3f * gridRows}};
     }
 
     @Override
@@ -46,18 +47,21 @@ public class AllBlocksTourTask extends Task {
         if (index >= spots.length) return null;
         AltoClef mod = AltoClef.getInstance();
         BlockPos spot = spots[index];
-        if (!mod.getPlayer().getBlockPos().equals(spot)) {
+        if (mod.getPlayer().getBlockPos().getSquaredDistance(spot) > 2 * 2) {
             // Pushed off the spot (a fight, a fall): walk back and hold the view afresh.
             held = 0;
+            logged = false;
             setDebugState("Walking to the " + names[index] + " view at " + spot.toShortString());
             return new GetToBlockTask(spot);
         }
         mod.getPlayer().setYaw(looks[index][0]);
         mod.getPlayer().setPitch(looks[index][1]);
-        if (held == 0) Debug.logMessage("ALLBLOCKS TOUR " + names[index] + " at " + spot.toShortString());
+        if (!logged) Debug.logMessage("ALLBLOCKS TOUR " + names[index] + " at " + spot.toShortString());
+        logged = true;
         if (++held >= HOLD_TICKS) {
             index++;
             held = 0;
+            logged = false;
         }
         setDebugState("Holding the " + names[index < names.length ? index : names.length - 1] + " view");
         return null;

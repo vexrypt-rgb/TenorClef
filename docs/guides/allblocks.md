@@ -15,7 +15,7 @@ runner). `@allblocks` does the same from TenorClef's own command prefix.
 | `#allblocks report [n]` | Stuck, unsupported and skipped entries with the reason and the failing code path. |
 | `#allblocks stop` | Stop. Progress is kept. |
 | `#allblocks reset` | Forget this world's progress (the chests and the grid stay). |
-| `#allblocks tour` | Climb to a view 4 blocks above the chest rows, then the grid, and hold each for 10 seconds (for screenshots). |
+| `#allblocks tour` | Walk to the chest-room view, then the grid view, and hold each for 10 seconds (for screenshots). |
 
 ## Layout
 

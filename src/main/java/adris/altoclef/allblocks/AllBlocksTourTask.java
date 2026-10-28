@@ -13,6 +13,7 @@ import net.minecraft.util.math.BlockPos;
 public class AllBlocksTourTask extends Task {
 
     private static final int HOLD_TICKS = 200;
+    private static final int VIEW_HEIGHT = 4;
 
     private final BlockPos origin;
     private final BlockPos[] spots;
@@ -25,11 +26,13 @@ public class AllBlocksTourTask extends Task {
         this.origin = origin;
         int chestRows = Math.max(1, (chests + AllBlocks.CHESTS_PER_ROW - 1) / AllBlocks.CHESTS_PER_ROW);
         int gridRows = Math.max(1, (cells + AllBlocks.CELLS_PER_ROW - 1) / AllBlocks.CELLS_PER_ROW);
-        // In front of the chest rows (north of them, the -z side), facing south across the labels.
+        // North of the chest rows and of the grid (the -z side), facing south. Raised 4 blocks (the bot pillars up):
+        // from the ground, trees and uneven terrain in a forest hid the grid.
         this.spots = new BlockPos[]{
-                origin.add(Math.min(chests, AllBlocks.CHESTS_PER_ROW) - 1, 0, -3),
-                origin.add(Math.min(cells, AllBlocks.CELLS_PER_ROW) - 1, 0, AllBlocks.GRID_Z - 3)};
-        this.looks = new float[][]{{0f, 20f + 5f * chestRows}, {0f, 25f + 3f * gridRows}};
+                origin.add(Math.min(chests, AllBlocks.CHESTS_PER_ROW) - 1, VIEW_HEIGHT, -3),
+                // An odd x is a gap of the layout: the pillar never stands on a chest, label or cell.
+                origin.add((Math.min(cells, AllBlocks.CELLS_PER_ROW) - 1) | 1, VIEW_HEIGHT, AllBlocks.GRID_Z - 3)};
+        this.looks = new float[][]{{0f, 40f + 4f * chestRows}, {0f, 45f + 3f * gridRows}};
     }
 
     @Override

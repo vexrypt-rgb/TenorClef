@@ -305,13 +305,14 @@ public class AllBlocksTask extends Task {
                     return t;
                 }
             }
-            if (mod.getPlayer().getBlockPos().getSquaredDistance(origin) > 12 * 12) {
+            double d2 = mod.getPlayer().getBlockPos().getSquaredDistance(origin);
+            // Home only when it is close: walking far at dusk ends in the dark. The carried bed works anywhere.
+            if (d2 > 12 * 12 && d2 < 64 * 64) {
                 setDebugState("Dusk: heading home");
                 return new adris.altoclef.tasks.movement.GetToBlockTask(origin.add(-2, 0, -2));
             }
         }
-        if (!night || ticks < nightCooldownUntil || WorldHelper.getCurrentDimension() != Dimension.OVERWORLD
-                || (sleepTask == null && !AllBlocksKit.hasBed(mod))) {
+        if (!night || ticks < nightCooldownUntil || WorldHelper.getCurrentDimension() != Dimension.OVERWORLD) {
             if (sleepTask != null && !night) {
                 Debug.logMessage("ALLBLOCKS morning");
                 if (bedPos != null) bedPickupUntil = ticks + 60L * 20;
@@ -320,17 +321,21 @@ public class AllBlocksTask extends Task {
             bunkered = false;
             return bedPickupStep(mod);
         }
-        if (sleepTask == null) {
+        // Only a bed carried or one close by: the bed task walked 110 blocks in the dark to an old bed and died.
+        boolean bedHere = mod.getItemStorage().hasItem(ItemHelper.BED) || nearBed(mod);
+        if (sleepTask == null && !bunkered) {
             sleepTask = new adris.altoclef.tasks.misc.SleepThroughNightTask();
-            sleepStart = ticks;
+            sleepStart = mod.getWorld().getTime();
             Debug.logMessage("ALLBLOCKS night: going to bed" + (gathering != null ? " (holding gather of " + gathering.id + ")" : ""));
         }
-        if (!mod.getPlayer().isSleeping() && (bunkered || ticks - sleepStart > 60L * 20)) {
+        // World time, not this task's ticks: while mob defense has control this task does not tick at all.
+        if (!mod.getPlayer().isSleeping() && (bunkered || !bedHere || mod.getWorld().getTime() - sleepStart > 60L * 20)) {
             // No sleep (monsters nearby, no bed, standing in water): a capped pit two deep keeps mobs off.
             if (!bunkered) {
                 // Dig in where the bot stands: walking home in the dark is what got it killed.
                 bunkerTop = mod.getPlayer().getBlockPos();
-                Debug.logMessage("ALLBLOCKS night: no sleep after 60s (" + chain(sleepTask) + "); bunkering at " + bunkerTop.toShortString());
+                Debug.logMessage("ALLBLOCKS night: " + (bedHere ? "no sleep after 60s (" + chain(sleepTask) + ")" : "no bed carried or nearby")
+                        + "; bunkering at " + bunkerTop.toShortString());
             }
             bunkered = true;
             if (gathering != null) gatherStart++;
@@ -371,6 +376,11 @@ public class AllBlocksTask extends Task {
 
     private boolean bunkered;
     private BlockPos bunkerTop;
+
+    static boolean nearBed(AltoClef mod) {
+        Optional<BlockPos> bed = mod.getBlockScanner().getNearestBlock(ItemHelper.itemsToBlocks(ItemHelper.BED));
+        return bed.isPresent() && bed.get().getSquaredDistance(mod.getPlayer().getBlockPos()) < 24 * 24;
+    }
 
     /** A pit two deep under where the bot stood when it gave up on sleeping, closed over its head. */
     private Task bunkerStep(AltoClef mod) {

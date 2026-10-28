@@ -135,10 +135,12 @@ final class AllBlocksKit {
         return hasPick(mod, new String[]{key});
     }
 
-    /** A bed in the inventory, or one placed within reach (the night step sleeps in it). */
+    /**
+     * A bed in the inventory, or one placed close by (the night step sleeps in it). A bed left far away does not count:
+     * the bot walked to one in the dark and died.
+     */
     static boolean hasBed(AltoClef mod) {
-        return mod.getItemStorage().hasItem(adris.altoclef.util.helpers.ItemHelper.BED)
-                || mod.getBlockScanner().anyFound(adris.altoclef.util.helpers.ItemHelper.itemsToBlocks(adris.altoclef.util.helpers.ItemHelper.BED));
+        return mod.getItemStorage().hasItem(adris.altoclef.util.helpers.ItemHelper.BED) || AllBlocksTask.nearBed(mod);
     }
 
     /** A tool of one of these kinds with more than {@value #MIN_DURABILITY} of its durability left. */

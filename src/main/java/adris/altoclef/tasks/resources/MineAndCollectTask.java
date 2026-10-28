@@ -25,6 +25,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import adris.altoclef.util.Pair;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.*;
@@ -269,16 +270,30 @@ public class MineAndCollectTask extends ResourceTask {
         }
 
         public static Pair<Double,Optional<BlockPos> > getClosestBlock(AltoClef mod,Vec3d pos ,Block... blocks) {
+            // Ostinato: #allblocks. Dry blocks first: the closest iron ore was often on the ocean floor, where the bot
+            // stalled escaping water until its gather timed out. Wet blocks are still used when nothing dry is known.
             Optional<BlockPos> closestBlock = mod.getBlockScanner().getNearestBlock(pos, check -> {
-
                 if (mod.getBlockScanner().isUnreachable(check)) return false;
-                return WorldHelper.canBreak(check);
+                return WorldHelper.canBreak(check) && !touchesWater(mod, check);
             }, blocks);
+            if (closestBlock.isEmpty()) {
+                closestBlock = mod.getBlockScanner().getNearestBlock(pos, check -> {
+                    if (mod.getBlockScanner().isUnreachable(check)) return false;
+                    return WorldHelper.canBreak(check);
+                }, blocks);
+            }
 
             return new Pair<>(
                     closestBlock.map(blockPos -> BlockPosVer.getSquaredDistance(blockPos, pos)).orElse(Double.POSITIVE_INFINITY),
                     closestBlock
             );
+        }
+
+        private static boolean touchesWater(AltoClef mod, BlockPos p) {
+            for (Direction d : Direction.values()) {
+                if (!mod.getWorld().getBlockState(p.offset(d)).getFluidState().isEmpty()) return true;
+            }
+            return false;
         }
 
         @Override

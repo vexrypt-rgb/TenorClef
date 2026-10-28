@@ -14,6 +14,7 @@ import adris.altoclef.util.Dimension;
 import adris.altoclef.util.ItemTarget;
 import adris.altoclef.util.helpers.ItemHelper;
 import adris.altoclef.util.helpers.WorldHelper;
+import net.minecraft.block.AbstractSignBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -53,7 +54,7 @@ import java.util.Set;
  */
 public class AllBlocksTask extends Task {
 
-    private static final int DEPOSIT_BATCH = 8;
+    private static final int DEPOSIT_BATCH = 4;
     private static final int MIN_FREE_SLOTS = 5;
     /** First try of an item; the retry after everything else gets {@link #RETRY_MINUTES}. */
     private static final int GATHER_MINUTES = 10;
@@ -111,6 +112,9 @@ public class AllBlocksTask extends Task {
     protected void onStart() {
         AltoClef mod = AltoClef.getInstance();
         mod.getBehaviour().push();
+        // The bot's own gathering dug the first chest's floor out from under it (it mines wherever the closest block
+        // is). Nothing breaks blocks in the storage area and grid except the step clearing a cell.
+        mod.getBehaviour().avoidBlockBreaking(this::protectedArea);
         if (progress != null) {
             // Resumed after another chain (eating, mob defense) had control: keep the state.
             protectedNow.clear();
@@ -250,7 +254,26 @@ public class AllBlocksTask extends Task {
     private Task nightStep(AltoClef mod) {
         long time = mod.getWorld().getTimeOfDay() % 24000;
         boolean night = time >= 12542 && time <= 23460;
-        if (!night || ticks < nightCooldownUntil || WorldHelper.getCurrentDimension() != Dimension.OVERWORLD) {
+        // Dusk: bank what is carried and get home, so the bed (and the night) is next to the chests. Items carried
+        // into the night were lost with every death.
+        boolean dusk = time >= 11200 && time < 12542;
+        if (dusk && origin != null && WorldHelper.getCurrentDimension() == Dimension.OVERWORLD && ticks >= nightCooldownUntil) {
+            if (gathering != null) gatherStart++;
+            kit.hold();
+            if (!pending.isEmpty()) {
+                Task t = depositStep(mod);
+                if (t != null) {
+                    setDebugState("Dusk: banking " + pending.size() + " items");
+                    return t;
+                }
+            }
+            if (mod.getPlayer().getBlockPos().getSquaredDistance(origin) > 12 * 12) {
+                setDebugState("Dusk: heading home");
+                return new adris.altoclef.tasks.movement.GetToBlockTask(origin.add(-2, 0, -2));
+            }
+        }
+        if (!night || ticks < nightCooldownUntil || WorldHelper.getCurrentDimension() != Dimension.OVERWORLD
+                || (sleepTask == null && !AllBlocksKit.hasBed(mod))) {
             if (sleepTask != null && !night) Debug.logMessage("ALLBLOCKS morning");
             sleepTask = null;
             return null;
@@ -268,6 +291,7 @@ public class AllBlocksTask extends Task {
         }
         if (gathering != null) gatherStart++;
         if (stepTask != null) stepStart++;
+        kit.hold();
         setDebugState("Night: sleeping");
         return sleepTask;
     }
@@ -483,7 +507,12 @@ public class AllBlocksTask extends Task {
         int chest = Integer.MAX_VALUE;
         for (String id : pending) chest = Math.min(chest, progress.chestOf.getOrDefault(id, 0));
         BlockPos pos = AllBlocks.chestPos(origin, chest);
+        Task home = goHomeFirst(mod, pos, "deposit");
+        if (home != null) return home;
         Block at = mod.getWorld().getBlockState(pos).getBlock();
+        // The walkway north of the chest is where the bot stands to open it: keep it clear and floored.
+        Task stand = prepareCell(mod, pos.north(), "stand cell of chest " + chest, null);
+        if (stand != null) return stand;
         if (at != Blocks.CHEST) {
             Task t = prepareCell(mod, pos, "chest " + chest, null);
             if (t != null) return t;
@@ -492,7 +521,7 @@ public class AllBlocksTask extends Task {
             }
             return startStep("place chest " + chest, new PlaceBlockTask(pos, Blocks.CHEST), PLACE_MINUTES);
         }
-        if (!Boolean.TRUE.equals(progress.labeled.get(chest)) && !labelFailed.contains(chest)) {
+        if (!Boolean.TRUE.equals(progress.labeled.get(chest)) && !labelFailed.contains(chest) && stepTask == null) {
             Task t = labelStep(mod, chest);
             if (t != null) return t;
         }
@@ -508,8 +537,21 @@ public class AllBlocksTask extends Task {
                 new StoreInContainerTask(pos, false, targets.toArray(new ItemTarget[0])), DEPOSIT_MINUTES);
     }
 
+    /**
+     * Far from home the storage chunks are not loaded and read as air: the bot planned 7-deep floor fills from that.
+     * Walk until the spot is loaded and close before looking at it.
+     */
+    private Task goHomeFirst(AltoClef mod, BlockPos spot, String why) {
+        if (mod.getChunkTracker().isChunkLoaded(spot) && mod.getPlayer().getBlockPos().getSquaredDistance(spot) < 48 * 48) {
+            return null;
+        }
+        setDebugState("Heading home to " + why);
+        return new adris.altoclef.tasks.movement.GetToBlockTask(spot.north(2));
+    }
+
     private int depositChest = -1;
     private int labelChest = -1;
+    private int labelFor = -1;
     private long labelDeadline;
     private final Set<Integer> labelFailed = new LinkedHashSet<>();
 
@@ -550,15 +592,16 @@ public class AllBlocksTask extends Task {
             return startStep("get a sign for label " + chest, TaskCatalogue.getItemTask("sign", count(signs) + 1), LABEL_MINUTES * 2);
         }
         labelPos = sign;
+        labelFor = chest;
         labelLines = AllBlocks.labelLines(chest, progress.chestOf);
         List<Block> blocks = new ArrayList<>();
         for (Item s : signs) if (spare(s) > 0) blocks.add(Block.getBlockFromItem(s));
         return startStep("label chest " + chest, new PlaceBlockTask(sign, blocks.toArray(new Block[0])), LABEL_MINUTES);
     }
 
+    /** Standing or wall sign: a label placed against the chest's side becomes a wall sign. */
     private static boolean isSign(Block b) {
-        for (Item s : ItemHelper.WOOD_SIGN) if (Block.getBlockFromItem(s) == b) return true;
-        return false;
+        return b instanceof AbstractSignBlock;
     }
 
     /**
@@ -578,6 +621,10 @@ public class AllBlocksTask extends Task {
                         labelPos, true, labelLines[0], labelLines[1], labelLines[2], labelLines[3]));
                 //#endif
                 Debug.logMessage("ALLBLOCKS LABEL " + labelPos.toShortString() + " \"" + String.join(" / ", labelLines) + "\"");
+                if (labelFor >= 0) {
+                    progress.labeled.put(labelFor, true);
+                    progress.save(file);
+                }
                 labelPos = null;
                 labelLines = null;
             }
@@ -622,6 +669,8 @@ public class AllBlocksTask extends Task {
             placingCell = n;
         }
         BlockPos cell = AllBlocks.cellPos(origin, placingCell);
+        Task home = goHomeFirst(mod, cell, "place " + e.id);
+        if (home != null) return home;
         BlockState cellState = mod.getWorld().getBlockState(cell);
         if (cellState.getBlock() == block) {
             progress.placed.put(e.id, placingCell);
@@ -689,25 +738,53 @@ public class AllBlocksTask extends Task {
         BlockState under = mod.getWorld().getBlockState(down);
         if (floor != null && under.getBlock() != floor) {
             if (!under.isAir() && under.getFluidState().isEmpty()) {
+                allowedBreak = down;
                 return startStep("clear floor of " + what, new DestroyBlockTask(down), 2);
             }
+            allowedBreak = down;
             return startStep("lay " + floor.asItem() + " floor for " + what, new PlaceBlockTask(down, floor), PLACE_MINUTES);
         }
         if (floor == null && !WorldHelper.isSolidBlock(down)) {
             // Fill a dip from the bottom up: a block can only be placed against one that is already there.
             BlockPos fill = down;
             for (int i = 0; i < 6 && !WorldHelper.isSolidBlock(fill.down()); i++) fill = fill.down();
+            allowedBreak = fill;
             return startStep("floor for " + what + (fill.equals(down) ? "" : " (filling " + fill.toShortString() + ")"),
                     new PlaceBlockTask(fill, new Block[0], true, true), PLACE_MINUTES);
         }
-        for (BlockPos p : new BlockPos[]{pos, pos.up()}) {
+        // Two blocks of headroom above: chests are opened by standing on them.
+        for (BlockPos p : new BlockPos[]{pos, pos.up(), pos.up(2)}) {
             BlockState s = mod.getWorld().getBlockState(p);
             if (!s.isAir() && s.getFluidState().isEmpty() && !isSign(s.getBlock()) && WorldHelper.canBreak(p)
                     && !(p.equals(pos) && (s.getBlock() == Blocks.CHEST || placingId != null && s.getBlock() == byId.get(placingId).block()))) {
+                allowedBreak = p;
                 return startStep("clear " + what, new DestroyBlockTask(p), 2);
             }
         }
         return null;
+    }
+
+    private BlockPos allowedBreak;
+
+    /**
+     * A chest, label sign or grid cell of the layout, or the floor block under one, and not the block a clear step is
+     * removing. Only the structures: protecting the whole footprint walled the first chest in when the site was a
+     * forest (no trunk or leaf inside it could be cut to get there).
+     */
+    private boolean protectedArea(BlockPos p) {
+        if (origin == null || p.equals(allowedBreak)) return false;
+        int dx = p.getX() - origin.getX(), dy = p.getY() - origin.getY(), dz = p.getZ() - origin.getZ();
+        // The structure block itself and the column under it (holes are filled from the bottom up, and the bot's own
+        // gathering mined the filler back out from under the first chest's stand cell).
+        if (dy > 0 || dy < -8) return false;
+        if (dx < 0 || dx % 2 != 0) return false;
+        if (dz >= -1 && dz < AllBlocks.GRID_Z) {
+            if (dx > 2 * (AllBlocks.CHESTS_PER_ROW - 1)) return false;
+            int m = Math.floorMod(dz, 3);
+            if (m == 2) return dy < 0; // stand cell north of a chest: its floor, not the cell
+            return true;                // chest (3r) or its label (3r + 1)
+        }
+        return dz >= AllBlocks.GRID_Z && (dz - AllBlocks.GRID_Z) % 2 == 0 && dx <= 2 * (AllBlocks.CELLS_PER_ROW - 1);
     }
 
     // ---------------------------------------------------------------- steps
@@ -732,6 +809,16 @@ public class AllBlocksTask extends Task {
 
     private Task continueStep(AltoClef mod) {
         boolean timedOut = ticks - stepStart > (long) stepMinutes * TPM;
+        // A label written as a wall sign never matches the standing sign PlaceBlockTask waits for: done once written.
+        boolean labelDone = stepKey.startsWith("label chest ")
+                && Boolean.TRUE.equals(progress.labeled.get(Integer.parseInt(stepKey.substring("label chest ".length()))));
+        if (labelDone) {
+            stepTask = null;
+            stepKey = null;
+            labelPos = null;
+            labelLines = null;
+            return null;
+        }
         if (!stepTask.isFinished() && !timedOut) {
             setDebugState(stepKey);
             return stepTask;

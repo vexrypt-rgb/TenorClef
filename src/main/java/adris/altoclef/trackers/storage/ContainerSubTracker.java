@@ -107,9 +107,21 @@ public class ContainerSubTracker extends Tracker {
         hasSentError = false;
     }
 
+    /** Ostinato: #allblocks diagnostics. */
+    public static volatile String debugState = "";
+
     public void onServerTick() {
         if (MinecraftClient.getInstance().player == null)
             return;
+        debugState = "containerOpen=" + containerOpen + " lastPos=" + lastBlockPosInteraction + " lastBlock=" + lastBlockInteraction
+                + " screen=" + adris.altoclef.multiversion.ScreenVer.current(MinecraftClient.getInstance()) + " handler=" + MinecraftClient.getInstance().player.currentScreenHandler;
+        // Ostinato: #allblocks. On 26.3 the screen-open hook never marked a chest screen as a container, so nothing
+        // was ever stored: also trust the open menu when it matches the block we last clicked.
+        ScreenHandler openHandler = MinecraftClient.getInstance().player.currentScreenHandler;
+        if (!containerOpen && lastBlockInteraction != null && openHandler != null
+                && ContainerType.screenHandlerMatches(ContainerType.getFromBlock(lastBlockInteraction), openHandler)) {
+            containerOpen = true;
+        }
         // If we haven't registered interacting with a block, try the currently "looking at" block
         if (containerOpen && lastBlockPosInteraction == null && lastBlockInteraction == null) {
             if (MinecraftClient.getInstance().crosshairTarget instanceof BlockHitResult bhit) {

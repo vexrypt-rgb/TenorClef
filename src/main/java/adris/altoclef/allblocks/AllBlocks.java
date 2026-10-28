@@ -50,7 +50,8 @@ public final class AllBlocks {
 
     /**
      * Picks the origin when none is given: the closest spot (8-block steps up to 64 blocks around the player) whose
-     * chest rows and first 8 grid rows (64 wide, 28 deep) are loaded, dry and within 6 blocks of height, sampled every
+     * chest rows and first 8 grid rows (64 wide, 28 deep) are loaded, dry, open (at most 6 sampled tree columns) and
+     * within 6 blocks of height, sampled every
      * 4 blocks. Lakes and rivers are the usual trouble: a chest in water cannot be reached. Later grid rows are not
      * checked (they are often not loaded yet); a cell that turns out to be in water is skipped. The origin is one
      * block above the most common ground height. Null when there is none.
@@ -72,7 +73,7 @@ public final class AllBlocks {
         }
         if (best == null) {
             Debug.logMessage("ALLBLOCKS no dry flat site within 64 blocks (rejected: " + siteRejects[0] + " not loaded, "
-                    + siteRejects[1] + " water, " + siteRejects[2] + " uneven)");
+                    + siteRejects[1] + " water, " + siteRejects[2] + " uneven, " + siteRejects[3] + " forest)");
             java.util.Arrays.fill(siteRejects, 0);
             return null;
         }
@@ -80,7 +81,7 @@ public final class AllBlocks {
         return best;
     }
 
-    private static final int[] siteRejects = new int[3];
+    private static final int[] siteRejects = new int[4];
 
     private static boolean isTree(BlockState s) {
         String id = Registries.BLOCK.getId(s.getBlock()).getPath();
@@ -91,7 +92,7 @@ public final class AllBlocks {
     /** Most common ground height + 1 over the footprint, or null when it is wet, too uneven or not loaded. */
     private static Integer footprintY(AltoClef mod, int x0, int z0, int width, int depth) {
         java.util.Map<Integer, Integer> heights = new java.util.HashMap<>();
-        int min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
+        int min = Integer.MAX_VALUE, max = Integer.MIN_VALUE, trees = 0, cmin = Integer.MAX_VALUE, cmax = Integer.MIN_VALUE;
         for (int x = x0; x <= x0 + width; x += 4) {
             for (int z = z0 - 2; z <= z0 + depth; z += 4) {
                 BlockPos column = new BlockPos(x, 0, z);
@@ -100,8 +101,14 @@ public final class AllBlocks {
                     return null;
                 }
                 int top = mod.getWorld().getTopY(net.minecraft.world.Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, x, z);
-                // Look through tree trunks: they are cut down anyway and would make every forest "uneven".
+                // Look through tree trunks (they would make every forest "uneven"), but count them: under a canopy it
+                // stays dark enough for mobs by day, and the first run in a taiga died at its chest every evening.
+                int before = top;
                 while (top > 0 && isTree(mod.getWorld().getBlockState(new BlockPos(x, top - 1, z)))) top--;
+                if (top != before && ++trees > 6) {
+                    siteRejects[3]++;
+                    return null;
+                }
                 BlockPos ground = new BlockPos(x, top - 1, z);
                 if (!mod.getWorld().getBlockState(ground).getFluidState().isEmpty()
                         || !mod.getWorld().getBlockState(ground.up()).getFluidState().isEmpty()) {
@@ -110,6 +117,16 @@ public final class AllBlocks {
                 }
                 min = Math.min(min, top);
                 max = Math.max(max, top);
+                // The chest rows must be truly flat (a sunken chest in a hillside could not be reached); the grid
+                // may roll a little.
+                if (z < z0 + GRID_Z && x <= x0 + 2 * (CHESTS_PER_ROW - 1)) {
+                    cmin = Math.min(cmin, top);
+                    cmax = Math.max(cmax, top);
+                    if (cmax - cmin > 2) {
+                        siteRejects[2]++;
+                        return null;
+                    }
+                }
                 if (max - min > 6) {
                     siteRejects[2]++;
                     return null;

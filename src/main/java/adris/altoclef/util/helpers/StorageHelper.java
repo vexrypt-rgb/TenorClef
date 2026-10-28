@@ -136,13 +136,22 @@ public class StorageHelper {
         return AltoClef.getInstance().getItemStorage().hasItem(items);
     }
 
+    /**
+     * Ostinato: copper pickaxes (26.x) mine what stone ones do (same incorrect_for_*_tool tag). Without this the bot
+     * with only a copper pickaxe crafted a stone one before every stone-tier ore.
+     */
+    private static boolean copperPick(boolean inventoryOnly) {
+        Item copper = adris.altoclef.tasks.speedrun.testrun2.McCompat.item("copper_pickaxe");
+        return copper != null && h(inventoryOnly, copper);
+    }
+
     private static boolean miningRequirementMetInner(boolean inventoryOnly, MiningRequirement requirement) {
         return switch (requirement) {
             case HAND -> true;
             case WOOD ->
-                    h(inventoryOnly, Items.WOODEN_PICKAXE) || h(inventoryOnly, Items.STONE_PICKAXE) || h(inventoryOnly, Items.IRON_PICKAXE) || h(inventoryOnly, Items.GOLDEN_PICKAXE) || h(inventoryOnly, Items.DIAMOND_PICKAXE) || h(inventoryOnly, Items.NETHERITE_PICKAXE);
+                    h(inventoryOnly, Items.WOODEN_PICKAXE) || h(inventoryOnly, Items.STONE_PICKAXE) || copperPick(inventoryOnly) || h(inventoryOnly, Items.IRON_PICKAXE) || h(inventoryOnly, Items.GOLDEN_PICKAXE) || h(inventoryOnly, Items.DIAMOND_PICKAXE) || h(inventoryOnly, Items.NETHERITE_PICKAXE);
             case STONE ->
-                    h(inventoryOnly, Items.STONE_PICKAXE) || h(inventoryOnly, Items.IRON_PICKAXE) || h(inventoryOnly, Items.GOLDEN_PICKAXE) || h(inventoryOnly, Items.DIAMOND_PICKAXE) || h(inventoryOnly, Items.NETHERITE_PICKAXE);
+                    h(inventoryOnly, Items.STONE_PICKAXE) || copperPick(inventoryOnly) || h(inventoryOnly, Items.IRON_PICKAXE) || h(inventoryOnly, Items.GOLDEN_PICKAXE) || h(inventoryOnly, Items.DIAMOND_PICKAXE) || h(inventoryOnly, Items.NETHERITE_PICKAXE);
             case IRON ->
                     h(inventoryOnly, Items.IRON_PICKAXE) || h(inventoryOnly, Items.GOLDEN_PICKAXE) || h(inventoryOnly, Items.DIAMOND_PICKAXE) || h(inventoryOnly, Items.NETHERITE_PICKAXE);
             case DIAMOND ->

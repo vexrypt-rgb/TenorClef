@@ -8,6 +8,7 @@ import adris.altoclef.tasksystem.Task;
 import adris.altoclef.trackers.storage.ContainerCache;
 import adris.altoclef.trackers.storage.ContainerType;
 import adris.altoclef.util.helpers.WorldHelper;
+import net.minecraft.block.AbstractSignBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
@@ -21,6 +22,7 @@ import java.util.Optional;
 public abstract class AbstractDoToStorageContainerTask extends Task {
 
     private ContainerType currentContainerType = null;
+    private int waitForCacheTicks;
 
     @Override
     protected void onStart() {
@@ -48,6 +50,19 @@ public abstract class AbstractDoToStorageContainerTask extends Task {
             if (cache.isPresent()) {
                 return onContainerOpenSubtask(mod, cache.get());
             }
+            // Ostinato: #allblocks. The screen is open but the tracker files it a tick or two later. Interacting again
+            // here closed it (InteractWithBlockTask closes any open screen before clicking), so on 26.3 a chest was
+            // opened and shut every few ticks and never filled.
+            if (++waitForCacheTicks < 40) {
+                setDebugState("Container open, waiting for its contents");
+                return null;
+            }
+            if (waitForCacheTicks == 40) {
+                adris.altoclef.Debug.logMessage("Container screen open at " + targetPos.toShortString()
+                        + " but the storage tracker has no cache for it after 2s: " + adris.altoclef.trackers.storage.ContainerSubTracker.debugState);
+            }
+        } else {
+            waitForCacheTicks = 0;
         }
 
         // Get to the container
@@ -91,7 +106,10 @@ public abstract class AbstractDoToStorageContainerTask extends Task {
         BlockState s = mod.getWorld().getBlockState(p);
         // Ostinato: #allblocks. Water and lava have no collision shape either, but a face whose stand cell is fluid
         // sent the bot swimming at a lakeside chest until the deposit timed out.
-        return s.isAir() || (s.getCollisionShape(mod.getWorld(), p).isEmpty() && s.getFluidState().isEmpty());
+        // A sign has no collision either, but the pathfinder will not stand in one it may not break (an #allblocks
+        // label in front of its chest), so the chest was never reached.
+        return s.isAir() || (s.getCollisionShape(mod.getWorld(), p).isEmpty() && s.getFluidState().isEmpty()
+                && !(s.getBlock() instanceof AbstractSignBlock));
     }
 
     protected abstract Optional<BlockPos> getContainerTarget();

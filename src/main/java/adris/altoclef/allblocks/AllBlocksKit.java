@@ -25,6 +25,7 @@ import java.util.Objects;
  *   never digs stone bare-handed or with a pick that is about to break.</li>
  *   <li>A sword: copper, then iron, then stone. Night mobs killed every early run that had none.</li>
  *   <li>Food in the inventory (food score {@value #FOOD_MIN} or more).</li>
+ *   <li>A bed (unless one is placed nearby), for the night: fetching wool after dark got the bot killed.</li>
  *   <li>Armor in every slot: copper, then iron, then leather.</li>
  * </ol>
  * Each need gets {@value #NEED_MINUTES} minutes; a need that runs out of time cools down for
@@ -84,6 +85,11 @@ final class AllBlocksKit {
         return t;
     }
 
+    /** Holds the running need's timer (the bot is asleep or otherwise not working on it). */
+    void hold() {
+        if (needTask != null) needStart++;
+    }
+
     String current() {
         return need;
     }
@@ -101,6 +107,7 @@ final class AllBlocksKit {
             }
         }
         if (StorageHelper.calculateInventoryFoodScore() < FOOD_MIN && ready("food", now)) return "food";
+        if (!hasBed(mod) && ready("bed", now) && TaskCatalogue.taskExists("bed")) return "bed";
         for (String slot : SLOTS) {
             if (wearing(slot)) continue;
             for (String tier : ARMOR_TIERS) {
@@ -123,8 +130,15 @@ final class AllBlocksKit {
 
     private static boolean met(AltoClef mod, String key) {
         if (key.equals("food")) return StorageHelper.calculateInventoryFoodScore() >= FOOD_MIN;
+        if (key.equals("bed")) return hasBed(mod);
         if (key.startsWith("equip:")) return wearing(key.substring(key.lastIndexOf('_') + 1));
         return hasPick(mod, new String[]{key});
+    }
+
+    /** A bed in the inventory, or one placed within reach (the night step sleeps in it). */
+    static boolean hasBed(AltoClef mod) {
+        return mod.getItemStorage().hasItem(adris.altoclef.util.helpers.ItemHelper.BED)
+                || mod.getBlockScanner().anyFound(adris.altoclef.util.helpers.ItemHelper.itemsToBlocks(adris.altoclef.util.helpers.ItemHelper.BED));
     }
 
     /** A tool of one of these kinds with more than {@value #MIN_DURABILITY} of its durability left. */

@@ -291,6 +291,12 @@ RAW = {'oak_log': 1, 'log': 1, 'dirt': 1, 'cobblestone': 2, 'stone': 3, 'sand': 
        'breeze_rod': 120, 'heart_of_the_sea': 150, 'echo_shard': 150, 'netherite_scrap': 120}
 REQCOST = {'HAND': 2, 'WOOD': 3, 'STONE': 5, 'IRON': 9, 'DIAMOND': 16}
 cost = dict(RAW)
+# Woods that only grow in a few biomes: their logs (and everything made from them) go after the common ones, or the
+# run spends its first hour walking to jungles and pale gardens.
+for wood in ('acacia', 'dark_oak', 'jungle', 'mangrove', 'cherry', 'pale_oak', 'poplar', 'crimson', 'warped', 'bamboo'):
+    for suffix in ('_log', '_stem', '_block', '_sapling', '_leaves', '_propagule'):
+        if wood + suffix in ITEMSET:
+            cost[wood + suffix] = 30
 for line in shear_lines:
     cost.setdefault(line.split()[1], 12)
 for line in kill_lines:

@@ -847,7 +847,9 @@ public class AllBlocksTask extends Task {
             if (e.candidate() && e.block() == there && progress.stored.containsKey(e.id) && needsPlacement(e)) {
                 progress.placed.put(e.id, n);
                 progress.nextCell = n + 1;
-                Debug.logMessage("ALLBLOCKS PLACED " + e.id + " in cell " + n + " at " + cell.toShortString() + " (found there; placed " + progress.placed.size() + ")");
+                // Normally the place step's own block (checked in the world); otherwise a block already standing there.
+                String how = e.id.equals(placingId) ? "placed by the place step" : "found there";
+                Debug.logMessage("ALLBLOCKS PLACED " + e.id + " in cell " + n + " at " + cell.toShortString() + " (" + how + "; placed " + progress.placed.size() + ")");
                 if (e.id.equals(placingId)) placingId = null;
                 progress.save(file);
                 return;

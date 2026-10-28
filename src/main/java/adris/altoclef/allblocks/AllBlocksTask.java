@@ -29,6 +29,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.GlobalPos;
+import net.minecraft.world.World;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.util.math.Direction;
 
 import java.nio.file.Path;
@@ -227,6 +230,9 @@ public class AllBlocksTask extends Task {
         // a zombie killed the bot.
         if (night != null || inBunker) return night;
 
+        Task recover = recoverStep(mod);
+        if (recover != null) return recover;
+
         if (gathering == null) {
             Task k = kit.tick(mod, ticks);
             if (k != null) {
@@ -280,6 +286,61 @@ public class AllBlocksTask extends Task {
     }
 
     private final Map<Integer, Integer> trimTries = new HashMap<>();
+
+    // ---------------------------------------------------------------- death
+
+    private String seenDeath;
+    private BlockPos recoverPos;
+    private long recoverUntil;
+    private static final int RECOVER_MINUTES = 8;
+
+    /**
+     * After a death, walk back and pick up what was dropped: rebuilding pick, sword, armor and food from nothing took
+     * about 45 minutes every time. Drops last 5 minutes in loaded chunks (the clock stops while the chunk is unloaded),
+     * so they are often still there. Deaths before this session started are not chased.
+     */
+    private Task recoverStep(AltoClef mod) {
+        Optional<GlobalPos> death = mod.getPlayer().getLastDeathPos();
+        String key = death.map(Object::toString).orElse("");
+        if (seenDeath == null) seenDeath = key;
+        if (!key.equals(seenDeath)) {
+            seenDeath = key;
+            BlockPos at = death.get().pos();
+            if (WorldHelper.getCurrentDimension() == Dimension.OVERWORLD
+                    && death.get().dimension() == World.OVERWORLD
+                    && at.getSquaredDistance(mod.getPlayer().getBlockPos()) < 400 * 400) {
+                recoverPos = at;
+                recoverUntil = ticks + (long) RECOVER_MINUTES * TPM;
+                Debug.logMessage("ALLBLOCKS died at " + at.toShortString() + "; going back for the drops");
+            }
+        }
+        if (recoverPos == null) return null;
+        if (ticks > recoverUntil) {
+            Debug.logMessage("ALLBLOCKS gave up on the drops at " + recoverPos.toShortString());
+            recoverPos = null;
+            return null;
+        }
+        List<ItemEntity> near = new ArrayList<>();
+        for (ItemEntity drop : mod.getEntityTracker().getDroppedItems()) {
+            if (drop.getBlockPos().getSquaredDistance(recoverPos) < 12 * 12) near.add(drop);
+        }
+        if (mod.getPlayer().getBlockPos().getSquaredDistance(recoverPos) > 8 * 8 && (near.isEmpty() || !mod.getChunkTracker().isChunkLoaded(recoverPos))) {
+            setDebugState("Back to the death spot for the drops");
+            return new adris.altoclef.tasks.movement.GetToBlockTask(recoverPos);
+        }
+        if (near.isEmpty() || freeSlots(mod) == 0) {
+            Debug.logMessage("ALLBLOCKS picked up the drops at " + recoverPos.toShortString());
+            recoverPos = null;
+            return null;
+        }
+        List<ItemTarget> targets = new ArrayList<>();
+        for (ItemEntity drop : near) {
+            Item item = drop.getStack().getItem();
+            targets.add(new ItemTarget(item, count(item) + drop.getStack().getCount()));
+        }
+        setDebugState("Picking up the drops (" + near.size() + " left)");
+        return new adris.altoclef.tasks.movement.PickupDroppedItemTask(targets.toArray(new ItemTarget[0]), true);
+    }
 
     // ---------------------------------------------------------------- night
 

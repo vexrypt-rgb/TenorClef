@@ -8,12 +8,15 @@ import adris.altoclef.tasks.misc.PlaceBedAndSetSpawnTask;
 import adris.altoclef.tasks.resources.CollectFoodTask;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.ItemTarget;
+import adris.altoclef.util.helpers.ItemHelper;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Ostinato: one {@code #maze.tunnels} survival-kit run. Works the needs in order (tools first, then armor, food,
@@ -37,6 +40,8 @@ public class TunnelProvisionTask extends Task {
     private BlockPos home;
     private int softTicks;
     private boolean returning;
+    private final Set<String> leashRetried = new HashSet<>(); // Ostinato: needs re-queued once after a leash walk-back
+    private int bedTries; // Ostinato: bed item gathers this round (bounded; the leash and timeouts can each end one)
 
     public TunnelProvisionTask(Map<String, Integer> needs) {
         this.needs = new LinkedHashMap<>(needs);
@@ -55,6 +60,8 @@ public class TunnelProvisionTask extends Task {
         current = null;
         softTicks = 0;
         returning = false;
+        leashRetried.clear();
+        bedTries = 0;
         home = mod().getPlayer() == null ? null : mod().getPlayer().getBlockPos();
         started = true;
     }
@@ -62,6 +69,8 @@ public class TunnelProvisionTask extends Task {
     private Task make(String key, int count) {
         if (key.equals("food")) return new CollectFoodTask(count);
         if (key.equals("bed")) return new PlaceBedAndSetSpawnTask();
+        if (key.equals("bed_item")) return TaskCatalogue.getItemTask("bed", count);
+        if (key.equals("bed_home")) return new GetToBlockTask(home);
         if (key.startsWith("equip:")) return new EquipArmorTask(new ItemTarget(key.substring(6), 1));
         if (key.equals("stick")) return TaskCatalogue.getItemTask("stick", count);
         return TaskCatalogue.getItemTask(key, count);
@@ -72,11 +81,17 @@ public class TunnelProvisionTask extends Task {
         boolean hard = currentKey != null && currentKey.endsWith("_pickaxe") && !returning;
         // Ostinato: the bed has its own cap (below) and neither spends nor is skipped by the shared budget. It
         // is queued last, so armor + torches used to eat the whole budget every round and spawn was never set (run73).
-        boolean bed = "bed".equals(currentKey);
+        boolean bed = currentKey != null && currentKey.startsWith("bed");
         if (current != null && !hard && !bed && !returning) softTicks++;
         if (current != null && !returning && home != null && mod().getPlayer() != null
                 && horiz(mod().getPlayer().getBlockPos(), home) > LEASH) {
             Debug.logHarness("[tunnels] need " + currentKey + " left the " + LEASH + "-block leash; walking back");
+            // Ostinato: re-queue the interrupted need once, so it restarts from home instead of being dropped. run74's bed
+            // step started 70+ blocks out (where the copper kit left the bot) and was dropped 10 s in without a try.
+            if (!"return".equals(currentKey) && leashRetried.add(currentKey)) {
+                Debug.logHarness("[tunnels] need " + currentKey + " re-queued after the walk back");
+                queue.addFirst(Map.entry(currentKey, currentCount));
+            }
             current = new GetToBlockTask(home);
             currentKey = "return";
             currentTicks = 0;
@@ -94,7 +109,7 @@ public class TunnelProvisionTask extends Task {
         }
         while (current == null && !queue.isEmpty()) {
             Map.Entry<String, Integer> e = queue.poll();
-            if (!e.getKey().endsWith("_pickaxe") && !e.getKey().equals("bed") && softTicks > SOFT_BUDGET_TICKS) {
+            if (!e.getKey().endsWith("_pickaxe") && !e.getKey().startsWith("bed") && softTicks > SOFT_BUDGET_TICKS) {
                 Debug.logHarness("[tunnels] soft budget spent; skipping " + e.getKey() + " (Ostinato asks again later)");
                 continue;
             }
@@ -110,6 +125,22 @@ public class TunnelProvisionTask extends Task {
                     Debug.logHarness("[tunnels] pick " + e.getKey() + " needs " + sticksNeeded + " sticks, have " + have("stick") + "; sticks first");
                     queue.addFirst(e);
                     e = Map.entry("stick", sticksNeeded);
+                }
+            }
+            // Ostinato: bed = get the bed item (wherever the sheep are), walk back home (the dig face), then place it and
+            // sleep there. PlaceBedAndSetSpawnTask alone placed it wherever the gather ended, out of Ostinato's range.
+            if (e.getKey().equals("bed") && mod().getItemStorage() != null) {
+                if (beds() == 0) {
+                    if (bedTries++ >= 2) {
+                        Debug.logHarness("[tunnels] no bed item after " + (bedTries - 1) + " gathers; skipping bed (Ostinato asks again later)");
+                        continue;
+                    }
+                    queue.addFirst(e);
+                    e = Map.entry("bed_item", 1);
+                } else if (home != null && mod().getPlayer() != null && horiz(mod().getPlayer().getBlockPos(), home) > 6
+                        && !"bed_home".equals(currentKey)) {
+                    queue.addFirst(e);
+                    e = Map.entry("bed_home", 1);
                 }
             }
             try {
@@ -141,12 +172,17 @@ public class TunnelProvisionTask extends Task {
 
     private static int have(String key) {
         if (key == null || mod().getItemStorage() == null) return 0;
-        if (key.startsWith("equip:") || key.equals("food") || key.equals("bed") || key.equals("return")) return 0;
+        if (key.equals("bed_item")) return beds();
+        if (key.startsWith("equip:") || key.equals("food") || key.startsWith("bed") || key.equals("return")) return 0;
         try {
             return mod().getItemStorage().getItemCount(TaskCatalogue.getItemMatches(key));
         } catch (RuntimeException ex) {
             return 0;
         }
+    }
+
+    private static int beds() {
+        return mod().getItemStorage() == null ? 0 : mod().getItemStorage().getItemCount(ItemHelper.BED);
     }
 
     /** Ostinato: copper -> iron -> stone. Use a better metal only when 3 ingots are already held (no extra gathering). */

@@ -10,6 +10,7 @@ import net.minecraft.client.gui.screen.ingame.BrewingStandScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
@@ -57,6 +58,12 @@ public final class McCompat {
     public static Block block(String name) {
         Identifier id = id(name);
         return id != null && Registries.BLOCK.containsId(id) ? Registries.BLOCK.get(id) : null;
+    }
+
+    /** The entity type with this id, or null when this version has none. */
+    public static EntityType<?> entityType(String name) {
+        Identifier id = id(name);
+        return id != null && Registries.ENTITY_TYPE.containsId(id) ? Registries.ENTITY_TYPE.get(id) : null;
     }
 
     private static Identifier id(String name) {

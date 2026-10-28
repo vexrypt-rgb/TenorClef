@@ -89,7 +89,9 @@ public abstract class AbstractDoToStorageContainerTask extends Task {
 
     private static boolean open(AltoClef mod, BlockPos p) {
         BlockState s = mod.getWorld().getBlockState(p);
-        return s.isAir() || s.getCollisionShape(mod.getWorld(), p).isEmpty();
+        // Ostinato: #allblocks. Water and lava have no collision shape either, but a face whose stand cell is fluid
+        // sent the bot swimming at a lakeside chest until the deposit timed out.
+        return s.isAir() || (s.getCollisionShape(mod.getWorld(), p).isEmpty() && s.getFluidState().isEmpty());
     }
 
     protected abstract Optional<BlockPos> getContainerTarget();

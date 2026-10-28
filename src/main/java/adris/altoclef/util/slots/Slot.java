@@ -12,6 +12,7 @@ import net.minecraft.client.gui.screen.ingame.*;
 //$$ import net.minecraft.client.gui.screens.inventory.CraftingScreen;
 //$$ import net.minecraft.client.gui.screens.inventory.FurnaceScreen;
 //$$ import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+//$$ import net.minecraft.client.gui.screens.inventory.EnchantmentScreen;
 //$$ import net.minecraft.client.gui.screens.inventory.SmithingScreen;
 //$$ import net.minecraft.client.gui.screens.inventory.SmokerScreen;
 //#endif
@@ -64,6 +65,8 @@ public abstract class Slot {
                 return new ChestSlot(slot, true, inventory);
             case CHEST_SMALL:
                 return new ChestSlot(slot, false, inventory);
+            case ENCHANTING_TABLE:
+                return new EnchantingTableSlot(slot, inventory);
             default:
                 Debug.logWarning("Unhandled slot for inventory check: " + getCurrentType());
                 return null;
@@ -91,6 +94,9 @@ public abstract class Slot {
         }
         if (screen instanceof CraftingScreen) {
             return ContainerType.CRAFTING_TABLE;
+        }
+        if (screen instanceof EnchantmentScreen) {
+            return ContainerType.ENCHANTING_TABLE;
         }
         return ContainerType.PLAYER;
     }
@@ -184,6 +190,7 @@ public abstract class Slot {
         CRAFTING_TABLE,
         CHEST_SMALL,
         CHEST_LARGE,
-        FURNACE_OR_SMITH_OR_SMOKER_OR_BLAST
+        FURNACE_OR_SMITH_OR_SMOKER_OR_BLAST,
+        ENCHANTING_TABLE
     }
 }

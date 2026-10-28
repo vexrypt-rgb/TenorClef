@@ -321,9 +321,13 @@ public class AllBlocksTask extends Task {
             sleepStart = ticks;
             Debug.logMessage("ALLBLOCKS night: going to bed" + (gathering != null ? " (holding gather of " + gathering.id + ")" : ""));
         }
-        if (!mod.getPlayer().isSleeping() && (bunkered || ticks - sleepStart > 60L * 20) && origin != null) {
-            // No sleep (monsters nearby, no bed): a capped pit two deep next to the storage area keeps mobs off.
-            if (!bunkered) Debug.logMessage("ALLBLOCKS night: no sleep after 60s (" + chain(sleepTask) + "); bunkering");
+        if (!mod.getPlayer().isSleeping() && (bunkered || ticks - sleepStart > 60L * 20)) {
+            // No sleep (monsters nearby, no bed, standing in water): a capped pit two deep keeps mobs off.
+            if (!bunkered) {
+                // Dig in where the bot stands: walking home in the dark is what got it killed.
+                bunkerTop = mod.getPlayer().getBlockPos();
+                Debug.logMessage("ALLBLOCKS night: no sleep after 60s (" + chain(sleepTask) + "); bunkering at " + bunkerTop.toShortString());
+            }
             bunkered = true;
             if (gathering != null) gatherStart++;
             kit.hold();
@@ -337,9 +341,11 @@ public class AllBlocksTask extends Task {
     }
 
     private boolean bunkered;
+    private BlockPos bunkerTop;
 
+    /** A pit two deep under where the bot stood when it gave up on sleeping, closed over its head. */
     private Task bunkerStep(AltoClef mod) {
-        BlockPos top = origin.add(-4, 0, -4), head = top.down(), feet = top.down(2);
+        BlockPos top = bunkerTop, head = top.down(), feet = top.down(2);
         if (!mod.getWorld().getBlockState(head).isAir() && !mod.getPlayer().getBlockPos().equals(feet)) {
             setDebugState("Night: digging the bunker");
             return new DestroyBlockTask(head);

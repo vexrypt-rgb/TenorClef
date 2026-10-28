@@ -36,7 +36,7 @@ two clear blocks above it.
 
 1. A sign edit screen (a label was just placed) gets the label text and closes.
 2. **Night**: at dusk the bot drops off what it carries and goes home; at night it sleeps in its bed. When it cannot
-   sleep within a minute (no bed, monsters nearby) it digs a two-deep pit beside the storage area, closes it over its
+   sleep within a minute (no bed, monsters nearby) it digs a two-deep pit where it stands, closes it over its
    head and waits for morning.
 3. **Survival kit**, before every gather: a pickaxe with life left (copper, then iron, then stone; a wooden pickaxe
    does not count), a sword (copper, then iron, then stone), food score 10 or more, a bed, and armor in every slot

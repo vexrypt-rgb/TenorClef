@@ -332,12 +332,12 @@ public class AllBlocksTask extends Task {
             Debug.logMessage("ALLBLOCKS night: going to bed" + (gathering != null ? " (holding gather of " + gathering.id + ")" : ""));
         }
         // World time, not this task's ticks: while mob defense has control this task does not tick at all.
-        if (!mod.getPlayer().isSleeping() && (bunkered || !bedHere || mod.getWorld().getTime() - sleepStart > 60L * 20)) {
+        if (!mod.getPlayer().isSleeping() && (bunkered || !bedHere || mod.getWorld().getTime() - sleepStart > SLEEP_TRY_SECONDS * 20L)) {
             // No sleep (monsters nearby, no bed, standing in water): a capped pit two deep keeps mobs off.
             if (!bunkered) {
                 // Dig in where the bot stands: walking home in the dark is what got it killed.
                 bunkerTop = mod.getPlayer().getBlockPos();
-                Debug.logMessage("ALLBLOCKS night: " + (bedHere ? "no sleep after 60s (" + chain(sleepTask) + ")" : "no bed carried or nearby")
+                Debug.logMessage("ALLBLOCKS night: " + (bedHere ? "no sleep after " + SLEEP_TRY_SECONDS + "s (" + chain(sleepTask) + ")" : "no bed carried or nearby")
                         + "; bunkering at " + bunkerTop.toShortString());
             }
             bunkered = true;
@@ -379,6 +379,11 @@ public class AllBlocksTask extends Task {
 
     private boolean bunkered;
     private BlockPos bunkerTop;
+    /**
+     * Time to get into bed before digging in. Sleep is possible from 12542; monsters come out around 13200, so after
+     * that the bot should already be underground (a 60 s try left it digging among skeletons).
+     */
+    private static final int SLEEP_TRY_SECONDS = 30;
 
     /** Standing room at {@code top} over two solid, fluid-free blocks to dig into. */
     private static boolean dryGround(AltoClef mod, BlockPos top) {
@@ -527,7 +532,7 @@ public class AllBlocksTask extends Task {
         gatherTask = holder.task;
         gatherStart = ticks;
         AllBlocksProgress.Failure prev = progress.failures.get(stored ? "sweep:" + next.id : next.id);
-        gatherMinutes = prev != null && prev.attempts > 0 ? RETRY_MINUTES : GATHER_MINUTES;
+        gatherMinutes = prev != null && prev.attempts > 0 ? RETRY_MINUTES : stored && remainingNew() ? EARLY_SWEEP_MINUTES : GATHER_MINUTES;
         Debug.logMessage("ALLBLOCKS gather " + next.id + " x" + gatherWant + (sweep ? " (blocks sweep)" : "")
                 + " via " + gatherTask.getClass().getSimpleName() + " | kit: " + AllBlocksKit.summary(mod));
         return gatherTask;
@@ -556,6 +561,8 @@ public class AllBlocksTask extends Task {
     private AllBlocksPlan.Entry nextToGather() {
         // A stored block whose grid copy got used up (dirt and cobblestone double as building filler): get it again
         // now, while its source is near, rather than in a sweep at the very end.
+        // A short try only (see EARLY_SWEEP_MINUTES): a rare one (potatoes) sent the bot wandering 10 minutes before any
+        // new item was tried. A failed early sweep waits for the sweep at the end.
         for (AllBlocksPlan.Entry e : plan) {
             if (!e.candidate() || !progress.stored.containsKey(e.id) || !needsPlacement(e) || count(e.item) > 0) continue;
             AllBlocksProgress.Failure f = progress.failures.get("sweep:" + e.id);
@@ -586,8 +593,20 @@ public class AllBlocksTask extends Task {
         return null;
     }
 
+    /** Time for re-gathering a used-up grid block before new items (dirt and cobblestone take seconds). */
+    private static final int EARLY_SWEEP_MINUTES = 3;
     private final Set<String> deferred = new LinkedHashSet<>();
     private int gatherMinutes = GATHER_MINUTES;
+
+    /** Any item never stored and not yet failed for good: an early sweep is still ahead of them. */
+    private boolean remainingNew() {
+        for (AllBlocksPlan.Entry e : plan) {
+            if (!e.candidate() || progress.stored.containsKey(e.id) || e.unsupportedReason() != null) continue;
+            AllBlocksProgress.Failure f = progress.failures.get(e.id);
+            if (f == null || !f.stuck) return true;
+        }
+        return false;
+    }
 
     private static String family(String id) {
         int i = id.indexOf('_');

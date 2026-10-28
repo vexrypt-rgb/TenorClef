@@ -73,6 +73,7 @@ gathered again later.
   | `coral` | Live coral (silk touch) placed out of water to die. |
   | `loot-boss-trade` | Structure loot, a boss, a villager trade or a rare mob (discs, templates, horse armor, elytra, ...). |
   | `loot-brushing` | Brushing suspicious sand or gravel (pottery sherds). |
+  | `sniffer` | A sniffer, hatched from an egg brushed out of ocean ruins (torchflower, pitcher plant and their seeds). |
   | `mob-bucket` | A water bucket used on a fish, axolotl or tadpole. |
   | `brewing-bottles` | A brewing stand or bottling. |
   | `ingredient` | A recipe whose ingredient has no path (resin, honey, poplar wood, snow, ...). |

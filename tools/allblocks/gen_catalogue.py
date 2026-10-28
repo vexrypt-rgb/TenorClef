@@ -146,7 +146,8 @@ def self_drop(block):
 # would send the bot searching the world for them, so they stay without a generated path.
 NOT_NATURAL = ('concrete', 'exposed_', 'weathered_', 'oxidized_', 'dead_', 'chipped_anvil', 'damaged_anvil',
                'golem_statue', '_head', '_skull', 'heavy_core', 'dragon_egg', 'carved_pumpkin', 'bell',
-               'stripped_', 'froglight', 'sniffer_egg', 'wither_rose', 'petrified_', '_crop')
+               'stripped_', 'froglight', 'sniffer_egg', 'wither_rose', 'petrified_', '_crop',
+               'torchflower', 'pitcher_plant')  # the last two grow only from sniffer seeds
 mine_lines = []
 for item in ITEMS:
     if item in recipes or not self_drop(item) or any(k in item for k in NOT_NATURAL):
@@ -344,6 +345,8 @@ def gap(item):
         return 'coral', 'coral placed out of water dies; live coral needs silk touch'
     if silk_only(item):
         return 'silk-touch', 'drops itself only to a silk touch tool (needs enchanting)'
+    if item in ('torchflower', 'pitcher_plant', 'torchflower_seeds', 'pitcher_pod', 'sniffer_egg'):
+        return 'sniffer', 'a sniffer digs the seeds up; its egg comes from brushing ocean ruins'
     if item in MOB_BUCKETS:
         return 'mob-bucket', 'a water bucket used on the mob'
     if 'potion' in item or item in ('dragon_breath', 'experience_bottle', 'ominous_bottle', 'honey_bottle'):

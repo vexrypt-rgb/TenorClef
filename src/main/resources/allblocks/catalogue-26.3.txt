@@ -34,7 +34,6 @@ order closed_eyeblossom 2
 order cobblestone 2
 order cobblestone_slab 2.0
 order cornflower 2
-order cyan_dye 2.0
 order dandelion 2
 order fern 2
 order firefly_bush 2
@@ -59,7 +58,6 @@ order peony 2
 order pink_dye 2.0
 order pink_petals 2
 order pink_tulip 2
-order pitcher_plant 2
 order poisonous_potato 2
 order poppy 2
 order potato 2
@@ -81,7 +79,6 @@ order spruce_log 2
 order spruce_sapling 2
 order sunflower 2
 order sweet_berries 2
-order torchflower 2
 order wet_sponge 2
 order wheat_seeds 2
 order white_tulip 2
@@ -101,7 +98,6 @@ order cobbled_deepslate_slab 2.5
 order spruce_button 2.5
 order stone_slab 2.5
 order tuff_slab 2.5
-order cyan_stained_glass_pane 2.59
 order magenta_stained_glass_pane 2.59
 order pink_stained_glass_pane 2.59
 order red_stained_glass_pane 2.59
@@ -115,6 +111,7 @@ order orange_stained_glass_pane 2.6399999999999997
 order white_stained_glass_pane 2.6399999999999997
 order purple_stained_glass_pane 2.66
 order copper_bars 2.88
+order cyan_stained_glass_pane 2.88
 order oak_stairs 2.88
 order baked_potato 3.0
 order blue_dye 3.0
@@ -150,7 +147,6 @@ order white_dye 3.0
 order green_stained_glass_pane 3.02
 order birch_stairs 3.25
 order black_stained_glass_pane 3.25
-order cyan_concrete_powder 3.25
 order iron_bars 3.25
 order magenta_concrete_powder 3.25
 order pink_concrete_powder 3.25
@@ -185,6 +181,7 @@ order cinnabar_wall 4.0
 order clay_ball 4
 order cobbled_deepslate_wall 4.0
 order cobblestone_stairs 4.0
+order cyan_concrete_powder 4.0
 order deepslate 4.0
 order deepslate_tile_slab 4.0
 order flint 4
@@ -203,7 +200,6 @@ order tuff_wall 4.0
 order oak_sign 4.04
 order birch_fence 4.08
 order spruce_fence 4.08
-order cyan_stained_glass 4.25
 order magenta_stained_glass 4.25
 order pink_stained_glass 4.25
 order red_stained_glass 4.25
@@ -229,6 +225,7 @@ order brick 5.0
 order cinnabar_bricks 5.0
 order copper_ingot 5
 order cracked_stone_bricks 5.0
+order cyan_stained_glass 5.0
 order deepslate_bricks 5.0
 order feather 5
 order leather 5
@@ -309,6 +306,7 @@ order name_tag 7.56
 order wooden_axe 7.99
 order wooden_pickaxe 7.99
 order chiseled_tuff_bricks 8.0
+order cyan_dye 8.0
 order flower_banner_pattern 8.0
 order gunpowder 8
 order lapis_lazuli 8
@@ -455,8 +453,6 @@ order iron_sword 14.62
 order beetroot_soup 14.94
 order bamboo 15
 order blackstone_slab 15.0
-order cyan_bundle 15.0
-order cyan_wool_slab 15.0
 order ink_sac 15
 order magenta_bundle 15.0
 order magenta_wool_slab 15.0
@@ -525,6 +521,7 @@ order cherry_door 18.0
 order cherry_pressure_plate 18.0
 order crimson_door 18.0
 order crimson_pressure_plate 18.0
+order cyan_wool_slab 18.0
 order dark_oak_door 18.0
 order dark_oak_pressure_plate 18.0
 order jungle_door 18.0
@@ -557,7 +554,6 @@ order bamboo_mosaic 19.0
 order bucket 19.0
 order copper_axe 19.24
 order copper_pickaxe 19.24
-order cyan_terracotta 19.25
 order magenta_terracotta 19.25
 order oak_chest_boat 19.25
 order pink_terracotta 19.25
@@ -572,16 +568,15 @@ order orange_terracotta 19.38
 order white_terracotta 19.38
 order purple_terracotta 19.44
 order green_wool_slab 19.5
-order cyan_carpet 19.67
 order magenta_carpet 19.67
 order pink_carpet 19.67
 order red_carpet 19.67
 order yellow_carpet 19.67
 order cocoa_beans 20
+order cyan_terracotta 20.0
 order ender_pearl 20
 order honeycomb 20
 order pumpkin_pie 20.0
-order cyan_glazed_terracotta 20.25
 order magenta_glazed_terracotta 20.25
 order pink_glazed_terracotta 20.25
 order red_glazed_terracotta 20.25
@@ -615,6 +610,8 @@ order bricks 21.0
 order brown_dye 21.0
 order copper_boots 21.0
 order copper_trapdoor 21.0
+order cyan_bundle 21.0
+order cyan_glazed_terracotta 21.0
 order decorated_pot 21.0
 order leather_boots 21.0
 order note_block 21.0
@@ -633,6 +630,7 @@ order soul_lantern 22.77
 order light_weighted_pressure_plate 23.0
 order bamboo_fence 23.41
 order sulfur_brick_stairs 23.5
+order cyan_carpet 23.67
 order bow 23.86
 order waxed_copper_bars 23.88
 order green_bundle 24.0
@@ -689,7 +687,6 @@ order basalt 28
 order blackstone 28
 order bone_block 28.0
 order coal_block 28.0
-order cyan_wool 28.0
 order gilded_blackstone 28
 order magenta_wool 28.0
 order pink_wool 28.0
@@ -725,7 +722,6 @@ order cherry_sapling 30
 order chicken 30
 order cod 30
 order crimson_stem 30
-order cyan_candle 30.0
 order dark_oak_leaves 30
 order dark_oak_log 30
 order dark_oak_sapling 30
@@ -797,11 +793,13 @@ order bamboo_door 33.0
 order bamboo_pressure_plate 33.0
 order bamboo_sign 33.54
 order brown_bundle 34.0
+order cyan_wool 34.0
 order soul_campfire 34.86
 order compass 35.0
 order waxed_cut_copper_slab 35.0
 order straw_bed 35.5
 order copper_leggings 36.0
+order cyan_candle 36.0
 order leather_horse_armor 36.0
 order leather_leggings 36.0
 order spyglass 36.0
@@ -828,7 +826,6 @@ order mangrove_wood 41.0
 order pale_oak_wood 41.0
 order poplar_wood 41.0
 order warped_hyphae 41.0
-order cyan_wool_stairs 41.5
 order magenta_wool_stairs 41.5
 order pink_wool_stairs 41.5
 order red_wool_stairs 41.5
@@ -858,7 +855,6 @@ order mangrove_boat 43.5
 order pale_oak_boat 43.5
 order poplar_boat 43.5
 order black_candle 44.0
-order cyan_cushion 44.5
 order magenta_cushion 44.5
 order pink_cushion 44.5
 order polished_blackstone_stairs 44.5
@@ -886,6 +882,7 @@ order copper_grate 47.0
 order cut_copper 47.0
 order magma_cream 47.0
 order white_harness 47.0
+order cyan_wool_stairs 47.5
 order diorite_stairs 47.5
 order copper_bulb 48.0
 order end_rod 48.75
@@ -898,11 +895,11 @@ order polished_diorite_stairs 49.0
 order tnt 49.0
 order glow_item_frame 49.96
 order chiseled_copper 50.0
-order cyan_harness 50.0
 order magenta_harness 50.0
 order pink_harness 50.0
 order red_harness 50.0
 order yellow_harness 50.0
+order cyan_cushion 50.5
 order green_wool_stairs 50.5
 order blue_harness 51.0
 order gray_harness 51.0
@@ -927,6 +924,7 @@ order jungle_chest_boat 55.5
 order mangrove_chest_boat 55.5
 order pale_oak_chest_boat 55.5
 order poplar_chest_boat 55.5
+order cyan_harness 56.0
 order golden_helmet 56.0
 order diamond_boots 57.0
 order quartz_slab 57.5
@@ -975,7 +973,6 @@ order bamboo_raft 81.0
 order honeycomb_block 81.0
 order tnt_minecart 81.0
 order crafter 82.0
-order cyan_bed 82.75
 order magenta_bed 82.75
 order pink_bed 82.75
 order red_bed 82.75
@@ -988,6 +985,7 @@ order lime_bed 83.75
 order orange_bed 83.75
 order purple_bed 84.25
 order target 87.0
+order cyan_bed 88.75
 order golden_chestplate 89.0
 order granite_stairs 91.0
 order melon 91.0
@@ -1041,7 +1039,6 @@ order redstone_lamp 162.0
 order ender_chest 163.0
 order quartz_stairs 170.5
 order red_nether_brick_stairs 170.5
-order cyan_banner 170.62
 order magenta_banner 170.62
 order pink_banner 170.62
 order red_banner 170.62
@@ -1057,6 +1054,7 @@ order purple_banner 179.62
 order magma_block 189.0
 order anvil 190.0
 order shulker_shell 200
+order cyan_banner 206.62
 order green_banner 224.62
 order slime_block 226.0
 order purpur_stairs 229.0
@@ -1071,7 +1069,6 @@ order prismarine_brick_slab 271.5
 order brown_banner 284.62
 order prismarine_stairs 362.5
 order shulker_box 412.0
-order cyan_shulker_box 415.0
 order magenta_shulker_box 415.0
 order pink_shulker_box 415.0
 order red_shulker_box 415.0
@@ -1084,6 +1081,7 @@ order lime_shulker_box 416.0
 order orange_shulker_box 416.0
 order white_shulker_box 416.0
 order purple_shulker_box 416.5
+order cyan_shulker_box 421.0
 order green_shulker_box 424.0
 order black_shulker_box 429.0
 order brown_shulker_box 434.0
@@ -1436,6 +1434,7 @@ order pillager_spawn_egg -1
 order pink_concrete -1
 order pink_concrete_slab -1
 order pink_concrete_stairs -1
+order pitcher_plant -1
 order pitcher_pod -1
 order plains_village_map -1
 order player_head -1
@@ -1550,6 +1549,7 @@ order tall_grass -1
 order test_block -1
 order test_instance_block -1
 order tide_armor_trim_smithing_template -1
+order torchflower -1
 order torchflower_seeds -1
 order trader_llama_spawn_egg -1
 order trial_key -1
@@ -3036,7 +3036,6 @@ mine pale_oak_sapling pale_oak_sapling HAND OVERWORLD
 mine peony peony HAND OVERWORLD
 mine pink_petals pink_petals HAND OVERWORLD
 mine pink_tulip pink_tulip HAND OVERWORLD
-mine pitcher_plant pitcher_plant HAND OVERWORLD
 mine pointed_dripstone pointed_dripstone WOOD OVERWORLD
 mine poplar_log poplar_log HAND OVERWORLD
 mine poplar_sapling poplar_sapling HAND OVERWORLD
@@ -3063,7 +3062,6 @@ mine spruce_sapling spruce_sapling HAND OVERWORLD
 mine sugar_cane sugar_cane HAND OVERWORLD
 mine sulfur_spike sulfur_spike WOOD OVERWORLD
 mine sunflower sunflower HAND OVERWORLD
-mine torchflower torchflower HAND OVERWORLD
 mine tuff tuff WOOD OVERWORLD
 mine twisting_vines twisting_vines HAND NETHER
 mine vine vine HAND OVERWORLD
@@ -3535,7 +3533,7 @@ gap cyan_concrete_powder ingredient an ingredient of its recipe has no TaskCatal
 gap cyan_concrete_slab ingredient recipe needs cyan_concrete (no path)
 gap cyan_concrete_stairs ingredient recipe needs cyan_concrete (no path)
 gap cyan_cushion ingredient an ingredient of its recipe has no TaskCatalogue path
-gap cyan_dye ingredient an ingredient of its recipe has no TaskCatalogue path
+gap cyan_dye ingredient recipe needs pitcher_plant (no path)
 gap cyan_glazed_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
 gap cyan_harness ingredient an ingredient of its recipe has no TaskCatalogue path
 gap cyan_shulker_box ingredient an ingredient of its recipe has no TaskCatalogue path
@@ -4134,7 +4132,7 @@ gap orange_concrete_powder ingredient an ingredient of its recipe has no TaskCat
 gap orange_concrete_slab ingredient recipe needs orange_concrete (no path)
 gap orange_concrete_stairs ingredient recipe needs orange_concrete (no path)
 gap orange_cushion ingredient an ingredient of its recipe has no TaskCatalogue path
-gap orange_dye ingredient an ingredient of its recipe has no TaskCatalogue path
+gap orange_dye ingredient recipe needs torchflower (no path)
 gap orange_glazed_terracotta ingredient an ingredient of its recipe has no TaskCatalogue path
 gap orange_harness ingredient an ingredient of its recipe has no TaskCatalogue path
 gap orange_poplar_leaves no-task listed with a raw cost but TaskCatalogue has no task for it
@@ -4224,8 +4222,8 @@ gap pink_wool ingredient an ingredient of its recipe has no TaskCatalogue path
 gap pink_wool_slab ingredient an ingredient of its recipe has no TaskCatalogue path
 gap pink_wool_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
 gap piston ingredient an ingredient of its recipe has no TaskCatalogue path
-gap pitcher_plant no-task listed with a raw cost but TaskCatalogue has no task for it
-gap pitcher_pod no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap pitcher_plant sniffer a sniffer digs the seeds up; its egg comes from brushing ocean ruins
+gap pitcher_pod sniffer a sniffer digs the seeds up; its egg comes from brushing ocean ruins
 gap plains_village_map loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
 gap player_head no-source no recipe, natural self-drop or plain mob drop in the jar data
 gap plenty_pottery_sherd loot-brushing brushing suspicious sand or gravel in ruins
@@ -4469,7 +4467,7 @@ gap smooth_sandstone_slab ingredient an ingredient of its recipe has no TaskCata
 gap smooth_sandstone_stairs ingredient an ingredient of its recipe has no TaskCatalogue path
 gap smooth_stone ingredient an ingredient of its recipe has no TaskCatalogue path
 gap smooth_stone_slab ingredient an ingredient of its recipe has no TaskCatalogue path
-gap sniffer_egg loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
+gap sniffer_egg sniffer a sniffer digs the seeds up; its egg comes from brushing ocean ruins
 gap sniffer_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
 gap snort_pottery_sherd loot-brushing brushing suspicious sand or gravel in ruins
 gap snout_armor_trim_smithing_template loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
@@ -4576,7 +4574,7 @@ gap sulfur_wall ingredient an ingredient of its recipe has no TaskCatalogue path
 gap sunflower no-task listed with a raw cost but TaskCatalogue has no task for it
 gap suspicious_gravel no-source no recipe, natural self-drop or plain mob drop in the jar data
 gap suspicious_sand no-source no recipe, natural self-drop or plain mob drop in the jar data
-gap suspicious_stew ingredient recipe needs wither_rose (no path)
+gap suspicious_stew ingredient recipe needs torchflower,wither_rose (no path)
 gap swamp_hut_map loot-boss-trade structure loot, a boss, a trade, or a rare mob or mechanic, or crafted from one
 gap sweet_berries no-task listed with a raw cost but TaskCatalogue has no task for it
 gap tadpole_bucket mob-bucket a water bucket used on the mob
@@ -4594,8 +4592,8 @@ gap tipped_arrow no-task listed with a raw cost but TaskCatalogue has no task fo
 gap tnt ingredient an ingredient of its recipe has no TaskCatalogue path
 gap tnt_minecart ingredient an ingredient of its recipe has no TaskCatalogue path
 gap torch ingredient an ingredient of its recipe has no TaskCatalogue path
-gap torchflower no-task listed with a raw cost but TaskCatalogue has no task for it
-gap torchflower_seeds no-source no recipe, natural self-drop or plain mob drop in the jar data
+gap torchflower sniffer a sniffer digs the seeds up; its egg comes from brushing ocean ruins
+gap torchflower_seeds sniffer a sniffer digs the seeds up; its egg comes from brushing ocean ruins
 gap totem_of_undying no-task listed with a raw cost but TaskCatalogue has no task for it
 gap trader_llama_spawn_egg no-source no recipe, natural self-drop or plain mob drop in the jar data
 gap trapped_chest ingredient an ingredient of its recipe has no TaskCatalogue path

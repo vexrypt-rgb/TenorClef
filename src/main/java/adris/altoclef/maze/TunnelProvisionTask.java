@@ -81,7 +81,10 @@ public class TunnelProvisionTask extends Task {
 
     @Override
     protected Task onTick() {
-        boolean hard = currentKey != null && currentKey.endsWith("_pickaxe") && !returning;
+        boolean usablePick = usablePick();
+        // Ostinato: a pickaxe ask is hard (long timeout) only while no usable pick is held. With one in hand it is Ostinato's
+        // soft spare/upgrade ask; run79 sat 7+ min on a worn-copper spare (stuck pathing to ore) while the held pick could dig.
+        boolean hard = currentKey != null && currentKey.endsWith("_pickaxe") && !returning && !usablePick;
         // Ostinato: the bed has its own cap (below) and neither spends nor is skipped by the shared budget. It
         // is queued last, so armor + torches used to eat the whole budget every round and spawn was never set (run73).
         boolean bed = currentKey != null && currentKey.startsWith("bed");
@@ -182,6 +185,16 @@ public class TunnelProvisionTask extends Task {
         } catch (RuntimeException ex) {
             return 0;
         }
+    }
+
+    /** Ostinato: any pickaxe with more than 2 uses left (Ostinato's pickGate "usable"). */
+    private static boolean usablePick() {
+        if (mod().getItemStorage() == null) return false;
+        for (net.minecraft.item.ItemStack s : mod().getItemStorage().getItemStacksPlayerInventory(false)) {
+            if (s.isEmpty() || !ItemHelper.stackIn(s, net.minecraft.registry.tag.ItemTags.PICKAXES)) continue;
+            if (s.getMaxDamage() <= 0 || s.getMaxDamage() - s.getDamage() > 2) return true;
+        }
+        return false;
     }
 
     private int leash() {

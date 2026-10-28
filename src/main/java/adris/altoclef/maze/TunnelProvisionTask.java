@@ -70,7 +70,10 @@ public class TunnelProvisionTask extends Task {
     @Override
     protected Task onTick() {
         boolean hard = currentKey != null && currentKey.endsWith("_pickaxe") && !returning;
-        if (current != null && !hard && !returning) softTicks++;
+        // Ostinato: the bed has its own cap (below) and neither spends nor is skipped by the shared budget. It
+        // is queued last, so armor + torches used to eat the whole budget every round and spawn was never set (run73).
+        boolean bed = "bed".equals(currentKey);
+        if (current != null && !hard && !bed && !returning) softTicks++;
         if (current != null && !returning && home != null && mod().getPlayer() != null
                 && horiz(mod().getPlayer().getBlockPos(), home) > LEASH) {
             Debug.logHarness("[tunnels] need " + currentKey + " left the " + LEASH + "-block leash; walking back");
@@ -80,8 +83,9 @@ public class TunnelProvisionTask extends Task {
             returning = true;
         }
         if (returning && current != null && current.isFinished()) returning = false;
-        int limit = hard || returning ? NEED_TIMEOUT_TICKS : SOFT_NEED_TICKS;
-        if (current != null && (current.isFinished() || ++currentTicks > limit || (!hard && !returning && softTicks > SOFT_BUDGET_TICKS))) {
+        // Ostinato: a bed means finding sheep on the surface, shearing/killing 3, then crafting and placing: 6 min, not 3.
+        int limit = hard || returning ? NEED_TIMEOUT_TICKS : bed ? SOFT_BUDGET_TICKS : SOFT_NEED_TICKS;
+        if (current != null && (current.isFinished() || ++currentTicks > limit || (!hard && !bed && !returning && softTicks > SOFT_BUDGET_TICKS))) {
             // Ostinato: harness-visible (logInternal is muted at NORMAL), with the counts that prove the order sticks -> pick.
             Debug.logHarness("[tunnels] need " + currentKey + (current.isFinished() ? " done" : " timed out") + " have "
                     + have(currentKey) + "/" + currentCount + " sticks=" + have("stick") + " planks=" + have("planks"));
@@ -90,7 +94,7 @@ public class TunnelProvisionTask extends Task {
         }
         while (current == null && !queue.isEmpty()) {
             Map.Entry<String, Integer> e = queue.poll();
-            if (!e.getKey().endsWith("_pickaxe") && softTicks > SOFT_BUDGET_TICKS) {
+            if (!e.getKey().endsWith("_pickaxe") && !e.getKey().equals("bed") && softTicks > SOFT_BUDGET_TICKS) {
                 Debug.logHarness("[tunnels] soft budget spent; skipping " + e.getKey() + " (Ostinato asks again later)");
                 continue;
             }

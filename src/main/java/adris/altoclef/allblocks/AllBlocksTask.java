@@ -384,6 +384,17 @@ public class AllBlocksTask extends Task {
 
     /** A pit two deep under where the bot stood when it gave up on sleeping, closed over its head. */
     private Task bunkerStep(AltoClef mod) {
+        // A pit in water is no shelter: get to land first and dig in there.
+        if (mod.getPlayer().isTouchingWater()) {
+            setDebugState("Night: out of the water to dig in");
+            bunkerTop = null;
+            return new adris.altoclef.tasks.movement.GetOutOfWaterTask();
+        }
+        if (bunkerTop == null || !mod.getWorld().getBlockState(bunkerTop).getFluidState().isEmpty()
+                || !mod.getWorld().getBlockState(bunkerTop.down()).getFluidState().isEmpty()) {
+            bunkerTop = mod.getPlayer().getBlockPos();
+            Debug.logMessage("ALLBLOCKS night: bunkering at " + bunkerTop.toShortString());
+        }
         BlockPos top = bunkerTop, head = top.down(), feet = top.down(2);
         if (!mod.getWorld().getBlockState(head).isAir() && !mod.getPlayer().getBlockPos().equals(feet)) {
             setDebugState("Night: digging the bunker");

@@ -954,6 +954,20 @@ public class AllBlocksTask extends Task {
      * {@code pos} and above it. Null when ready.
      */
     private Task prepareCell(AltoClef mod, BlockPos pos, String what, Block floor) {
+        // Room to stand next to the cell: a tree growing into the grid left nowhere to place the floor from. The 8
+        // blocks around a cell are gaps of the layout, so only leaves and logs there are cut.
+        for (int dy = 0; dy <= 1; dy++) {
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    if (dx == 0 && dz == 0) continue;
+                    BlockPos p = pos.add(dx, dy, dz);
+                    if (AllBlocks.isTree(mod.getWorld().getBlockState(p)) && WorldHelper.canBreak(p)) {
+                        allowedBreak = p;
+                        return startStep("clear tree around " + what, new DestroyBlockTask(p), 2);
+                    }
+                }
+            }
+        }
         BlockPos down = pos.down();
         BlockState under = mod.getWorld().getBlockState(down);
         if (floor != null && under.getBlock() != floor) {
@@ -985,6 +999,7 @@ public class AllBlocksTask extends Task {
     }
 
     private BlockPos allowedBreak;
+    private final Map<Integer, Integer> cellTimeouts = new HashMap<>();
 
     /**
      * A chest, label sign or grid cell of the layout, or the floor block under one, and not the block a clear step is
@@ -1044,7 +1059,16 @@ public class AllBlocksTask extends Task {
             return stepTask;
         }
         String key = stepKey;
-        if (timedOut) Debug.logMessage("ALLBLOCKS step timed out: " + key + " | " + chain(stepTask));
+        if (timedOut) {
+            Debug.logMessage("ALLBLOCKS step timed out: " + key + " | " + chain(stepTask));
+            // A grid cell that cannot be readied twice over is given up; the block goes to the next cell.
+            if (placingCell >= 0 && (key.endsWith("cell " + placingCell) || key.contains("cell " + placingCell + " ")) && cellTimeouts.merge(placingCell, 1, Integer::sum) >= 2) {
+                progress.badCells.put(placingCell, "could not be readied: " + key);
+                Debug.logMessage("ALLBLOCKS cell " + placingCell + " given up (" + key + "); using the next cell");
+                placingCell = -1;
+                progress.save(file);
+            }
+        }
         stepTask = null;
         stepKey = null;
         if (key.startsWith("deposit ")) {

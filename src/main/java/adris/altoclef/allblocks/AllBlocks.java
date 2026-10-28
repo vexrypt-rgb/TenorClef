@@ -83,7 +83,7 @@ public final class AllBlocks {
 
     private static final int[] siteRejects = new int[4];
 
-    private static boolean isTree(BlockState s) {
+    static boolean isTree(BlockState s) {
         String id = Registries.BLOCK.getId(s.getBlock()).getPath();
         return id.endsWith("_log") || id.endsWith("_leaves") || id.endsWith("_wood") || id.endsWith("_stem")
                 || id.contains("mushroom_block") || id.contains("vine");

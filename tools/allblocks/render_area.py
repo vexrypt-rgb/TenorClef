@@ -4,7 +4,7 @@
     pip install nbtlib pillow
     python3 tools/allblocks/render_area.py <world dir> <progress.json> <client.jar> <out.png>
 
-Each block column of the area is drawn with the texture of the highest block at the run's height (y-1 .. y+1).
+Each block column of the area is drawn with the texture of the highest block from y+1 down to y-5 (below y shaded).
 Chests are outlined and numbered; placed grid cells are outlined green. Reads the world only, so it shows what is
 really there, not what the bot's log says.
 """
@@ -19,6 +19,8 @@ sys.path.insert(0, __import__('os').path.dirname(__file__))
 from verify_world import Region, chest_pos, cell_pos, CHESTS_PER_ROW, CELLS_PER_ROW, GRID_Z  # noqa: E402
 
 PX = 16
+SHADE = Image.new('RGBA', (PX, PX), (0, 0, 0, 90))
+TINTED = ('grass_block', 'leaves', 'short_grass', 'tall_grass', 'fern', 'vine')
 
 
 def texture(jar, name, cache={}):
@@ -36,6 +38,11 @@ def texture(jar, name, cache={}):
         path = f'assets/minecraft/textures/item/{name}.png'
         if path in jar.namelist():
             img = Image.open(io.BytesIO(jar.read(path))).convert('RGBA').resize((PX, PX), Image.NEAREST)
+    if img is not None and any(t in name for t in TINTED):
+        # The game tints these by biome; the texture itself is grey.
+        img = Image.composite(Image.new('RGBA', img.size, (0, 0, 0, 0)), img, Image.new('L', img.size, 0))
+        green = Image.new('RGBA', img.size, (110, 170, 70, 255))
+        img = Image.blend(img, Image.composite(green, img, img.split()[3]), 0.6)
     cache[name] = img
     return img
 
@@ -54,7 +61,7 @@ def main():
     draw = ImageDraw.Draw(img)
     for x in range(x0, x1):
         for z in range(z0, z1):
-            for y in (o[1] + 1, o[1], o[1] - 1):
+            for y in range(o[1] + 1, o[1] - 6, -1):
                 b = reg.block(x, y, z)
                 if b and b not in ('minecraft:air', 'minecraft:cave_air'):
                     name = b.replace('minecraft:', '')
@@ -65,7 +72,7 @@ def main():
                     else:
                         draw.rectangle([px, pz, px + PX - 1, pz + PX - 1], fill=(120, 90, 40, 255))
                     if y < o[1]:  # floor only: darken so placed blocks stand out
-                        draw.rectangle([px, pz, px + PX - 1, pz + PX - 1], fill=(0, 0, 0, 90))
+                        img.alpha_composite(SHADE, (px, pz))
                     break
     for k in chests:
         x, _, z = chest_pos(o, k)

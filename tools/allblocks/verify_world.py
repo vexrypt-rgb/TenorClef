@@ -31,11 +31,13 @@ def cell_pos(o, n):
 
 
 def state_name(entry):
-    """Block id of a palette entry: {Name: ..., Properties: ...} before 26.x, a bare string (or {'': ...}) after."""
+    """Block id of a palette entry: {Name: ..., Properties: ...} before 26.x; on 26.x a bare string, or
+    {id: ..., properties: ...} for a block with state."""
     if isinstance(entry, str):
         return entry
-    if 'Name' in entry:
-        return str(entry['Name'])
+    for key in ('Name', 'id'):
+        if key in entry:
+            return str(entry[key])
     if '' in entry:
         return str(entry[''])
     return str(entry)

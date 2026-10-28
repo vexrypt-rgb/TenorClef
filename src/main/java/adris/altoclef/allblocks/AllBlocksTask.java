@@ -377,6 +377,14 @@ public class AllBlocksTask extends Task {
     private boolean bunkered;
     private BlockPos bunkerTop;
 
+    /** Standing room at {@code top} over two solid, fluid-free blocks to dig into. */
+    private static boolean dryGround(AltoClef mod, BlockPos top) {
+        for (BlockPos p : new BlockPos[]{top, top.down(), top.down(2), top.down(3)}) {
+            if (!mod.getWorld().getBlockState(p).getFluidState().isEmpty()) return false;
+        }
+        return WorldHelper.isSolidBlock(top.down(3));
+    }
+
     static boolean nearBed(AltoClef mod) {
         Optional<BlockPos> bed = mod.getBlockScanner().getNearestBlock(ItemHelper.itemsToBlocks(ItemHelper.BED));
         return bed.isPresent() && bed.get().getSquaredDistance(mod.getPlayer().getBlockPos()) < 24 * 24;
@@ -384,15 +392,15 @@ public class AllBlocksTask extends Task {
 
     /** A pit two deep under where the bot stood when it gave up on sleeping, closed over its head. */
     private Task bunkerStep(AltoClef mod) {
-        // A pit in water is no shelter: get to land first and dig in there.
-        if (mod.getPlayer().isTouchingWater()) {
-            setDebugState("Night: out of the water to dig in");
-            bunkerTop = null;
-            return new adris.altoclef.tasks.movement.GetOutOfWaterTask();
-        }
-        if (bunkerTop == null || !mod.getWorld().getBlockState(bunkerTop).getFluidState().isEmpty()
-                || !mod.getWorld().getBlockState(bunkerTop.down()).getFluidState().isEmpty()) {
-            bunkerTop = mod.getPlayer().getBlockPos();
+        // A pit in water is no shelter: get onto solid, dry ground first and dig in there.
+        if (bunkerTop == null || !dryGround(mod, bunkerTop)) {
+            BlockPos here = mod.getPlayer().getBlockPos();
+            if (mod.getPlayer().isTouchingWater() || !mod.getPlayer().isOnGround() || !dryGround(mod, here)) {
+                setDebugState("Night: out of the water to dig in");
+                bunkerTop = null;
+                return new adris.altoclef.tasks.movement.GetOutOfWaterTask();
+            }
+            bunkerTop = here;
             Debug.logMessage("ALLBLOCKS night: bunkering at " + bunkerTop.toShortString());
         }
         BlockPos top = bunkerTop, head = top.down(), feet = top.down(2);

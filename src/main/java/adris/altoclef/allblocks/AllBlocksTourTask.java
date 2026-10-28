@@ -34,8 +34,8 @@ public class AllBlocksTourTask extends Task {
 
     @Override
     protected void onStart() {
-        index = 0;
-        held = 0;
+        // Nothing to reset: mob defense and eating interrupt the tour, and starting over from the first view each
+        // time kept it from ever reaching the grid.
     }
 
     @Override
@@ -43,7 +43,9 @@ public class AllBlocksTourTask extends Task {
         if (index >= spots.length) return null;
         AltoClef mod = AltoClef.getInstance();
         BlockPos spot = spots[index];
-        if (!mod.getPlayer().getBlockPos().equals(spot) && held == 0) {
+        if (!mod.getPlayer().getBlockPos().equals(spot)) {
+            // Pushed off the spot (a fight, a fall): walk back and hold the view afresh.
+            held = 0;
             setDebugState("Walking to the " + names[index] + " view at " + spot.toShortString());
             return new GetToBlockTask(spot);
         }

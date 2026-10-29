@@ -140,6 +140,7 @@ public class MazeFurnishTask extends Task {
         AltoClef mod = AltoClef.getInstance();
         BlockPos feet = mod.getPlayer().getBlockPos();
         if (failed) return null;
+        traceWoodSpend(mod);
         int sig = 0;
         for (int i = 0; i < mod.getPlayer().getInventory().size(); i++) { net.minecraft.item.ItemStack st = mod.getPlayer().getInventory().getStack(i); sig = sig * 31 + st.getCount() * 7 + net.minecraft.registry.Registries.ITEM.getRawId(st.getItem()); }
         if (sig != lastInvSig || stuckAnchor == null || stuckAnchor.getSquaredDistance(feet) > 64) { if (sig != lastInvSig) stuckRecoveries = 0; lastInvSig = sig; stuckAnchor = feet; stuckTicks = 0; }
@@ -745,6 +746,19 @@ public class MazeFurnishTask extends Task {
     }
     private static boolean hasWoodFor(AltoClef mod, String key, int count) {
         return heldWood(mod) >= planksFor(mod, key, count);
+    }
+    // Ostinato: run98. 38 planks-equivalent fell to 6 during the copper kit and no line said what spent it. Before the
+    // place phase, every drop in held wood names the running task chain once.
+    private int lastWood = -1;
+    private void traceWoodSpend(AltoClef mod) {
+        int w = heldWood(mod);
+        if (lastWood >= 0 && w < lastWood && !gathered) {
+            StringBuilder chain = new StringBuilder();
+            Task c = this.getSub();
+            for (int d = 0; c != null && d < 6; d++, c = c.getSub()) { String n = c.toString(); chain.append(n, 0, Math.min(70, n.length())).append(" / "); }
+            System.out.println("MAZETEST FURNISH wood-spent " + lastWood + "->" + w + " " + woodInv(mod) + " via " + chain);
+        }
+        lastWood = w;
     }
     private static int heldWood(AltoClef mod) {
         int planks = heldPlanks(mod);

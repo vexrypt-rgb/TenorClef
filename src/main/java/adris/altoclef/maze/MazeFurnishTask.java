@@ -91,6 +91,8 @@ public class MazeFurnishTask extends Task {
         // cladding it just put in (run42: ceiling cells at y=88 mined away while "Surfacing for barrel").
         for (MazeFurnishPlan.Step s : plan.steps) plannedCells.add(new BlockPos(s.x(), s.y(), s.z()));
         for (MazeFurnishPlan.Step s : plan.steps) if (s.kind() == MazeFurnishPlan.Kind.SEAL) sealCells.add(new BlockPos(s.x(), s.y(), s.z()));
+        int[] air = this.plan.airCells; // Ostinato: run100
+        for (int i = 0; i + 2 < air.length; i += 3) airCells.add(new BlockPos(air[i], air[i + 1], air[i + 2]));
     }
 
     static boolean obtainable(String id) {
@@ -883,7 +885,7 @@ public class MazeFurnishTask extends Task {
                 if (have.length > 0 && direct && !thinLight(have)) {
                     // Ostinato: run91. A fresh task each restart of the tree (~1s) reset its bad-stand and walk timers, so an
                     // unreachable stand was walked at until the 30s stuck-defer. Keep one task per cell.
-                    if (ceilTask == null || !ceilTask.target().equals(pos) || !java.util.Arrays.equals(ceilHave, have)) { ceilTask = new MazeCeilingPlaceTask(pos, have); ceilHave = have; }
+                    if (ceilTask == null || !ceilTask.target().equals(pos) || !java.util.Arrays.equals(ceilHave, have)) { ceilTask = new MazeCeilingPlaceTask(pos, have, this::isStray); ceilHave = have; }
                     return ceilTask;
                 }
                 if (have.length > 0) return new PlaceBlockTask(pos, have);
@@ -1201,6 +1203,14 @@ public class MazeFurnishTask extends Task {
 
     private final java.util.Set<String> hiddenLogged = new java.util.HashSet<>(); // Ostinato
     private final java.util.Set<BlockPos> plannedCells = new java.util.HashSet<>(); // Ostinato: never mine these
+    private final java.util.Set<BlockPos> airCells = new java.util.HashSet<>(); // Ostinato: run100, the room's carved cells
+
+    // Ostinato: run100. A solid block in a carved cell the plan does not fill is pillar/bridge scaffolding left after the dig.
+    private boolean isStray(BlockPos p) {
+        if (!airCells.contains(p) || plannedCells.contains(p)) return false;
+        BlockState st = AltoClef.getInstance().getWorld().getBlockState(p);
+        return !st.isAir() && st.getFluidState().isEmpty() && !st.getCollisionShape(AltoClef.getInstance().getWorld(), p).isEmpty();
+    }
 
     // Ostinato: blocks of this item that are still the wrong block in the world.
     private int stillNeeded(AltoClef mod, Item item) {

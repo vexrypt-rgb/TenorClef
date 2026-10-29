@@ -4,6 +4,7 @@
 package adris.altoclef.maze;
 
 import adris.altoclef.AltoClef;
+import adris.altoclef.tasks.construction.DestroyBlockTask;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.helpers.ItemHelper;
 import baritone.api.pathing.goals.GoalBlock;
@@ -26,6 +27,7 @@ import net.minecraft.world.RaycastContext;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.Arrays;
+import java.util.function.Predicate;
 
 public class MazeCeilingPlaceTask extends Task {
 
@@ -46,10 +48,16 @@ public class MazeCeilingPlaceTask extends Task {
     private double walkBest; private int walkIdle; // Ostinato: run97 walk progress toward the stand
     private BlockPos equipLogged; // Ostinato: run89 diagnostic, once per cell
     private int refusedClicks; private boolean nudging; // Ostinato: run93 refused place clicks / re-centering on the stand
+    private final Predicate<BlockPos> stray; private BlockPos clearing; private int clears; // Ostinato: run100
 
     public MazeCeilingPlaceTask(BlockPos target, Block[] toPlace) {
+        this(target, toPlace, p -> false);
+    }
+
+    public MazeCeilingPlaceTask(BlockPos target, Block[] toPlace, Predicate<BlockPos> stray) {
         this.target = target;
         this.toPlace = toPlace;
+        this.stray = stray;
     }
 
     @Override
@@ -73,7 +81,12 @@ public class MazeCeilingPlaceTask extends Task {
             return null;
         }
         mod.getClientBaritone().getBuilderProcess().onLostControl();
+        if (clearing != null) { // Ostinato: run100, mining scaffolding that hides the target (see strayInTheWay)
+            if (stray.test(clearing)) { stopNudge(mod); release(mod); setDebugState("Clearing scaffolding " + clearing.toShortString()); return new DestroyBlockTask(clearing); }
+            clearing = null; badStands.clear(); going = null; walkStand = null;
+        }
         BlockPos stand = standUnder(mod);
+        if (clearing != null) { stopNudge(mod); release(mod); return new DestroyBlockTask(clearing); }
         Vec3d eye = mod.getClientBaritone().getPlayerContext().playerHead();
         BlockPos feetNow = mod.getPlayer().getBlockPos();
         // Ostinato: measure against the STAND column, not the target column. standUnder may pick a neighbouring
@@ -282,8 +295,57 @@ public class MazeCeilingPlaceTask extends Task {
             if (!sideStandLogged) { sideStandLogged = true; System.out.println("MAZETEST FURNISH ceiling-ring-stand " + target.toShortString() + " from " + best.toShortString()); }
             return best;
         }
+        // Ostinato: run100. Room 2's light cell -50,93,107 had only its room-side face open, and the pillar dirt left at
+        // -51,92,107 / -51,93,107 covered it: no stand saw it, the fallback stand under it was unreachable, the cell was
+        // skipped and the room failed verify. A solid block in a carved cell the plan does not fill is scaffolding, so
+        // mine the one in the way and search again.
+        if (clears < 8) {
+            BlockPos s = strayInTheWay(mod);
+            if (s != null) {
+                clears++; clearing = s;
+                System.out.println("MAZETEST FURNISH ceiling-clear-stray " + s.toShortString() + " for " + target.toShortString()
+                        + " was=" + net.minecraft.registry.Registries.BLOCK.getId(mod.getWorld().getBlockState(s).getBlock()).getPath());
+                return feetNow;
+            }
+        }
         if (!badStands.isEmpty()) { badStands.clear(); }
         return new BlockPos(target.getX(), target.getY() - 2, target.getZ());
+    }
+
+    // Ostinato: run100. The stray block nearest the target that a standable cell's view of it hits first: a ray to the
+    // target (when it must be mined) or to a solid neighbour's face (to place against). Failing that, a stray next to a
+    // solid target, which covers one of its faces.
+    private BlockPos strayInTheWay(AltoClef mod) {
+        boolean solidTarget = !mod.getWorld().getBlockState(target).isAir();
+        BlockPos best = null; double bestD = Double.MAX_VALUE;
+        for (int dx = -4; dx <= 4; dx++) for (int dz = -4; dz <= 4; dz++) for (int dy = -5; dy <= 1; dy++) {
+            BlockPos feet = target.add(dx, dy, dz);
+            if (feet.equals(target) || feet.up().equals(target) || feet.down().equals(target)) continue;
+            if (!(support(mod, feet.down()) && open(mod, feet) && open(mod, feet.up()))) continue;
+            Vec3d eye = new Vec3d(feet.getX() + 0.5, feet.getY() + 1.62, feet.getZ() + 0.5);
+            if (eye.distanceTo(Vec3d.ofCenter(target)) > REACH - 0.3) continue;
+            java.util.List<Vec3d> aims = new java.util.ArrayList<>();
+            if (solidTarget) {
+                Vec3d c = Vec3d.ofCenter(target);
+                for (Direction d : Direction.values()) aims.add(c.add(d.getOffsetX() * 0.45, d.getOffsetY() * 0.45, d.getOffsetZ() * 0.45));
+            } else {
+                for (Direction fromTarget : Direction.values()) {
+                    BlockPos against = target.offset(fromTarget);
+                    if (support(mod, against)) aims.add(facePoint(against, fromTarget.getOpposite(), 0, 0));
+                }
+            }
+            for (Vec3d aim : aims) {
+                HitResult hr = mod.getWorld().raycast(new RaycastContext(eye, aim, RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mod.getPlayer()));
+                if (!(hr instanceof BlockHitResult bhr) || bhr.getBlockPos().equals(target) || !stray.test(bhr.getBlockPos())) continue;
+                double d = bhr.getBlockPos().getSquaredDistance(target);
+                if (d < bestD) { bestD = d; best = bhr.getBlockPos(); }
+            }
+        }
+        if (best == null && solidTarget) for (Direction d : Direction.values()) {
+            BlockPos n = target.offset(d);
+            if (stray.test(n)) return n;
+        }
+        return best;
     }
 
     // Ostinato: run63 FAIL light 132/133. Corner wall hole -152,80,13 (cladding above, below and beside it, only its

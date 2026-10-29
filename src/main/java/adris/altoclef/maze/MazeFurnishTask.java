@@ -85,6 +85,7 @@ public class MazeFurnishTask extends Task {
         // Ostinato: every cell the plan will place into. The surface climb must never mine these, or it eats the
         // cladding it just put in (run42: ceiling cells at y=88 mined away while "Surfacing for barrel").
         for (MazeFurnishPlan.Step s : plan.steps) plannedCells.add(new BlockPos(s.x(), s.y(), s.z()));
+        for (MazeFurnishPlan.Step s : plan.steps) if (s.kind() == MazeFurnishPlan.Kind.SEAL) sealCells.add(new BlockPos(s.x(), s.y(), s.z()));
     }
 
     static boolean obtainable(String id) {
@@ -118,7 +119,7 @@ public class MazeFurnishTask extends Task {
         // Ostinato: run52. Protect a planned cell only once it already is the block the plan wants.
         // Protecting every solid cell also protected the stone and dirt the ceiling pass has to mine
         // (8 cells sat on "Mining ceiling" until skip, light 125/133). A finished seal stays protected.
-        AltoClef.getInstance().getBehaviour().avoidBlockBreaking(p -> plannedCells.contains(p) && isSolidCell(p) && cellMatchesPlan(p));
+        AltoClef.getInstance().getBehaviour().avoidBlockBreaking(p -> plannedCells.contains(p) && isSolidCell(p) && cellMatchesPlan(p) && !(repairOpen && sealCells.contains(p)));
         AltoClef.getInstance().getBehaviour().addProtectedItems(IRON_ARMOR);
         AltoClef.getInstance().getBehaviour().addProtectedItems(KEEP); // Ostinato: food and tools are never garbage
         // Ostinato: run16 tug-of-war. Baritone autoTool and TenorClef's equip kept swapping tools on the same block, so it
@@ -353,6 +354,9 @@ public class MazeFurnishTask extends Task {
                 if (!secondPass && deferred.contains(index)) { index++; continue; }
                 // Ostinato: run90. Deferred lights were retried after the seals, so two ceiling holes could only be reached
                 // from inside a sealed room (bot on the roof, 3 repair rounds, 131/133). Retry them while it is still open.
+                // Ostinato: the interior repairs of this round are done; the opened seal cells are protected again (once
+                // re-placed) and the SEAL steps below close the room the same way the first seal pass did.
+                if (repairOpen && step.kind() == MazeFurnishPlan.Kind.SEAL) { repairOpen = false; System.out.println("MAZETEST FURNISH repair-reseal"); }
                 if (!secondPass && step.kind() == MazeFurnishPlan.Kind.SEAL && !deferred.isEmpty()) {
                     System.out.println("MAZETEST FURNISH retry-before-seal " + deferred.size());
                     break;
@@ -397,6 +401,12 @@ public class MazeFurnishTask extends Task {
             }
             if (!wrong.isEmpty()) {
                 repairRounds++;
+                // Ostinato: run93 room 1. Four lights were wrong after the seal; the bot was outside a room enclosed by
+                // protected cells (walls, finished seal), every walk-in searched 1M+ nodes, and rounds 2-3 skipped all four.
+                // With only interior cells wrong and the seal finished, this round may break the seal cells to get back in.
+                boolean sealDone = true, interiorWrong = false;
+                for (int i : wrong) { if (work.get(i).kind() == MazeFurnishPlan.Kind.SEAL) sealDone = false; else interiorWrong = true; }
+                if (sealDone && interiorWrong && !sealCells.isEmpty()) { repairOpen = true; System.out.println("MAZETEST FURNISH repair-open-seal cells=" + sealCells.size()); }
                 System.out.println("MAZETEST FURNISH repair-sweep round=" + repairRounds + " cells=" + wrong.size() + cells);
                 deferred.clear(); deferred.addAll(wrong); secondPass = true; index = wrong.get(0); stepIdx = -1; stepTicks = 0;
                 return null;
@@ -412,6 +422,8 @@ public class MazeFurnishTask extends Task {
     // Ostinato: run92 room 3 FAIL 3 cells short after one repair round. A skip on the stuck path moved index past the end
     // outside the step loop, so isFinished() was true before the next tick could run the sweep: rounds 2-3 never ran.
     private boolean repairDone;
+    private boolean repairOpen; // Ostinato: run93, seal cells may be broken to reach interior repairs
+    private final java.util.Set<BlockPos> sealCells = new java.util.HashSet<>();
 
     // Ostinato: run62. Pure check (no side effects) that a planned cell is missing or holds the wrong block.
     private boolean cellWrong(AltoClef mod, MazeFurnishPlan.Step step) {

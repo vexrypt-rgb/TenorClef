@@ -228,14 +228,18 @@ public class MazeCeilingPlaceTask extends Task {
      * floor-level ceiling insert and every wall insert over room air time out (run42: 20 skip-light why=timeout).
      */
     private BlockPos standUnder(AltoClef mod) {
+        // Ostinato: run96. The column and side searches only look below the target, which is right for a ceiling cell
+        // (room air under it, solid above). For a floor cell they found pits under the floor (9,88,-151 got stand
+        // 10,86,-151, 9,88,-150 got 9,87,-149): unreachable, 30s each, then skip-light. Walls and floors take the ring.
+        boolean ceiling = open(mod, target.down()) && !open(mod, target.up());
         // Same column, but the head must stay under the target: feet <= target - 2.
-        for (int y = target.getY() - 2; y >= target.getY() - 6 && y > mod.getWorld().getBottomY(); y--) {
+        if (ceiling) for (int y = target.getY() - 2; y >= target.getY() - 6 && y > mod.getWorld().getBottomY(); y--) {
             BlockPos feet = new BlockPos(target.getX(), y, target.getZ());
             if (standSees(mod, feet)) return feet; // Ostinato: run63
         }
         // Ostinato: a 2-high room (floor right under the hole) or a column already clad below has no such spot.
         // Stand in a neighbouring room column instead; clickFace still lands on the target's face from there.
-        for (Direction d : new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST}) {
+        if (ceiling) for (Direction d : new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST}) {
             BlockPos c = target.offset(d);
             for (int y = target.getY() - 1; y >= target.getY() - 4 && y > mod.getWorld().getBottomY(); y--) {
                 BlockPos feet = new BlockPos(c.getX(), y, c.getZ());
@@ -262,7 +266,9 @@ public class MazeCeilingPlaceTask extends Task {
             Vec3d eye = new Vec3d(feet.getX() + 0.5, feet.getY() + 1.62, feet.getZ() + 0.5);
             if (eye.distanceTo(Vec3d.ofCenter(target)) > REACH - 0.3) continue;
             if (!seesTargetOrFace(mod, eye)) continue;
-            double d = feet.getSquaredDistance(feetNow);
+            // Ostinato: run96. A stand below the bot's feet is usually a pit or a cave pocket under the floor; prefer
+            // stands on the level the bot is working from.
+            double d = feet.getSquaredDistance(feetNow) + 9 * Math.max(0, feetNow.getY() - feet.getY());
             if (d < bestD) { bestD = d; best = feet; }
         }
         if (best != null) {

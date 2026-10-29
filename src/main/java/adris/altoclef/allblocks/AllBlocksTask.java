@@ -306,14 +306,17 @@ public class AllBlocksTask extends Task {
     /**
      * After a death, walk back and pick up what was dropped: rebuilding pick, sword, armor and food from nothing took
      * about 45 minutes every time. Drops last 5 minutes in loaded chunks (the clock stops while the chunk is unloaded),
-     * so they are often still there. Deaths before this session started are not chased.
+     * so they are often still there. The last handled death is saved, so a death just before a restart is still chased;
+     * deaths from before the first run are not.
      */
     private Task recoverStep(AltoClef mod) {
         Optional<GlobalPos> death = mod.getPlayer().getLastDeathPos();
         String key = death.map(Object::toString).orElse("");
-        if (seenDeath == null) seenDeath = key;
+        if (seenDeath == null) seenDeath = progress.seenDeath != null ? progress.seenDeath : key;
         if (!key.equals(seenDeath)) {
             seenDeath = key;
+            progress.seenDeath = key;
+            progress.save(file);
             BlockPos at = death.get().pos();
             if (WorldHelper.getCurrentDimension() == Dimension.OVERWORLD
                     && death.get().dimension() == World.OVERWORLD
@@ -322,6 +325,10 @@ public class AllBlocksTask extends Task {
                 recoverUntil = ticks + (long) RECOVER_MINUTES * TPM;
                 Debug.logMessage("ALLBLOCKS died at " + at.toShortString() + "; going back for the drops");
             }
+        }
+        if (progress.seenDeath == null) {
+            progress.seenDeath = seenDeath;
+            progress.save(file);
         }
         if (recoverPos == null) return null;
         if (ticks > recoverUntil) {

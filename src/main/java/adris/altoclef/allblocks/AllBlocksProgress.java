@@ -46,6 +46,8 @@ public final class AllBlocksProgress {
     public int nextCell;
     public long startedAt;
     public long gatherTicks;
+    /** The last death the run has handled (its position): a death while the client was down is still chased. */
+    public String seenDeath;
 
     public static Path file(Path gameDir, String world) {
         return gameDir.resolve("altoclef").resolve("allblocks").resolve(world.replaceAll("[^A-Za-z0-9._-]", "_") + ".json");

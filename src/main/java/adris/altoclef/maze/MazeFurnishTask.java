@@ -126,6 +126,7 @@ public class MazeFurnishTask extends Task {
         // (8 cells sat on "Mining ceiling" until skip, light 125/133). A finished seal stays protected.
         AltoClef.getInstance().getBehaviour().avoidBlockBreaking(p -> plannedCells.contains(p) && isSolidCell(p) && cellMatchesPlan(p) && !(repairOpen && sealCells.contains(p)));
         AltoClef.getInstance().getBehaviour().addProtectedItems(IRON_ARMOR);
+        AltoClef.getInstance().getBehaviour().addProtectedItems(KIT_ARMOR);
         AltoClef.getInstance().getBehaviour().addProtectedItems(KEEP); // Ostinato: food and tools are never garbage
         // Ostinato: run16 tug-of-war. Baritone autoTool and TenorClef's equip kept swapping tools on the same block, so it
         // never broke. TenorClef's PlayerInteractionFixChain equips for the block actually being broken; let it own tools.
@@ -461,6 +462,10 @@ public class MazeFurnishTask extends Task {
     private static final Item[] SWORDS = {Items.STONE_SWORD, Items.IRON_SWORD, Items.DIAMOND_SWORD, Items.NETHERITE_SWORD};
     private static final Item[] PICKS = {Items.STONE_PICKAXE, Items.IRON_PICKAXE, Items.DIAMOND_PICKAXE, Items.NETHERITE_PICKAXE};
     private static final Item[] IRON_ARMOR = {Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS};
+    // Ostinato: run97. Copper first, like the tunnel kit (copper -> iron): room 1's iron kit spent its whole 3-min budget
+    // mining iron_ore and equipped nothing (skip-armor). Copper ore is far more common. Iron where copper does not exist.
+    private static final Item[] KIT_ARMOR = McCompat.item("copper_helmet") == null ? IRON_ARMOR : new Item[]{McCompat.item("copper_helmet"),
+            McCompat.item("copper_chestplate"), McCompat.item("copper_leggings"), McCompat.item("copper_boots")};
     private static final Item[] KEEP = {Items.BREAD, Items.COOKED_BEEF, Items.COOKED_PORKCHOP, Items.COOKED_CHICKEN, Items.COOKED_MUTTON, Items.COOKED_RABBIT, Items.COOKED_COD, Items.COOKED_SALMON, Items.BAKED_POTATO, Items.APPLE, Items.CARROT, Items.WOODEN_PICKAXE, Items.STONE_PICKAXE, Items.IRON_PICKAXE, Items.DIAMOND_PICKAXE, Items.SHIELD}; // Ostinato
     // Ostinato: run60. Fill-only loot that needs a long hunt (cobwebs/spiders). Used from inventory only, never gathered.
     private static final java.util.Set<String> NO_HUNT_LOOT = java.util.Set.of("string");
@@ -545,9 +550,10 @@ public class MazeFurnishTask extends Task {
         // Ostinato: run39 iron armor blocked lights ~11 min (40 unreachable iron_ore tries) and was rebuilt after a drown.
         // Armor is optional: only before the place phase, only on the first life, 3 min budget.
         // Ostinato: run40 audit. Never mine iron for armor on an empty stomach (food < 6); food comes first.
-        else if (food >= 6 && !armorGaveUp && !gathered && !died && !adris.altoclef.util.helpers.StorageHelper.isArmorEquippedAll(IRON_ARMOR)) {
+        else if (food >= 6 && !armorGaveUp && !gathered && !died && !adris.altoclef.util.helpers.StorageHelper.isArmorEquippedAll(IRON_ARMOR)
+                && !adris.altoclef.util.helpers.StorageHelper.isArmorEquippedAll(KIT_ARMOR)) {
             if (++armorTicks > 3600) { System.out.println("MAZETEST FURNISH skip-armor"); armorGaveUp = true; step = "ready"; t = null; }
-            else { step = "iron_armor"; t = new adris.altoclef.tasks.misc.EquipArmorTask(IRON_ARMOR); }
+            else { step = KIT_ARMOR == IRON_ARMOR ? "iron_armor" : "copper_armor"; t = new adris.altoclef.tasks.misc.EquipArmorTask(KIT_ARMOR); }
         }
         else { step = "ready"; t = null; }
         if (!step.equals(lastKit)) {

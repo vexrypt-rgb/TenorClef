@@ -300,6 +300,7 @@ public class AllBlocksTask extends Task {
 
     private String seenDeath;
     private BlockPos recoverPos;
+    private boolean sawDrops;
     private long recoverUntil;
     private static final int RECOVER_MINUTES = 8;
 
@@ -345,10 +346,13 @@ public class AllBlocksTask extends Task {
             return new adris.altoclef.tasks.movement.GetToBlockTask(recoverPos);
         }
         if (near.isEmpty() || freeSlots(mod) == 0) {
-            Debug.logMessage("ALLBLOCKS picked up the drops at " + recoverPos.toShortString());
+            Debug.logMessage("ALLBLOCKS " + (sawDrops ? "picked up the drops" : "no drops left (despawned or burned)")
+                    + " at " + recoverPos.toShortString());
             recoverPos = null;
+            sawDrops = false;
             return null;
         }
+        sawDrops = true;
         List<ItemTarget> targets = new ArrayList<>();
         for (ItemEntity drop : near) {
             Item item = drop.getStack().getItem();

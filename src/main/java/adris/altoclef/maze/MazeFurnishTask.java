@@ -382,7 +382,8 @@ public class MazeFurnishTask extends Task {
                     boolean placing = sub instanceof PlaceBlockTask || sub instanceof MazeCeilingPlaceTask || sub instanceof StoreInContainerTask || sub instanceof MazeBarrelFillTask;
                     // Ostinato: run58. A deferred light retries with the direct stand-and-click task, which walks to a new
                     // stand cell first; 15s was used up by the walk, so the second pass gets 45s.
-                    int budget = step.kind() == MazeFurnishPlan.Kind.LIGHT ? (secondPass ? 900 : 300) : 600;
+                    // Ostinato: run96. Walls go direct on the first pass too, so the direct task gets 45s on either pass.
+                    int budget = step.kind() == MazeFurnishPlan.Kind.LIGHT ? (secondPass || sub instanceof MazeCeilingPlaceTask ? 900 : 300) : 600;
                     if (placing && ++stepTicks > budget) {
                         deferStep("timeout");
                         continue;
@@ -829,7 +830,11 @@ public class MazeFurnishTask extends Task {
                 // Ostinato: run58. Wall/corner cells went to Baritone's builder ("Failed to place, wandering timeout") on
                 // both passes, so nine cells were skipped. A deferred light now uses the direct task: mine, pick a stand
                 // inside the room in reach, click a solid neighbour's face.
-                boolean direct = openBelow(mod, pos) || (step.kind() == MazeFurnishPlan.Kind.LIGHT && secondPass && deferred.contains(index));
+                // Ostinato: run96. The builder timed out (15s each) on 29 of room 2's cells with a block above (walls, inner
+                // pipes), then the second pass placed them direct (run92: 79 of 84 deferred cells). A light cell under a solid
+                // block goes direct first; the builder keeps the floor cells, where it ran 56 lights in 4 min.
+                boolean direct = openBelow(mod, pos) || (step.kind() == MazeFurnishPlan.Kind.LIGHT
+                        && (secondPass && deferred.contains(index) || !openAbove(mod, pos)));
                 if (have.length > 0 && direct && !thinLight(have)) {
                     // Ostinato: run91. A fresh task each restart of the tree (~1s) reset its bad-stand and walk timers, so an
                     // unreachable stand was walked at until the 30s stuck-defer. Keep one task per cell.
@@ -988,6 +993,13 @@ public class MazeFurnishTask extends Task {
             if (fluid == net.minecraft.fluid.Fluids.LAVA || fluid == net.minecraft.fluid.Fluids.FLOWING_LAVA) return true;
         }
         return false;
+    }
+
+    // Ostinato: run96. True when the cell above the place target is open (a floor cell the builder places from above).
+    private static boolean openAbove(AltoClef mod, BlockPos pos) {
+        BlockPos above = pos.up();
+        BlockState s = mod.getWorld().getBlockState(above);
+        return s.isAir() || s.getCollisionShape(mod.getWorld(), above).isEmpty();
     }
 
     // Ostinato: true when the cell under the place target is open room air (interior ceiling).

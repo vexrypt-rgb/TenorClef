@@ -127,6 +127,8 @@ public class MazeFurnishTask extends Task {
         // Protecting every solid cell also protected the stone and dirt the ceiling pass has to mine
         // (8 cells sat on "Mining ceiling" until skip, light 125/133). A finished seal stays protected.
         AltoClef.getInstance().getBehaviour().avoidBlockBreaking(p -> plannedCells.contains(p) && isSolidCell(p) && cellMatchesPlan(p) && !(repairOpen && sealCells.contains(p)));
+        MazeRooms.begin(airCells, plannedCells); // Ostinato: run101, earlier rooms are off limits to gathers and paths
+        AltoClef.getInstance().getBehaviour().avoidBlockBreaking(MazeRooms::isProtected);
         AltoClef.getInstance().getBehaviour().addProtectedItems(IRON_ARMOR);
         AltoClef.getInstance().getBehaviour().addProtectedItems(KIT_ARMOR);
         AltoClef.getInstance().getBehaviour().addProtectedItems(KEEP); // Ostinato: food and tools are never garbage
@@ -482,7 +484,12 @@ public class MazeFurnishTask extends Task {
     }
     private static final Item[] KEEP = {Items.BREAD, Items.COOKED_BEEF, Items.COOKED_PORKCHOP, Items.COOKED_CHICKEN, Items.COOKED_MUTTON, Items.COOKED_RABBIT, Items.COOKED_COD, Items.COOKED_SALMON, Items.BAKED_POTATO, Items.APPLE, Items.CARROT, Items.WOODEN_PICKAXE, Items.STONE_PICKAXE, Items.IRON_PICKAXE, Items.DIAMOND_PICKAXE, Items.SHIELD}; // Ostinato
     // Ostinato: run60. Fill-only loot that needs a long hunt (cobwebs/spiders). Used from inventory only, never gathered.
-    private static final java.util.Set<String> NO_HUNT_LOOT = java.util.Set.of("string");
+    // Ostinato: run100. Fill loot whose only source is ore far below the room is not hunted either: room 1's pipes barrel
+    // wanted redstone x6, the bot mined down to y~11 (the leash only counts depth past 16), stuck in a pocket at y=37 on the
+    // way back, skipped the fill and all four seals and the room failed verify. The fill stores what is held; fallback junk
+    // covers the rest. Diamond/emerald were already kept out of the material list; this keeps them out of the fill hunt.
+    private static final java.util.Set<String> NO_HUNT_LOOT = java.util.Set.of("string",
+            "redstone", "redstone_torch", "repeater", "comparator", "lapis_lazuli", "diamond", "emerald");
     private String lastKit = ""; private int armorTicks; private boolean armorGaveUp, died; // Ostinato
     private final java.util.Set<Integer> deferred = new java.util.HashSet<>(); // Ostinato
     private boolean secondPass; private int stepIdx = -1, stepTicks; // Ostinato
@@ -1247,6 +1254,7 @@ public class MazeFurnishTask extends Task {
 
     @Override
     protected void onStop(Task interruptTask) {
+        MazeRooms.end(); // Ostinato: run101
         AltoClef.getInstance().getClientBaritoneSettings().autoTool.value = prevAutoTool; // Ostinato
         AltoClef.getInstance().getBehaviour().pop();
     }

@@ -42,6 +42,8 @@ public class MazeCeilingPlaceTask extends Task {
     private final java.util.Set<BlockPos> badStands = new java.util.HashSet<>(); // Ostinato: run58
     private int thereTicks; // Ostinato: run58
 
+    private BlockPos equipLogged; // Ostinato: run89 diagnostic, once per cell
+
     public MazeCeilingPlaceTask(BlockPos target, Block[] toPlace) {
         this.target = target;
         this.toPlace = toPlace;
@@ -138,7 +140,24 @@ public class MazeCeilingPlaceTask extends Task {
         if (eye.distanceTo(click.hit) > REACH) {
             return stay("Too far to place ceiling " + target.toShortString());
         }
-        if (!mod.getSlotHandler().forceEquipItem(ItemHelper.blocksToItems(toPlace))) {
+        Item[] placeItems = ItemHelper.blocksToItems(toPlace);
+        // Ostinato: run89. 17 second-pass ceilings sat on "No ceiling block in hand" while the blocks were held. The plain
+        // equip refuses while FoodChain.needsToEat(); the block is in reach and one click away, so equip it regardless.
+        if (!mod.getSlotHandler().forceEquipItem(placeItems, true)) {
+            if (equipLogged == null || !equipLogged.equals(target)) {
+                equipLogged = target;
+                StringBuilder held = new StringBuilder();
+                for (Item it : placeItems) held.append(it).append('=').append(mod.getItemStorage().getItemCount(it)).append(' ');
+                System.out.println("MAZETEST FURNISH ceiling-equip-fail " + target.toShortString() + " want=" + held
+                        + "eat=" + mod.getFoodChain().needsToEat() + " hunger=" + mod.getPlayer().getHungerManager().getFoodLevel()
+                        + " screen=" + mod.getItemStorage().getSlotsWithItemScreen(placeItems).size()
+                        + " gridOrCursor=" + adris.altoclef.util.helpers.StorageHelper.isItemInaccessibleToContainer(mod, new adris.altoclef.util.ItemTarget(placeItems, 1)));
+            }
+            // Held but not equippable: hasItem also counts the crafting grid / cursor, the equip only the inventory.
+            adris.altoclef.util.ItemTarget stuck = new adris.altoclef.util.ItemTarget(placeItems, 1);
+            if (adris.altoclef.util.helpers.StorageHelper.isItemInaccessibleToContainer(mod, stuck)) {
+                return new adris.altoclef.tasks.slot.MoveInaccessibleItemToInventoryTask(stuck);
+            }
             return stay("No ceiling block in hand " + target.toShortString());
         }
         look(mod, click.hit);

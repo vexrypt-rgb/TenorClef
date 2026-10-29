@@ -1258,9 +1258,16 @@ public class MazeFurnishTask extends Task {
             Items.WHITE_TULIP, Items.PINK_TULIP, Items.LILY_OF_THE_VALLEY, Items.FLINT, Items.GRAVEL, Items.SAND, Items.TUFF,
             Items.GRANITE, Items.DIORITE, Items.ANDESITE, Items.COBBLED_DEEPSLATE, Items.CALCITE, Items.CLAY_BALL,
             Items.COBBLESTONE, Items.DIRT};
-    private boolean trimming; private int trimTicks, trimIdle;
+    private boolean trimming; private int trimTicks, trimIdle, trimClock;
+    private final Map<Item, Integer> thrownAt = new java.util.HashMap<>();
 
+    // Ostinato: run104. The first cut threw the first junk in list order (petals, gravel, diorite) at the bot's feet while it
+    // looked down mining; it picked them up 2s later and looped every ~3s, never reaching the 12 surplus cobblestone stacks
+    // (774 from three digs) that actually filled the bag. It also threw diorite the hub's polished_diorite x27 needed.
+    // Now: the item freeing the most slots goes first, thrown looking up so it lands clear; an item is not thrown again
+    // for 2 min (a re-pick cannot ping-pong); raw stone is kept for planned polished_* blocks.
     private boolean trimJunk(AltoClef mod) {
+        trimClock++;
         if (trimIdle > 0) { trimIdle--; return false; }
         if (mod.getPlayer().currentScreenHandler != mod.getPlayer().playerScreenHandler) return false;
         if (!adris.altoclef.util.helpers.StorageHelper.getItemStackInCursorSlot().isEmpty()) return false;
@@ -1268,26 +1275,37 @@ public class MazeFurnishTask extends Task {
         for (int i = 0; i < 36; i++) if (mod.getPlayer().getInventory().getStack(i).isEmpty()) free++;
         if (free <= 3) trimming = true;
         if (!trimming || free >= 6) { trimming = false; return false; }
-        if (++trimTicks % 5 != 0) return true;
+        mod.getPlayer().setPitch(-35f);
+        if (++trimTicks % 5 != 0 || !mod.getSlotHandler().canDoSlotAction()) return true;
         java.util.Set<String> fillIds = new java.util.HashSet<>();
         for (MazeFurnishPlan.Step st : plan.steps) if (st.kind() == MazeFurnishPlan.Kind.FILL) for (MazeFurnishPlan.Item it : st.contents()) fillIds.add(it.id());
+        adris.altoclef.util.slots.Slot best = null; Item bestItem = null; double bestSlots = 0; int bestKeep = 0, bestN = 0;
         for (Item it : JUNK) {
             String id = net.minecraft.registry.Registries.ITEM.getId(it).getPath();
             if (fillIds.contains(id)) continue;
+            Integer last = thrownAt.get(it);
+            if (last != null && trimClock - last < 2400) continue;
             int keep = (materials != null && materials.containsKey(id) ? stillNeeded(mod, it) : 0)
                     + (it == Items.COBBLESTONE ? 128 : it == Items.DIRT ? 64 : 0);
+            Item polished = McCompat.item("polished_" + id);
+            if (polished != null && materials != null && materials.containsKey("polished_" + id))
+                keep += Math.max(0, stillNeeded(mod, polished) - mod.getItemStorage().getItemCount(polished));
             int surplus = mod.getItemStorage().getItemCount(it) - keep;
             if (surplus <= 0) continue;
+            double slots = (double) surplus / new ItemStack(it).getMaxCount();
+            if (slots <= bestSlots) continue;
             for (adris.altoclef.util.slots.Slot slot : mod.getItemStorage().getSlotsWithItemPlayerInventory(false, it)) {
                 int n = adris.altoclef.util.helpers.StorageHelper.getItemStackInSlot(slot).getCount();
                 if (n <= 0 || n > surplus) continue;
-                System.out.println("MAZETEST FURNISH junk-drop " + id + " x" + n + " free=" + free + " keep=" + keep);
-                mod.getSlotHandler().clickSlot(slot, 1, net.minecraft.screen.slot.SlotActionType.THROW);
-                return true;
+                best = slot; bestItem = it; bestSlots = slots; bestKeep = keep; bestN = n;
+                break;
             }
         }
-        trimming = false; trimIdle = 200; // nothing left to drop; don't rescan every tick
-        return false;
+        if (best == null) { trimming = false; trimIdle = 200; return false; } // nothing left to drop; don't rescan every tick
+        System.out.println("MAZETEST FURNISH junk-drop " + net.minecraft.registry.Registries.ITEM.getId(bestItem).getPath() + " x" + bestN + " free=" + free + " keep=" + bestKeep);
+        mod.getSlotHandler().clickSlot(best, 1, net.minecraft.screen.slot.SlotActionType.THROW);
+        if (mod.getItemStorage().getItemCount(bestItem) - bestN - bestKeep < bestN) thrownAt.put(bestItem, trimClock);
+        return true;
     }
 
     // Ostinato: one natural stack for the barrel when the rolled loot was never gathered.

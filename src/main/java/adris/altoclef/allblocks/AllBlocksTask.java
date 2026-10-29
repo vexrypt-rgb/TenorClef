@@ -1011,6 +1011,14 @@ public class AllBlocksTask extends Task {
         if (placingCell < 0) {
             int n = progress.nextCell;
             while (progress.badCells.containsKey(n)) n++;
+            // A hole left by a block that went missing (its record was dropped) is filled before the grid grows.
+            java.util.Set<Integer> used = new java.util.HashSet<>(progress.placed.values());
+            for (int h = 0; h < progress.nextCell; h++) {
+                if (!used.contains(h) && !progress.badCells.containsKey(h)) {
+                    n = h;
+                    break;
+                }
+            }
             placingCell = repairs.getOrDefault(placingId, n);
         }
         BlockPos cell = AllBlocks.cellPos(origin, placingCell);
@@ -1019,7 +1027,8 @@ public class AllBlocksTask extends Task {
         BlockState cellState = mod.getWorld().getBlockState(cell);
         if (cellState.getBlock() == block) {
             progress.placed.put(e.id, placingCell);
-            if (repairs.remove(e.id) == null) progress.nextCell = Math.max(progress.nextCell, placingCell + 1);
+            repairs.remove(e.id);
+            progress.nextCell = Math.max(progress.nextCell, placingCell + 1);
             Debug.logMessage("ALLBLOCKS PLACED " + e.id + " in cell " + placingCell + " at " + cell.toShortString()
                     + " (placed " + progress.placed.size() + ")");
             placingId = null;

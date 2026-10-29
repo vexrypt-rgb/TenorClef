@@ -49,7 +49,7 @@ public class MazeFurnishTask extends Task {
     private int stuckRecoveries; // Ostinato: one wander+blacklist recovery before FAIL
     private boolean gathered;    // Ostinato: gather-once latch
     private boolean treesReplanted; private adris.altoclef.tasks.resources.ReplantTreesTask replantTask; // Ostinato: wood farm, once per room
-    private final java.util.Set<String> lootDone = new java.util.HashSet<>(); private String lootKey; private int lootTicks, lootWander; private boolean lootGathering; // Ostinato: loot at FILL
+    private final java.util.Set<String> lootDone = new java.util.HashSet<>(); private String lootKey; private int lootTicks, lootWander, lootHave, lootGainTick; private boolean lootGathering; // Ostinato: loot at FILL
     private String gatherKey;    // Ostinato: loot-only gather budget
     private int gatherTicks;
     private final java.util.Set<String> skipped = new java.util.HashSet<>();
@@ -979,15 +979,20 @@ public class MazeFurnishTask extends Task {
                     Item li = McCompat.item(it.id());
                     if (li == null || lootDone.contains(it.id()) || skipped.contains(it.id()) || NO_HUNT_LOOT.contains(it.id())) continue;
                     if (mod.getItemStorage().getItemCount(li) >= it.count() || !TaskCatalogue.obtainableNow(li)) { lootDone.add(it.id()); continue; }
-                    if (!it.id().equals(lootKey)) { lootKey = it.id(); lootTicks = 0; lootWander = 0; System.out.println("MAZETEST FURNISH loot-gather " + it.id() + " x" + it.count() + " have=" + mod.getItemStorage().getItemCount(li)); }
+                    if (!it.id().equals(lootKey)) { lootKey = it.id(); lootTicks = 0; lootWander = 0; lootHave = mod.getItemStorage().getItemCount(li); lootGainTick = 0; System.out.println("MAZETEST FURNISH loot-gather " + it.id() + " x" + it.count() + " have=" + mod.getItemStorage().getItemCount(li)); }
                     // Ostinato: run102. Room 2's paper hunt saw no sugar cane, so the chain fell back to TimeoutWanderTask and
                     // walked 97 blocks out (loot-skip at the leash), then the seeds were skipped from there and the bot walked
                     // back. Optional loot is only gathered from sources already in sight: 5s of wandering skips it.
                     boolean wandering = false;
                     for (Task t = getSub(); t != null; t = t.getSub()) if (t instanceof adris.altoclef.tasks.movement.TimeoutWanderTask) { wandering = true; break; }
                     lootWander = wandering ? lootWander + 1 : 0;
-                    if (++lootTicks > 3600 || homeDist(lootFeet) > GATHER_LEASH || lootWander > 100) {
-                        System.out.println("MAZETEST FURNISH loot-skip " + it.id() + " have=" + mod.getItemStorage().getItemCount(li) + "/" + it.count() + " ticks=" + lootTicks + " dist=" + homeDist(lootFeet) + (lootWander > 100 ? " why=none-seen" : ""));
+                    // Ostinato: run105. wheat_seeds ran the full 3 min beside the room for 2/7 (sparse grass). Optional loot
+                    // that has gained nothing for 1 min is skipped; the fill stores what is held plus fallback junk.
+                    int lootNow = mod.getItemStorage().getItemCount(li);
+                    if (lootNow > lootHave) { lootHave = lootNow; lootGainTick = lootTicks; }
+                    boolean noGain = lootTicks - lootGainTick > 1200;
+                    if (++lootTicks > 3600 || homeDist(lootFeet) > GATHER_LEASH || lootWander > 100 || noGain) {
+                        System.out.println("MAZETEST FURNISH loot-skip " + it.id() + " have=" + mod.getItemStorage().getItemCount(li) + "/" + it.count() + " ticks=" + lootTicks + " dist=" + homeDist(lootFeet) + (lootWander > 100 ? " why=none-seen" : noGain ? " why=no-gain" : ""));
                         lootDone.add(it.id());
                         continue;
                     }

@@ -839,8 +839,11 @@ public class MazeFurnishTask extends Task {
                 // Ostinato: run96. The builder timed out (15s each) on 29 of room 2's cells with a block above (walls, inner
                 // pipes), then the second pass placed them direct (run92: 79 of 84 deferred cells). A light cell under a solid
                 // block goes direct first; the builder keeps the floor cells, where it ran 56 lights in 4 min.
-                boolean direct = openBelow(mod, pos) || (step.kind() == MazeFurnishPlan.Kind.LIGHT
-                        && (secondPass && deferred.contains(index) || !openAbove(mod, pos)));
+                // Ostinato: run97. It did not: room 1's 18 floor cells at y=90 all timed out (15s each). Baritone's GoalBreak
+                // refuses a stand above the block (goalBreakFromAbove is off), so a floor cell under open room air has its
+                // only break stands inside the solid floor; the builder dug down, fell in and wandered. Every full-block light
+                // goes direct now; the ring stand never stands on the target, and wall cells placed in ~1s each that way.
+                boolean direct = openBelow(mod, pos) || step.kind() == MazeFurnishPlan.Kind.LIGHT;
                 if (have.length > 0 && direct && !thinLight(have)) {
                     // Ostinato: run91. A fresh task each restart of the tree (~1s) reset its bad-stand and walk timers, so an
                     // unreachable stand was walked at until the 30s stuck-defer. Keep one task per cell.
@@ -999,13 +1002,6 @@ public class MazeFurnishTask extends Task {
             if (fluid == net.minecraft.fluid.Fluids.LAVA || fluid == net.minecraft.fluid.Fluids.FLOWING_LAVA) return true;
         }
         return false;
-    }
-
-    // Ostinato: run96. True when the cell above the place target is open (a floor cell the builder places from above).
-    private static boolean openAbove(AltoClef mod, BlockPos pos) {
-        BlockPos above = pos.up();
-        BlockState s = mod.getWorld().getBlockState(above);
-        return s.isAir() || s.getCollisionShape(mod.getWorld(), above).isEmpty();
     }
 
     // Ostinato: true when the cell under the place target is open room air (interior ceiling).

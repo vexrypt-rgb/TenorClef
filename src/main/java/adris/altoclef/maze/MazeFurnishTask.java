@@ -472,6 +472,12 @@ public class MazeFurnishTask extends Task {
     // mining iron_ore and equipped nothing (skip-armor). Copper ore is far more common. Iron where copper does not exist.
     private static final Item[] KIT_ARMOR = McCompat.item("copper_helmet") == null ? IRON_ARMOR : new Item[]{McCompat.item("copper_helmet"),
             McCompat.item("copper_chestplate"), McCompat.item("copper_leggings"), McCompat.item("copper_boots")};
+    // Ostinato: run99. The first kit piece (helmet, chestplate, leggings, boots) whose slot holds neither it nor iron.
+    private static Item nextKitPiece() {
+        for (int i = 0; i < KIT_ARMOR.length; i++)
+            if (!adris.altoclef.util.helpers.StorageHelper.isArmorEquipped(KIT_ARMOR[i], IRON_ARMOR[i])) return KIT_ARMOR[i];
+        return null;
+    }
     private static final Item[] KEEP = {Items.BREAD, Items.COOKED_BEEF, Items.COOKED_PORKCHOP, Items.COOKED_CHICKEN, Items.COOKED_MUTTON, Items.COOKED_RABBIT, Items.COOKED_COD, Items.COOKED_SALMON, Items.BAKED_POTATO, Items.APPLE, Items.CARROT, Items.WOODEN_PICKAXE, Items.STONE_PICKAXE, Items.IRON_PICKAXE, Items.DIAMOND_PICKAXE, Items.SHIELD}; // Ostinato
     // Ostinato: run60. Fill-only loot that needs a long hunt (cobwebs/spiders). Used from inventory only, never gathered.
     private static final java.util.Set<String> NO_HUNT_LOOT = java.util.Set.of("string");
@@ -556,10 +562,13 @@ public class MazeFurnishTask extends Task {
         // Ostinato: run39 iron armor blocked lights ~11 min (40 unreachable iron_ore tries) and was rebuilt after a drown.
         // Armor is optional: only before the place phase, only on the first life, 3 min budget.
         // Ostinato: run40 audit. Never mine iron for armor on an empty stomach (food < 6); food comes first.
-        else if (food >= 6 && !armorGaveUp && !gathered && !died && !adris.altoclef.util.helpers.StorageHelper.isArmorEquippedAll(IRON_ARMOR)
-                && !adris.altoclef.util.helpers.StorageHelper.isArmorEquippedAll(KIT_ARMOR)) {
-            if (++armorTicks > 3600) { System.out.println("MAZETEST FURNISH skip-armor"); armorGaveUp = true; step = "ready"; t = null; }
-            else { step = KIT_ARMOR == IRON_ARMOR ? "iron_armor" : "copper_armor"; t = new adris.altoclef.tasks.misc.EquipArmorTask(KIT_ARMOR); }
+        // Ostinato: run99. The whole copper set was one EquipArmorTask: 24 ingots planned up front, nothing worn until all
+        // four pieces existed, and each room's 3-min budget ran out mid-smelt (skip-armor in runs 98 and 99). One piece at a
+        // time now, helmet first; a finished piece is worn at once and the next room's budget starts on the next piece.
+        else if (food >= 6 && !armorGaveUp && !gathered && !died && nextKitPiece() != null) {
+            Item piece = nextKitPiece();
+            if (++armorTicks > 3600) { System.out.println("MAZETEST FURNISH skip-armor next=" + net.minecraft.registry.Registries.ITEM.getId(piece).getPath()); armorGaveUp = true; step = "ready"; t = null; }
+            else { step = net.minecraft.registry.Registries.ITEM.getId(piece).getPath(); t = new adris.altoclef.tasks.misc.EquipArmorTask(piece); }
         }
         else { step = "ready"; t = null; }
         if (!step.equals(lastKit)) {

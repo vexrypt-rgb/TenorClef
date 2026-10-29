@@ -422,6 +422,7 @@ public class MazeFurnishTask extends Task {
     // Ostinato: run92 room 3 FAIL 3 cells short after one repair round. A skip on the stuck path moved index past the end
     // outside the step loop, so isFinished() was true before the next tick could run the sweep: rounds 2-3 never ran.
     private boolean repairDone;
+    private final java.util.Map<String, Integer> stepRegather = new java.util.HashMap<>(); // Ostinato: run94
     private boolean repairOpen; // Ostinato: run93, seal cells may be broken to reach interior repairs
     private final java.util.Set<BlockPos> sealCells = new java.util.HashSet<>();
 
@@ -771,6 +772,15 @@ public class MazeFurnishTask extends Task {
                         // room's own walls, light 97 -> 89).
                         int missing = stillMissing(mod, id);
                         if (missing <= 0) continue;
+                        // Ostinato: run94. The barrel was skipped by the pre-gather budget, so this regather flipped gathered,
+                        // the pre-gather loop skipped it and flipped it back, every tick (log spam, and the step's placing budget
+                        // never ran): an unbounded barrel hunt 282 blocks out. A skipped item gets one 3-min step regather.
+                        if (skipped.contains(id)) {
+                            int rt = stepRegather.merge(id, 1, Integer::sum);
+                            if (rt == 1) System.out.println("MAZETEST FURNISH regather-skipped " + id + " x" + missing);
+                            if (rt > 3600) { if (rt == 3601) System.out.println("MAZETEST FURNISH regather-giveup " + id); continue; }
+                            return TaskCatalogue.getItemTask(b.asItem(), missing);
+                        }
                         if (gathered) System.out.println("MAZETEST FURNISH regather " + id + " x" + missing);
                         hidePlacedCladding(mod, id);
                         gathered = false;

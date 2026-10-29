@@ -384,6 +384,7 @@ public class MazeFurnishTask extends Task {
         // later used as a bad stand; nothing revisited it, so verify saw air (light 132/133). Before handing back,
         // re-check every planned LIGHT/CONTAINER/SEAL cell and re-place any that are air or wrong (skipped, dug through,
         // or broken while placing seals/lights) with the direct stand-and-click task. Up to 3 sweeps.
+        if (work != null && index >= work.size() && repairRounds >= 3) repairDone = true;
         if (work != null && index >= work.size() && repairRounds < 3) {
             java.util.List<Integer> wrong = new java.util.ArrayList<>();
             StringBuilder cells = new StringBuilder();
@@ -401,12 +402,16 @@ public class MazeFurnishTask extends Task {
                 return null;
             }
             if (repairRounds > 0 && !repairCleanLogged) { repairCleanLogged = true; System.out.println("MAZETEST FURNISH repair-sweep clean rounds=" + repairRounds); }
+            repairDone = true;
         }
         return null;
     }
 
     private MazeCeilingPlaceTask ceilTask; private Block[] ceilHave; // Ostinato: run91
     private int repairRounds; private boolean repairCleanLogged; // Ostinato: run62
+    // Ostinato: run92 room 3 FAIL 3 cells short after one repair round. A skip on the stuck path moved index past the end
+    // outside the step loop, so isFinished() was true before the next tick could run the sweep: rounds 2-3 never ran.
+    private boolean repairDone;
 
     // Ostinato: run62. Pure check (no side effects) that a planned cell is missing or holds the wrong block.
     private boolean cellWrong(AltoClef mod, MazeFurnishPlan.Step step) {
@@ -651,11 +656,22 @@ public class MazeFurnishTask extends Task {
     private static final java.util.Set<String> SURFACE_GAVE_UP = new java.util.HashSet<>();
     private static final int SURFACE_BUDGET = 6000;
     private String surfaceKey(String key) { return plan.summary + "|" + key; }
+    private int surfaceBestY = Integer.MIN_VALUE, surfaceBestT; private String surfaceBestKey; // Ostinato: run92
     private Task surfaceOrGiveUp(AltoClef mod, BlockPos feet, String key, int count) {
         String k = surfaceKey(key);
         if (SURFACE_GAVE_UP.contains(k)) return null;
         int t = SURFACE_TICKS.merge(k, 1, Integer::sum);
         if (t == 1 || t % 1200 == 0) System.out.println("MAZETEST FURNISH surface-for " + key + " x" + count + " ticks=" + t + "/" + SURFACE_BUDGET + " " + woodInv(mod) + " feet=" + feet.toShortString());
+        // Ostinato: run92. "Surfacing for barrel" sat at one spot (y82) for the whole 5-min budget. No height gained in 60s
+        // means the climb cannot work from here: give up now and gather in place. Logs what is overhead.
+        if (!k.equals(surfaceBestKey)) { surfaceBestKey = k; surfaceBestY = Integer.MIN_VALUE; }
+        if (surfaceBestY == Integer.MIN_VALUE || feet.getY() > surfaceBestY) { surfaceBestY = feet.getY(); surfaceBestT = t; }
+        if (t - surfaceBestT > 1200) {
+            StringBuilder above = new StringBuilder();
+            for (int dy = 2; dy <= 5; dy++) { BlockPos p = feet.up(dy); above.append(net.minecraft.registry.Registries.BLOCK.getId(mod.getWorld().getBlockState(p).getBlock()).getPath()).append(plannedCells.contains(p) ? "(planned)" : "").append(' '); }
+            System.out.println("MAZETEST FURNISH surface-stalled " + key + " y=" + feet.getY() + " above=" + above + "sky=" + mod.getWorld().isSkyVisible(feet.up()));
+            t = SURFACE_BUDGET + 1;
+        }
         if (t > SURFACE_BUDGET) {
             System.out.println("MAZETEST FURNISH surface-giveup " + key + " gather-in-place ticks=" + t + " " + woodInv(mod) + " feet=" + feet.toShortString());
             SURFACE_GAVE_UP.add(k);
@@ -1056,7 +1072,7 @@ public class MazeFurnishTask extends Task {
 
     @Override
     public boolean isFinished() {
-        return materials != null && work != null && index >= work.size();
+        return materials != null && work != null && index >= work.size() && repairDone;
     }
 
     @Override

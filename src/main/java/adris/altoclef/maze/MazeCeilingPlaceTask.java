@@ -43,6 +43,7 @@ public class MazeCeilingPlaceTask extends Task {
     private int thereTicks; // Ostinato: run58
 
     private int walkTicks; private BlockPos walkStand; // Ostinato: run90
+    private double walkBest; private int walkIdle; // Ostinato: run97 walk progress toward the stand
     private BlockPos equipLogged; // Ostinato: run89 diagnostic, once per cell
     private int refusedClicks; private boolean nudging; // Ostinato: run93 refused place clicks / re-centering on the stand
 
@@ -93,9 +94,15 @@ public class MazeCeilingPlaceTask extends Task {
             arrived = false;
             // Ostinato: run90. A stand inside a sealed room cannot be pathed to; it was walked at forever. 30s per stand.
             // (walkStand, not going: onStart clears going whenever the task tree is restarted.)
-            if (!stand.equals(walkStand)) { walkStand = stand; walkTicks = 0; }
-            if (++walkTicks > 600) {
-                System.out.println("MAZETEST FURNISH ceiling-unreachable-stand " + stand.toShortString() + " for " + target.toShortString());
+            if (!stand.equals(walkStand)) { walkStand = stand; walkTicks = 0; walkBest = Double.MAX_VALUE; walkIdle = 0; }
+            // Ostinato: run97. -21,95,-20 and -19,95,-20 (pipes room) never reached their stands, and the 30s cap tied the
+            // furnish stuck-defer (also 30s), so no other stand was tried before the defer. A walk that gains less than
+            // half a block in 12s drops the stand now, leaving time for the side and ring stands.
+            double dist = Math.sqrt(mod.getPlayer().getPos().squaredDistanceTo(Vec3d.ofBottomCenter(stand)));
+            if (dist < walkBest - 0.5) { walkBest = dist; walkIdle = 0; } else walkIdle++;
+            if (++walkTicks > 600 || walkIdle > 240) {
+                System.out.println("MAZETEST FURNISH ceiling-unreachable-stand " + stand.toShortString() + " for " + target.toShortString()
+                        + (walkIdle > 240 ? " no-progress dist=" + String.format("%.1f", dist) : ""));
                 badStands.add(stand); going = null; walkStand = null;
                 return stay("New stand for " + target.toShortString());
             }

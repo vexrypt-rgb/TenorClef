@@ -588,6 +588,12 @@ public class MazeFurnishTask extends Task {
     private boolean needsSurface(AltoClef mod, BlockPos feet, String key) {
         int surfaceY = mod.getWorld().getTopY(net.minecraft.world.Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, feet.getX(), feet.getZ());
         if (surfaceY <= 0) return false;
+        // Ostinato: run98. 3 planks short for the barrel at y=87, "Surfacing for barrel" yo-yoed with the gather for 2.5 min
+        // until surface-giveup; the in-place gather then had its log within ~5s. A reachable log the scanner already
+        // knows near the bot is mined from here (CollectPlanksTask mines logs only); the climb is for when none is known.
+        if (mod.getBlockScanner().getNearestBlock(net.minecraft.util.math.Vec3d.ofCenter(feet), adris.altoclef.util.helpers.WorldHelper::canReach,
+                adris.altoclef.util.helpers.ItemHelper.itemsToBlocks(adris.altoclef.util.helpers.ItemHelper.LOG))
+                .map(p -> p.isWithinDistance(feet, 32)).orElse(false)) return false;
         int solid = 0;
         for (int dy = 2; dy <= 6; dy++) {
             BlockPos p = feet.up(dy);

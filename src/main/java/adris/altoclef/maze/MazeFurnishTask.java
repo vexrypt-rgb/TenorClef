@@ -127,7 +127,7 @@ public class MazeFurnishTask extends Task {
         // Protecting every solid cell also protected the stone and dirt the ceiling pass has to mine
         // (8 cells sat on "Mining ceiling" until skip, light 125/133). A finished seal stays protected.
         AltoClef.getInstance().getBehaviour().avoidBlockBreaking(p -> plannedCells.contains(p) && isSolidCell(p) && cellMatchesPlan(p) && !(repairOpen && sealCells.contains(p)));
-        MazeRooms.begin(airCells, plannedCells); // Ostinato: run101, earlier rooms are off limits to gathers and paths
+        MazeRooms.begin(airCells, plannedCells, sealCells); // Ostinato: run101, earlier rooms are off limits to gathers and paths
         AltoClef.getInstance().getBehaviour().avoidBlockBreaking(MazeRooms::isProtected);
         AltoClef.getInstance().getBehaviour().addProtectedItems(IRON_ARMOR);
         AltoClef.getInstance().getBehaviour().addProtectedItems(KIT_ARMOR);
@@ -145,6 +145,7 @@ public class MazeFurnishTask extends Task {
         BlockPos feet = mod.getPlayer().getBlockPos();
         if (failed) return null;
         traceWoodSpend(mod);
+        if (trimJunk(mod)) { setDebugState("Dropping junk"); return null; } // Ostinato: run102
         int sig = 0;
         for (int i = 0; i < mod.getPlayer().getInventory().size(); i++) { net.minecraft.item.ItemStack st = mod.getPlayer().getInventory().getStack(i); sig = sig * 31 + st.getCount() * 7 + net.minecraft.registry.Registries.ITEM.getRawId(st.getItem()); }
         // Ostinato: run99. The copper kit stood at its furnace on "Waiting..." while 11 raw copper smelted: the inventory does
@@ -1231,6 +1232,49 @@ public class MazeFurnishTask extends Task {
             if (!blocks(s.blockIds()).contains(st.getBlock())) need++;
         }
         return need;
+    }
+
+    // Ostinato: run102. Room 3 (hub, on snow) sat 16 min on "Gathering barrel": all 36 slots were full (14 stacks of
+    // snowballs from the shovel clearing snow, 10 of cobblestone from three digs), so mined logs and crafted planks stayed
+    // on the ground ("Failed to pick up drop") and the craft lost them (wood 40 -> 8). EnsureFreeInventorySlotTask throws one
+    // stack at the bot's feet and it is picked straight back up. With 3 or fewer free slots, throw whole stacks the room does
+    // not need (snow, flowers, loose stone; cobble past 2 stacks, dirt past 1, on top of what the plan still wants) until 6
+    // are free. Fill loot and anything the plan places are kept.
+    private static final Item[] JUNK = {Items.SNOWBALL, Items.PINK_PETALS, Items.DANDELION, Items.POPPY, Items.AZURE_BLUET,
+            Items.OXEYE_DAISY, Items.CORNFLOWER, Items.ALLIUM, Items.BLUE_ORCHID, Items.RED_TULIP, Items.ORANGE_TULIP,
+            Items.WHITE_TULIP, Items.PINK_TULIP, Items.LILY_OF_THE_VALLEY, Items.FLINT, Items.GRAVEL, Items.SAND, Items.TUFF,
+            Items.GRANITE, Items.DIORITE, Items.ANDESITE, Items.COBBLED_DEEPSLATE, Items.CALCITE, Items.CLAY_BALL,
+            Items.COBBLESTONE, Items.DIRT};
+    private boolean trimming; private int trimTicks, trimIdle;
+
+    private boolean trimJunk(AltoClef mod) {
+        if (trimIdle > 0) { trimIdle--; return false; }
+        if (mod.getPlayer().currentScreenHandler != mod.getPlayer().playerScreenHandler) return false;
+        if (!adris.altoclef.util.helpers.StorageHelper.getItemStackInCursorSlot().isEmpty()) return false;
+        int free = 0;
+        for (int i = 0; i < 36; i++) if (mod.getPlayer().getInventory().getStack(i).isEmpty()) free++;
+        if (free <= 3) trimming = true;
+        if (!trimming || free >= 6) { trimming = false; return false; }
+        if (++trimTicks % 5 != 0) return true;
+        java.util.Set<String> fillIds = new java.util.HashSet<>();
+        for (MazeFurnishPlan.Step st : plan.steps) if (st.kind() == MazeFurnishPlan.Kind.FILL) for (MazeFurnishPlan.Item it : st.contents()) fillIds.add(it.id());
+        for (Item it : JUNK) {
+            String id = net.minecraft.registry.Registries.ITEM.getId(it).getPath();
+            if (fillIds.contains(id)) continue;
+            int keep = (materials != null && materials.containsKey(id) ? stillNeeded(mod, it) : 0)
+                    + (it == Items.COBBLESTONE ? 128 : it == Items.DIRT ? 64 : 0);
+            int surplus = mod.getItemStorage().getItemCount(it) - keep;
+            if (surplus <= 0) continue;
+            for (adris.altoclef.util.slots.Slot slot : mod.getItemStorage().getSlotsWithItemPlayerInventory(false, it)) {
+                int n = adris.altoclef.util.helpers.StorageHelper.getItemStackInSlot(slot).getCount();
+                if (n <= 0 || n > surplus) continue;
+                System.out.println("MAZETEST FURNISH junk-drop " + id + " x" + n + " free=" + free + " keep=" + keep);
+                mod.getSlotHandler().clickSlot(slot, 1, net.minecraft.screen.slot.SlotActionType.THROW);
+                return true;
+            }
+        }
+        trimming = false; trimIdle = 200; // nothing left to drop; don't rescan every tick
+        return false;
     }
 
     // Ostinato: one natural stack for the barrel when the rolled loot was never gathered.

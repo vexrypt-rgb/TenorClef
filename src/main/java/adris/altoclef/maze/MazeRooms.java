@@ -27,8 +27,12 @@ public final class MazeRooms {
     private MazeRooms() {}
 
     /** The room being furnished: registered for later, and left open to its own furnisher until {@link #end()}. */
-    public static void begin(Set<BlockPos> airCells, Set<BlockPos> plannedCells) {
-        Set<BlockPos> box = airCells.isEmpty() ? plannedCells : airCells;
+    public static void begin(Set<BlockPos> airCells, Set<BlockPos> plannedCells, Set<BlockPos> sealCells) {
+        // Ostinato: run102. The carved cells alone gave y 89..94 for a room at y 88..94: the floor cladding (planned, y 89)
+        // sits under the lowest carved cell, so the shell below it was left out. The box spans carved and planned cells
+        // (the seal shaft above the room excluded) plus the one-block shell around them.
+        Set<BlockPos> box = new java.util.HashSet<>(airCells);
+        for (BlockPos p : plannedCells) if (!sealCells.contains(p)) box.add(p);
         if (box.isEmpty()) return;
         int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, minZ = Integer.MAX_VALUE;
         int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE, maxZ = Integer.MIN_VALUE;

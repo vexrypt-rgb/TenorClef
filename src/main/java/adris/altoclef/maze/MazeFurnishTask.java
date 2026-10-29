@@ -58,6 +58,10 @@ public class MazeFurnishTask extends Task {
     private int foodCooldown;   // Ostinato: ticks after skip-food before a starve retry
     private boolean foodGaveUp; // Ostinato
     private String surfacedFor; // Ostinato: wood gather already reached open air
+    private String woodFor;     // Ostinato: run94 last pooled wood trip owner (log once)
+    // Ostinato: run94. Items whose wood was in hand once. The craft then spends it (table placed, planks -> slabs), so a
+    // live "has wood" check would read short mid-craft and restart the wood trip; the craft budget bounds them instead.
+    private final java.util.Set<String> woodReady = new java.util.HashSet<>();
 
     // Ostinato: wood-derived items whose recipe chain bottoms out in logs.
     private static boolean isWoody(String id) {
@@ -249,12 +253,7 @@ public class MazeFurnishTask extends Task {
                     }
                     satisfied.add(need.getKey()); continue;
                 }
-                Task home = returnHome(mod, feet, need.getKey()); // Ostinato: run52 gather near the room
-                if (home != null) return home;
-                if (needsSurface(mod, feet, need.getKey())) return surfaceClimb(mod, feet, need.getKey());
-                Task leash = gatherLeash(mod, feet, need.getKey(), true); if (leash != null) return leash; // Ostinato: run66
-                setDebugState("Gathering any planks x" + pooled + " (for " + need.getKey() + ")");
-                return new adris.altoclef.tasks.resources.CollectPlanksTask(pooled);
+                return pooledWoodGather(mod, feet, need.getKey(), Math.max(pooled, pooledWoodNeed(mod))); // Ostinato: run94
             }
             Item item = McCompat.item(need.getKey());
             if (item != null && mod.getItemStorage().getItemCount(item) >= need.getValue()) { satisfied.add(need.getKey()); continue; }
@@ -278,6 +277,17 @@ public class MazeFurnishTask extends Task {
                 // (y27-40, light 0/133). Non-cladding woody items (barrel/chest/bowl) get a 6 min budget, surfacing included;
                 // past it the item is skipped so lights/seal start and the CONTAINER step defers/skips instead.
                 boolean woodyExtra = isWoody(need.getKey()) && !isCladding(need.getKey());
+                // Ostinato: run94. Without the wood for this craft, do the shared leashed planks trip first; it is the
+                // cladding's wood trip too, so it does not spend this item's 6-min craft budget or its leash skip.
+                int missingCount = need.getValue() - mod.getItemStorage().getItemCount(item);
+                if (woodyExtra && !lootOnly(need.getKey()) && !woodReady.contains(need.getKey())) {
+                    if (hasWoodFor(mod, need.getKey(), missingCount)) woodReady.add(need.getKey());
+                }
+                if (woodyExtra && !lootOnly(need.getKey()) && !woodReady.contains(need.getKey())) {
+                    int pooled = Math.max(planksFor(mod, need.getKey(), missingCount), pooledWoodNeed(mod));
+                    if (!need.getKey().equals(woodFor)) { woodFor = need.getKey(); System.out.println("MAZETEST FURNISH wood-pool for=" + woodFor + " planks=" + pooled + " " + woodInv(mod)); }
+                    return pooledWoodGather(mod, feet, need.getKey(), pooled);
+                }
                 if (lootOnly(need.getKey()) || woodyExtra) {
                     if (!need.getKey().equals(gatherKey)) { gatherKey = need.getKey(); gatherTicks = 0; }
                     // Ostinato: run52. book/paper hunts dragged the bot ~350 blocks from the room into a flooded cave before the
@@ -296,6 +306,7 @@ public class MazeFurnishTask extends Task {
                     if (++gatherTicks > (woodyExtra && !lootOnly(need.getKey()) ? 7200 : 3600)) {
                         System.out.println("MAZETEST FURNISH skip-loot " + need.getKey() + " have=" + mod.getItemStorage().getItemCount(item) + "/" + need.getValue());
                         skipped.add(need.getKey());
+                        woodReady.remove(need.getKey()); // Ostinato: run94 the step regather re-checks the wood
                         continue;
                     }
                 }
@@ -316,7 +327,8 @@ public class MazeFurnishTask extends Task {
                 }
                 if (!lootOnly(need.getKey())) { Task home = returnHome(mod, feet, need.getKey()); if (home != null) return home; } // Ostinato: run52
                 // Ostinato: run65/66. After the one-shot return the gather was unbounded (book/barrel/planks drifted 65-100+ blocks).
-                if (homeDist(feet) > leashFor(need.getKey())) {
+                // Ostinato: run94. A woody extra reaching here holds its wood and crafts in place; distance does not matter.
+                if (homeDist(feet) > leashFor(need.getKey()) && !(woodyExtra && woodReady.contains(need.getKey()))) {
                     if (!isCladding(need.getKey())) { System.out.println("MAZETEST FURNISH skip-gather " + need.getKey() + " why=leash dist=" + homeDist(feet)); skipped.add(need.getKey()); continue; }
                     Task leash = gatherLeash(mod, feet, need.getKey(), false); if (leash != null) return leash;
                 }
@@ -699,12 +711,65 @@ public class MazeFurnishTask extends Task {
         return "inv planks=" + planks + " logs=" + logs + " sticks=" + mod.getItemStorage().getItemCount(Items.STICK);
     }
     // Ostinato: run55. Planks a woody item needs: sticks are 4 per 2 planks; other crafts keep the 8-per-item budget.
+    // Ostinato: run94. Per recipe now: the flat 8 left a barrel (6 planks + 2 slabs = 9) with no crafting table 5 planks
+    // short, so its own gather hunted logs/slabs far from the room. A 3x3 craft also pays 4 for the table when none is held.
+    private static int recipePlanks(String key, int count) {
+        int n = Math.max(1, count);
+        switch (key) {
+            case "stick": return 2 * ((n + 3) / 4);
+            case "crafting_table": return 4 * n;
+            case "barrel": return 6 * n + 3 * ((2 * n + 5) / 6);
+            case "chest": return 8 * n;
+            case "bowl": return 3 * ((n + 3) / 4);
+            default:
+                if (key.endsWith("_planks")) return n;
+                if (key.endsWith("_slab")) return 3 * ((n + 5) / 6);
+                return 8 * n;
+        }
+    }
+    private static boolean needsTable(String key) {
+        return key.equals("barrel") || key.equals("chest") || key.equals("bowl") || key.endsWith("_slab");
+    }
+    private static int planksFor(AltoClef mod, String key, int count) {
+        return recipePlanks(key, count) + (needsTable(key) && !mod.getItemStorage().hasItem(Items.CRAFTING_TABLE) ? 4 : 0);
+    }
     private static boolean hasWoodFor(AltoClef mod, String key, int count) {
-        int need = key.equals("stick") ? 2 * ((Math.max(1, count) + 3) / 4) : 8 * Math.max(1, count);
-        int planks = 0;
-        for (Item i : adris.altoclef.util.helpers.ItemHelper.PLANKS) planks += mod.getItemStorage().getItemCount(i);
+        return heldWood(mod) >= planksFor(mod, key, count);
+    }
+    private static int heldWood(AltoClef mod) {
+        int planks = heldPlanks(mod);
         for (Item i : adris.altoclef.util.helpers.ItemHelper.LOG) planks += 4 * mod.getItemStorage().getItemCount(i);
-        return planks >= need;
+        return planks;
+    }
+    // Ostinato: run94. A woody item the gather loop still has to craft (barrel, chest, crafting table; not loot, not cladding).
+    private boolean woodyExtra(String key) {
+        return isWoody(key) && !isCladding(key) && !lootOnly(key) && !skipped.contains(key) && !satisfied.contains(key);
+    }
+    // Ostinato: run94. Planks for one pooled wood trip: the wrong wood cladding cells plus every woody extra still to craft,
+    // with the crafting table counted once.
+    private int pooledWoodNeed(AltoClef mod) {
+        int n = 0; boolean table = false;
+        for (Map.Entry<String, Integer> e : materials.entrySet()) {
+            if (!woodyExtra(e.getKey())) continue;
+            Item it = McCompat.item(e.getKey());
+            int missing = Math.min(e.getValue() - (it == null ? 0 : mod.getItemStorage().getItemCount(it)), stillMissing(mod, e.getKey()));
+            if (missing <= 0) continue;
+            n += recipePlanks(e.getKey(), missing);
+            table |= needsTable(e.getKey());
+        }
+        if (table && !mod.getItemStorage().hasItem(Items.CRAFTING_TABLE)) n += 4;
+        return n + Math.max(0, plankCladdingMissing(mod));
+    }
+    // Ostinato: run94. The barrel was the first wood item with 0 wood held: its own gather surfaced, chased a log/slab 97
+    // blocks out and was skipped at the first leash breach, so CONTAINER/FILL could not pass. Woody extras and wood cladding
+    // now share one leashed planks trip from the room (any log, nearest to home); the crafts then run from held planks.
+    private Task pooledWoodGather(AltoClef mod, BlockPos feet, String key, int pooled) {
+        Task home = returnHome(mod, feet, "wood-" + key); // Ostinato: run52 gather near the room; the craft keeps its own return
+        if (home != null) return home;
+        if (needsSurface(mod, feet, key)) { Task climb = surfaceOrGiveUp(mod, feet, key, pooled); if (climb != null) return climb; }
+        Task leash = gatherLeash(mod, feet, "wood", true); if (leash != null) return leash; // Ostinato: run66, shared widening
+        setDebugState("Gathering any planks x" + pooled + " (for " + key + ")");
+        return new adris.altoclef.tasks.resources.CollectPlanksTask(pooled);
     }
 
     private int surfaceStuckLimit() {
@@ -772,6 +837,10 @@ public class MazeFurnishTask extends Task {
                         // room's own walls, light 97 -> 89).
                         int missing = stillMissing(mod, id);
                         if (missing <= 0) continue;
+                        // Ostinato: run94. A woody craft without its wood takes the leashed planks trip from the room first
+                        // (the barrel's own gather chased slabs/logs 97-282 blocks out).
+                        if (isWoody(id) && hasWoodFor(mod, id, missing)) woodReady.add(id);
+                        boolean needWood = isWoody(id) && !woodReady.contains(id);
                         // Ostinato: run94. The barrel was skipped by the pre-gather budget, so this regather flipped gathered,
                         // the pre-gather loop skipped it and flipped it back, every tick (log spam, and the step's placing budget
                         // never ran): an unbounded barrel hunt 282 blocks out. A skipped item gets one 3-min step regather.
@@ -779,12 +848,12 @@ public class MazeFurnishTask extends Task {
                             int rt = stepRegather.merge(id, 1, Integer::sum);
                             if (rt == 1) System.out.println("MAZETEST FURNISH regather-skipped " + id + " x" + missing);
                             if (rt > 3600) { if (rt == 3601) System.out.println("MAZETEST FURNISH regather-giveup " + id); continue; }
-                            return TaskCatalogue.getItemTask(b.asItem(), missing);
+                            return needWood ? pooledWoodGather(mod, mod.getPlayer().getBlockPos(), id, planksFor(mod, id, missing)) : TaskCatalogue.getItemTask(b.asItem(), missing);
                         }
                         if (gathered) System.out.println("MAZETEST FURNISH regather " + id + " x" + missing);
                         hidePlacedCladding(mod, id);
                         gathered = false;
-                        return TaskCatalogue.getItemTask(b.asItem(), missing);
+                        return needWood ? pooledWoodGather(mod, mod.getPlayer().getBlockPos(), id, planksFor(mod, id, missing)) : TaskCatalogue.getItemTask(b.asItem(), missing);
                     }
                     return null;
                 }

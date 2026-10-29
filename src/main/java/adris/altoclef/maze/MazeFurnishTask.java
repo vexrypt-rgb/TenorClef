@@ -557,7 +557,9 @@ public class MazeFurnishTask extends Task {
         }
         else { step = "ready"; t = null; }
         if (!step.equals(lastKit)) {
-            System.out.println("MAZETEST FURNISH kit " + step + " food=" + food);
+            // Ostinato: run98. Provisioned wood (38 planks-equivalent) was down to planks=6 logs=0 when the copper kit ended,
+            // and nothing logged where it went. Print the wood held at every kit step change.
+            System.out.println("MAZETEST FURNISH kit " + step + " food=" + food + " " + woodInv(mod));
             lastKit = step;
         }
         if (t != null) setDebugState("Kit " + step);

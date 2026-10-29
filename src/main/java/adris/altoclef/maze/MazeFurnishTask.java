@@ -49,6 +49,7 @@ public class MazeFurnishTask extends Task {
     private int stuckRecoveries; // Ostinato: one wander+blacklist recovery before FAIL
     private boolean gathered;    // Ostinato: gather-once latch
     private boolean treesReplanted; private adris.altoclef.tasks.resources.ReplantTreesTask replantTask; // Ostinato: wood farm, once per room
+    private int plankRegatherLogged = -1; private String gatheredLogged; // Ostinato: run105
     private final java.util.Set<String> lootDone = new java.util.HashSet<>(); private String lootKey; private int lootTicks, lootWander, lootHave, lootGainTick; private boolean lootGathering; // Ostinato: loot at FILL
     private String gatherKey;    // Ostinato: loot-only gather budget
     private int gatherTicks;
@@ -355,7 +356,7 @@ public class MazeFurnishTask extends Task {
                 return TaskCatalogue.getItemTask(item, need.getValue());
             }
         }
-        if (!gathered) System.out.println("MAZETEST FURNISH gathered skipped=" + skipped);
+        if (!gathered && !skipped.toString().equals(gatheredLogged)) { gatheredLogged = skipped.toString(); System.out.println("MAZETEST FURNISH gathered skipped=" + skipped); } // Ostinato: run105 once per change
         gathered = true;
         if (fill != null && fill.isFinished()) { fill = null; index++; } // Ostinato: run58
         if (fill != null) {
@@ -664,6 +665,7 @@ public class MazeFurnishTask extends Task {
     private boolean foodDeferred; // Ostinato: run57
     // Ostinato: run66. Hard gather leash with hysteresis for every furnish gather (not once per item like returnHome).
     private static final int GATHER_LEASH = 96;
+    private static final int LOOT_LEASH = 32; // Ostinato: run105 optional FILL loot stays beside the room
     private int homeTicks, leashTicks, leashTrips;
     private Task leashHome;
     // Ostinato: run88. Oak within 96 of the room was chopped out: 5 trips walked home to 56 and straight back out to the same
@@ -913,7 +915,9 @@ public class MazeFurnishTask extends Task {
                             if (pooled <= 0) continue;
                             // Ostinato: run48. Held planks already cover the wrong cells; never re-gather (that loop was the stall).
                             if (heldPlanks(mod) >= pooled) continue;
-                            if (gathered) System.out.println("MAZETEST FURNISH regather any_planks x" + pooled + " for " + id);
+                            // Ostinato: run105. The gather loop finds the pooled cladding satisfied and flips gathered back, so
+                            // this printed every tick (504 lines in 25s); log once per count.
+                            if (gathered && pooled != plankRegatherLogged) { plankRegatherLogged = pooled; System.out.println("MAZETEST FURNISH regather any_planks x" + pooled + " for " + id); }
                             gathered = false;
                             return new adris.altoclef.tasks.resources.CollectPlanksTask(pooled);
                         }
@@ -991,8 +995,12 @@ public class MazeFurnishTask extends Task {
                     int lootNow = mod.getItemStorage().getItemCount(li);
                     if (lootNow > lootHave) { lootHave = lootNow; lootGainTick = lootTicks; }
                     boolean noGain = lootTicks - lootGainTick > 1200;
-                    if (++lootTicks > 3600 || homeDist(lootFeet) > GATHER_LEASH || lootWander > 100 || noGain) {
-                        System.out.println("MAZETEST FURNISH loot-skip " + it.id() + " have=" + mod.getItemStorage().getItemCount(li) + "/" + it.count() + " ticks=" + lootTicks + " dist=" + homeDist(lootFeet) + (lootWander > 100 ? " why=none-seen" : noGain ? " why=no-gain" : ""));
+                    // Ostinato: run105. The 96-block gather leash let optional loot walk far: room 1's bowl craft went 73 out
+                    // for logs, room 3's paper 94 out to remembered sugar cane, then the walk back (2-4 min per room). Loot is
+                    // a bonus from what grows beside the room; past LOOT_LEASH it is skipped.
+                    boolean far = homeDist(lootFeet) > LOOT_LEASH;
+                    if (++lootTicks > 3600 || far || lootWander > 100 || noGain) {
+                        System.out.println("MAZETEST FURNISH loot-skip " + it.id() + " have=" + mod.getItemStorage().getItemCount(li) + "/" + it.count() + " ticks=" + lootTicks + " dist=" + homeDist(lootFeet) + (lootWander > 100 ? " why=none-seen" : noGain ? " why=no-gain" : far ? " why=far" : ""));
                         lootDone.add(it.id());
                         continue;
                     }

@@ -150,6 +150,10 @@ public class CraftGenericWithRecipeBooksTask extends Task implements ITaskUsesCr
         //$$ net.minecraft.util.context.ContextMap ctx = net.minecraft.world.item.crafting.display.SlotDisplayContext.fromLevel(player.level());
         //$$ for (net.minecraft.client.gui.screens.recipebook.RecipeCollection col : player.getRecipeBook().getCollections()) {
         //$$     for (net.minecraft.world.item.crafting.display.RecipeDisplayEntry entry : col.getRecipes()) {
+        //$$         // Ostinato: run99. polished_andesite matched its stonecutter entry first; a crafting grid given a stonecutter
+        //$$         // id throws ClassCastException server-side (suppressed) and places nothing. Only crafting displays fit a grid.
+        //$$         if (!(entry.display() instanceof net.minecraft.world.item.crafting.display.ShapedCraftingRecipeDisplay)
+        //$$                 && !(entry.display() instanceof net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay)) continue;
         //$$         if (entry.resultItems(ctx).stream().anyMatch(s -> s.getItem() == target.getOutputItem())) { id = entry.id(); break; }
         //$$     }
         //$$     if (id != null) break;

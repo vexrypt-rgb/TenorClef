@@ -48,7 +48,7 @@ public class MazeFurnishTask extends Task {
     private int stuckRecoveries; // Ostinato: one wander+blacklist recovery before FAIL
     private boolean gathered;    // Ostinato: gather-once latch
     private boolean treesReplanted; private adris.altoclef.tasks.resources.ReplantTreesTask replantTask; // Ostinato: wood farm, once per room
-    private final java.util.Set<String> lootDone = new java.util.HashSet<>(); private String lootKey; private int lootTicks; // Ostinato: loot at FILL
+    private final java.util.Set<String> lootDone = new java.util.HashSet<>(); private String lootKey; private int lootTicks; private boolean lootGathering; // Ostinato: loot at FILL
     private String gatherKey;    // Ostinato: loot-only gather budget
     private int gatherTicks;
     private final java.util.Set<String> skipped = new java.util.HashSet<>();
@@ -141,7 +141,9 @@ public class MazeFurnishTask extends Task {
             for (Task t = this; t != null; t = t.getSub()) if (t instanceof DestroyBlockTask d) { mod.getBlockScanner().requestBlockUnreachable(d.getPos(), 0); }
             // Ostinato: run40 audit. A stuck CONTAINER/FILL/SEAL cell burned both recoveries then FAILed the run. Blacklist the
             // cell itself: defer it to the second pass (skip it there) instead of wandering back to the same face.
-            if (inStep()) { deferStep("stuck"); stuckRecoveries = 0; stuckTicks = 0; stuckAnchor = feet; return null; }
+            // Ostinato: run91. A FILL step hunting loot (paper -> sugar cane) is a gather, not a stuck place: it was deferred
+            // 30s into the hunt. It takes the gather recovery below; the 3-min loot budget still bounds it.
+            if (inStep() && !lootGathering) { deferStep("stuck"); stuckRecoveries = 0; stuckTicks = 0; stuckAnchor = feet; return null; }
             System.out.println("MAZETEST FURNISH stuck-recover stuck=" + getDebugState() + " feet=" + feet.toShortString());
             stuckRecoveries++; stuckTicks = 0; stuckAnchor = feet;
             unstickTicks = 0; unstick = new adris.altoclef.tasks.movement.TimeoutWanderTask(16);
@@ -403,6 +405,7 @@ public class MazeFurnishTask extends Task {
         return null;
     }
 
+    private MazeCeilingPlaceTask ceilTask; private Block[] ceilHave; // Ostinato: run91
     private int repairRounds; private boolean repairCleanLogged; // Ostinato: run62
 
     // Ostinato: run62. Pure check (no side effects) that a planned cell is missing or holds the wrong block.
@@ -681,6 +684,7 @@ public class MazeFurnishTask extends Task {
     }
     /** The sub task still needed for this step, or null when the world already matches it. */
     private Task stepTask(AltoClef mod, MazeFurnishPlan.Step step) {
+        lootGathering = false; // Ostinato: run91, set again only by the FILL loot gather
         BlockPos pos = new BlockPos(step.x(), step.y(), step.z());
         BlockState state = mod.getWorld().getBlockState(pos);
         switch (step.kind()) {
@@ -713,7 +717,12 @@ public class MazeFurnishTask extends Task {
                 // both passes, so nine cells were skipped. A deferred light now uses the direct task: mine, pick a stand
                 // inside the room in reach, click a solid neighbour's face.
                 boolean direct = openBelow(mod, pos) || (step.kind() == MazeFurnishPlan.Kind.LIGHT && secondPass && deferred.contains(index));
-                if (have.length > 0 && direct && !thinLight(have)) return new MazeCeilingPlaceTask(pos, have);
+                if (have.length > 0 && direct && !thinLight(have)) {
+                    // Ostinato: run91. A fresh task each restart of the tree (~1s) reset its bad-stand and walk timers, so an
+                    // unreachable stand was walked at until the 30s stuck-defer. Keep one task per cell.
+                    if (ceilTask == null || !ceilTask.target().equals(pos) || !java.util.Arrays.equals(ceilHave, have)) { ceilTask = new MazeCeilingPlaceTask(pos, have); ceilHave = have; }
+                    return ceilTask;
+                }
                 if (have.length > 0) return new PlaceBlockTask(pos, have);
                 if (have.length == 0) { // Ostinato: ran dry mid-cladding; regather the planned count instead of skipping the block
                     for (Block b : wanted) {
@@ -783,6 +792,8 @@ public class MazeFurnishTask extends Task {
                         lootDone.add(it.id());
                         continue;
                     }
+                    lootGathering = true;
+                    setDebugState("Gathering " + it.id() + " x" + it.count() + " (loot)");
                     return TaskCatalogue.getItemTask(li, it.count());
                 }
                 List<ItemTarget> targets = new ArrayList<>();

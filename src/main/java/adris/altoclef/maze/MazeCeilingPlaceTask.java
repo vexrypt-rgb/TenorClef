@@ -42,7 +42,7 @@ public class MazeCeilingPlaceTask extends Task {
     private final java.util.Set<BlockPos> badStands = new java.util.HashSet<>(); // Ostinato: run58
     private int thereTicks; // Ostinato: run58
 
-    private int walkTicks; // Ostinato: run90
+    private int walkTicks; private BlockPos walkStand; // Ostinato: run90
     private BlockPos equipLogged; // Ostinato: run89 diagnostic, once per cell
 
     public MazeCeilingPlaceTask(BlockPos target, Block[] toPlace) {
@@ -88,13 +88,15 @@ public class MazeCeilingPlaceTask extends Task {
             release(mod);
             arrived = false;
             // Ostinato: run90. A stand inside a sealed room cannot be pathed to; it was walked at forever. 30s per stand.
-            if (stand.equals(going) && ++walkTicks > 600) {
+            // (walkStand, not going: onStart clears going whenever the task tree is restarted.)
+            if (!stand.equals(walkStand)) { walkStand = stand; walkTicks = 0; }
+            if (++walkTicks > 600) {
                 System.out.println("MAZETEST FURNISH ceiling-unreachable-stand " + stand.toShortString() + " for " + target.toShortString());
-                badStands.add(stand); going = null; walkTicks = 0;
+                badStands.add(stand); going = null; walkStand = null;
                 return stay("New stand for " + target.toShortString());
             }
             if (!stand.equals(going)) {
-                going = stand; walkTicks = 0;
+                going = stand;
                 mod.getClientBaritone().getCustomGoalProcess().setGoalAndPath(new GoalBlock(stand.getX(), stand.getY(), stand.getZ()));
             }
             return stay("Walking under ceiling " + target.toShortString());
@@ -379,6 +381,10 @@ public class MazeCeilingPlaceTask extends Task {
     public boolean isFinished() {
         AltoClef mod = AltoClef.getInstance();
         return mod != null && mod.getWorld() != null && placed(mod);
+    }
+
+    public BlockPos target() {
+        return target;
     }
 
     @Override

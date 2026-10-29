@@ -300,6 +300,7 @@ public class AllBlocksTask extends Task {
 
     private String seenDeath;
     private BlockPos recoverPos;
+    private BlockPos lastRecover;
     private boolean sawDrops;
     private long recoverUntil;
     private static final int RECOVER_MINUTES = 8;
@@ -319,10 +320,18 @@ public class AllBlocksTask extends Task {
             progress.seenDeath = key;
             progress.save(file);
             BlockPos at = death.get().pos();
-            if (WorldHelper.getCurrentDimension() == Dimension.OVERWORLD
+            // Not underground, and not where the last trip back for drops just ended in another death: walking back
+            // unarmed into the cave that killed it got the bot killed again by the same zombies.
+            boolean underground = at.getY() < 55;
+            boolean deathTrap = lastRecover != null && lastRecover.getSquaredDistance(at) < 32 * 32;
+            if (underground || deathTrap) {
+                Debug.logMessage("ALLBLOCKS died at " + at.toShortString() + "; not going back for the drops ("
+                        + (underground ? "underground" : "died there again") + ")");
+            } else if (WorldHelper.getCurrentDimension() == Dimension.OVERWORLD
                     && death.get().dimension() == World.OVERWORLD
                     && at.getSquaredDistance(mod.getPlayer().getBlockPos()) < 400 * 400) {
                 recoverPos = at;
+                lastRecover = at;
                 recoverUntil = ticks + (long) RECOVER_MINUTES * TPM;
                 Debug.logMessage("ALLBLOCKS died at " + at.toShortString() + "; going back for the drops");
             }

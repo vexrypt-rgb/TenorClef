@@ -42,6 +42,7 @@ public class MazeCeilingPlaceTask extends Task {
     private final java.util.Set<BlockPos> badStands = new java.util.HashSet<>(); // Ostinato: run58
     private int thereTicks; // Ostinato: run58
 
+    private int walkTicks; // Ostinato: run90
     private BlockPos equipLogged; // Ostinato: run89 diagnostic, once per cell
 
     public MazeCeilingPlaceTask(BlockPos target, Block[] toPlace) {
@@ -86,8 +87,14 @@ public class MazeCeilingPlaceTask extends Task {
             thereTicks = 0;
             release(mod);
             arrived = false;
+            // Ostinato: run90. A stand inside a sealed room cannot be pathed to; it was walked at forever. 30s per stand.
+            if (stand.equals(going) && ++walkTicks > 600) {
+                System.out.println("MAZETEST FURNISH ceiling-unreachable-stand " + stand.toShortString() + " for " + target.toShortString());
+                badStands.add(stand); going = null; walkTicks = 0;
+                return stay("New stand for " + target.toShortString());
+            }
             if (!stand.equals(going)) {
-                going = stand;
+                going = stand; walkTicks = 0;
                 mod.getClientBaritone().getCustomGoalProcess().setGoalAndPath(new GoalBlock(stand.getX(), stand.getY(), stand.getZ()));
             }
             return stay("Walking under ceiling " + target.toShortString());

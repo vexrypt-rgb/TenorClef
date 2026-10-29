@@ -349,6 +349,12 @@ public class MazeFurnishTask extends Task {
             while (work != null && index < work.size()) {
                 MazeFurnishPlan.Step step = work.get(index);
                 if (!secondPass && deferred.contains(index)) { index++; continue; }
+                // Ostinato: run90. Deferred lights were retried after the seals, so two ceiling holes could only be reached
+                // from inside a sealed room (bot on the roof, 3 repair rounds, 131/133). Retry them while it is still open.
+                if (!secondPass && step.kind() == MazeFurnishPlan.Kind.SEAL && !deferred.isEmpty()) {
+                    System.out.println("MAZETEST FURNISH retry-before-seal " + deferred.size());
+                    break;
+                }
                 Task sub = stepTask(mod, step);
                 if (sub != null) {
                     if (index != stepIdx) { stepIdx = index; stepTicks = 0; }

@@ -12,6 +12,7 @@ import adris.altoclef.util.ItemTarget;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.math.BlockPos;
 
@@ -48,7 +49,7 @@ public class MazeFurnishTask extends Task {
     private int stuckRecoveries; // Ostinato: one wander+blacklist recovery before FAIL
     private boolean gathered;    // Ostinato: gather-once latch
     private boolean treesReplanted; private adris.altoclef.tasks.resources.ReplantTreesTask replantTask; // Ostinato: wood farm, once per room
-    private final java.util.Set<String> lootDone = new java.util.HashSet<>(); private String lootKey; private int lootTicks; private boolean lootGathering; // Ostinato: loot at FILL
+    private final java.util.Set<String> lootDone = new java.util.HashSet<>(); private String lootKey; private int lootTicks, lootWander; private boolean lootGathering; // Ostinato: loot at FILL
     private String gatherKey;    // Ostinato: loot-only gather budget
     private int gatherTicks;
     private final java.util.Set<String> skipped = new java.util.HashSet<>();
@@ -786,7 +787,13 @@ public class MazeFurnishTask extends Task {
             StringBuilder chain = new StringBuilder();
             Task c = this.getSub();
             for (int d = 0; c != null && d < 6; d++, c = c.getSub()) { String n = c.toString(); chain.append(n, 0, Math.min(70, n.length())).append(" / "); }
-            System.out.println("MAZETEST FURNISH wood-spent " + lastWood + "->" + w + " " + woodInv(mod) + " via " + chain);
+            // Ostinato: run102. Items sitting in a crafting grid are outside the counted inventory; show them.
+            StringBuilder grid = new StringBuilder();
+            net.minecraft.screen.ScreenHandler h = mod.getPlayer().currentScreenHandler;
+            int n = h instanceof net.minecraft.screen.CraftingScreenHandler ? 10 : 0;
+            for (int i = 1; i < 5; i++) { ItemStack g = mod.getPlayer().playerScreenHandler.getSlot(i).getStack(); if (!g.isEmpty()) grid.append(g.getCount()).append('x').append(net.minecraft.registry.Registries.ITEM.getId(g.getItem()).getPath()).append(' '); }
+            for (int i = 1; i < n; i++) { ItemStack g = h.getSlot(i).getStack(); if (!g.isEmpty()) grid.append('T').append(g.getCount()).append('x').append(net.minecraft.registry.Registries.ITEM.getId(g.getItem()).getPath()).append(' '); }
+            System.out.println("MAZETEST FURNISH wood-spent " + lastWood + "->" + w + " " + woodInv(mod) + " grid=[" + grid + "] via " + chain);
         }
         lastWood = w;
     }
@@ -972,9 +979,15 @@ public class MazeFurnishTask extends Task {
                     Item li = McCompat.item(it.id());
                     if (li == null || lootDone.contains(it.id()) || skipped.contains(it.id()) || NO_HUNT_LOOT.contains(it.id())) continue;
                     if (mod.getItemStorage().getItemCount(li) >= it.count() || !TaskCatalogue.obtainableNow(li)) { lootDone.add(it.id()); continue; }
-                    if (!it.id().equals(lootKey)) { lootKey = it.id(); lootTicks = 0; System.out.println("MAZETEST FURNISH loot-gather " + it.id() + " x" + it.count() + " have=" + mod.getItemStorage().getItemCount(li)); }
-                    if (++lootTicks > 3600 || homeDist(lootFeet) > GATHER_LEASH) {
-                        System.out.println("MAZETEST FURNISH loot-skip " + it.id() + " have=" + mod.getItemStorage().getItemCount(li) + "/" + it.count() + " ticks=" + lootTicks + " dist=" + homeDist(lootFeet));
+                    if (!it.id().equals(lootKey)) { lootKey = it.id(); lootTicks = 0; lootWander = 0; System.out.println("MAZETEST FURNISH loot-gather " + it.id() + " x" + it.count() + " have=" + mod.getItemStorage().getItemCount(li)); }
+                    // Ostinato: run102. Room 2's paper hunt saw no sugar cane, so the chain fell back to TimeoutWanderTask and
+                    // walked 97 blocks out (loot-skip at the leash), then the seeds were skipped from there and the bot walked
+                    // back. Optional loot is only gathered from sources already in sight: 5s of wandering skips it.
+                    boolean wandering = false;
+                    for (Task t = getSub(); t != null; t = t.getSub()) if (t instanceof adris.altoclef.tasks.movement.TimeoutWanderTask) { wandering = true; break; }
+                    lootWander = wandering ? lootWander + 1 : 0;
+                    if (++lootTicks > 3600 || homeDist(lootFeet) > GATHER_LEASH || lootWander > 100) {
+                        System.out.println("MAZETEST FURNISH loot-skip " + it.id() + " have=" + mod.getItemStorage().getItemCount(li) + "/" + it.count() + " ticks=" + lootTicks + " dist=" + homeDist(lootFeet) + (lootWander > 100 ? " why=none-seen" : ""));
                         lootDone.add(it.id());
                         continue;
                     }

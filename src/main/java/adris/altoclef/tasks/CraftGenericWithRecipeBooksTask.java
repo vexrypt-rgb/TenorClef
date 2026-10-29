@@ -166,7 +166,10 @@ public class CraftGenericWithRecipeBooksTask extends Task implements ITaskUsesCr
         //$$ }
         //$$ if (mod.getSlotHandler().canDoSlotAction()) {
         //$$     setDebugState("Recipe book: placing " + target);
-        //$$     mod.getController().handlePlaceRecipe(player.containerMenu.containerId, id, true);
+        //$$     // Ostinato: run102. Place one set per craft, never the max: max put all 16 logs (or every plank) in the grid,
+        //$$     // the output was taken once or twice to reach the target and the rest stayed in the grid, out of the counted
+        //$$     // inventory. Each barrel craft lost ~60 planks of wood (66 -> 3 in rooms 1 and 2), so every room re-chopped.
+        //$$     mod.getController().handlePlaceRecipe(player.containerMenu.containerId, id, false);
         //$$     mod.getSlotHandler().registerSlotAction();
         //$$ }
         //#elseif MC >= 12102

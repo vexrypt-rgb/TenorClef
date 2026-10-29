@@ -593,7 +593,7 @@ public class MazeFurnishTask extends Task {
         // knows near the bot is mined from here (CollectPlanksTask mines logs only); the climb is for when none is known.
         if (mod.getBlockScanner().getNearestBlock(net.minecraft.util.math.Vec3d.ofCenter(feet), adris.altoclef.util.helpers.WorldHelper::canReach,
                 adris.altoclef.util.helpers.ItemHelper.itemsToBlocks(adris.altoclef.util.helpers.ItemHelper.LOG))
-                .map(p -> p.isWithinDistance(feet, 32)).orElse(false)) return false;
+                .map(p -> p.getSquaredDistance(feet) <= 32 * 32).orElse(false)) return false;
         int solid = 0;
         for (int dy = 2; dy <= 6; dy++) {
             BlockPos p = feet.up(dy);

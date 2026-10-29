@@ -298,6 +298,11 @@ for wood in ('acacia', 'dark_oak', 'jungle', 'mangrove', 'cherry', 'pale_oak', '
     for suffix in ('_log', '_stem', '_block', '_sapling', '_leaves', '_propagule'):
         if wood + suffix in ITEMSET:
             cost[wood + suffix] = 30
+# Plants that grow only under water: diving for them (with shears, for seagrass) took the bot hundreds of blocks
+# away; they go after the land items.
+for item in ('seagrass', 'tall_seagrass', 'sea_pickle', 'kelp', 'lily_pad'):
+    if item in ITEMSET:
+        cost[item] = 40
 for line in shear_lines:
     cost.setdefault(line.split()[1], 12)
 for line in kill_lines:

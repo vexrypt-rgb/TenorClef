@@ -1,0 +1,5 @@
+level.dat: allowCommands=0 GameType=0 (0/0 = cheats off, survival)
+chests found: 13; unique items in chests: 35; duplicates: 0
+progress says stored: 35; not found in any chest: 0 []
+progress says placed: 20; cell holds a block: 20; empty/unloaded: 0
+/tmp/claude-0/allblocks-proof/storage-and-grid-topdown.png: 1072x772, 45 chests assigned, 20 cells placed

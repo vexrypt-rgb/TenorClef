@@ -118,3 +118,9 @@ grid from above with the game's textures.
 `verify_world.py` reads the region files and reports every chest's contents, whether each stored item is really in a chest, the
 block in each placed grid cell, and level.dat's `allowCommands` (0 means cheats were off, so `/give` could not have
 been used).
+
+## Live run on 26.3
+
+[`allblocks-proof-26.3/`](allblocks-proof-26.3/README.md) holds the proof from the live run: the world check, the
+top-down render, screenshots, the report by root cause and the run log. That run stored 35 items and placed 20 blocks
+before it was stopped; it did not finish.

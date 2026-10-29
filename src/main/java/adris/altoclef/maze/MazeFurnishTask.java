@@ -143,7 +143,12 @@ public class MazeFurnishTask extends Task {
         traceWoodSpend(mod);
         int sig = 0;
         for (int i = 0; i < mod.getPlayer().getInventory().size(); i++) { net.minecraft.item.ItemStack st = mod.getPlayer().getInventory().getStack(i); sig = sig * 31 + st.getCount() * 7 + net.minecraft.registry.Registries.ITEM.getRawId(st.getItem()); }
-        if (sig != lastInvSig || stuckAnchor == null || stuckAnchor.getSquaredDistance(feet) > 64) { if (sig != lastInvSig) stuckRecoveries = 0; lastInvSig = sig; stuckAnchor = feet; stuckTicks = 0; }
+        // Ostinato: run99. The copper kit stood at its furnace on "Waiting..." while 11 raw copper smelted: the inventory does
+        // not change until the bot takes the output, so this fired stuck-recover at 30s and wandered it away from the furnace.
+        // A burning furnace the bot has open is progress; an unfuelled one is not, and still trips the watchdog.
+        boolean smelting = mod.getPlayer().currentScreenHandler instanceof net.minecraft.screen.AbstractFurnaceScreenHandler fh
+                && (adris.altoclef.util.helpers.StorageHelper.getFurnaceFuel(fh) > 0 || fh.getCookProgress() > 0);
+        if (smelting || sig != lastInvSig || stuckAnchor == null || stuckAnchor.getSquaredDistance(feet) > 64) { if (sig != lastInvSig) stuckRecoveries = 0; lastInvSig = sig; stuckAnchor = feet; stuckTicks = 0; }
         else if (++stuckTicks >= 600 && stuckRecoveries < surfaceStuckLimit()) { // Ostinato: 90s -> 30s (user: faster) // Ostinato: two recoveries before FAIL; surfacing gets more (run37)
             // Ostinato: first 90s stall: blacklist the block the chain is fighting, wander 30s, retry. Second stall FAILs.
             for (Task t = this; t != null; t = t.getSub()) if (t instanceof DestroyBlockTask d) { mod.getBlockScanner().requestBlockUnreachable(d.getPos(), 0); }
@@ -179,7 +184,7 @@ public class MazeFurnishTask extends Task {
             net.minecraft.client.MinecraftClient.getInstance().scheduleStop();
             return null;
         }
-        if (feet.equals(lastFeet)) stillTicks++; else { stillTicks = 0; lastFeet = feet; }
+        if (feet.equals(lastFeet) && !smelting) stillTicks++; else { stillTicks = 0; lastFeet = feet; } // Ostinato: run99 smelt waits are not stillness
         // Ostinato: run13 watchdog fired once, then the wander never reported finished and the bot idled forever.
         // Cap each wander at 30s and let stillness keep counting so the watchdog can fire again.
         // Ostinato: an escalation walk home (GetToXZ) gets 2 min, a wander 30 s.

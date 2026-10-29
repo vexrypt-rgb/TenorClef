@@ -320,13 +320,13 @@ public class AllBlocksTask extends Task {
             progress.seenDeath = key;
             progress.save(file);
             BlockPos at = death.get().pos();
-            // Not underground, and not where the last trip back for drops just ended in another death: walking back
+            // Not underground or underwater, and not where the last trip back for drops just ended in another death: walking back
             // unarmed into the cave that killed it got the bot killed again by the same zombies.
-            boolean underground = at.getY() < 55;
+            boolean underground = at.getY() < 62; // below sea level: a cave or the sea floor (drowned)
             boolean deathTrap = lastRecover != null && lastRecover.getSquaredDistance(at) < 32 * 32;
             if (underground || deathTrap) {
                 Debug.logMessage("ALLBLOCKS died at " + at.toShortString() + "; not going back for the drops ("
-                        + (underground ? "underground" : "died there again") + ")");
+                        + (underground ? "below sea level" : "died there again") + ")");
             } else if (WorldHelper.getCurrentDimension() == Dimension.OVERWORLD
                     && death.get().dimension() == World.OVERWORLD
                     && at.getSquaredDistance(mod.getPlayer().getBlockPos()) < 400 * 400) {

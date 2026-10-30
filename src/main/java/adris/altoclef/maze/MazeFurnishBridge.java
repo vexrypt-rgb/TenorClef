@@ -21,6 +21,11 @@ public final class MazeFurnishBridge {
                 switch (method.getName()) {
                     case "furnish":
                         return accept(args[0]);
+                    case "busy":
+                        return busy();
+                    case "cancel":
+                        cancel();
+                        return null;
                     case "name":
                     case "toString":
                         return "TenorClef";
@@ -40,6 +45,19 @@ public final class MazeFurnishBridge {
         } catch (ReflectiveOperationException | RuntimeException e) {
             Debug.logInternal("[maze] could not register furnisher: " + e);
             return false;
+        }
+    }
+
+    // Ostinato run107: #maze.backrooms.connected digs the next segment only once the furnish task has let go.
+    private static boolean busy() {
+        AltoClef mod = AltoClef.getInstance();
+        return mod != null && mod.getUserTaskChain().getCurrentTask() instanceof MazeFurnishTask;
+    }
+
+    private static void cancel() {
+        AltoClef mod = AltoClef.getInstance();
+        if (mod != null && mod.getUserTaskChain().getCurrentTask() instanceof MazeFurnishTask) {
+            mod.getUserTaskChain().cancel(mod);
         }
     }
 

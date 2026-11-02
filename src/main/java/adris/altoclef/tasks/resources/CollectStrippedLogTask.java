@@ -16,8 +16,18 @@ import net.minecraft.util.math.BlockPos;
 import java.util.Optional;
 
 public class CollectStrippedLogTask extends ResourceTask {
-    private static final Item[] _axes = new Item[]{Items.WOODEN_AXE, Items.STONE_AXE, Items.GOLDEN_AXE, Items.IRON_AXE,
-            Items.DIAMOND_AXE, Items.NETHERITE_AXE};
+    // Ostinato: 2026-11-02. A copper axe from the maze kit counts. Without it, warehouse stripping crafted a wooden axe.
+    private static final Item[] _axes = axes();
+
+    private static Item[] axes() {
+        java.util.List<Item> out = new java.util.ArrayList<>();
+        Item copper = adris.altoclef.tasks.speedrun.testrun2.McCompat.item("copper_axe");
+        if (copper != null) out.add(copper);
+        for (Item it : new Item[]{Items.WOODEN_AXE, Items.STONE_AXE, Items.GOLDEN_AXE, Items.IRON_AXE, Items.DIAMOND_AXE, Items.NETHERITE_AXE}) {
+            if (it != null) out.add(it);
+        }
+        return out.toArray(new Item[0]);
+    }
     private final Item[] _strippedLogs;
     private final Item[] _strippableLogs;
     private final int _targetCount;

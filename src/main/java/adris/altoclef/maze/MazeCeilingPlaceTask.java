@@ -15,7 +15,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
-import net.minecraft.item.Items;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -31,12 +30,29 @@ import java.util.function.Predicate;
 
 public class MazeCeilingPlaceTask extends Task {
 
-    private static final double REACH = 4.4;
+    // Ostinato: 2026-11-02. Vanilla survival reach. The old 4.4-with-centre check rejected the floor of a 6-high room.
+    private static final double REACH = MazeReach.SURVIVAL;
+    // Ostinato: 2026-11-02. Copper first. McCompat keeps a version without copper tools off this list.
+    private static final Item[] PICKS = picks();
+
+    private static Item[] picks() {
+        java.util.List<Item> out = new java.util.ArrayList<>();
+        for (String id : new String[]{"copper_pickaxe", "iron_pickaxe", "diamond_pickaxe", "netherite_pickaxe", "stone_pickaxe"}) {
+            Item it = adris.altoclef.tasks.speedrun.testrun2.McCompat.item(id);
+            if (it != null && !out.contains(it)) out.add(it);
+        }
+        return out.toArray(new Item[0]);
+    }
 
     private final BlockPos target;
     private final Block[] toPlace;
     private BlockPos going;
     private boolean logged;
+    // Ostinato: 2026-10-30. `logged` is set by the "was=<block>" line on the very first tick, so every later
+    // `if (!logged)` guard in this task was dead: ceiling-need-pick could never print (0 hits in run106 while
+    // 32 ceiling-bad-stand fired). The pickaxe give-up is the one diagnostic that explains a silent stall, so
+    // it gets its own flag.
+    private boolean needPickLogged;
     private boolean arrived;
     private int actTicks;
     private int liveTicks;
@@ -69,6 +85,15 @@ public class MazeCeilingPlaceTask extends Task {
     @Override
     protected Task onTick() {
         AltoClef mod = AltoClef.getInstance();
+        // Ostinato: 2026-10-30. Every line below reads the world, and TaskRunner.tick() only checks
+        // AltoClef.inGame() (player + network handler), not the world. isFinished() already guards the world;
+        // onTick did not, so a tick that landed between setWorld(null) and the player being cleared would throw
+        // out of the ClientTickEvent subscriber and out of taskRunner.tick(). Same guard, same answer as
+        // isFinished(): do nothing this tick.
+        if (mod == null || mod.getWorld() == null || mod.getPlayer() == null) {
+            setDebugState("No world");
+            return null;
+        }
         if (placed(mod)) {
             stopNudge(mod);
             release(mod);
@@ -144,17 +169,19 @@ public class MazeCeilingPlaceTask extends Task {
             logged = true;
         }
         if (!state.isAir() && !ArrayUtils.contains(toPlace, state.getBlock())) {
-            Item[] picks = {Items.IRON_PICKAXE, Items.DIAMOND_PICKAXE, Items.NETHERITE_PICKAXE, Items.STONE_PICKAXE};
             // Hunger used to make forceEquip return false, so a pick in the inventory still logged "No pickaxe" and never swung.
-            if (!mod.getItemStorage().hasItem(picks)) {
+            if (!mod.getItemStorage().hasItem(PICKS)) {
                 mod.getClientBaritone().getInputOverrideHandler().setInputForceState(Input.CLICK_LEFT, false);
-                if (!logged) {
-                    System.out.println("MAZETEST FURNISH ceiling-need-pick " + target.toShortString());
-                    logged = true;
+                if (!needPickLogged) {
+                    needPickLogged = true;
+                    System.out.println("MAZETEST FURNISH ceiling-need-pick " + target.toShortString()
+                            + " held=" + mod.getItemStorage().getItemCount(PICKS));
                 }
-                return adris.altoclef.TaskCatalogue.getItemTask(Items.STONE_PICKAXE, 1);
+                // Ostinato: 2026-11-02. Copper when this version has it. The string id keeps older lines compiling.
+                String ask = adris.altoclef.TaskCatalogue.taskExists("copper_pickaxe") ? "copper_pickaxe" : "stone_pickaxe";
+                return adris.altoclef.TaskCatalogue.getItemTask(ask, 1);
             }
-            if (!mod.getSlotHandler().forceEquipItem(picks, true)) {
+            if (!mod.getSlotHandler().forceEquipItem(PICKS, true)) {
                 mod.getClientBaritone().getInputOverrideHandler().setInputForceState(Input.CLICK_LEFT, false);
                 return stay("Equipping pickaxe " + target.toShortString());
             }
@@ -253,7 +280,8 @@ public class MazeCeilingPlaceTask extends Task {
         // 10,86,-151, 9,88,-150 got 9,87,-149): unreachable, 30s each, then skip-light. Walls and floors take the ring.
         boolean ceiling = open(mod, target.down()) && !open(mod, target.up());
         // Same column, but the head must stay under the target: feet <= target - 2.
-        if (ceiling) for (int y = target.getY() - 2; y >= target.getY() - 6 && y > mod.getWorld().getBottomY(); y--) {
+        // Ostinato: 2026-11-02. Down to the floor of a clear-height-6 room (feet 6 under the ceiling block), not a fixed 7-wide room.
+        if (ceiling) for (int y = target.getY() - 2; y >= target.getY() - MazeReach.STAND_DOWN && y > mod.getWorld().getBottomY(); y--) {
             BlockPos feet = new BlockPos(target.getX(), y, target.getZ());
             if (standSees(mod, feet)) return feet; // Ostinato: run63
         }
@@ -277,14 +305,15 @@ public class MazeCeilingPlaceTask extends Task {
         // nearest one to the player whose eye has a clear line to the target or to a solid neighbour's face.
         BlockPos feetNow = mod.getPlayer().getBlockPos();
         BlockPos best = null; double bestD = Double.MAX_VALUE;
-        for (int dx = -4; dx <= 4; dx++) for (int dz = -4; dz <= 4; dz++) for (int dy = -5; dy <= 1; dy++) { // Ostinato: run63 wider ring
+        // Ostinato: 2026-11-02. Horizontal +-4 is the reach, not a room size. 5x5 and 11x11 place from the same local stand.
+        for (int dx = -4; dx <= 4; dx++) for (int dz = -4; dz <= 4; dz++) for (int dy = -MazeReach.STAND_DOWN; dy <= 1; dy++) {
             BlockPos feet = target.add(dx, dy, dz);
             // Ostinato: run93. -87,74,-150 got the ring stand -87,75,-150, i.e. standing ON the target: the "there" check
             // wants a same-column stand under the target, so the bot stood on it for 30s and called it unreachable.
             if (feet.equals(target) || feet.up().equals(target) || feet.down().equals(target) || badStands.contains(feet)) continue;
             if (!(support(mod, feet.down()) && open(mod, feet) && open(mod, feet.up()))) continue;
             Vec3d eye = new Vec3d(feet.getX() + 0.5, feet.getY() + 1.62, feet.getZ() + 0.5);
-            if (eye.distanceTo(Vec3d.ofCenter(target)) > REACH - 0.3) continue;
+            if (!MazeReach.reaches(eye.x, eye.y, eye.z, target.getX(), target.getY(), target.getZ())) continue;
             if (!seesTargetOrFace(mod, eye)) continue;
             // Ostinato: run96. A stand below the bot's feet is usually a pit or a cave pocket under the floor; prefer
             // stands on the level the bot is working from.
@@ -318,12 +347,13 @@ public class MazeCeilingPlaceTask extends Task {
     private BlockPos strayInTheWay(AltoClef mod) {
         boolean solidTarget = !mod.getWorld().getBlockState(target).isAir();
         BlockPos best = null; double bestD = Double.MAX_VALUE;
-        for (int dx = -4; dx <= 4; dx++) for (int dz = -4; dz <= 4; dz++) for (int dy = -5; dy <= 1; dy++) {
+        // Ostinato: 2026-11-02. Same floor depth as the stand ring, so a 6-high room can clear a stray from the floor.
+        for (int dx = -4; dx <= 4; dx++) for (int dz = -4; dz <= 4; dz++) for (int dy = -MazeReach.STAND_DOWN; dy <= 1; dy++) {
             BlockPos feet = target.add(dx, dy, dz);
             if (feet.equals(target) || feet.up().equals(target) || feet.down().equals(target)) continue;
             if (!(support(mod, feet.down()) && open(mod, feet) && open(mod, feet.up()))) continue;
             Vec3d eye = new Vec3d(feet.getX() + 0.5, feet.getY() + 1.62, feet.getZ() + 0.5);
-            if (eye.distanceTo(Vec3d.ofCenter(target)) > REACH - 0.3) continue;
+            if (!MazeReach.reaches(eye.x, eye.y, eye.z, target.getX(), target.getY(), target.getZ())) continue;
             java.util.List<Vec3d> aims = new java.util.ArrayList<>();
             if (solidTarget) {
                 Vec3d c = Vec3d.ofCenter(target);
@@ -357,7 +387,7 @@ public class MazeCeilingPlaceTask extends Task {
         if (badStands.contains(feet) || feet.equals(target) || feet.up().equals(target) || feet.down().equals(target)) return false;
         if (!(support(mod, feet.down()) && open(mod, feet) && open(mod, feet.up()))) return false;
         Vec3d eye = new Vec3d(feet.getX() + 0.5, feet.getY() + 1.62, feet.getZ() + 0.5);
-        return eye.distanceTo(Vec3d.ofCenter(target)) <= REACH - 0.3 && seesTargetOrFace(mod, eye);
+        return MazeReach.reaches(eye.x, eye.y, eye.z, target.getX(), target.getY(), target.getZ()) && seesTargetOrFace(mod, eye);
     }
 
     // Ostinato: run58. True when this eye can raycast the target block itself (to mine it) or a solid neighbour's face (to place).

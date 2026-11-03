@@ -1149,7 +1149,8 @@ public class MazeFurnishTask extends Task {
                     // that has gained nothing for 1 min is skipped; the fill stores what is held plus fallback junk.
                     int lootNow = mod.getItemStorage().getItemCount(li);
                     if (lootNow > lootHave) { lootHave = lootNow; lootGainTick = lootTicks; }
-                    boolean noGain = lootTicks - lootGainTick > 1200;
+                    // Ostinato: run117. Room 0 seeds sat 3.5 min at 0/7 ("Failed exploring" in a sealed room). Zero-held loot skips after 15s.
+                    boolean noGain = lootTicks - lootGainTick > (lootHave == 0 ? 300 : 1200);
                     // Ostinato: run105. The 96-block gather leash let optional loot walk far: room 1's bowl craft went 73 out
                     // for logs, room 3's paper 94 out to remembered sugar cane, then the walk back (2-4 min per room). Loot is
                     // a bonus from what grows beside the room; past LOOT_LEASH it is skipped.

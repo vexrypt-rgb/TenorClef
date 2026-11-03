@@ -415,7 +415,19 @@ public class MazeCeilingPlaceTask extends Task {
         BlockState st = mod.getWorld().getBlockState(target);
         if (!st.isAir()) {
             Vec3d c = Vec3d.ofCenter(target);
-            for (Direction d : Direction.values()) if (rayHitsBlock(mod, eye, c.add(d.getOffsetX() * 0.45, d.getOffsetY() * 0.45, d.getOffsetZ() * 0.45), target)) return true;
+            // Ostinato: run115 lobby. A ring stand passed on the nearest-corner distance (4.46) while every mining aim point
+            // was ~5 away: the crosshair never reached the stone, so each floor stand burned 8s as ceiling-bad-stand and the
+            // 453-cell room timed out at 252. The aim point must be in reach, and so must a face to place on once it is mined.
+            boolean mineable = false;
+            for (Direction d : Direction.values()) {
+                Vec3d p = c.add(d.getOffsetX() * 0.45, d.getOffsetY() * 0.45, d.getOffsetZ() * 0.45);
+                if (eye.distanceTo(p) <= REACH - 0.05 && rayHitsBlock(mod, eye, p, target)) { mineable = true; break; }
+            }
+            if (!mineable) return false;
+            for (Direction fromTarget : faceOrder()) {
+                BlockPos against = target.offset(fromTarget);
+                if (support(mod, against) && eye.distanceTo(facePoint(against, fromTarget.getOpposite(), 0, 0)) <= REACH) return true;
+            }
             return false;
         }
         for (Direction fromTarget : faceOrder()) {
@@ -464,12 +476,15 @@ public class MazeCeilingPlaceTask extends Task {
     private Vec3d visiblePoint(AltoClef mod, BlockPos pos) {
         Vec3d eye = mod.getPlayer().getEyePos();
         Vec3d center = Vec3d.ofCenter(pos);
-        if (rayHitsBlock(mod, eye, center, pos)) return center;
-        for (Direction d : Direction.values()) {
-            Vec3d p = center.add(d.getOffsetX() * 0.4, d.getOffsetY() * 0.4, d.getOffsetZ() * 0.4);
-            if (rayHitsBlock(mod, eye, p, pos)) return p;
+        // Ostinato: run115. The first visible point could be past reach (crosshair misses); take the nearest visible one.
+        Vec3d best = null; double bestD = Double.MAX_VALUE;
+        java.util.List<Vec3d> pts = new java.util.ArrayList<>(); pts.add(center);
+        for (Direction d : Direction.values()) pts.add(center.add(d.getOffsetX() * 0.45, d.getOffsetY() * 0.45, d.getOffsetZ() * 0.45));
+        for (Vec3d p : pts) {
+            double dd = eye.distanceTo(p);
+            if (dd < bestD && rayHitsBlock(mod, eye, p, pos)) { bestD = dd; best = p; }
         }
-        return center;
+        return best != null ? best : center;
     }
 
     private static Vec3d facePoint(BlockPos against, Direction face, double ou, double ov) {

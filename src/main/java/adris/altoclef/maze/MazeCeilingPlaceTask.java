@@ -57,7 +57,18 @@ public class MazeCeilingPlaceTask extends Task {
     private int actTicks;
     private int liveTicks;
     private boolean sideStandLogged; // Ostinato
-    private final java.util.Set<BlockPos> badStands = new java.util.HashSet<>(); // Ostinato: run58
+    // Ostinato: run118 room3 seal 67/72. badStands lived on the task instance and the no-stand fallback cleared it, so the
+    // ceiling seals -17,85,4 / -17,85,5 picked stand -17,83,x, dropped it on no-progress, then picked it again until the
+    // furnish bridge skipped the seal why=stuck. A rejected stand now stays rejected for that cell for the session, the
+    // next candidate is tried, and when every ground stand is gone the bot pillars up to a scaffold stand (pillarStand).
+    private static final java.util.Map<BlockPos, java.util.Set<BlockPos>> REJECTED = new java.util.HashMap<>();
+    private final java.util.Set<BlockPos> badStands;
+    private BlockPos pillarLogged; // Ostinato: run118
+
+    static synchronized java.util.Set<BlockPos> rejectedFor(BlockPos t) {
+        if (REJECTED.size() > 4096) REJECTED.clear();
+        return REJECTED.computeIfAbsent(t.toImmutable(), k -> java.util.Collections.synchronizedSet(new java.util.HashSet<>()));
+    }
     private int thereTicks; // Ostinato: run58
 
     private int walkTicks; private BlockPos walkStand; // Ostinato: run90
@@ -75,6 +86,7 @@ public class MazeCeilingPlaceTask extends Task {
         this.toPlace = toPlace;
         this.stray = stray;
         this.thin = thin(toPlace);
+        this.badStands = rejectedFor(target); // Ostinato: run118
     }
 
     // Ostinato: run113. A torch/lantern/candle cell: the click goes on the block under it, then a side; a torch never
@@ -361,8 +373,47 @@ public class MazeCeilingPlaceTask extends Task {
                 return feetNow;
             }
         }
-        if (!badStands.isEmpty()) { badStands.clear(); }
+        // Ostinato: run118. No ground stand left: scaffold up. A walk-reachable floor cell near the target whose clear
+        // column, k blocks up, puts the eye in reach of the target or a face. Baritone pillars to that air goal with
+        // throwaway blocks (MovementPillar). Each pillar top that fails is rejected like any stand, so the next is tried.
+        BlockPos pillar = pillarStand(mod);
+        if (pillar != null) {
+            if (!pillar.equals(pillarLogged)) {
+                pillarLogged = pillar;
+                System.out.println("MAZETEST FURNISH ceiling-pillar-stand " + target.toShortString() + " from " + pillar.toShortString()
+                        + " rejected=" + badStands.size());
+            }
+            return pillar;
+        }
+        // Ostinato: run118. The old fallback cleared badStands here, which put the same unreachable stand back on top.
         return new BlockPos(target.getX(), target.getY() - 2, target.getZ());
+    }
+
+    // Ostinato: run118. Scaffold/pillar fallback for ceiling seal and light cells.
+    private BlockPos pillarStand(AltoClef mod) {
+        BlockPos feetNow = mod.getPlayer().getBlockPos();
+        walkable(mod, feetNow); // fills `reach`
+        if (reach == null) return null;
+        BlockPos best = null; double bestScore = Double.MAX_VALUE;
+        for (BlockPos base : reach) {
+            int dx = base.getX() - target.getX(), dz = base.getZ() - target.getZ();
+            if (Math.abs(dx) > 3 || Math.abs(dz) > 3 || base.getY() > target.getY() - 2) continue;
+            for (int k = 1; k <= 5; k++) {
+                BlockPos top = base.up(k);
+                if (top.getY() > target.getY() - 1) break;
+                if (!(open(mod, top) && open(mod, top.up()))) break; // the column must be clear to jump through
+                if (top.equals(target) || top.up().equals(target) || badStands.contains(top)) continue;
+                // The player's box at the top must not cover the target cell (BlockItem.canPlace).
+                if (dx == 0 && dz == 0 && top.getY() + 2 > target.getY()) continue;
+                Vec3d eye = new Vec3d(top.getX() + 0.5, top.getY() + 1.62, top.getZ() + 0.5);
+                if (!MazeReach.reaches(eye.x, eye.y, eye.z, target.getX(), target.getY(), target.getZ())) continue;
+                if (!seesTargetOrFace(mod, eye)) continue;
+                double score = 4.0 * k + Math.hypot(dx, dz) + 0.1 * base.getSquaredDistance(feetNow);
+                if (score < bestScore) { bestScore = score; best = top; }
+                break; // lowest working height in this column
+            }
+        }
+        return best;
     }
 
     // Ostinato: run100. The stray block nearest the target that a standable cell's view of it hits first: a ray to the

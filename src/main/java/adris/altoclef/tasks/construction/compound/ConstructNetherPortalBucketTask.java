@@ -313,7 +313,8 @@ public class ConstructNetherPortalBucketTask extends Task {
 
         // No water/lava and no portal site yet for too long ? abort so EarlyOverworld hard-resets Construct.
         boolean hasFluid = waterBuckets > 0 || lavaBuckets > 0;
-        if (!hasFluid && portalOrigin == null) {
+        // S302: with an empty bucket the water search below IS the progress; aborting restarts it.
+        if (!hasFluid && portalOrigin == null && emptyBuckets == 0) {
             if (noFluidProgressTimer.elapsed()) {
                 Debug.logMessage("Construct: no water/lava progress - aborting for EarlyOverworld reacquire"
                         + " (empty=" + emptyBuckets + " water=" + waterBuckets + " lava=" + lavaBuckets + ")");

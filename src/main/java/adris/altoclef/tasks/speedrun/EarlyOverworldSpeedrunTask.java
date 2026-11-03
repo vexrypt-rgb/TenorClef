@@ -359,17 +359,25 @@ public class EarlyOverworldSpeedrunTask extends Task {
                 Debug.logMessage("EarlyOverworld: portal build stalled without water/lava - abort hard-reset Construct"
                         + " (empty=" + empty + " water=" + water + " lava=" + lava + ")");
                 hardResetUi();
-                if (goToNetherTask instanceof DefaultGoToDimensionTask dim) {
-                    dim.hardResetPortalBuild();
-                    goToNetherTask.stop();
-                } else if (goToNetherTask != null) {
-                    goToNetherTask.stop();
+                // S302: 065856 held an empty bucket and was wandering for water; this reset fired
+                // every 90s for 7+ min, restarting the water search (and its wander) from scratch
+                // each time. With an empty bucket in hand the search itself is the progress - keep it.
+                if (empty > 0) {
+                    portalPhaseTimer.reset();
+                    Debug.logMessage("EarlyOverworld: [S302] keeping water/lava search (empty bucket in hand)");
+                } else {
+                    if (goToNetherTask instanceof DefaultGoToDimensionTask dim) {
+                        dim.hardResetPortalBuild();
+                        goToNetherTask.stop();
+                    } else if (goToNetherTask != null) {
+                        goToNetherTask.stop();
+                    }
+                    // Drop cached dimension task so next enterNether() gets a fresh Construct
+                    goToNetherTask = null;
+                    portalPhaseTimerStarted = false;
+                    portalPhaseTimer.reset();
+                    return new TimeoutWanderTask(16, true);
                 }
-                // Drop cached dimension task so next enterNether() gets a fresh Construct
-                goToNetherTask = null;
-                portalPhaseTimerStarted = false;
-                portalPhaseTimer.reset();
-                return new TimeoutWanderTask(16, true);
             }
             // Progress exists - keep going but reset the watchdog
             portalPhaseTimer.reset();

@@ -130,6 +130,8 @@ public class ConstructNetherPortalBucketTask extends Task {
     private static java.lang.ref.WeakReference<Object> deepLakeWorld = new java.lang.ref.WeakReference<>(null);
     private static final int MID_LAKE_Y = 25;
     private int secondBucketIronLast = -1;
+    // S305 (Ostinato): walking toward ore is progress; S208 only fires when the player is also stationary.
+    private net.minecraft.util.math.Vec3d secondBucketIronLastPos = null;
     private Task secondBucketRelocate;
     // S297 (Ostinato): wall-clock cap so a stuck relocate wander cannot hold Construct idle (testrun-040808: 5+ min idle after S208).
     private long secondBucketRelocateStartMs = 0;
@@ -137,6 +139,8 @@ public class ConstructNetherPortalBucketTask extends Task {
     public boolean abortedForReacquire = false;
     private BlockPos portalOrigin = null;
     private final List<BlockPos> unportalableLakes = new ArrayList<>();
+    // S306 (Ostinato): lake that produced portalOrigin, so an unreachable frame blacklists it (testrun-080204: same y=43 lake re-picked every 5s for 2+ min).
+    private BlockPos portalLakePos = null;
     private Task getToLakeTask = null;
     private BlockPos currentDestroyTarget = null;
 
@@ -291,7 +295,10 @@ public class ConstructNetherPortalBucketTask extends Task {
                 secondBucketRelocate = null;
                 // S297: raw iron (26.x ore drop) counts as progress so smelting is not interrupted every 25s.
                 int ironProgress = iron + mod.getItemStorage().getItemCount(Items.RAW_IRON);
-                if (ironProgress != secondBucketIronLast) {
+                net.minecraft.util.math.Vec3d s305Pos = mod.getPlayer().getPos();
+                boolean s305Moved = secondBucketIronLastPos == null || s305Pos.distanceTo(secondBucketIronLastPos) > 4;
+                if (ironProgress != secondBucketIronLast || s305Moved) {
+                    secondBucketIronLastPos = s305Pos;
                     secondBucketIronLast = ironProgress;
                     secondBucketIronStallTimer.reset();
                 } else if (secondBucketIronStallTimer.elapsed()) {
@@ -303,7 +310,7 @@ public class ConstructNetherPortalBucketTask extends Task {
                 }
                 progressChecker.reset();
                 if (secondBucketIronLogTimer.elapsed()) {
-                    Debug.logMessage("Construct: need iron for 2nd bucket (iron=" + iron + " empty=" + emptyBuckets
+                    Debug.logMessage("Construct: need iron for 2nd bucket (iron=" + iron + " raw=" + mod.getItemStorage().getItemCount(Items.RAW_IRON) + " empty=" + emptyBuckets
                             + " water=" + waterBuckets + " lava=" + lavaBuckets + ")");
                     secondBucketIronLogTimer.reset();
                 }
@@ -359,6 +366,7 @@ public class ConstructNetherPortalBucketTask extends Task {
                         unportalableLakes.add(lavaPos);
                     } else {
                         portalOrigin = foundPortalRegion.add(PORTAL_ORIGIN_RELATIVE_TO_REGION);
+                        portalLakePos = lavaPos;
                         foundSpot = true;
 
                         getToLakeTask = new GetWithinRangeOfBlockTask(portalOrigin,7);
@@ -462,6 +470,8 @@ public class ConstructNetherPortalBucketTask extends Task {
             // We need to place obsidian here.
             if (mod.getBlockScanner().isUnreachable(framePos)) {
                 Debug.logMessage("Portal frame unreachable, picking a new lava lake spot");
+                if (portalLakePos != null) unportalableLakes.add(portalLakePos);
+                unportalableLakes.add(portalOrigin);
                 portalOrigin = null;
                 currentDestroyTarget = null;
                 return wanderTask;

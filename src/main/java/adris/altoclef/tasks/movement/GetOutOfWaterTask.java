@@ -37,6 +37,17 @@ public class GetOutOfWaterTask extends CustomBaritoneGoalTask {
     protected Task onTick() {
         AltoClef mod = AltoClef.getInstance();
 
+        // Ostinato: S312. testrun-102039 latched the escape at y=55 and drowned 18s later.
+        // GetOutOfWater was pathing, and the swim-up jump only runs when Baritone is not
+        // pathing, so the head never cleared. Below two-thirds air, cancel the path and jump.
+        if (mod.getPlayer().isSubmergedInWater()
+                && mod.getPlayer().getAir() < mod.getPlayer().getMaxAir() * 2 / 3) {
+            mod.getClientBaritone().getPathingBehavior().forceCancel();
+            mod.getClientBaritone().getCustomGoalProcess().onLostControl();
+            mod.getInputControls().hold(Input.JUMP);
+            return null;
+        }
+
         // get on the surface first
         if (mod.getPlayer().getAir() < mod.getPlayer().getMaxAir() || mod.getPlayer().isSubmergedInWater()) {
             return super.onTick();

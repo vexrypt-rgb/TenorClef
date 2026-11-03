@@ -180,6 +180,13 @@ public class WorldSurvivalChain extends SingleTaskChain {
         // Swim
         boolean avoidedDrowning = false;
         if (mod.getModSettings().shouldAvoidDrowning()) {
+            // Ostinato: S312. A path underwater used to skip this jump until the player drowned.
+            boolean airCritical = mod.getPlayer().isSubmergedInWater()
+                    && mod.getPlayer().getAir() < mod.getPlayer().getMaxAir() * 2 / 3;
+            if (airCritical) {
+                mod.getClientBaritone().getPathingBehavior().forceCancel();
+                mod.getClientBaritone().getCustomGoalProcess().onLostControl();
+            }
             if (!mod.getClientBaritone().getPathingBehavior().isPathing()) {
                 if (mod.getPlayer().isTouchingWater() && mod.getPlayer().getAir() < mod.getPlayer().getMaxAir()) {
                     // Swim up!

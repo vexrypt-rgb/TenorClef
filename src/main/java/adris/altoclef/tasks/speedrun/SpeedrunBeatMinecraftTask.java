@@ -502,14 +502,24 @@ public class SpeedrunBeatMinecraftTask extends Task {
      * Emergency food interrupt: short CollectFood only when critically hungry and empty.
      * Does NOT re-enable heavy CollectFood every run.
      */
+    private long emergencyFoodStartMs = 0L;
+    private long emergencyFoodCooldownUntilMs = 0L;
+
     private Task maybeEmergencyFood() {
         PlayerEntity player = mod.getPlayer();
         if (player == null) return null;
         int hunger = player.getHungerManager().getFoodLevel();
         float sat = player.getHungerManager().getSaturationLevel();
-        boolean critical = hunger <= 6 || (sat <= 0.05f && hunger <= 10);
+        // S304: hunger 7-10 with 0 saturation (fresh respawn) is not an emergency - sprint still
+        // works above 6. Run 071718 chased food for 4+ min at hunger=10 instead of the portal.
+        boolean critical = hunger <= 6;
         if (!critical) {
             emergencyFoodTask = null;
+            emergencyFoodStartMs = 0L;
+            return null;
+        }
+        long nowMs = System.currentTimeMillis();
+        if (nowMs < emergencyFoodCooldownUntilMs && hunger > 3) {
             return null;
         }
 
@@ -525,6 +535,15 @@ public class SpeedrunBeatMinecraftTask extends Task {
         if (emergencyFoodTask == null || emergencyFoodTask.isFinished() || emergencyFoodTask.stopped()) {
             Debug.logMessage("Speedrun: emergency food (hunger=" + hunger + ") collecting short @food");
             emergencyFoodTask = new CollectFoodTask(10);
+            emergencyFoodStartMs = nowMs;
+        }
+        // S304: cap a fruitless food hunt at 120s, then let the run continue for 90s.
+        if (emergencyFoodStartMs > 0L && nowMs - emergencyFoodStartMs > 120_000L && hunger > 3) {
+            Debug.logMessage("[S304] emergency food hunt >120s at hunger=" + hunger + " - resuming run, retry in 90s");
+            emergencyFoodTask = null;
+            emergencyFoodStartMs = 0L;
+            emergencyFoodCooldownUntilMs = nowMs + 90_000L;
+            return null;
         }
         setDebugState("Emergency food (hunger=" + hunger + ")");
         return emergencyFoodTask;

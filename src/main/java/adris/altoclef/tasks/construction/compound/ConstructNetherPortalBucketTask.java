@@ -599,6 +599,7 @@ public class ConstructNetherPortalBucketTask extends Task {
         BlockPos deepestFallback = null;
         double midSq = Double.POSITIVE_INFINITY;
         BlockPos midLake = null;
+        int deepestArea = 0;
         List<BlockPos> lavas = mod.getBlockScanner().getKnownLocations(Blocks.LAVA);
 
         if (!lavas.isEmpty()) {
@@ -635,6 +636,7 @@ public class ConstructNetherPortalBucketTask extends Task {
                 } else if (lakeDist < deepestFallbackSq) {
                     deepestFallbackSq = lakeDist;
                     deepestFallback = lakeAt;
+                    deepestArea = surface;
                 }
                 if (topY < SAFE_LAKE_Y && topY >= MID_LAKE_Y && lakeDist < midSq) {
                     midSq = lakeDist;
@@ -672,7 +674,10 @@ public class ConstructNetherPortalBucketTask extends Task {
             return midLake;
         }
         // S300: y<0 deepslate lakes (y=-55 in 055030) stalled S211 every time; wait 6 min for those.
-        long deepWaitMs = (deepestFallback != null && deepestFallback.getY() < 0) ? 360_000 : 180_000;
+        // Ostinato: S310. A wide open top at y>=12 is a cavern pool (testrun-102039: area 64 at
+        // y=17). The 3-minute surface wander walked into a skeleton and dropped the run to iron.
+        long deepWaitMs = deepestFallback == null ? LavaLakeWait.DEEP_MS
+                : LavaLakeWait.waitMs(deepestFallback.getY(), deepestArea);
         if (deepestFallback != null && System.currentTimeMillis() - deepLakeFirstSeenMs < deepWaitMs) {
             // S216: a deep lake (helmcap: y=9) cost 35min - a dark shaft then a stuck pillar-out. Keep
             // exploring the surface for up to 3 min before accepting one.
@@ -755,10 +760,9 @@ public class ConstructNetherPortalBucketTask extends Task {
     }
 
     private long pinWaitMs(int topY) {
-        if (topY >= SAFE_LAKE_Y) return 0;
-        if (topY >= MID_LAKE_Y) return 45_000L;
-        if (topY < 0) return 360_000L;
-        return 180_000L;
+        // Ostinato: S310. Same clock as the search, so the pin does not walk back early
+        // or hold a wide cavern pool for the old 3 minutes.
+        return LavaLakeWait.waitMs(topY, pinnedLakeSurface);
     }
 
     private boolean pinWaitElapsed() {

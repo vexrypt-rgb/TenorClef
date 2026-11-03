@@ -74,6 +74,24 @@ public class MazeCeilingPlaceTask extends Task {
         this.target = target;
         this.toPlace = toPlace;
         this.stray = stray;
+        this.thin = thin(toPlace);
+    }
+
+    // Ostinato: run113. A torch/lantern/candle cell: the click goes on the block under it, then a side; a torch never
+    // takes a ceiling underside, and the cell is satisfied by the item in any form (torch or wall_torch).
+    private final boolean thin;
+
+    static boolean thin(Block[] blocks) {
+        for (Block b : blocks) {
+            String p = net.minecraft.registry.Registries.BLOCK.getId(b).getPath();
+            if (p.contains("torch") || p.contains("lantern") || p.contains("candle") || p.equals("end_rod")) return true;
+        }
+        return false;
+    }
+
+    private Direction[] faceOrder() {
+        return thin ? new Direction[]{Direction.DOWN, Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST}
+                : new Direction[]{Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.DOWN};
     }
 
     @Override
@@ -265,7 +283,9 @@ public class MazeCeilingPlaceTask extends Task {
     }
 
     private boolean placed(AltoClef mod) {
-        return ArrayUtils.contains(toPlace, mod.getWorld().getBlockState(target).getBlock());
+        Block b = mod.getWorld().getBlockState(target).getBlock();
+        if (ArrayUtils.contains(toPlace, b)) return true;
+        return thin && b != net.minecraft.block.Blocks.AIR && ArrayUtils.contains(ItemHelper.blocksToItems(toPlace), b.asItem());
     }
 
     /**
@@ -398,7 +418,7 @@ public class MazeCeilingPlaceTask extends Task {
             for (Direction d : Direction.values()) if (rayHitsBlock(mod, eye, c.add(d.getOffsetX() * 0.45, d.getOffsetY() * 0.45, d.getOffsetZ() * 0.45), target)) return true;
             return false;
         }
-        for (Direction fromTarget : Direction.values()) {
+        for (Direction fromTarget : faceOrder()) {
             BlockPos against = target.offset(fromTarget);
             if (!support(mod, against)) continue;
             Direction face = fromTarget.getOpposite();
@@ -423,7 +443,7 @@ public class MazeCeilingPlaceTask extends Task {
         Vec3d eye = mod.getPlayer().getEyePos();
         Click fallback = null;
         // UP = the block above the hole (its down face). Sides next. DOWN = the block under the hole.
-        for (Direction fromTarget : new Direction[]{Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.DOWN}) {
+        for (Direction fromTarget : faceOrder()) {
             BlockPos against = target.offset(fromTarget);
             if (!support(mod, against)) continue;
             Direction face = fromTarget.getOpposite();

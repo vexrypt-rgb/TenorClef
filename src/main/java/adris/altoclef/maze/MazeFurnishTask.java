@@ -1034,7 +1034,10 @@ public class MazeFurnishTask extends Task {
                 // only break stands inside the solid floor; the builder dug down, fell in and wandered. Every full-block light
                 // goes direct now; the ring stand never stands on the target, and wall cells placed in ~1s each that way.
                 boolean direct = openBelow(mod, pos) || step.kind() == MazeFurnishPlan.Kind.LIGHT;
-                if (have.length > 0 && direct && !thinLight(have)) {
+                // Ostinato: run113. Room 4's repair torch 59,86,126 went to the builder ("Failed to place, wandering timeout") every
+                // round and the room failed LIGHT-CHECK. Torches take the direct task too; it clicks a floor top or a wall
+                // side, never a ceiling underside (see MazeCeilingPlaceTask.thin).
+                if (have.length > 0 && direct) {
                     // Ostinato: run91. A fresh task each restart of the tree (~1s) reset its bad-stand and walk timers, so an
                     // unreachable stand was walked at until the 30s stuck-defer. Keep one task per cell.
                     if (ceilTask == null || !ceilTask.target().equals(pos) || !java.util.Arrays.equals(ceilHave, have)) { ceilTask = new MazeCeilingPlaceTask(pos, have, this::isStray); ceilHave = have; }
@@ -1184,6 +1187,14 @@ public class MazeFurnishTask extends Task {
             if (b != null) {
                 out.add(b);
             }
+        }
+        // Ostinato: run113. A repair torch on a floor cell becomes wall_torch when only a side face is clickable (and the
+        // reverse), so the same torch item in either form satisfies the cell.
+        for (String[] pair : new String[][]{{"torch", "wall_torch"}, {"soul_torch", "soul_wall_torch"}, {"redstone_torch", "redstone_wall_torch"}}) {
+            Block a = McCompat.block(pair[0]), w = McCompat.block(pair[1]);
+            if (a == null || w == null) continue;
+            if (out.contains(a) && !out.contains(w)) out.add(w);
+            else if (out.contains(w) && !out.contains(a)) out.add(a);
         }
         return out;
     }

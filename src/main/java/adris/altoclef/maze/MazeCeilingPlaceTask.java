@@ -325,6 +325,7 @@ public class MazeCeilingPlaceTask extends Task {
         // nearest one to the player whose eye has a clear line to the target or to a solid neighbour's face.
         BlockPos feetNow = mod.getPlayer().getBlockPos();
         BlockPos best = null; double bestD = Double.MAX_VALUE;
+        BlockPos bestR = null; double bestRD = Double.MAX_VALUE; // Ostinato: run117, best stand the bot can walk to
         // Ostinato: 2026-11-02. Horizontal +-4 is the reach, not a room size. 5x5 and 11x11 place from the same local stand.
         for (int dx = -4; dx <= 4; dx++) for (int dz = -4; dz <= 4; dz++) for (int dy = -MazeReach.STAND_DOWN; dy <= 1; dy++) {
             BlockPos feet = target.add(dx, dy, dz);
@@ -339,7 +340,10 @@ public class MazeCeilingPlaceTask extends Task {
             // stands on the level the bot is working from.
             double d = feet.getSquaredDistance(feetNow) + 9 * Math.max(0, feetNow.getY() - feet.getY());
             if (d < bestD) { bestD = d; best = feet; }
+            if (d < bestRD && walkable(mod, feet)) { bestRD = d; bestR = feet; }
         }
+        if (bestR != null) best = bestR;
+        else if (best != null && !unwalkLogged) { unwalkLogged = true; System.out.println("MAZETEST FURNISH ceiling-ring-unwalkable " + target.toShortString() + " best=" + best.toShortString() + " reach=" + (reach == null ? 0 : reach.size())); }
         if (best != null) {
             if (!sideStandLogged) { sideStandLogged = true; System.out.println("MAZETEST FURNISH ceiling-ring-stand " + target.toShortString() + " from " + best.toShortString()); }
             return best;
@@ -440,8 +444,43 @@ public class MazeCeilingPlaceTask extends Task {
         return false;
     }
 
-    private static boolean open(AltoClef mod, BlockPos p) {
-        BlockState s = mod.getWorld().getBlockState(p);
+    // Ostinato: run117 room4. Seal 45,97..98,115 took ring stands 45,98,114 / 45,99,113 the pathfinder could not reach
+    // (open set 0 at 605 nodes, no-progress dist=3.8 ten times), both seals were skipped and the room failed verify.
+    // The ring prefers stands the bot can walk to now: a flood fill over 2-high standable cells (step up 1, drop up
+    // to 3), cached 2s. Stands only Baritone digging could reach stay as the fallback.
+    private java.util.Set<BlockPos> reach; private long reachTick = Long.MIN_VALUE / 2; private BlockPos reachFrom; private boolean unwalkLogged;
+    private boolean walkable(AltoClef mod, BlockPos feet) {
+        long now = mod.getWorld().getTime();
+        BlockPos from = mod.getPlayer().getBlockPos();
+        if (reach == null || now - reachTick > 40 || !from.equals(reachFrom)) {
+            reachTick = now; reachFrom = from; reach = new java.util.HashSet<>();
+            java.util.ArrayDeque<BlockPos> q = new java.util.ArrayDeque<>();
+            reach.add(from); q.add(from);
+            while (!q.isEmpty() && reach.size() < 6000) {
+                BlockPos c = q.poll();
+                for (Direction d : new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST}) {
+                    BlockPos n = c.offset(d);
+                    if (Math.abs(n.getX() - from.getX()) > 24 || Math.abs(n.getZ() - from.getZ()) > 24) continue;
+                    BlockPos up = n.up();
+                    if (open(mod, c.up(2)) && standable(mod, up)) { if (reach.add(up)) q.add(up); }
+                    if (standable(mod, n)) { if (reach.add(n)) q.add(n); continue; }
+                    if (!(open(mod, n) && open(mod, n.up()))) continue;
+                    for (int k = 1; k <= 3; k++) {
+                        BlockPos f = n.down(k);
+                        if (!open(mod, f)) break;
+                        if (support(mod, f.down())) { if (reach.add(f)) q.add(f); break; }
+                    }
+                }
+            }
+        }
+        return reach.contains(feet);
+    }
+
+    private static boolean standable(AltoClef mod, BlockPos f) {
+        return support(mod, f.down()) && open(mod, f) && open(mod, f.up());
+    }
+
+    private static boolean open(AltoClef mod, BlockPos p) {        BlockState s = mod.getWorld().getBlockState(p);
         return s.isAir() || s.getCollisionShape(mod.getWorld(), p).isEmpty();
     }
 

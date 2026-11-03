@@ -1,12 +1,12 @@
 package adris.altoclef.tasks.resources;
 
 import adris.altoclef.AltoClef;
+import adris.altoclef.multiversion.versionedfields.Blocks;
 import adris.altoclef.tasks.InteractWithBlockTask;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.ItemTarget;
 import adris.altoclef.util.helpers.ItemHelper;
 import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -21,6 +21,11 @@ public class ReplantTreesTask extends Task {
     private static final Block[] GROUND = {Blocks.GRASS_BLOCK, Blocks.DIRT, Blocks.COARSE_DIRT, Blocks.PODZOL, Blocks.ROOTED_DIRT,
             Blocks.MOSS_BLOCK, Blocks.MUD};
     private static final int RADIUS = 10;
+    // Ostinato: 2026-11-03, tree clearance. Cherry/large oak need ~7 air above and a wider footprint; 2 air + 2-block
+    // spacing let saplings sit under overhangs or crowd each other and never grow.
+    private static final int CLEAR_UP = 7;
+    private static final int SPACING = 3;
+    private static final int CROWN = 2;
 
     private final int want;
     private final int maxTicks;
@@ -65,14 +70,14 @@ public class ReplantTreesTask extends Task {
         return new InteractWithBlockTask(new ItemTarget(ItemHelper.SAPLINGS, 1), Direction.UP, spot.down(), true);
     }
 
-    /** Open, sky-lit ground with no log or sapling within 2 blocks (room for a tree to grow). */
+    /** Open, sky-lit ground with {@link #CLEAR_UP} air above, an open crown, and no log or sapling within {@link #SPACING}. */
     private static BlockPos findSpot(AltoClef mod) {
         BlockPos c = mod.getPlayer().getBlockPos();
         BlockPos best = null;
         double bestD = Double.MAX_VALUE;
         for (int dx = -RADIUS; dx <= RADIUS; dx++) for (int dz = -RADIUS; dz <= RADIUS; dz++) for (int dy = -4; dy <= 4; dy++) {
             BlockPos s = c.add(dx, dy, dz);
-            if (!mod.getWorld().getBlockState(s).isAir() || !mod.getWorld().getBlockState(s.up()).isAir()) continue;
+            if (!clearAbove(mod, s)) continue;
             Block g = mod.getWorld().getBlockState(s.down()).getBlock();
             boolean ok = false;
             for (Block b : GROUND) if (b == g) { ok = true; break; }
@@ -84,8 +89,19 @@ public class ReplantTreesTask extends Task {
         return best;
     }
 
+    /** Ostinato: trunk column air for CLEAR_UP blocks, and the crown band (y+3..CLEAR_UP-1, radius CROWN) free of solids. */
+    private static boolean clearAbove(AltoClef mod, BlockPos s) {
+        for (int dy = 0; dy < CLEAR_UP; dy++) if (!mod.getWorld().getBlockState(s.up(dy)).isAir()) return false;
+        for (int dy = 3; dy < CLEAR_UP; dy++) for (int dx = -CROWN; dx <= CROWN; dx++) for (int dz = -CROWN; dz <= CROWN; dz++) {
+            if (dx == 0 && dz == 0) continue;
+            var st = mod.getWorld().getBlockState(s.add(dx, dy, dz));
+            if (!st.isAir() && !is(st.getBlock(), ItemHelper.LEAVES)) return false;
+        }
+        return true;
+    }
+
     private static boolean crowded(AltoClef mod, BlockPos s) {
-        for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++) for (int dy = 0; dy <= 1; dy++) {
+        for (int dx = -SPACING; dx <= SPACING; dx++) for (int dz = -SPACING; dz <= SPACING; dz++) for (int dy = -1; dy <= 2; dy++) {
             Block b = mod.getWorld().getBlockState(s.add(dx, dy, dz)).getBlock();
             if (is(b, ItemHelper.LOG) || is(b, ItemHelper.SAPLINGS)) return true;
         }

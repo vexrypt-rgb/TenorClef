@@ -485,6 +485,14 @@ public class MazeFurnishTask extends Task {
                     if (cells.length() < 400) cells.append(' ').append(s.kind()).append('@').append(s.x()).append(',').append(s.y()).append(',').append(s.z());
                 }
             }
+            // Ostinato: run120 mono_yellow. Repair rounds 2-3 re-tried the same LIGHT+SEAL pair from the same dead stands for
+            // ~1.5 min each with zero progress. A sweep that finds exactly the cells the previous sweep found made no progress:
+            // stop repairing and hand to verify instead of burning another round.
+            if (!wrong.isEmpty() && repairRounds >= 2 && wrong.equals(lastRepairWrong)) {
+                System.out.println("MAZETEST FURNISH repair-no-progress round=" + repairRounds + " cells=" + wrong.size() + cells);
+                repairDone = true; return null;
+            }
+            lastRepairWrong = new java.util.ArrayList<>(wrong);
             if (!wrong.isEmpty()) {
                 repairRounds++;
                 // Ostinato: run93 room 1. Four lights were wrong after the seal; the bot was outside a room enclosed by
@@ -523,6 +531,7 @@ public class MazeFurnishTask extends Task {
 
     private MazeCeilingPlaceTask ceilTask; private Block[] ceilHave; // Ostinato: run91
     private int repairRounds; private boolean repairCleanLogged; // Ostinato: run62
+    private java.util.List<Integer> lastRepairWrong; // Ostinato: run120 repair watchdog
     // Ostinato: run92 room 3 FAIL 3 cells short after one repair round. A skip on the stuck path moved index past the end
     // outside the step loop, so isFinished() was true before the next tick could run the sweep: rounds 2-3 never ran.
     private boolean repairDone;

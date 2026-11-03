@@ -355,6 +355,17 @@ public class MazeCeilingPlaceTask extends Task {
             if (d < bestRD && walkable(mod, feet)) { bestRD = d; bestR = feet; }
         }
         if (bestR != null) best = bestR;
+        // Ostinato: run120 room mono_yellow. Light -36,88,-5 / seal -37,84,-4 (7-high room edge) had no walk-reachable ring
+        // stand, so the ring returned unwalkable perches on the shell (-34,85,-4, -35,86,-3 ...): each burned 12s as
+        // no-progress, the pillar fallback below was never reached, and 3 repair rounds ended in FAIL. When no ring stand is
+        // walkable, pillar up from the floor first; an unwalkable perch is only the last resort.
+        else if (best != null) {
+            BlockPos pillar = pillarStand(mod);
+            if (pillar != null) {
+                if (!pillar.equals(pillarLogged)) { pillarLogged = pillar; System.out.println("MAZETEST FURNISH ceiling-pillar-stand " + target.toShortString() + " from " + pillar.toShortString() + " rejected=" + badStands.size() + " (ring unwalkable)"); }
+                return pillar;
+            }
+        }
         else if (best != null && !unwalkLogged) { unwalkLogged = true; System.out.println("MAZETEST FURNISH ceiling-ring-unwalkable " + target.toShortString() + " best=" + best.toShortString() + " reach=" + (reach == null ? 0 : reach.size())); }
         if (best != null) {
             if (!sideStandLogged) { sideStandLogged = true; System.out.println("MAZETEST FURNISH ceiling-ring-stand " + target.toShortString() + " from " + best.toShortString()); }

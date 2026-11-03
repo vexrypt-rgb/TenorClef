@@ -141,6 +141,14 @@ public class ConstructNetherPortalBucketTask extends Task {
     private final List<BlockPos> unportalableLakes = new ArrayList<>();
     // S306 (Ostinato): lake that produced portalOrigin, so an unreachable frame blacklists it (testrun-080204: same y=43 lake re-picked every 5s for 2+ min).
     private BlockPos portalLakePos = null;
+    // Ostinato: S308. S216 defers a lake, then TimeoutWanderTask(60) leaves render distance and the
+    // scanner forgets it. testrun-090756: y=33 surface=64 at 09:29:58, only surface=0 left by 09:31.
+    // Pin the best open surface (by top Y) and walk back once its wait elapses.
+    private BlockPos pinnedLake = null;
+    private int pinnedLakeTopY = Integer.MIN_VALUE;
+    private int pinnedLakeSurface = 0;
+    private long pinnedLakeSeenMs = 0;
+    private java.lang.ref.WeakReference<Object> pinnedWorld = new java.lang.ref.WeakReference<>(null);
     private Task getToLakeTask = null;
     private BlockPos currentDestroyTarget = null;
 
@@ -356,6 +364,20 @@ public class ConstructNetherPortalBucketTask extends Task {
                 lavaSearchTimer.reset();
                 Debug.logMessage("(Searching for lava lake with portalable spot nearby...)");
                 BlockPos lavaPos = findLavaLake(mod, mod.getPlayer().getBlockPos());
+                if (lavaPos != null && mod.getPlayer().getBlockPos().getSquaredDistance(lavaPos) > 32 * 32) {
+                    // Ostinato: S308. Region scan from out of range blacklists a good lake
+                    // (unloaded chunks read as air). Close in; the tick below keeps walking.
+                    boolean needNew = true;
+                    if (lakeWander instanceof GetWithinRangeOfBlockTask near && near.blockPos.equals(lavaPos)) {
+                        try { needNew = lakeWander.isFinished(); }
+                        catch (NullPointerException npe) { needNew = false; }
+                    }
+                    if (needNew) {
+                        Debug.logMessage("[S308] closing distance to lava " + lavaPos.toShortString());
+                        lakeWander = new GetWithinRangeOfBlockTask(lavaPos, 24);
+                    }
+                    return lakeWander;
+                }
                 if (lavaPos != null) {
                     // We have a lava lake, set our portal origin!
                     BlockPos foundPortalRegion = getPortalableRegion(mod, lavaPos, mod.getPlayer().getBlockPos(), new Vec3i(-1, 0, 0), PORTALABLE_REGION_SIZE, 48);
@@ -364,6 +386,8 @@ public class ConstructNetherPortalBucketTask extends Task {
                         // S229: remember it, or the next search re-picks the same lake forever
                         // (chainlog: 14 bail/wander cycles over the ocean around one y=6 lake).
                         unportalableLakes.add(lavaPos);
+                        // Ostinato: S308. Drop the pin too, or we walk back onto a lake we just rejected.
+                        if (pinnedLake != null && BlockPosVer.isWithinDistance(pinnedLake, lavaPos, 16)) pinnedLake = null;
                     } else {
                         portalOrigin = foundPortalRegion.add(PORTAL_ORIGIN_RELATIVE_TO_REGION);
                         portalLakePos = lavaPos;
@@ -379,6 +403,25 @@ public class ConstructNetherPortalBucketTask extends Task {
 
             if (!foundSpot) {
                 setDebugState("(timeout: Looking for lava lake)");
+                // Ostinato: S308. Wait elapsed but the pin unloaded (or we are still far). Walk
+                // back before the 60-block wander. Do not call getPortalableRegion from out of range:
+                // unloaded chunks look like air and the lake gets blacklisted.
+                if (pinnedLake != null && pinWaitElapsed() && pinnedWorld.get() == mod.getWorld()
+                        && (mod.getPlayer().getBlockPos().getSquaredDistance(pinnedLake) > 32 * 32
+                        || !mod.getChunkTracker().isChunkLoaded(pinnedLake))) {
+                    setDebugState("[S308] walking back to pinned lava " + pinnedLake.toShortString());
+                    boolean needNew = true;
+                    if (lakeWander instanceof GetWithinRangeOfBlockTask near && near.blockPos.equals(pinnedLake)) {
+                        try { needNew = lakeWander.isFinished(); }
+                        catch (NullPointerException npe) { needNew = false; }
+                    }
+                    if (needNew) {
+                        Debug.logMessage("[S308] walking back to pinned lava " + pinnedLake.toShortString()
+                                + " topY=" + pinnedLakeTopY);
+                        lakeWander = new GetWithinRangeOfBlockTask(pinnedLake, 24);
+                    }
+                    return lakeWander;
+                }
                 // S318: a fresh TimeoutWanderTask every tick restarted the wander before it went
                 // anywhere; s314t jittered around -485,64,690 for 10 minutes. Reuse one.
                 boolean wanderDone;
@@ -573,21 +616,29 @@ public class ConstructNetherPortalBucketTask extends Task {
                 // S300: depth floods up/down too, so a lavafall column or a deep stacked lake
                 // scored as a "lake" and the cast stalled (S211) beside it. Require an open,
                 // standable top surface: horizontal still sources with air above.
-                int surface = lavaSurfaceArea(pos);
-                Debug.logMessage("Found with depth " + depth + " surface=" + surface);
-                if (depth < 12 || surface < 6) continue;
-                if (pos.getY() >= SAFE_LAKE_Y) {
-                    if (sqDist < nearestSqDistance) {
-                        nearestSqDistance = sqDist;
-                        nearestLake = pos;
+                // Ostinato: S308. Classify by that open top, not the scanner block. A y=-55
+                // block in the same pool was deferring a lake whose air-above surface sits higher.
+                LavaSurface surf = openLavaSurface(pos);
+                int surface = surf.area;
+                Debug.logMessage("Found with depth " + depth + " surface=" + surface
+                        + (surf.top != null ? " topY=" + surf.top.getY() : ""));
+                if (depth < 12 || surface < 6 || surf.top == null) continue;
+                BlockPos lakeAt = surf.top;
+                int topY = lakeAt.getY();
+                considerPin(mod, lakeAt, surface);
+                double lakeDist = playerPos.getSquaredDistance(lakeAt);
+                if (topY >= SAFE_LAKE_Y) {
+                    if (lakeDist < nearestSqDistance) {
+                        nearestSqDistance = lakeDist;
+                        nearestLake = lakeAt;
                     }
-                } else if (sqDist < deepestFallbackSq) {
-                    deepestFallbackSq = sqDist;
-                    deepestFallback = pos;
+                } else if (lakeDist < deepestFallbackSq) {
+                    deepestFallbackSq = lakeDist;
+                    deepestFallback = lakeAt;
                 }
-                if (pos.getY() < SAFE_LAKE_Y && pos.getY() >= MID_LAKE_Y && sqDist < midSq) {
-                    midSq = sqDist;
-                    midLake = pos;
+                if (topY < SAFE_LAKE_Y && topY >= MID_LAKE_Y && lakeDist < midSq) {
+                    midSq = lakeDist;
+                    midLake = lakeAt;
                 }
             }
         }
@@ -596,6 +647,16 @@ public class ConstructNetherPortalBucketTask extends Task {
                     + nearestLake.getY() + " (surface, safe)");
             deepTarget = null;
             return nearestLake;
+        }
+        // Ostinato: S308. The lake we pinned may have left the scanner while we looked for
+        // something higher. Once its own wait is up and we are close enough to judge the
+        // portal spot, use it instead of starting the search over.
+        BlockPos pinnedReady = readyPin(mod);
+        if (pinnedReady != null) {
+            Debug.logMessage("[S308] accepting pinned lava " + pinnedReady.toShortString()
+                    + " topY=" + pinnedLakeTopY + " area=" + pinnedLakeSurface);
+            deepTarget = null;
+            return pinnedReady;
         }
         if (deepLakeWorld.get() != mod.getWorld()) {
             // Static so it survives this task being rebuilt, which also made it survive into the next world.
@@ -632,11 +693,24 @@ public class ConstructNetherPortalBucketTask extends Task {
 
     /** S300: count still lava sources on the top layer (air above) connected horizontally to start's top. */
     static int lavaSurfaceArea(BlockPos start) {
+        return openLavaSurface(start).area;
+    }
+
+    /** Open lava surface: the top still-source with air above, plus how many such sources sit beside it. */
+    private static final class LavaSurface {
+        final BlockPos top;
+        final int area;
+        LavaSurface(BlockPos top, int area) { this.top = top; this.area = area; }
+        static final LavaSurface NONE = new LavaSurface(null, 0);
+    }
+
+    // Ostinato: S308. Climb the column (was 24) so a deep scanned block is judged by its open top.
+    private static LavaSurface openLavaSurface(BlockPos start) {
         var world = MinecraftClient.getInstance().world;
-        if (world == null) return 0;
+        if (world == null) return LavaSurface.NONE;
         BlockPos top = start;
-        for (int i = 0; i < 24 && world.getBlockState(top.up()).getBlock() == Blocks.LAVA; i++) top = top.up();
-        if (!world.getBlockState(top.up()).isAir()) return 0;
+        for (int i = 0; i < 128 && world.getBlockState(top.up()).getBlock() == Blocks.LAVA; i++) top = top.up();
+        if (!world.getBlockState(top.up()).isAir()) return LavaSurface.NONE;
         HashSet<BlockPos> seen = new HashSet<>();
         ArrayDeque<BlockPos> q = new ArrayDeque<>();
         q.add(top);
@@ -651,7 +725,60 @@ public class ConstructNetherPortalBucketTask extends Task {
             n++;
             q.add(b.north()); q.add(b.south()); q.add(b.east()); q.add(b.west());
         }
-        return n;
+        if (n == 0) return LavaSurface.NONE;
+        return new LavaSurface(top.toImmutable(), n);
+    }
+
+    /** Ostinato: S308. Keep the highest open lava surface we have seen in this world. */
+    private void considerPin(AltoClef mod, BlockPos top, int area) {
+        if (top == null || area < 6) return;
+        if (pinnedWorld.get() != mod.getWorld()) {
+            pinnedWorld = new java.lang.ref.WeakReference<>(mod.getWorld());
+            pinnedLake = null;
+            pinnedLakeTopY = Integer.MIN_VALUE;
+            pinnedLakeSurface = 0;
+            pinnedLakeSeenMs = 0;
+        }
+        if (unportalableLakes.stream().anyMatch(b -> BlockPosVer.isWithinDistance(b, top, 16))) return;
+        int topY = top.getY();
+        boolean better = pinnedLake == null || topY > pinnedLakeTopY
+                || (topY == pinnedLakeTopY && area > pinnedLakeSurface);
+        if (!better) return;
+        boolean same = pinnedLake != null && pinnedLake.equals(top);
+        pinnedLake = top.toImmutable();
+        pinnedLakeTopY = topY;
+        pinnedLakeSurface = area;
+        if (!same) {
+            pinnedLakeSeenMs = System.currentTimeMillis();
+            Debug.logMessage("[S308] pinning open lava at " + pinnedLake.toShortString() + " area=" + area);
+        }
+    }
+
+    private long pinWaitMs(int topY) {
+        if (topY >= SAFE_LAKE_Y) return 0;
+        if (topY >= MID_LAKE_Y) return 45_000L;
+        if (topY < 0) return 360_000L;
+        return 180_000L;
+    }
+
+    private boolean pinWaitElapsed() {
+        return pinnedLake != null && System.currentTimeMillis() - pinnedLakeSeenMs >= pinWaitMs(pinnedLakeTopY);
+    }
+
+    /** Pin is usable only once we are close enough that the portal-region scan sees real blocks. */
+    private BlockPos readyPin(AltoClef mod) {
+        if (pinnedLake == null || pinnedWorld.get() != mod.getWorld()) {
+            if (pinnedWorld.get() != mod.getWorld()) pinnedLake = null;
+            return null;
+        }
+        if (!pinWaitElapsed()) return null;
+        if (unportalableLakes.stream().anyMatch(b -> BlockPosVer.isWithinDistance(b, pinnedLake, 16))) {
+            pinnedLake = null;
+            return null;
+        }
+        if (!mod.getChunkTracker().isChunkLoaded(pinnedLake)) return null;
+        if (mod.getPlayer().getBlockPos().getSquaredDistance(pinnedLake) > 32 * 32) return null;
+        return pinnedLake;
     }
 
     private int getNumberOfBlocksAdjacent(HashSet<BlockPos> alreadyExplored, BlockPos start) {

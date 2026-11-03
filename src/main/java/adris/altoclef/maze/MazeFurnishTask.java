@@ -1108,8 +1108,17 @@ public class MazeFurnishTask extends Task {
                         if (!alt.contains(b) && mod.getItemStorage().hasItem(b.asItem())) alt.add(b);
                     have = alt.toArray(new Block[0]);
                 }
+                // Ostinato: run116 room3. Seals -24..-22,91..93 went to PlaceBlockTask ("Letting baritone place a block"); the
+                // bot stood at -26,85,-1 inside the finished room, 6 under the targets, for 30 min (skip-seal why=stuck x61,
+                // seal 0/64, ROOM FAIL). A held seal block takes the direct stand-and-click task like lights and containers:
+                // its ring search picks a stand that can raycast a solid neighbour's face (the roof top from outside), walks
+                // there, and drops stands it cannot reach or see from. Only an empty inventory still goes to the builder.
+                if (have.length > 0) {
+                    if (ceilTask == null || !ceilTask.target().equals(pos) || !java.util.Arrays.equals(ceilHave, have)) { ceilTask = new MazeCeilingPlaceTask(pos, have, this::isStray); ceilHave = have; }
+                    return ceilTask;
+                }
                 // Falls back to throwaways (dirt, cobble) so the shaft is never left open.
-                return new PlaceBlockTask(pos, have.length == 0 ? wanted.toArray(new Block[0]) : have, true, false);
+                return new PlaceBlockTask(pos, wanted.toArray(new Block[0]), true, false);
             }
             case FILL: {
                 if (state.isAir()) {

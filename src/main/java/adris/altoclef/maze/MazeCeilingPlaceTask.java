@@ -65,6 +65,11 @@ public class MazeCeilingPlaceTask extends Task {
     private final java.util.Set<BlockPos> badStands;
     private BlockPos pillarLogged; // Ostinato: run118
 
+    // Ostinato: run138 lobby. Ceiling y=92 cells took ring stands 4-5 blocks off (-49,92,-11 for -47,92,-8) that the
+    // flood fill called walkable but the bot never reached: each burned 12s as no-progress, then the next far stand, then
+    // skip-seal SEAL-LEFT-OPEN. Once a cell has lost a stand to no-progress/timeout it escalates: pillar under/near the
+    // cell first, ring stands only when no pillar column works. Kept per cell like REJECTED.
+    private static final java.util.Set<BlockPos> ESCALATED = java.util.Collections.synchronizedSet(new java.util.HashSet<>());
     static synchronized java.util.Set<BlockPos> rejectedFor(BlockPos t) {
         if (REJECTED.size() > 4096) REJECTED.clear();
         return REJECTED.computeIfAbsent(t.toImmutable(), k -> java.util.Collections.synchronizedSet(new java.util.HashSet<>()));
@@ -172,6 +177,7 @@ public class MazeCeilingPlaceTask extends Task {
                 System.out.println("MAZETEST FURNISH ceiling-unreachable-stand " + stand.toShortString() + " for " + target.toShortString()
                         + (walkIdle > 240 ? " no-progress dist=" + String.format("%.1f", dist) : ""));
                 badStands.add(stand); going = null; walkStand = null;
+                if (ESCALATED.add(target.toImmutable())) System.out.println("MAZETEST FURNISH ceiling-stand-too-far " + target.toShortString() + " stand=" + stand.toShortString() + " escalate=pillar"); // Ostinato: run138
                 return stay("New stand for " + target.toShortString());
             }
             if (!stand.equals(going)) {
@@ -311,6 +317,14 @@ public class MazeCeilingPlaceTask extends Task {
         // (room air under it, solid above). For a floor cell they found pits under the floor (9,88,-151 got stand
         // 10,86,-151, 9,88,-150 got 9,87,-149): unreachable, 30s each, then skip-light. Walls and floors take the ring.
         boolean ceiling = open(mod, target.down()) && !open(mod, target.up());
+        // Ostinato: run138. Escalated cell: pillar-under-cell before any further ring/far stand.
+        if (ESCALATED.contains(target)) {
+            BlockPos pillar = pillarStand(mod);
+            if (pillar != null) {
+                if (!pillar.equals(pillarLogged)) { pillarLogged = pillar; System.out.println("MAZETEST FURNISH ceiling-pillar-stand " + target.toShortString() + " from " + pillar.toShortString() + " rejected=" + badStands.size() + " (escalated)"); }
+                return pillar;
+            }
+        }
         // Same column, but the head must stay under the target: feet <= target - 2.
         // Ostinato: 2026-11-02. Down to the floor of a clear-height-6 room (feet 6 under the ceiling block), not a fixed 7-wide room.
         if (ceiling) for (int y = target.getY() - 2; y >= target.getY() - MazeReach.STAND_DOWN && y > mod.getWorld().getBottomY(); y--) {
@@ -351,6 +365,10 @@ public class MazeCeilingPlaceTask extends Task {
             // Ostinato: run96. A stand below the bot's feet is usually a pit or a cave pocket under the floor; prefer
             // stands on the level the bot is working from.
             double d = feet.getSquaredDistance(feetNow) + 9 * Math.max(0, feetNow.getY() - feet.getY());
+            // Ostinato: run138. A perch at ceiling height (feet >= target-1) beside a ceiling cell is a wall top / ledge the
+            // bot rarely reaches; rank it behind floor stands, and favour stands whose eye is close to the cell.
+            if (ceiling && feet.getY() > target.getY() - 2) d += 64;
+            d += 4 * eye.squaredDistanceTo(Vec3d.ofCenter(target));
             if (d < bestD) { bestD = d; best = feet; }
             if (d < bestRD && walkable(mod, feet)) { bestRD = d; bestR = feet; }
         }

@@ -1033,7 +1033,11 @@ public class MazeFurnishTask extends Task {
                 // refuses a stand above the block (goalBreakFromAbove is off), so a floor cell under open room air has its
                 // only break stands inside the solid floor; the builder dug down, fell in and wandered. Every full-block light
                 // goes direct now; the ring stand never stands on the target, and wall cells placed in ~1s each that way.
-                boolean direct = openBelow(mod, pos) || step.kind() == MazeFurnishPlan.Kind.LIGHT;
+                boolean direct = openBelow(mod, pos) || step.kind() == MazeFurnishPlan.Kind.LIGHT
+                        // Ostinato: run114. Room 1's barrel -31,88,-20 went to PlaceBlockTask; the bot stood next to it holding
+                        // the barrel for 120s (skip-container why=stuck x4, ROOM FAIL). A container is a full block on the floor's
+                        // air row: the direct task clicks the floor top or a wall side from a room stand, as the lights do.
+                        || step.kind() == MazeFurnishPlan.Kind.CONTAINER;
                 // Ostinato: run113. Room 4's repair torch 59,86,126 went to the builder ("Failed to place, wandering timeout") every
                 // round and the room failed LIGHT-CHECK. Torches take the direct task too; it clicks a floor top or a wall
                 // side, never a ceiling underside (see MazeCeilingPlaceTask.thin).

@@ -131,6 +131,8 @@ public class ConstructNetherPortalBucketTask extends Task {
     private static final int MID_LAKE_Y = 25;
     private int secondBucketIronLast = -1;
     private Task secondBucketRelocate;
+    // S297 (Ostinato): wall-clock cap so a stuck relocate wander cannot hold Construct idle (testrun-040808: 5+ min idle after S208).
+    private long secondBucketRelocateStartMs = 0;
     /** Set when Construct gives up so EarlyOverworld can tear down goToNether and re-acquire. */
     public boolean abortedForReacquire = false;
     private BlockPos portalOrigin = null;
@@ -282,16 +284,21 @@ public class ConstructNetherPortalBucketTask extends Task {
             int iron = mod.getItemStorage().getItemCount(Items.IRON_INGOT);
             if (iron < 3) {
                 setDebugState("Mining iron for 2nd bucket at lava");
-                if (secondBucketRelocate != null && secondBucketRelocate.isActive() && !secondBucketRelocate.isFinished()) {
+                if (secondBucketRelocate != null && secondBucketRelocate.isActive() && !secondBucketRelocate.isFinished()
+                        && System.currentTimeMillis() - secondBucketRelocateStartMs < 20_000) {
                     return secondBucketRelocate;
                 }
-                if (iron != secondBucketIronLast) {
-                    secondBucketIronLast = iron;
+                secondBucketRelocate = null;
+                // S297: raw iron (26.x ore drop) counts as progress so smelting is not interrupted every 25s.
+                int ironProgress = iron + mod.getItemStorage().getItemCount(Items.RAW_IRON);
+                if (ironProgress != secondBucketIronLast) {
+                    secondBucketIronLast = ironProgress;
                     secondBucketIronStallTimer.reset();
                 } else if (secondBucketIronStallTimer.elapsed()) {
                     secondBucketIronStallTimer.reset();
                     Debug.logWarning("[S208] 2nd-bucket iron stalled 25s at iron=" + iron + " - relocating");
                     secondBucketRelocate = new TimeoutWanderTask(12);
+                    secondBucketRelocateStartMs = System.currentTimeMillis();
                     return secondBucketRelocate;
                 }
                 progressChecker.reset();

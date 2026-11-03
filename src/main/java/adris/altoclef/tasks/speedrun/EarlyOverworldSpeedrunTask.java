@@ -243,16 +243,36 @@ public class EarlyOverworldSpeedrunTask extends Task {
         if (!hasIronPick) {
             boolean canMineIron = StorageHelper.miningRequirementMetInventory(mod, MiningRequirement.STONE)
                     || StorageHelper.miningRequirementMetInventory(mod, MiningRequirement.IRON);
+            if (ironStallWander != null) {
+                if (!ironStallWander.isFinished() && System.currentTimeMillis() < ironStallWanderUntilMs) {
+                    setDebugState("Iron stall: wandering for a new ore route");
+                    return ironStallWander;
+                }
+                ironStallWander = null;
+                ironPickTimer.reset();
+            }
             if (canMineIron) {
                 if (!ironPickTimerStarted) {
                     ironPickTimerStarted = true;
                     ironPickTimer.reset();
                     Debug.logMessage("EarlyOverworld: starting iron pick (stone tools ready)");
-                } else if (ironPickTimer.elapsed()) {
+                }
+                // Ostinato: S296. The >90s wander fired at 04:04:48 (testrun-20261103-035940) while 3 raw iron sat in the
+                // just-placed furnace, so the bot walked off and lost the iron (3/3 -> 0/3). Iron progress resets the
+                // stall timer, and once we hold enough iron the smelt/craft is never interrupted by the wander.
+                int ironNow = StorageHelper.getItemCount(mod, Items.RAW_IRON, Items.IRON_ORE, Items.IRON_INGOT);
+                if (ironNow != ironTimerLastCount) {
+                    ironTimerLastCount = ironNow;
+                    ironPickTimer.reset();
+                }
+                if (ironNow < 3 && ironPickTimer.elapsed()) {
                     Debug.logMessage("EarlyOverworld: iron pick >90s - close screen + wander");
                     StorageHelper.closeScreen();
                     ironPickTimer.reset();
-                    return new TimeoutWanderTask(24, true);
+                    // Ostinato: S296 keep returning the same wander until it finishes (was dropped after one tick).
+                    ironStallWander = new TimeoutWanderTask(24, true);
+                    ironStallWanderUntilMs = System.currentTimeMillis() + 25_000;
+                    return ironStallWander;
                 }
             } else {
                 ironPickTimerStarted = false;
@@ -537,6 +557,10 @@ public class EarlyOverworldSpeedrunTask extends Task {
         hasBasicArmor = true;
         return null;
     }
+
+    private int ironTimerLastCount = -1; // Ostinato: S296
+    private Task ironStallWander = null; // Ostinato: S296
+    private long ironStallWanderUntilMs = 0;
 
     private Task ensureIronPick() {
         // Hard gate: never chase iron with only a wooden pick

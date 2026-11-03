@@ -400,6 +400,22 @@ public class DestroyBlockTask extends Task implements ITaskRequiresGrounded {
         // Water bob thrash: crosshair cannot stay on the block while floating.
         // Prefer shore / solid footing before continuing the break (issue class #2377).
         Optional<Rotation> reach = LookHelper.getReach(pos);
+        // Ostinato override of Baritone RotationUtils.reachable (S295): on 26.3 it returned empty while the bot stood on /
+        // beside the target and a plain eye->center raycast hit the target (IRON_PICK sat at dist=0.7 for 10+ min,
+        // log testrun-20261103-035940 "S295 reach-miss ... hit=<target>"). Trust the vanilla raycast in that case.
+        if (!reach.isPresent()) {
+            try {
+                net.minecraft.util.math.Vec3d eye0 = LookHelper.getCameraPos(mod);
+                net.minecraft.util.math.Vec3d center0 = net.minecraft.util.math.Vec3d.ofCenter(pos);
+                double rd = mod.getClientBaritone().getPlayerContext().playerController().getBlockReachDistance();
+                if (eye0.distanceTo(center0) <= rd) {
+                    net.minecraft.util.hit.BlockHitResult h0 = LookHelper.raycast(mod.getPlayer(), eye0, center0, rd);
+                    if (h0.getType() == net.minecraft.util.hit.HitResult.Type.BLOCK && h0.getBlockPos().equals(pos)) {
+                        reach = Optional.of(LookHelper.getLookRotation(mod, center0));
+                    }
+                }
+            } catch (Throwable ignored) {}
+        }
         if (wet && !grounded) {
             waterBobTicks++;
             isMining = false;
@@ -475,6 +491,26 @@ public class DestroyBlockTask extends Task implements ITaskRequiresGrounded {
             } else {
                 isMining = false;
             }
+            // Ostinato: S295 instrumentation. IRON_PICK sat at dist=0.7 with reach=false for 10+ min; log why the reach test fails.
+            if (!reach.isPresent() && System.currentTimeMillis() - lastReachMissLogMs > 3000
+                    && pos.isWithinDistance(mod.getPlayer().getPos(), 4.5)) {
+                lastReachMissLogMs = System.currentTimeMillis();
+                try {
+                    net.minecraft.util.math.Vec3d eye = LookHelper.getCameraPos(mod);
+                    net.minecraft.util.hit.BlockHitResult hit = LookHelper.raycast(mod.getPlayer(), eye,
+                            net.minecraft.util.math.Vec3d.ofCenter(pos), 6);
+                    Debug.logMessage("S295 reach-miss target=" + pos.toShortString()
+                            + " block=" + mod.getWorld().getBlockState(pos).getBlock()
+                            + " player=" + mod.getPlayer().getPos() + " eye=" + eye
+                            + " hit=" + hit.getType() + "@" + hit.getBlockPos().toShortString()
+                            + " hitBlock=" + mod.getWorld().getBlockState(hit.getBlockPos()).getBlock()
+                            + " reachDist=" + mod.getClientBaritone().getPlayerContext().playerController().getBlockReachDistance()
+                            + " pathing=" + mod.getClientBaritone().getPathingBehavior().isPathing()
+                            + " sneak=" + mod.getPlayer().isSneaking());
+                } catch (Throwable t) {
+                    Debug.logMessage("S295 reach-miss log failed: " + t);
+                }
+            }
             WaterEscapeTrace.tick(pos, "PATH", wet, grounded, reach.isPresent());
             // Ostinato: S294 dry approach after a recent water escape (only while dry; a wet bot must be free to swim out).
             boolean wantDry = !wet && System.currentTimeMillis() < dryApproachUntilMs;
@@ -514,6 +550,8 @@ public class DestroyBlockTask extends Task implements ITaskRequiresGrounded {
      * unreachable (existing scanner blacklist, which expires with its normal resets), so the gather picks another block
      * instead of walking back into the same water.
      */
+    private long lastReachMissLogMs = 0; // Ostinato: S295
+
     private Task issueWaterEscape(AltoClef mod) {
         GetOutOfWaterTask escape = new GetOutOfWaterTask();
         if (LEGACY_WATER_ESCAPE) return escape;

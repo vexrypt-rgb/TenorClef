@@ -54,10 +54,20 @@ tasks.withType(JavaCompile).configureEach {
     }
 }
 
-// The 26.3 classes are Java 25, so its tests run on the JDK 25 toolchain too.
+// The 26.3 classes are Java 25, so its tests and client/server runs use the JDK 25 toolchain too.
+// Loom's runClient otherwise inherits the Gradle JVM (21), which rejects
+// --sun-misc-unsafe-memory-access=allow and dies before the window opens.
 if (unobfuscated) {
     tasks.withType(Test).configureEach {
         javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
+    }
+    afterEvaluate {
+        ['runClient', 'runServer'].each { name ->
+            def t = tasks.findByName(name)
+            if (t != null && t.hasProperty('javaLauncher')) {
+                t.javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
+            }
+        }
     }
 }
 

@@ -72,6 +72,7 @@ public class SpeedrunBeatMinecraftTask extends Task {
     private final Config config;
     private Phase currentPhase = Phase.OVERWORLD_EARLY;
     private Phase loggedPhase = null;
+    private boolean runStartedOnce = false;
 
     private Task overworldEarlyTask = null;
     private Task netherEntryTask = null;
@@ -233,6 +234,14 @@ public class SpeedrunBeatMinecraftTask extends Task {
 
     @Override
     protected void onStart() {
+        // S298 (Ostinato): chain interrupts (Mob Defense, food, MLG) call onStop/onStart on resume.
+        // Previously that reset currentPhase and nulled overworldEarlyTask -> fresh Construct, so the lava cast
+        // was abandoned mid-pour with buckets stranded. Resume keeps phase + subtasks; only first start resets.
+        if (runStartedOnce) {
+            phaseEnterMs = System.currentTimeMillis();
+            return;
+        }
+        runStartedOnce = true;
         currentPhase = startPhase;
         loggedPhase = null;
         divineFossilX = -1;
@@ -582,7 +591,7 @@ public class SpeedrunBeatMinecraftTask extends Task {
 
     @Override
     protected void onStop(Task interruptTask) {
-        clearPortalEntryTasks();
+        // S298: no clearPortalEntryTasks() here - an interrupt must not discard portal/cast progress.
         long now = System.currentTimeMillis();
         if (timingPhase != null && phaseEnterMs > 0) {
             phaseMs.merge(timingPhase, Math.max(0, now - phaseEnterMs), Long::sum);

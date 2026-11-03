@@ -180,6 +180,33 @@ public class EarlyOverworldSpeedrunTask extends Task {
 
         // ---------- Priority 1: Basic wood tools ----------
         if (!hasBasicTools) {
+            // Ostinato: S307. testrun-20261103-083032: stone pick broke mid-iron (no table/sticks, nearby logs
+            // blacklisted) and getItem(STONE_PICKAXE) sat silent 11+ min. Inventory-progress watchdog -> wander.
+            if (toolStallWander != null) {
+                if (!toolStallWander.isFinished() && System.currentTimeMillis() < toolStallWanderUntilMs) {
+                    setDebugState("S307 tool stall: wandering for fresh logs/stone");
+                    return toolStallWander;
+                }
+                toolStallWander = null;
+                toolStallLastProgressMs = System.currentTimeMillis();
+            }
+            int toolSig = StorageHelper.getItemCount(mod, ItemHelper.LOG) * 1000
+                    + StorageHelper.getItemCount(mod, ItemHelper.PLANKS) * 100
+                    + StorageHelper.getItemCount(mod, Items.STICK) * 10
+                    + StorageHelper.getItemCount(mod, Items.CRAFTING_TABLE);
+            long nowMs = System.currentTimeMillis();
+            if (toolSig != toolStallLastSig || toolStallLastProgressMs == 0) {
+                toolStallLastSig = toolSig;
+                toolStallLastProgressMs = nowMs;
+            } else if (nowMs - toolStallLastProgressMs > 75_000) {
+                Debug.logMessage("[S307] basic tools stalled 75s (sig=" + toolSig + ") - close screen + rescan + wander");
+                StorageHelper.closeScreen();
+                mod.getBlockScanner().reset();
+                toolStallWander = new TimeoutWanderTask(40, true);
+                toolStallWanderUntilMs = nowMs + 30_000;
+                toolStallLastProgressMs = nowMs;
+                return toolStallWander;
+            }
             setDebugState("Getting basic wood tools");
             return ensureBasicTools();
         }
@@ -566,6 +593,10 @@ public class EarlyOverworldSpeedrunTask extends Task {
         return null;
     }
 
+    private Task toolStallWander = null; // Ostinato: S307
+    private long toolStallWanderUntilMs = 0;
+    private long toolStallLastProgressMs = 0;
+    private int toolStallLastSig = -1;
     private int ironTimerLastCount = -1; // Ostinato: S296
     private Task ironStallWander = null; // Ostinato: S296
     private long ironStallWanderUntilMs = 0;

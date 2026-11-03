@@ -500,7 +500,25 @@ public class MazeFurnishTask extends Task {
             if (repairRounds > 0 && !repairCleanLogged) { repairCleanLogged = true; System.out.println("MAZETEST FURNISH repair-sweep clean rounds=" + repairRounds); }
             repairDone = true;
         }
+        // Ostinato: run117 room4 long_hall dug ~20 min bare-handed (kit stone_pickaxe only ran after the next furnish began).
+        // The Ostinato dig cannot craft, so hand back to it with a usable pick: provision one (or a spare for a worn one) first.
+        if (repairDone && !handoffPickOk(mod)) {
+            if (++handoffPickTicks > 3600) { if (!handoffPickGaveUp) System.out.println("MAZETEST FURNISH handoff-pick giveup"); handoffPickGaveUp = true; return null; }
+            if (handoffPick == null || handoffPick.isFinished()) {
+                boolean have = mod.getItemStorage().hasItem(PICKS);
+                int held = mod.getItemStorage().getItemCount(Items.STONE_PICKAXE);
+                handoffPick = TaskCatalogue.getItemTask("stone_pickaxe", have ? held + 1 : 1);
+                System.out.println("MAZETEST FURNISH handoff-pick have=" + have + " worn=" + (have && pickWorn(mod)) + " stone=" + held);
+            }
+            setDebugState("Pickaxe for next dig");
+            return handoffPick;
+        }
         return null;
+    }
+
+    private Task handoffPick; private int handoffPickTicks; private boolean handoffPickGaveUp; // Ostinato: run117
+    private boolean handoffPickOk(AltoClef mod) {
+        return handoffPickGaveUp || (mod.getItemStorage().hasItem(PICKS) && !pickWorn(mod));
     }
 
     private MazeCeilingPlaceTask ceilTask; private Block[] ceilHave; // Ostinato: run91
@@ -1444,6 +1462,7 @@ public class MazeFurnishTask extends Task {
             Items.COBBLESTONE, Items.DIRT};
     private boolean trimming; private int trimTicks, trimIdle, trimClock;
     private final Map<Item, Integer> thrownAt = new java.util.HashMap<>();
+    private final Map<Item, java.util.Deque<Integer>> throwHist = new java.util.HashMap<>(); // Ostinato: run117
 
     // Ostinato: run104. The first cut threw the first junk in list order (petals, gravel, diorite) at the bot's feet while it
     // looked down mining; it picked them up 2s later and looped every ~3s, never reaching the 12 surplus cobblestone stacks
@@ -1487,8 +1506,16 @@ public class MazeFurnishTask extends Task {
         }
         if (best == null) { trimming = false; trimIdle = 200; return false; } // nothing left to drop; don't rescan every tick
         System.out.println("MAZETEST FURNISH junk-drop " + net.minecraft.registry.Registries.ITEM.getId(bestItem).getPath() + " x" + bestN + " free=" + free + " keep=" + bestKeep);
+        int haveBefore = mod.getItemStorage().getItemCount(bestItem);
         mod.getSlotHandler().clickSlot(best, 1, net.minecraft.screen.slot.SlotActionType.THROW);
-        if (mod.getItemStorage().getItemCount(bestItem) - bestN - bestKeep < bestN) thrownAt.put(bestItem, trimClock);
+        // Ostinato: run117 room4 threw 144 cobblestone every ~2.5s for minutes: the post-throw count still held the thrown
+        // stack (client inventory updates a tick later), so the 2-min guard never armed and the bot re-picked the drops.
+        // Use the pre-throw count, and arm the guard on any item thrown 6+ times within 30s (a re-pick ping-pong).
+        if (haveBefore - bestN - bestKeep < bestN) thrownAt.put(bestItem, trimClock);
+        java.util.Deque<Integer> hist = throwHist.computeIfAbsent(bestItem, k -> new java.util.ArrayDeque<>());
+        hist.addLast(trimClock);
+        while (!hist.isEmpty() && trimClock - hist.peekFirst() > 600) hist.pollFirst();
+        if (hist.size() >= 6) { thrownAt.put(bestItem, trimClock); hist.clear(); System.out.println("MAZETEST FURNISH junk-drop pingpong " + net.minecraft.registry.Registries.ITEM.getId(bestItem).getPath() + " hold 2min"); }
         return true;
     }
 
@@ -1508,7 +1535,7 @@ public class MazeFurnishTask extends Task {
 
     @Override
     public boolean isFinished() {
-        return materials != null && work != null && index >= work.size() && repairDone;
+        return materials != null && work != null && index >= work.size() && repairDone && handoffPickOk(AltoClef.getInstance());
     }
 
     @Override

@@ -160,7 +160,21 @@ public class CollectBucketLiquidTask extends ResourceTask {
                 }
             }
 
-            return WorldHelper.isSourceBlock(blockPos, false);
+            if (!WorldHelper.isSourceBlock(blockPos, false)) return false;
+            // S300: lava only - skip lavafall/column sources (lava stacked above, nothing beside it,
+            // or air/flow below). Those are what S211 stalled on (055030: y=55 lavafall, y=-55 shaft).
+            if (toCollect == Blocks.LAVA) {
+                if (above == Blocks.LAVA) return false;
+                var below = mod.getWorld().getBlockState(blockPos.down());
+                if (below.isAir() || (below.getBlock() == Blocks.LAVA && !below.getFluidState().isStill())) return false;
+                int pool = 0;
+                for (Direction d : Direction.Type.HORIZONTAL) {
+                    var n = mod.getWorld().getBlockState(blockPos.offset(d));
+                    if (n.getBlock() == Blocks.LAVA && n.getFluidState().isStill()) pool++;
+                }
+                if (pool == 0) return false;
+            }
+            return true;
         };
 
         // Find nearest water and right click it

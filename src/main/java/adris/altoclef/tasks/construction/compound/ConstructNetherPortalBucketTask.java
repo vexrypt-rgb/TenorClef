@@ -559,8 +559,12 @@ public class ConstructNetherPortalBucketTask extends Task {
                 if (sqDist >= nearestSqDistance && sqDist >= deepestFallbackSq) continue;
                 int depth = getNumberOfBlocksAdjacent(alreadyExplored, pos);
                 if (depth == 0) continue;
-                Debug.logMessage("Found with depth " + depth);
-                if (depth < 12) continue;
+                // S300: depth floods up/down too, so a lavafall column or a deep stacked lake
+                // scored as a "lake" and the cast stalled (S211) beside it. Require an open,
+                // standable top surface: horizontal still sources with air above.
+                int surface = lavaSurfaceArea(pos);
+                Debug.logMessage("Found with depth " + depth + " surface=" + surface);
+                if (depth < 12 || surface < 6) continue;
                 if (pos.getY() >= SAFE_LAKE_Y) {
                     if (sqDist < nearestSqDistance) {
                         nearestSqDistance = sqDist;
@@ -595,7 +599,9 @@ public class ConstructNetherPortalBucketTask extends Task {
             deepTarget = null;
             return midLake;
         }
-        if (deepestFallback != null && System.currentTimeMillis() - deepLakeFirstSeenMs < 180_000) {
+        // S300: y<0 deepslate lakes (y=-55 in 055030) stalled S211 every time; wait 6 min for those.
+        long deepWaitMs = (deepestFallback != null && deepestFallback.getY() < 0) ? 360_000 : 180_000;
+        if (deepestFallback != null && System.currentTimeMillis() - deepLakeFirstSeenMs < deepWaitMs) {
             // S216: a deep lake (helmcap: y=9) cost 35min - a dark shaft then a stuck pillar-out. Keep
             // exploring the surface for up to 3 min before accepting one.
             Debug.logMessage("T2 [S216] deep lava lake at y=" + deepestFallback.getY() + " ignored, surface search first");
@@ -612,6 +618,30 @@ public class ConstructNetherPortalBucketTask extends Task {
 
     /** S256: the deep lake the portal build committed to (null if none). Pit solvers stand aside near it. */
     public static volatile BlockPos deepTarget;
+
+    /** S300: count still lava sources on the top layer (air above) connected horizontally to start's top. */
+    static int lavaSurfaceArea(BlockPos start) {
+        var world = MinecraftClient.getInstance().world;
+        if (world == null) return 0;
+        BlockPos top = start;
+        for (int i = 0; i < 24 && world.getBlockState(top.up()).getBlock() == Blocks.LAVA; i++) top = top.up();
+        if (!world.getBlockState(top.up()).isAir()) return 0;
+        HashSet<BlockPos> seen = new HashSet<>();
+        ArrayDeque<BlockPos> q = new ArrayDeque<>();
+        q.add(top);
+        int n = 0;
+        while (!q.isEmpty() && n < 64) {
+            BlockPos b = q.poll();
+            if (!seen.add(b)) continue;
+            if (b.getManhattanDistance(top) > 12) continue;
+            BlockState st = world.getBlockState(b);
+            if (st.getBlock() != Blocks.LAVA || !st.getFluidState().isStill()) continue;
+            if (!world.getBlockState(b.up()).isAir()) continue;
+            n++;
+            q.add(b.north()); q.add(b.south()); q.add(b.east()); q.add(b.west());
+        }
+        return n;
+    }
 
     private int getNumberOfBlocksAdjacent(HashSet<BlockPos> alreadyExplored, BlockPos start) {
         Queue<BlockPos> queue = new ArrayDeque<>();

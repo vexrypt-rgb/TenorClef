@@ -416,7 +416,11 @@ public class DestroyBlockTask extends Task implements ITaskRequiresGrounded {
                 }
             } catch (Throwable ignored) {}
         }
-        if (wet && !grounded) {
+        // Ostinato: S299. testrun-20261103-045847: crafting the iron pick sent the bot from a y=23 water cave to spruce logs
+        // ~55 blocks up; every swim in transit counted as a "bob", escaped, and after 2 re-entries blacklisted that log, so it
+        // walked the tree one block at a time (y=79,80,81...) for 18 min and died. Bobbing only matters near the target.
+        boolean bobNear = pos.isWithinDistance(mod.getPlayer().getPos(), 6);
+        if (wet && !grounded && bobNear) {
             waterBobTicks++;
             isMining = false;
             try {

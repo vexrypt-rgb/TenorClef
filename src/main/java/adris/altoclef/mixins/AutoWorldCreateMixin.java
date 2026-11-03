@@ -1,4 +1,4 @@
-package adris.altoclef.mixins;
+﻿package adris.altoclef.mixins;
 
 import net.minecraft.client.gui.screen.TitleScreen;
 import org.spongepowered.asm.mixin.Mixin;
@@ -96,7 +96,7 @@ public class AutoWorldCreateMixin {
     //$$                 levelInfo,
     //$$                 RegistryTracker.create(),
     //$$                 seededOptions());
-    //$$         Debug.logHarness("AUTOWORLD: create call returned — waiting for join");
+    //$$         Debug.logHarness("AUTOWORLD: create call returned â€” waiting for join");
     //$$     } catch (Throwable t) {
     //$$         Debug.logHarness("AUTOWORLD: create failed: " + t);
     //$$         AutoWorldState.setCreated(false);
@@ -155,14 +155,14 @@ public class AutoWorldCreateMixin {
     //$$             + "' mode=survival difficulty=easy hardcore=false via createFreshLevel");
     //$$
     //$$     try {
-    //$$         client.setScreen(null);
+    //$$         client.setScreenAndShow(null);
     //$$         client.createWorldOpenFlows().createFreshLevel(
     //$$                 name,
     //$$                 levelSettings,
     //$$                 options,
     //$$                 WorldPresets::createNormalWorldDimensions,
     //$$                 null);
-    //$$         Debug.logHarness("AUTOWORLD: createFreshLevel returned — waiting for join");
+    //$$         Debug.logHarness("AUTOWORLD: createFreshLevel returned â€” waiting for join");
     //$$     } catch (Throwable t) {
     //$$         Debug.logHarness("AUTOWORLD: createFreshLevel failed: " + t);
     //$$         AutoWorldState.setCreated(false);

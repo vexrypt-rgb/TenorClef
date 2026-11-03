@@ -107,7 +107,7 @@ public class MazeFurnishTask extends Task {
         // cladding it just put in (run42: ceiling cells at y=88 mined away while "Surfacing for barrel").
         // Ostinato: 2026-11-02. Walk the rewritten plan. The palette pass keeps positions and only changes block ids.
         for (MazeFurnishPlan.Step s : this.plan.steps) plannedCells.add(new BlockPos(s.x(), s.y(), s.z()));
-        for (MazeFurnishPlan.Step s : this.plan.steps) if (s.kind() == MazeFurnishPlan.Kind.SEAL) sealCells.add(new BlockPos(s.x(), s.y(), s.z()));
+        for (MazeFurnishPlan.Step s : this.plan.steps) { if (s.kind() == MazeFurnishPlan.Kind.SEAL) sealCells.add(new BlockPos(s.x(), s.y(), s.z())); if (s.kind() == MazeFurnishPlan.Kind.CONTAINER) containerCells.add(new BlockPos(s.x(), s.y(), s.z())); }
         int[] air = this.plan.airCells; // Ostinato: run100
         for (int i = 0; i + 2 < air.length; i += 3) airCells.add(new BlockPos(air[i], air[i + 1], air[i + 2]));
         roomBounds = boundsOf(airCells, plannedCells, sealCells); // Ostinato: 2026-11-02. The carved span, whatever size the job is.
@@ -511,6 +511,8 @@ public class MazeFurnishTask extends Task {
     private final java.util.Map<String, Integer> stepRegather = new java.util.HashMap<>(); // Ostinato: run94
     private boolean repairOpen; // Ostinato: run93, seal cells may be broken to reach interior repairs
     private final java.util.Set<BlockPos> sealCells = new java.util.HashSet<>();
+    private final java.util.Set<BlockPos> containerCells = new java.util.HashSet<>(); // Ostinato: run115
+    private final java.util.Set<BlockPos> liftedLogged = new java.util.HashSet<>();
 
     // Ostinato: run62. Pure check (no side effects) that a planned cell is missing or holds the wrong block.
     private boolean cellWrong(AltoClef mod, MazeFurnishPlan.Step step) {
@@ -526,6 +528,8 @@ public class MazeFurnishTask extends Task {
             }
             case SEAL:
                 return state.isAir() || !state.getFluidState().isEmpty();
+            case FILL: // Ostinato: run115. A lifted container comes back empty; its loot must go in again.
+                return !state.isAir() && !MazeBarrelFillTask.filled(pos);
             default:
                 return false;
         }
@@ -1391,6 +1395,13 @@ public class MazeFurnishTask extends Task {
 
     // Ostinato: run100. A solid block in a carved cell the plan does not fill is pillar/bridge scaffolding left after the dig.
     private boolean isStray(BlockPos p) {
+        // Ostinato: run115 room1. Wall cell -35,89,-18 was air at verify and its only open face was the barrel at -34,89,-18:
+        // no stand saw it and the repair sweep skipped it (light 63/64, ROOM FAIL). In a repair round a planned container
+        // in the way is lifted like scaffolding; the same sweep re-places it and re-runs its FILL (cellWrong FILL below).
+        if (repairRounds > 0 && containerCells.contains(p)) {
+            BlockState cs = AltoClef.getInstance().getWorld().getBlockState(p);
+            if (!cs.isAir()) { if (liftedLogged.add(p)) System.out.println("MAZETEST FURNISH lift-container " + p.toShortString() + " for repair"); return true; }
+        }
         if (!airCells.contains(p) || plannedCells.contains(p)) return false;
         BlockState st = AltoClef.getInstance().getWorld().getBlockState(p);
         return !st.isAir() && st.getFluidState().isEmpty() && !st.getCollisionShape(AltoClef.getInstance().getWorld(), p).isEmpty();

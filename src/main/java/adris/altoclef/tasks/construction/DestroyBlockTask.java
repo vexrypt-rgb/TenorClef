@@ -89,6 +89,14 @@ public class DestroyBlockTask extends Task implements ITaskRequiresGrounded {
     private static long dryApproachUntilMs = 0;
     private static boolean dryApproachOwnsWater = false;
 
+    /**
+     * Ostinato: S309. The survival-chain swim has to path through the water the bot is standing in.
+     * S294's water wall would make that path fail and leave the bot bobbing.
+     */
+    public static void suspendDryApproach(AltoClef mod) {
+        setDryApproach(mod, false);
+    }
+
     private static void setDryApproach(AltoClef mod, boolean on) {
         try {
             var list = mod.getClientBaritoneSettings().blocksToAvoid.value;

@@ -5,6 +5,7 @@ import adris.altoclef.multiversion.CBlocks;
 import adris.altoclef.AltoClef;
 import adris.altoclef.Debug;
 import adris.altoclef.tasks.movement.GetOutOfWaterTask;
+import adris.altoclef.util.WaterEscapeTrace;
 import adris.altoclef.tasks.movement.RunAwayFromPositionTask;
 import adris.altoclef.tasks.movement.SafeRandomShimmyTask;
 import adris.altoclef.tasksystem.ITaskRequiresGrounded;
@@ -67,7 +68,40 @@ public class DestroyBlockTask extends Task implements ITaskRequiresGrounded {
     private boolean isMining;
     /** Ticks spent wet without stable footing / lost mine reach (bob thrash). */
     private int waterBobTicks;
-    private static final int WATER_BOB_ESCAPE_TICKS = 25;
+    private static final int WATER_BOB_ESCAPE_TICKS = WaterEscapeLatch.WATER_BOB_ESCAPE_TICKS;
+    /** Water escapes this task has issued (diagnostic count for {@code WaterEscapeTrace}). */
+    private int escapesIssued;
+    /**
+     * {@code -Dtenorclef.waterEscape.legacy=true} restores the pre-latch handling (parent re-cancels navigation every
+     * airborne tick and drops the escape on the first wet ground contact). A/B baseline only.
+     */
+    private static final boolean LEGACY_WATER_ESCAPE = Boolean.getBoolean("tenorclef.waterEscape.legacy");
+    private final WaterEscapeLatch waterEscape = new WaterEscapeLatch();
+
+    /**
+     * Ostinato: S294 dry approach. testrun-20261103-030756: after one water escape at 141,63,44 the next path to every iron
+     * ore under the same aquifer swam again (water is the cheapest route), so each ore was escaped twice, reported
+     * unreachable, and the gather picked the next ore in the same water: 81 re-entries, 210 escapes, 0 iron in 10 min.
+     * After any water escape, path to blocks with water as a wall for a while: Baritone then digs to the ore through
+     * stone from dry footing. Ores that really need standing in water still fail and blacklist normally.
+     */
+    private static final long DRY_APPROACH_MS = Long.getLong("tenorclef.dryApproach.ms", 180_000L);
+    private static long dryApproachUntilMs = 0;
+    private static boolean dryApproachOwnsWater = false;
+
+    private static void setDryApproach(AltoClef mod, boolean on) {
+        try {
+            var list = mod.getClientBaritoneSettings().blocksToAvoid.value;
+            if (on && !dryApproachOwnsWater) {
+                if (!list.contains(Blocks.WATER)) list.add(Blocks.WATER);
+                dryApproachOwnsWater = true;
+                Debug.logMessage("S294 dry approach ON: pathing to blocks treats water as a wall");
+            } else if (!on && dryApproachOwnsWater) {
+                list.remove(Blocks.WATER);
+                dryApproachOwnsWater = false;
+            }
+        } catch (Throwable ignored) {}
+    }
 
     public DestroyBlockTask(BlockPos pos) {
         this.pos = pos;
@@ -215,6 +249,7 @@ public class DestroyBlockTask extends Task implements ITaskRequiresGrounded {
         // Reset move checker and stuck check.
         _moveChecker.reset();
         stuckCheck.reset();
+        waterEscape.parentRestarted();
 
         // Get the item stack in the cursor slot.
         ItemStack cursorStack = StorageHelper.getItemStackInCursorSlot();
@@ -339,6 +374,22 @@ public class DestroyBlockTask extends Task implements ITaskRequiresGrounded {
             }
         }
 
+        // An issued water escape owns navigation until it is dry or gives up (see WaterEscapeLatch).
+        if (!LEGACY_WATER_ESCAPE) {
+            Task held = waterEscape.held();
+            if (held != null) {
+                setDryApproach(mod, false); // Ostinato: S294 the escape itself must be free to swim
+                setDebugState("Escaping water before mine (escape holds navigation)");
+                WaterEscapeTrace.tick(pos, "ESCAPE_HELD", isWetSafe(mod), mod.getPlayer().isOnGround(), false);
+                return held;
+            }
+            if (waterEscape.releasePending(getSub())) {
+                setDebugState("Water escape ended, handing navigation back");
+                WaterEscapeTrace.event("escape released");
+                return null;
+            }
+        }
+
         boolean wet = false;
         boolean grounded = false;
         try {
@@ -356,15 +407,19 @@ public class DestroyBlockTask extends Task implements ITaskRequiresGrounded {
                 mod.getClientBaritone().getInputOverrideHandler().setInputForceState(Input.CLICK_LEFT, false);
                 mod.getInputControls().release(Input.CLICK_LEFT);
             } catch (Throwable ignored) {}
-            if (waterBobTicks >= WATER_BOB_ESCAPE_TICKS || !reach.isPresent()) {
+            if (WaterEscapeLatch.bobEscapeDue(wet, grounded, reach.isPresent(), waterBobTicks)) {
                 setDebugState("Escaping water before mine (bobbing, no footing)");
+                WaterEscapeTrace.tick(pos, "BOB_ESCAPE", wet, grounded, reach.isPresent());
+                WaterEscapeTrace.event("cancelEverything+escape (bob=" + waterBobTicks + ")");
                 waterBobTicks = 0;
                 try {
                     mod.getClientBaritone().getPathingBehavior().cancelEverything();
                     mod.getClientBaritone().getCustomGoalProcess().onLostControl();
                 } catch (Throwable ignored) {}
-                return new GetOutOfWaterTask();
+                WaterEscapeTrace.escapes(pos, ++escapesIssued);
+                return issueWaterEscape(mod);
             }
+            WaterEscapeTrace.tick(pos, "BOB_WAIT", wet, grounded, reach.isPresent());
         } else {
             waterBobTicks = 0;
         }
@@ -373,6 +428,7 @@ public class DestroyBlockTask extends Task implements ITaskRequiresGrounded {
         // Do not left-click while bobbing even if reach briefly flickers present.
         if (reach.isPresent() && grounded && !mod.getFoodChain().needsToEat() && !WorldHelper.isInNetherPortal() && mod.getClientBaritone().getPathingBehavior().isSafeToCancel()) {
             setDebugState("Block in range, mining...");
+            WaterEscapeTrace.tick(pos, "MINE", wet, grounded, true);
             stuckCheck.reset();
             isMining = true;
             mod.getInputControls().release(Input.SNEAK);
@@ -408,14 +464,23 @@ public class DestroyBlockTask extends Task implements ITaskRequiresGrounded {
             if (isMining && wet) {
                 // Previously held break while bobbing — that stalls CollectWaterBucket.
                 setDebugState("In water while mining — escaping for footing");
+                WaterEscapeTrace.tick(pos, "MINING_WET_ESCAPE", wet, grounded, reach.isPresent());
                 isMining = false;
                 try {
                     mod.getClientBaritone().getInputOverrideHandler().setInputForceState(Input.CLICK_LEFT, false);
                     mod.getInputControls().release(Input.CLICK_LEFT);
                 } catch (Throwable ignored) {}
-                return new GetOutOfWaterTask();
+                WaterEscapeTrace.escapes(pos, ++escapesIssued);
+                return issueWaterEscape(mod);
             } else {
                 isMining = false;
+            }
+            WaterEscapeTrace.tick(pos, "PATH", wet, grounded, reach.isPresent());
+            // Ostinato: S294 dry approach after a recent water escape (only while dry; a wet bot must be free to swim out).
+            boolean wantDry = !wet && System.currentTimeMillis() < dryApproachUntilMs;
+            if (wantDry != dryApproachOwnsWater) {
+                setDryApproach(mod, wantDry);
+                if (wantDry) mod.getClientBaritone().getCustomGoalProcess().onLostControl(); // re-path without water
             }
             boolean isCloseToMoveBack = pos.isWithinDistance(mod.getPlayer().getPos(), 2);
             if (isCloseToMoveBack) {
@@ -429,6 +494,7 @@ public class DestroyBlockTask extends Task implements ITaskRequiresGrounded {
                 }
             }
             if (!mod.getClientBaritone().getCustomGoalProcess().isActive()) {
+                WaterEscapeTrace.event("setGoalAndPath toward target");
                 mod.getClientBaritone().getBuilderProcess().onLostControl();
                 mod.getClientBaritone().getCustomGoalProcess().setGoalAndPath(mod.getWorld().getBlockState(pos.up()).getBlock() ==
                         Blocks.SNOW ? new GoalBlock(pos) : new GoalNear(pos, 1));
@@ -443,12 +509,40 @@ public class DestroyBlockTask extends Task implements ITaskRequiresGrounded {
      *
      * @param interruptTask The task that interrupted the current task.
      */
+    /**
+     * A new escape for this target. Past {@link WaterEscapeLatch#ALLOWED_REENTRIES} re-entries the target is reported
+     * unreachable (existing scanner blacklist, which expires with its normal resets), so the gather picks another block
+     * instead of walking back into the same water.
+     */
+    private Task issueWaterEscape(AltoClef mod) {
+        GetOutOfWaterTask escape = new GetOutOfWaterTask();
+        if (LEGACY_WATER_ESCAPE) return escape;
+        dryApproachUntilMs = System.currentTimeMillis() + DRY_APPROACH_MS; // Ostinato: S294
+        setDryApproach(mod, false);
+        if (waterEscape.issued(escape)) {
+            Debug.logMessage("Water re-entry " + waterEscape.reentries() + " for " + pos.toShortString()
+                    + ": reporting it unreachable from water.");
+            mod.getBlockScanner().requestBlockUnreachable(pos, 0);
+            WaterEscapeTrace.reentryBound(pos);
+        }
+        return escape;
+    }
+
+    private static boolean isWetSafe(AltoClef mod) {
+        try {
+            return mod.getPlayer().isTouchingWater() || mod.getPlayer().isSubmergedInWater();
+        } catch (Throwable t) {
+            return false;
+        }
+    }
+
     @Override
     protected void onStop(Task interruptTask) {
         AltoClef mod = AltoClef.getInstance();
 
         // Cancel Baritone pathing
         mod.getClientBaritone().getPathingBehavior().forceCancel();
+        setDryApproach(mod, false); // Ostinato: S294 never leak water-as-wall to other tasks
 
         // If not in game, return
         if (!AltoClef.inGame()) {

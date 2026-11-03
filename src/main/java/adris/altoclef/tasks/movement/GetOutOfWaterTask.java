@@ -29,6 +29,7 @@ public class GetOutOfWaterTask extends CustomBaritoneGoalTask {
         // Intentionally do not call super.onStart() forceCancel here via a no-op
         // override of cancel — CustomBaritoneGoalTask.onStart cancels pathing.
         // With isEqual fixed, onStart runs once per escape attempt, which is correct.
+        adris.altoclef.util.WaterEscapeTrace.event("escape task start");
         super.onStart();
     }
 
@@ -71,6 +72,8 @@ public class GetOutOfWaterTask extends CustomBaritoneGoalTask {
 
     @Override
     protected void onStop(Task interruptTask) {
+        adris.altoclef.util.WaterEscapeTrace.event("escape task stop finished=" + isFinished() + " interrupt="
+                + (interruptTask == null ? "-" : interruptTask.getClass().getSimpleName()));
         super.onStop(interruptTask);
     }
 

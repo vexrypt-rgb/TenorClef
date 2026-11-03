@@ -474,7 +474,11 @@ public class MobDefenseChain extends SingleTaskChain {
             return 65;
         }
         // Dodge all mobs cause we boutta die son
-        if (isInDanger(mod) && !escapeDragonBreath(mod) && !mod.getFoodChain().isShouldStop()) {
+        // Ostinato: S314. testrun-105122: this 70-flee ignored the disengage cooldown, the next
+        // tick returned 0 and clearEngagement killed the flee, and crafting restarted every
+        // second from 10:54. The cooldown has to stick unless health is actually low.
+        if (isInDanger(mod) && !escapeDragonBreath(mod) && !mod.getFoodChain().isShouldStop()
+                && !(disengageUntilMs > System.currentTimeMillis() && mod.getPlayer().getHealth() > 10)) {
             if (targetEntity == null || WorldHelper.isSurroundedByHostiles()) {
                 runAwayTask = keepRunAway();
                 setTask(runAwayTask);

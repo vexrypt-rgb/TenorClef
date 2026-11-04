@@ -296,6 +296,9 @@ public class TaskCatalogue {
             shapedRecipe2x2Block("polished_deepslate", Items.POLISHED_DEEPSLATE, 4, "cobbled_deepslate");
             shapedRecipe2x2Block("deepslate_bricks", Items.DEEPSLATE_BRICKS, 4, "polished_deepslate");
             shapedRecipe2x2Block("deepslate_tiles", Items.DEEPSLATE_TILES, 4, "deepslate_bricks");
+            // Ostinato: tuff family (1.21+), maze tunnel palette tuff.
+            shapedRecipe2x2Block("polished_tuff", Items.POLISHED_TUFF, 4, "tuff");
+            shapedRecipe2x2Block("tuff_bricks", Items.TUFF_BRICKS, 4, "polished_tuff");
             shapedRecipe2x2Block("cut_copper", CItems.CUT_COPPER, 4, "copper_block");
             shapedRecipe2x2Block("cut_sandstone", Items.CUT_SANDSTONE, 4, "sandstone");
             shapedRecipe2x2Block("cut_red_sandstone", Items.CUT_RED_SANDSTONE, 4, "red_sandstone");

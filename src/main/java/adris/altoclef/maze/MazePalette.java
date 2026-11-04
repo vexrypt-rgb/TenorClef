@@ -26,7 +26,7 @@ public final class MazePalette {
      */
     public static final List<String> SUPPORTED = List.of(
             "polished_diorite", "diorite", "calcite",
-            "polished_andesite", "andesite", "polished_granite", "granite", "tuff",
+            "polished_andesite", "andesite", "polished_granite", "granite", "tuff", "polished_tuff", "tuff_bricks",
             "cobblestone", "stone", "smooth_stone", "sandstone", "dirt", "sand",
             "oak_planks", "spruce_planks", "birch_planks", "jungle_planks", "acacia_planks", "dark_oak_planks", "mangrove_planks", "cherry_planks",
             "stripped_oak_log", "stripped_spruce_log", "stripped_birch_log", "stripped_jungle_log", "stripped_acacia_log", "stripped_dark_oak_log", "stripped_mangrove_log", "stripped_cherry_log",

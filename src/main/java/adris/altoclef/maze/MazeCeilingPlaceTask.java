@@ -145,6 +145,12 @@ public class MazeCeilingPlaceTask extends Task {
             if (stray.test(clearing)) { stopNudge(mod); release(mod); setDebugState("Clearing scaffolding " + clearing.toShortString()); return new DestroyBlockTask(clearing); }
             clearing = null; badStands.clear(); going = null; walkStand = null;
         }
+        // Ostinato: run141 mono_yellow seals. Furnish cladding boxed the bot in at -25,85,5 (Baritone open set 0, feet
+        // unchanged for 67 seals): every stand was no-progress and every seal SEAL-LEFT-OPEN. Dig out toward the stand.
+        if (exitDig != null) {
+            if (!mod.getWorld().getBlockState(exitDig).isAir()) { stopNudge(mod); release(mod); setDebugState("Digging out " + exitDig.toShortString()); return new DestroyBlockTask(exitDig); }
+            exitDig = null; going = null; walkStand = null;
+        }
         BlockPos stand = standUnder(mod);
         if (clearing != null) { stopNudge(mod); release(mod); return new DestroyBlockTask(clearing); }
         Vec3d eye = mod.getClientBaritone().getPlayerContext().playerHead();
@@ -173,6 +179,18 @@ public class MazeCeilingPlaceTask extends Task {
             // half a block in 12s drops the stand now, leaving time for the side and ring stands.
             double dist = Math.sqrt(mod.getPlayer().getPos().squaredDistanceTo(Vec3d.ofBottomCenter(stand)));
             if (dist < walkBest - 0.5) { walkBest = dist; walkIdle = 0; } else walkIdle++;
+            if (walkIdle > 60 && exitDigs < 12) {
+                walkable(mod, stand); // refreshes `reach` from the feet
+                if (reach != null && reach.size() <= 3) {
+                    BlockPos e = boxExit(mod, stand);
+                    if (e != null) {
+                        exitDigs++; exitDig = e; walkIdle = 0; walkTicks = 0; going = null;
+                        System.out.println("MAZETEST FURNISH boxed-in-dig " + e.toShortString() + " toward " + stand.toShortString() + " reach=" + reach.size()
+                                + " was=" + net.minecraft.registry.Registries.BLOCK.getId(mod.getWorld().getBlockState(e).getBlock()).getPath());
+                        return new DestroyBlockTask(e);
+                    }
+                }
+            }
             if (++walkTicks > 600 || walkIdle > 240) {
                 System.out.println("MAZETEST FURNISH ceiling-unreachable-stand " + stand.toShortString() + " for " + target.toShortString()
                         + (walkIdle > 240 ? " no-progress dist=" + String.format("%.1f", dist) : ""));
@@ -429,6 +447,22 @@ public class MazeCeilingPlaceTask extends Task {
         }
         // Ostinato: run118. The old fallback cleared badStands here, which put the same unreachable stand back on top.
         return new BlockPos(target.getX(), target.getY() - 2, target.getZ());
+    }
+
+    private BlockPos exitDig; private static int exitDigs; // Ostinato: run141, static: shared across seal cells per session
+    // Ostinato: run141. Solid feet/head block beside the bot, sides ordered by how well they face the stand.
+    private BlockPos boxExit(AltoClef mod, BlockPos stand) {
+        BlockPos f = mod.getPlayer().getBlockPos();
+        double vx = stand.getX() - f.getX(), vz = stand.getZ() - f.getZ();
+        Direction[] ds = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
+        java.util.Arrays.sort(ds, java.util.Comparator.comparingDouble(d -> -(d.getOffsetX() * vx + d.getOffsetZ() * vz)));
+        for (Direction d : ds) {
+            BlockPos n = f.offset(d);
+            if (n.equals(target) || n.up().equals(target)) continue;
+            if (!open(mod, n.up())) return n.up();
+            if (!open(mod, n)) return n;
+        }
+        return null;
     }
 
     private BlockPos columnLogged; // Ostinato: run140

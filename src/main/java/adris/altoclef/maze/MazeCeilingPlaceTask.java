@@ -324,6 +324,19 @@ public class MazeCeilingPlaceTask extends Task {
                 if (!pillar.equals(pillarLogged)) { pillarLogged = pillar; System.out.println("MAZETEST FURNISH ceiling-pillar-stand " + target.toShortString() + " from " + pillar.toShortString() + " rejected=" + badStands.size() + " (escalated)"); }
                 return pillar;
             }
+            // Ostinato: run140 yellow_office seal -35,85,-9/-8. Escalated, but pillarStand found no clear column (a solid
+            // block at y=82 under both cells), so the ring stands it had already failed were walked at again every
+            // repair round. Mine a stray (scaffolding) block that closes the pillar column under/next to the target first.
+            if (clears < 8) {
+                BlockPos s = columnStray(mod);
+                if (s != null) {
+                    clears++; clearing = s;
+                    System.out.println("MAZETEST FURNISH ceiling-clear-column " + s.toShortString() + " for " + target.toShortString()
+                            + " was=" + net.minecraft.registry.Registries.BLOCK.getId(mod.getWorld().getBlockState(s).getBlock()).getPath());
+                    return mod.getPlayer().getBlockPos();
+                }
+            }
+            if (!target.equals(columnLogged)) { columnLogged = target; System.out.println("MAZETEST FURNISH ceiling-column-diag " + target.toShortString() + " " + columnDiag(mod)); }
         }
         // Same column, but the head must stay under the target: feet <= target - 2.
         // Ostinato: 2026-11-02. Down to the floor of a clear-height-6 room (feet 6 under the ceiling block), not a fixed 7-wide room.
@@ -416,6 +429,31 @@ public class MazeCeilingPlaceTask extends Task {
         }
         // Ostinato: run118. The old fallback cleared badStands here, which put the same unreachable stand back on top.
         return new BlockPos(target.getX(), target.getY() - 2, target.getZ());
+    }
+
+    private BlockPos columnLogged; // Ostinato: run140
+    // Ostinato: run140. Nearest stray in the target column (then the 8 around it), between the floor under the bot
+    // and the target. Those are the blocks that stop pillarStand from finding a clear column.
+    private BlockPos columnStray(AltoClef mod) {
+        int floor = mod.getPlayer().getBlockPos().getY();
+        BlockPos best = null; double bestD = Double.MAX_VALUE;
+        for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) for (int y = floor; y < target.getY(); y++) {
+            BlockPos p = new BlockPos(target.getX() + dx, y, target.getZ() + dz);
+            if (!stray.test(p)) continue;
+            double d = (dx * dx + dz * dz) * 4 + (target.getY() - y);
+            if (d < bestD) { bestD = d; best = p; }
+        }
+        return best;
+    }
+
+    private String columnDiag(AltoClef mod) {
+        StringBuilder sb = new StringBuilder();
+        for (int y = mod.getPlayer().getBlockPos().getY(); y <= target.getY() + 1; y++) {
+            BlockPos p = new BlockPos(target.getX(), y, target.getZ());
+            sb.append(y).append("=").append(net.minecraft.registry.Registries.BLOCK.getId(mod.getWorld().getBlockState(p).getBlock()).getPath())
+                    .append(stray.test(p) ? "(stray)" : "").append(" ");
+        }
+        return sb.toString();
     }
 
     // Ostinato: run118. Scaffold/pillar fallback for ceiling seal and light cells.

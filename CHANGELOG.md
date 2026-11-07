@@ -1,3 +1,21 @@
+# Unreleased
+
+- **`@allblocks` / Ostinato `#allblocks`** (26.3): a survival collection run. One of every obtainable item goes into
+  labeled chests and one of every placeable block onto a grid next to them, from the bot's own gathering (never a
+  command). Progress is saved per world and a restart resumes from the next missing item; `status`, `report`, `stop`,
+  `reset` and `tour` (walks to the chest-room and grid views). Before each gather it checks a kit: a pickaxe (copper,
+  then iron, then stone), food and armor. See [docs/guides/allblocks.md](docs/guides/allblocks.md).
+- **Generated catalogue fallback** (26.3): `allblocks/catalogue-26.3.txt`, made from the 26.3 client jar by
+  `tools/allblocks/gen_catalogue.py`, adds vanilla crafting and smelting recipes, natural blocks to mine (including
+  ones that drop another item, like chorus fruit and glow berries), blocks to shear (leaves, bushes, dry grass) and
+  mob drops for items the hand-written catalogue does not cover. Copper tools and armor come from it. Hand-written
+  entries always win.
+- **Concrete**: new `CollectConcreteTask` places powder next to water and mines the concrete it hardens into (16
+  colors, and with them the 26.x concrete slabs and stairs).
+- **26.3 `runClient`** runs on the JDK 25 toolchain (Gradle stays on 21); before, the client would not start.
+- Tools: `tools/allblocks/verify_world.py` checks a run against the save (chest contents, grid blocks, cheats off);
+  `tools/allblocks/render_area.py` draws the chest room and grid from the save with the game's textures.
+
 # TenorClef 0.26.2
 
 Pairs with Ostinato v1.19.2. A second review pass: fixes only.

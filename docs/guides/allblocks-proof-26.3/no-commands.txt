@@ -1,0 +1,2 @@
+Command use in all 72 session logs + current log:
+(end; empty above = no command was sent)

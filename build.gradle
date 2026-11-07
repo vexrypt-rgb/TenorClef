@@ -59,6 +59,10 @@ if (unobfuscated) {
     tasks.withType(Test).configureEach {
         javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
     }
+    // runClient too: Gradle runs on 21, and 26.3 will not start on it.
+    tasks.withType(JavaExec).configureEach {
+        javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
+    }
 }
 
 base {

@@ -30,7 +30,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.math.BlockPos;
+//#if MC >= 11900
 import net.minecraft.util.math.GlobalPos;
+//#endif
 import net.minecraft.world.World;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.util.math.Direction;
@@ -312,6 +314,10 @@ public class AllBlocksTask extends Task {
      * deaths from before the first run are not.
      */
     private Task recoverStep(AltoClef mod) {
+        //#if MC < 11900
+        //$$ if (true) return null; // no last-death position before 1.19: no recovery trip
+        //#endif
+        //#if MC >= 11900
         Optional<GlobalPos> death = mod.getPlayer().getLastDeathPos();
         String key = death.map(Object::toString).orElse("");
         if (seenDeath == null) seenDeath = progress.seenDeath != null ? progress.seenDeath : key;
@@ -336,6 +342,7 @@ public class AllBlocksTask extends Task {
                 Debug.logMessage("ALLBLOCKS died at " + at.toShortString() + "; going back for the drops");
             }
         }
+        //#endif
         if (progress.seenDeath == null) {
             progress.seenDeath = seenDeath;
             progress.save(file);
@@ -941,7 +948,11 @@ public class AllBlocksTask extends Task {
 
     /** Crops (seeds, potatoes, stems, torchflower, pitcher pod) stand only on farmland: the place step hoes the floor. */
     static boolean needsFarmland(Block b) {
+        //#if MC >= 12000
         return b instanceof CropBlock || b instanceof StemBlock || b == Blocks.PITCHER_CROP;
+        //#else
+        //$$ return b instanceof CropBlock || b instanceof StemBlock;
+        //#endif
     }
 
     private static final Item[] HOES = {Items.NETHERITE_HOE, Items.DIAMOND_HOE, Items.IRON_HOE, Items.GOLDEN_HOE,

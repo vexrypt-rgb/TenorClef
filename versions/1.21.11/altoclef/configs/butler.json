@@ -1,0 +1,18 @@
+{
+  "useButlerBlacklist" : true,
+  "useButlerWhitelist" : true,
+  "whisperFormats" : [
+    "{from} whispers: {message}",
+    "{from} whispers to you: {message}",
+    "{from} {to} {message}"
+  ],
+  "whisperFormatDebug" : true,
+  "sendAuthorizationResponse" : true,
+  "failedAuthorizationResposne" : "Sorry {from} but you are not authorized!",
+  "requirePrefixMsg" : true,
+  "sigilCircle" : "",
+  "sigilSignet" : "",
+  "sigilRequireSealed" : false,
+  "sigilReplySealed" : true,
+  "sigilAutoDecrypt" : false
+}

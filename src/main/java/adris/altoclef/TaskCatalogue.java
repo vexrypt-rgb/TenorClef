@@ -766,7 +766,11 @@ public class TaskCatalogue {
             case "kill": {
                 EntityType<?> type = adris.altoclef.tasks.speedrun.testrun2.McCompat.entityType(p[2]);
                 if (type == null) return false;
+                //#if MC >= 12000
                 Class<?> cls = type.getBaseClass();
+                //#else
+                //$$ Class<?> cls = net.minecraft.entity.Entity.class; // no EntityType.getBaseClass before 1.20
+                //#endif
                 MOB_SOURCE.put(out, cls);
                 put(name, new Item[]{out}, c -> new KillAndLootTask(cls, e -> e.getType() == type, new ItemTarget(out, c)))
                         .forceDimension(Dimension.valueOf(p[3]));

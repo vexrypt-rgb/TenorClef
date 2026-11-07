@@ -16,6 +16,7 @@ public class AltoClefCommands {
         AltoClef.getCommandExecutor().registerNewCommand(
                 new HelpCommand(),
                 new GetCommand(),
+                new EnchantCommand(),
                 new GoalCommand(),
                 new BenchCommand(),
                 new ThreatCommand(),

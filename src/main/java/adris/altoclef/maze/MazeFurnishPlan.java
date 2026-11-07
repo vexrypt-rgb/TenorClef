@@ -28,11 +28,18 @@ public final class MazeFurnishPlan {
     public final String summary;
     public final boolean survival;
     public final List<Step> steps;
+    /** Ostinato: run100. The room's carved cells as x,y,z triples (empty from an older Ostinato). */
+    public final int[] airCells;
 
     public MazeFurnishPlan(String summary, boolean survival, List<Step> steps) {
+        this(summary, survival, steps, new int[0]);
+    }
+
+    public MazeFurnishPlan(String summary, boolean survival, List<Step> steps, int[] airCells) {
         this.summary = summary;
         this.survival = survival;
         this.steps = List.copyOf(steps);
+        this.airCells = airCells.clone();
     }
 
     /**
@@ -104,7 +111,7 @@ public final class MazeFurnishPlan {
             steps.add(new Step(s.kind(), s.x(), s.y(), s.z(), ids, s.contents()));
         }
         System.out.println("MAZETEST FURNISH stone-layer y=" + cladY + " deepslate -> cobblestone");
-        return new MazeFurnishPlan(plan.summary, plan.survival, steps);
+        return new MazeFurnishPlan(plan.summary, plan.survival, steps, plan.airCells);
     }
 
     /** First id that passes, or null. */
@@ -140,7 +147,9 @@ public final class MazeFurnishPlan {
             }
             steps.add(new Step(kind, (Integer) call(sc, s, "x"), (Integer) call(sc, s, "y"), (Integer) call(sc, s, "z"), ids, contents));
         }
-        return new MazeFurnishPlan(summary, survival, steps);
+        int[] air = new int[0];
+        try { air = (int[]) c.getField("airCells").get(job); } catch (NoSuchFieldException ignored) {} // Ostinato: run100
+        return new MazeFurnishPlan(summary, survival, steps, air);
     }
 
     private static Object call(Class<?> c, Object o, String name) throws ReflectiveOperationException {

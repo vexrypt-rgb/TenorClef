@@ -89,6 +89,20 @@ public class SlotHandler {
         }
         registerSlotAction();
         int syncId = player.currentScreenHandler.syncId;
+        // Ostinato: run102 wood audit. Log every stack this bot throws away and who threw it.
+        ItemStack thrown = type == SlotActionType.THROW
+                ? (windowSlot >= 0 && windowSlot < player.currentScreenHandler.slots.size() ? player.currentScreenHandler.getSlot(windowSlot).getStack() : ItemStack.EMPTY)
+                : windowSlot == -999 && type == SlotActionType.PICKUP ? StorageHelper.getItemStackInCursorSlot() : ItemStack.EMPTY;
+        if (!thrown.isEmpty()) {
+            StringBuilder by = new StringBuilder();
+            for (StackTraceElement e : Thread.currentThread().getStackTrace()) {
+                String c = e.getClassName();
+                if (!c.startsWith("adris.") || c.endsWith("SlotHandler")) continue;
+                by.append(c.substring(c.lastIndexOf('.') + 1)).append(':').append(e.getLineNumber()).append(' ');
+                if (by.length() > 120) break;
+            }
+            System.out.println("MAZETEST throw " + net.minecraft.registry.Registries.ITEM.getId(thrown.getItem()).getPath() + " x" + (type == SlotActionType.THROW && mouseButton == 0 ? 1 : thrown.getCount()) + " by " + by);
+        }
 
         try {
             mod.getController().clickSlot(syncId, windowSlot, mouseButton, type, player);

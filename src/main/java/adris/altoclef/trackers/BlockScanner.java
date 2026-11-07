@@ -86,6 +86,10 @@ public class BlockScanner {
         return blacklist.unreachable(pos);
     }
 
+    // Ostinato: run101. Cells no gather may pick (finished maze rooms, see MazeRooms). Unlike the blacklist this is never
+    // cleared, so room 3's diorite hunt cannot strip room 1's cladding after a clearBlacklist().
+    public static volatile Predicate<BlockPos> protectedCells = p -> false;
+
     public List<BlockPos> getKnownLocations(Block... blocks) {
         List<BlockPos> locations = new LinkedList<>();
 
@@ -129,7 +133,7 @@ public class BlockScanner {
             if (!trackedBlocks.containsKey(block)) continue;
 
             for (BlockPos pos : trackedBlocks.get(block)) {
-                if (isValidTest.test(pos) && mod.getWorld().getBlockState(pos).getBlock().equals(block) && !this.isUnreachable(pos))
+                if (isValidTest.test(pos) && mod.getWorld().getBlockState(pos).getBlock().equals(block) && !this.isUnreachable(pos) && !protectedCells.test(pos))
                     return true;
             }
         }
@@ -187,7 +191,7 @@ public class BlockScanner {
         for (BlockPos p : trackedBlocks.get(block)) {
             //ensure the block is there (can change upon rescan)
             if (!mod.getWorld().getBlockState(p).getBlock().equals(block)) continue;
-            if (!isValidTest.test(p) || isUnreachable(p)) continue;
+            if (!isValidTest.test(p) || isUnreachable(p) || protectedCells.test(p)) continue; // Ostinato: run101
 
             double dist = adris.altoclef.util.helpers.NearestBlockSelector.squaredDistanceBlock(
                     fromPos.x, fromPos.y, fromPos.z, p.getX(), p.getY(), p.getZ());

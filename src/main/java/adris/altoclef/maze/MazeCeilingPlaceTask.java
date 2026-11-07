@@ -4,6 +4,7 @@
 package adris.altoclef.maze;
 
 import adris.altoclef.AltoClef;
+import adris.altoclef.tasks.construction.DestroyBlockTask;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.helpers.ItemHelper;
 import baritone.api.pathing.goals.GoalBlock;
@@ -26,6 +27,7 @@ import net.minecraft.world.RaycastContext;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.Arrays;
+import java.util.function.Predicate;
 
 public class MazeCeilingPlaceTask extends Task {
 
@@ -42,9 +44,20 @@ public class MazeCeilingPlaceTask extends Task {
     private final java.util.Set<BlockPos> badStands = new java.util.HashSet<>(); // Ostinato: run58
     private int thereTicks; // Ostinato: run58
 
+    private int walkTicks; private BlockPos walkStand; // Ostinato: run90
+    private double walkBest; private int walkIdle; // Ostinato: run97 walk progress toward the stand
+    private BlockPos equipLogged; // Ostinato: run89 diagnostic, once per cell
+    private int refusedClicks; private boolean nudging; // Ostinato: run93 refused place clicks / re-centering on the stand
+    private final Predicate<BlockPos> stray; private BlockPos clearing; private int clears; // Ostinato: run100
+
     public MazeCeilingPlaceTask(BlockPos target, Block[] toPlace) {
+        this(target, toPlace, p -> false);
+    }
+
+    public MazeCeilingPlaceTask(BlockPos target, Block[] toPlace, Predicate<BlockPos> stray) {
         this.target = target;
         this.toPlace = toPlace;
+        this.stray = stray;
     }
 
     @Override
@@ -57,16 +70,23 @@ public class MazeCeilingPlaceTask extends Task {
     protected Task onTick() {
         AltoClef mod = AltoClef.getInstance();
         if (placed(mod)) {
+            stopNudge(mod);
             release(mod);
             return null;
         }
         if (mod.getItemStorage().getItemCount(ItemHelper.blocksToItems(toPlace)) <= 0) {
             setDebugState("No ceiling block in inventory");
+            stopNudge(mod);
             release(mod);
             return null;
         }
         mod.getClientBaritone().getBuilderProcess().onLostControl();
+        if (clearing != null) { // Ostinato: run100, mining scaffolding that hides the target (see strayInTheWay)
+            if (stray.test(clearing)) { stopNudge(mod); release(mod); setDebugState("Clearing scaffolding " + clearing.toShortString()); return new DestroyBlockTask(clearing); }
+            clearing = null; badStands.clear(); going = null; walkStand = null;
+        }
         BlockPos stand = standUnder(mod);
+        if (clearing != null) { stopNudge(mod); release(mod); return new DestroyBlockTask(clearing); }
         Vec3d eye = mod.getClientBaritone().getPlayerContext().playerHead();
         BlockPos feetNow = mod.getPlayer().getBlockPos();
         // Ostinato: measure against the STAND column, not the target column. standUnder may pick a neighbouring
@@ -81,9 +101,24 @@ public class MazeCeilingPlaceTask extends Task {
                 ? feetNow.getY() <= target.getY() - 2 && feetNow.getY() >= stand.getY() - 1
                 : feetNow.getY() == stand.getY());
         if (!there) {
-            thereTicks = 0;
+            thereTicks = 0; refusedClicks = 0;
+            stopNudge(mod);
             release(mod);
             arrived = false;
+            // Ostinato: run90. A stand inside a sealed room cannot be pathed to; it was walked at forever. 30s per stand.
+            // (walkStand, not going: onStart clears going whenever the task tree is restarted.)
+            if (!stand.equals(walkStand)) { walkStand = stand; walkTicks = 0; walkBest = Double.MAX_VALUE; walkIdle = 0; }
+            // Ostinato: run97. -21,95,-20 and -19,95,-20 (pipes room) never reached their stands, and the 30s cap tied the
+            // furnish stuck-defer (also 30s), so no other stand was tried before the defer. A walk that gains less than
+            // half a block in 12s drops the stand now, leaving time for the side and ring stands.
+            double dist = Math.sqrt(mod.getPlayer().getPos().squaredDistanceTo(Vec3d.ofBottomCenter(stand)));
+            if (dist < walkBest - 0.5) { walkBest = dist; walkIdle = 0; } else walkIdle++;
+            if (++walkTicks > 600 || walkIdle > 240) {
+                System.out.println("MAZETEST FURNISH ceiling-unreachable-stand " + stand.toShortString() + " for " + target.toShortString()
+                        + (walkIdle > 240 ? " no-progress dist=" + String.format("%.1f", dist) : ""));
+                badStands.add(stand); going = null; walkStand = null;
+                return stay("New stand for " + target.toShortString());
+            }
             if (!stand.equals(going)) {
                 going = stand;
                 mod.getClientBaritone().getCustomGoalProcess().setGoalAndPath(new GoalBlock(stand.getX(), stand.getY(), stand.getZ()));
@@ -93,7 +128,8 @@ public class MazeCeilingPlaceTask extends Task {
         // Ostinato: run58. A stand that sees no clickable face / cannot mine for 8s is dropped for the next one.
         if (++thereTicks > 160) {
             System.out.println("MAZETEST FURNISH ceiling-bad-stand " + stand.toShortString() + " for " + target.toShortString());
-            badStands.add(stand); thereTicks = 0; going = null;
+            badStands.add(stand); thereTicks = 0; going = null; refusedClicks = 0;
+            stopNudge(mod);
             return stay("New stand for " + target.toShortString());
         }
         if (!arrived) {
@@ -138,7 +174,35 @@ public class MazeCeilingPlaceTask extends Task {
         if (eye.distanceTo(click.hit) > REACH) {
             return stay("Too far to place ceiling " + target.toShortString());
         }
-        if (!mod.getSlotHandler().forceEquipItem(ItemHelper.blocksToItems(toPlace))) {
+        // Ostinato: run93. From the side stand -88,73,-150 the bot clicked -87,74,-150 for 30s and nothing was placed. "there"
+        // allows 0.75 off the stand centre, so the body can straddle into the target column, and BlockItem.canPlace refuses
+        // a block that would intersect the placer. Sneak back to the stand centre before clicking.
+        if (mod.getPlayer().getBoundingBox().intersects(new net.minecraft.util.math.Box(target))) {
+            look(mod, new Vec3d(stand.getX() + 0.5, eye.y, stand.getZ() + 0.5));
+            mod.getClientBaritone().getInputOverrideHandler().setInputForceState(Input.SNEAK, true);
+            mod.getClientBaritone().getInputOverrideHandler().setInputForceState(Input.MOVE_FORWARD, true);
+            nudging = true;
+            return stay("Centering on stand for " + target.toShortString());
+        }
+        stopNudge(mod);
+        Item[] placeItems = ItemHelper.blocksToItems(toPlace);
+        // Ostinato: run89. 17 second-pass ceilings sat on "No ceiling block in hand" while the blocks were held. The plain
+        // equip refuses while FoodChain.needsToEat(); the block is in reach and one click away, so equip it regardless.
+        if (!mod.getSlotHandler().forceEquipItem(placeItems, true)) {
+            if (equipLogged == null || !equipLogged.equals(target)) {
+                equipLogged = target;
+                StringBuilder held = new StringBuilder();
+                for (Item it : placeItems) held.append(it).append('=').append(mod.getItemStorage().getItemCount(it)).append(' ');
+                System.out.println("MAZETEST FURNISH ceiling-equip-fail " + target.toShortString() + " want=" + held
+                        + "eat=" + mod.getFoodChain().needsToEat() + " hunger=" + mod.getPlayer().getHungerManager().getFoodLevel()
+                        + " screen=" + mod.getItemStorage().getSlotsWithItemScreen(placeItems).size()
+                        + " gridOrCursor=" + adris.altoclef.util.helpers.StorageHelper.isItemInaccessibleToContainer(mod, new adris.altoclef.util.ItemTarget(placeItems, 1)));
+            }
+            // Held but not equippable: hasItem also counts the crafting grid / cursor, the equip only the inventory.
+            adris.altoclef.util.ItemTarget stuck = new adris.altoclef.util.ItemTarget(placeItems, 1);
+            if (adris.altoclef.util.helpers.StorageHelper.isItemInaccessibleToContainer(mod, stuck)) {
+                return new adris.altoclef.tasks.slot.MoveInaccessibleItemToInventoryTask(stuck);
+            }
             return stay("No ceiling block in hand " + target.toShortString());
         }
         look(mod, click.hit);
@@ -150,10 +214,18 @@ public class MazeCeilingPlaceTask extends Task {
         if (++actTicks % 4 != 0) {
             return stay("Placing ceiling " + target.toShortString());
         }
-        if (MinecraftClient.getInstance().interactionManager.interactBlock(mod.getPlayer(), Hand.MAIN_HAND, bhr) == ActionResult.SUCCESS) {
+        ActionResult res = MinecraftClient.getInstance().interactionManager.interactBlock(mod.getPlayer(), Hand.MAIN_HAND, bhr);
+        if (res == ActionResult.SUCCESS) {
             mod.getPlayer().swingHand(Hand.MAIN_HAND);
+            refusedClicks = 0;
+        } else if (++refusedClicks == 10) {
+            // Ostinato: run93. A stand whose clicks are all refused used to count as progress forever (only the outer
+            // furnish timeout skipped the cell). Log why once, then let thereTicks drop this stand for the next one.
+            System.out.println("MAZETEST FURNISH ceiling-place-refused " + target.toShortString() + " stand=" + stand.toShortString()
+                    + " res=" + res + " against=" + bhr.getBlockPos().toShortString() + " " + bhr.getSide()
+                    + " player=" + String.format("%.2f,%.2f,%.2f", mod.getPlayer().getX(), mod.getPlayer().getY(), mod.getPlayer().getZ()));
         }
-        if (actTicks > 40) thereTicks = Math.min(thereTicks, 120); // Ostinato: clicking a seen face counts as progress
+        if (actTicks > 40 && refusedClicks < 10) thereTicks = Math.min(thereTicks, 120); // Ostinato: clicking a seen face counts as progress
         return stay("Placing ceiling " + target.toShortString());
     }
 
@@ -176,14 +248,18 @@ public class MazeCeilingPlaceTask extends Task {
      * floor-level ceiling insert and every wall insert over room air time out (run42: 20 skip-light why=timeout).
      */
     private BlockPos standUnder(AltoClef mod) {
+        // Ostinato: run96. The column and side searches only look below the target, which is right for a ceiling cell
+        // (room air under it, solid above). For a floor cell they found pits under the floor (9,88,-151 got stand
+        // 10,86,-151, 9,88,-150 got 9,87,-149): unreachable, 30s each, then skip-light. Walls and floors take the ring.
+        boolean ceiling = open(mod, target.down()) && !open(mod, target.up());
         // Same column, but the head must stay under the target: feet <= target - 2.
-        for (int y = target.getY() - 2; y >= target.getY() - 6 && y > mod.getWorld().getBottomY(); y--) {
+        if (ceiling) for (int y = target.getY() - 2; y >= target.getY() - 6 && y > mod.getWorld().getBottomY(); y--) {
             BlockPos feet = new BlockPos(target.getX(), y, target.getZ());
             if (standSees(mod, feet)) return feet; // Ostinato: run63
         }
         // Ostinato: a 2-high room (floor right under the hole) or a column already clad below has no such spot.
         // Stand in a neighbouring room column instead; clickFace still lands on the target's face from there.
-        for (Direction d : new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST}) {
+        if (ceiling) for (Direction d : new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST}) {
             BlockPos c = target.offset(d);
             for (int y = target.getY() - 1; y >= target.getY() - 4 && y > mod.getWorld().getBottomY(); y--) {
                 BlockPos feet = new BlockPos(c.getX(), y, c.getZ());
@@ -203,20 +279,73 @@ public class MazeCeilingPlaceTask extends Task {
         BlockPos best = null; double bestD = Double.MAX_VALUE;
         for (int dx = -4; dx <= 4; dx++) for (int dz = -4; dz <= 4; dz++) for (int dy = -5; dy <= 1; dy++) { // Ostinato: run63 wider ring
             BlockPos feet = target.add(dx, dy, dz);
-            if (feet.equals(target) || feet.up().equals(target) || badStands.contains(feet)) continue;
+            // Ostinato: run93. -87,74,-150 got the ring stand -87,75,-150, i.e. standing ON the target: the "there" check
+            // wants a same-column stand under the target, so the bot stood on it for 30s and called it unreachable.
+            if (feet.equals(target) || feet.up().equals(target) || feet.down().equals(target) || badStands.contains(feet)) continue;
             if (!(support(mod, feet.down()) && open(mod, feet) && open(mod, feet.up()))) continue;
             Vec3d eye = new Vec3d(feet.getX() + 0.5, feet.getY() + 1.62, feet.getZ() + 0.5);
             if (eye.distanceTo(Vec3d.ofCenter(target)) > REACH - 0.3) continue;
             if (!seesTargetOrFace(mod, eye)) continue;
-            double d = feet.getSquaredDistance(feetNow);
+            // Ostinato: run96. A stand below the bot's feet is usually a pit or a cave pocket under the floor; prefer
+            // stands on the level the bot is working from.
+            double d = feet.getSquaredDistance(feetNow) + 9 * Math.max(0, feetNow.getY() - feet.getY());
             if (d < bestD) { bestD = d; best = feet; }
         }
         if (best != null) {
             if (!sideStandLogged) { sideStandLogged = true; System.out.println("MAZETEST FURNISH ceiling-ring-stand " + target.toShortString() + " from " + best.toShortString()); }
             return best;
         }
+        // Ostinato: run100. Room 2's light cell -50,93,107 had only its room-side face open, and the pillar dirt left at
+        // -51,92,107 / -51,93,107 covered it: no stand saw it, the fallback stand under it was unreachable, the cell was
+        // skipped and the room failed verify. A solid block in a carved cell the plan does not fill is scaffolding, so
+        // mine the one in the way and search again.
+        if (clears < 8) {
+            BlockPos s = strayInTheWay(mod);
+            if (s != null) {
+                clears++; clearing = s;
+                System.out.println("MAZETEST FURNISH ceiling-clear-stray " + s.toShortString() + " for " + target.toShortString()
+                        + " was=" + net.minecraft.registry.Registries.BLOCK.getId(mod.getWorld().getBlockState(s).getBlock()).getPath());
+                return feetNow;
+            }
+        }
         if (!badStands.isEmpty()) { badStands.clear(); }
         return new BlockPos(target.getX(), target.getY() - 2, target.getZ());
+    }
+
+    // Ostinato: run100. The stray block nearest the target that a standable cell's view of it hits first: a ray to the
+    // target (when it must be mined) or to a solid neighbour's face (to place against). Failing that, a stray next to a
+    // solid target, which covers one of its faces.
+    private BlockPos strayInTheWay(AltoClef mod) {
+        boolean solidTarget = !mod.getWorld().getBlockState(target).isAir();
+        BlockPos best = null; double bestD = Double.MAX_VALUE;
+        for (int dx = -4; dx <= 4; dx++) for (int dz = -4; dz <= 4; dz++) for (int dy = -5; dy <= 1; dy++) {
+            BlockPos feet = target.add(dx, dy, dz);
+            if (feet.equals(target) || feet.up().equals(target) || feet.down().equals(target)) continue;
+            if (!(support(mod, feet.down()) && open(mod, feet) && open(mod, feet.up()))) continue;
+            Vec3d eye = new Vec3d(feet.getX() + 0.5, feet.getY() + 1.62, feet.getZ() + 0.5);
+            if (eye.distanceTo(Vec3d.ofCenter(target)) > REACH - 0.3) continue;
+            java.util.List<Vec3d> aims = new java.util.ArrayList<>();
+            if (solidTarget) {
+                Vec3d c = Vec3d.ofCenter(target);
+                for (Direction d : Direction.values()) aims.add(c.add(d.getOffsetX() * 0.45, d.getOffsetY() * 0.45, d.getOffsetZ() * 0.45));
+            } else {
+                for (Direction fromTarget : Direction.values()) {
+                    BlockPos against = target.offset(fromTarget);
+                    if (support(mod, against)) aims.add(facePoint(against, fromTarget.getOpposite(), 0, 0));
+                }
+            }
+            for (Vec3d aim : aims) {
+                HitResult hr = mod.getWorld().raycast(new RaycastContext(eye, aim, RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mod.getPlayer()));
+                if (!(hr instanceof BlockHitResult bhr) || bhr.getBlockPos().equals(target) || !stray.test(bhr.getBlockPos())) continue;
+                double d = bhr.getBlockPos().getSquaredDistance(target);
+                if (d < bestD) { bestD = d; best = bhr.getBlockPos(); }
+            }
+        }
+        if (best == null && solidTarget) for (Direction d : Direction.values()) {
+            BlockPos n = target.offset(d);
+            if (stray.test(n)) return n;
+        }
+        return best;
     }
 
     // Ostinato: run63 FAIL light 132/133. Corner wall hole -152,80,13 (cladding above, below and beside it, only its
@@ -225,7 +354,7 @@ public class MazeCeilingPlaceTask extends Task {
     // room-floor spot -151,79,13 was never reached. A stand now counts only when its eye, within reach, can raycast
     // the target or a solid neighbour's face, so wall/corner holes fall through to a room stand that sees the opening.
     private boolean standSees(AltoClef mod, BlockPos feet) {
-        if (badStands.contains(feet) || feet.equals(target) || feet.up().equals(target)) return false;
+        if (badStands.contains(feet) || feet.equals(target) || feet.up().equals(target) || feet.down().equals(target)) return false;
         if (!(support(mod, feet.down()) && open(mod, feet) && open(mod, feet.up()))) return false;
         Vec3d eye = new Vec3d(feet.getX() + 0.5, feet.getY() + 1.62, feet.getZ() + 0.5);
         return eye.distanceTo(Vec3d.ofCenter(target)) <= REACH - 0.3 && seesTargetOrFace(mod, eye);
@@ -335,6 +464,13 @@ public class MazeCeilingPlaceTask extends Task {
         mod.getPlayer().setPitch(rot.getPitch());
     }
 
+    private void stopNudge(AltoClef mod) {
+        if (!nudging) return;
+        nudging = false;
+        mod.getClientBaritone().getInputOverrideHandler().setInputForceState(Input.MOVE_FORWARD, false);
+        mod.getClientBaritone().getInputOverrideHandler().setInputForceState(Input.SNEAK, false);
+    }
+
     private static void release(AltoClef mod) {
         mod.getClientBaritone().getInputOverrideHandler().setInputForceState(Input.CLICK_LEFT, false);
         mod.getInputControls().release(Input.CLICK_LEFT);
@@ -345,6 +481,7 @@ public class MazeCeilingPlaceTask extends Task {
     protected void onStop(Task interruptTask) {
         AltoClef mod = AltoClef.getInstance();
         if (mod != null && mod.getPlayer() != null) {
+            stopNudge(mod);
             release(mod);
         }
     }
@@ -353,6 +490,10 @@ public class MazeCeilingPlaceTask extends Task {
     public boolean isFinished() {
         AltoClef mod = AltoClef.getInstance();
         return mod != null && mod.getWorld() != null && placed(mod);
+    }
+
+    public BlockPos target() {
+        return target;
     }
 
     @Override

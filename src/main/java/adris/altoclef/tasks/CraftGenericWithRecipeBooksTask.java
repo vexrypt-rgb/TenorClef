@@ -150,6 +150,10 @@ public class CraftGenericWithRecipeBooksTask extends Task implements ITaskUsesCr
         //$$ net.minecraft.util.context.ContextMap ctx = net.minecraft.world.item.crafting.display.SlotDisplayContext.fromLevel(player.level());
         //$$ for (net.minecraft.client.gui.screens.recipebook.RecipeCollection col : player.getRecipeBook().getCollections()) {
         //$$     for (net.minecraft.world.item.crafting.display.RecipeDisplayEntry entry : col.getRecipes()) {
+        //$$         // Ostinato: run99. polished_andesite matched its stonecutter entry first; a crafting grid given a stonecutter
+        //$$         // id throws ClassCastException server-side (suppressed) and places nothing. Only crafting displays fit a grid.
+        //$$         if (!(entry.display() instanceof net.minecraft.world.item.crafting.display.ShapedCraftingRecipeDisplay)
+        //$$                 && !(entry.display() instanceof net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay)) continue;
         //$$         if (entry.resultItems(ctx).stream().anyMatch(s -> s.getItem() == target.getOutputItem())) { id = entry.id(); break; }
         //$$     }
         //$$     if (id != null) break;
@@ -162,7 +166,10 @@ public class CraftGenericWithRecipeBooksTask extends Task implements ITaskUsesCr
         //$$ }
         //$$ if (mod.getSlotHandler().canDoSlotAction()) {
         //$$     setDebugState("Recipe book: placing " + target);
-        //$$     mod.getController().handlePlaceRecipe(player.containerMenu.containerId, id, true);
+        //$$     // Ostinato: run102. Place one set per craft, never the max: max put all 16 logs (or every plank) in the grid,
+        //$$     // the output was taken once or twice to reach the target and the rest stayed in the grid, out of the counted
+        //$$     // inventory. Each barrel craft lost ~60 planks of wood (66 -> 3 in rooms 1 and 2), so every room re-chopped.
+        //$$     mod.getController().handlePlaceRecipe(player.containerMenu.containerId, id, false);
         //$$     mod.getSlotHandler().registerSlotAction();
         //$$ }
         //#elseif MC >= 12102

@@ -237,7 +237,8 @@ public class PlaceBedAndSetSpawnTask extends Task {
             return null;
         }
 
-        if (sleepAttemptMade) {
+        // Ostinato: once the spawn is set we only wait out inBedTimer; do not re-log the fallback every tick
+        if (sleepAttemptMade && !spawnSet) {
             if (bedInteractTimeout.elapsed()) {
                 Debug.logMessage("Failed to get \"Respawn point set\" message or sleeping, assuming that this bed already contains our spawn.");
                 spawnSet = true;

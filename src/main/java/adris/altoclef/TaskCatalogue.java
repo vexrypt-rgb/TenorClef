@@ -145,7 +145,7 @@ public class TaskCatalogue {
             mob("ink_sac", Items.INK_SAC, SquidEntity.class); // Warning, this probably won't work.
             mob("glow_ink_sac", Items.GLOW_INK_SAC, Entities.GLOW_SQUID); // Warning, this probably won't work.
             put("string", new Item[]{Items.STRING}, count -> new adris.altoclef.tasks.resources.CollectStringTask(count)); // Ostinato: cobweb+sword first, spiders second
-            mine("sugar_cane", Items.SUGAR_CANE);
+            simple("sugar_cane", Items.SUGAR_CANE, adris.altoclef.tasks.resources.FarmSugarCaneTask::new); // Ostinato: harvest above the base + replant/extend the patch (was: mine whole stalks)
             mine("brown_mushroom", MiningRequirement.HAND, new Block[]{Blocks.BROWN_MUSHROOM, Blocks.BROWN_MUSHROOM_BLOCK}, Items.BROWN_MUSHROOM);
             mine("red_mushroom", MiningRequirement.HAND, new Block[]{Blocks.RED_MUSHROOM, Blocks.RED_MUSHROOM_BLOCK}, Items.RED_MUSHROOM);
             mine("mushroom", MiningRequirement.HAND, new Block[]{Blocks.BROWN_MUSHROOM, Blocks.BROWN_MUSHROOM_BLOCK, Blocks.RED_MUSHROOM, Blocks.RED_MUSHROOM_BLOCK}, Items.BROWN_MUSHROOM, Items.RED_MUSHROOM);
@@ -426,6 +426,11 @@ public class TaskCatalogue {
             armor("iron", "iron_ingot", Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS);
             armor("golden", "gold_ingot", Items.GOLDEN_HELMET, Items.GOLDEN_CHESTPLATE, Items.GOLDEN_LEGGINGS, Items.GOLDEN_BOOTS);
             armor("diamond", "diamond", Items.DIAMOND_HELMET, Items.DIAMOND_CHESTPLATE, Items.DIAMOND_LEGGINGS, Items.DIAMOND_BOOTS);
+            //#if MC >= 12109
+            // Ostinato: copper tools and armor (1.21.9+); copper ore is common, so #maze.tunnels kits ask for these first.
+            tools("copper", "copper_ingot", Items.COPPER_PICKAXE, Items.COPPER_SHOVEL, Items.COPPER_SWORD, Items.COPPER_AXE, Items.COPPER_HOE);
+            armor("copper", "copper_ingot", Items.COPPER_HELMET, Items.COPPER_CHESTPLATE, Items.COPPER_LEGGINGS, Items.COPPER_BOOTS);
+            //#endif
             smith("netherite_helmet", Items.NETHERITE_HELMET, "netherite_ingot", "diamond_helmet");
             smith("netherite_chestplate", Items.NETHERITE_CHESTPLATE, "netherite_ingot", "diamond_chestplate");
             smith("netherite_leggings", Items.NETHERITE_LEGGINGS, "netherite_ingot", "diamond_leggings");

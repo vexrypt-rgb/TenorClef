@@ -401,7 +401,10 @@ public class DestroyBlockTask extends Task implements ITaskRequiresGrounded {
             }
             mod.getClientBaritone().getInputOverrideHandler().setInputForceState(Input.CLICK_LEFT, true);
         } else {
-            setDebugState("Getting to block...");
+            // Ostinato: run99. Polished-andesite gather stood 30s beside -67,100,-37 on "Getting to block..." until stuck-recover;
+            // which of the mine conditions failed was not visible. The furnish progress chain prints this state.
+            setDebugState("Getting to block... reach=" + reach.isPresent() + " ground=" + grounded + " wet=" + wet
+                    + " safe=" + mod.getClientBaritone().getPathingBehavior().isSafeToCancel() + " dist=" + String.format("%.1f", mod.getPlayer().getPos().distanceTo(net.minecraft.util.math.Vec3d.ofCenter(pos))));
             if (isMining && wet) {
                 // Previously held break while bobbing — that stalls CollectWaterBucket.
                 setDebugState("In water while mining — escaping for footing");

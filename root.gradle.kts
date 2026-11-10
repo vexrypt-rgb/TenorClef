@@ -13,6 +13,22 @@ subprojects {
     }
 }
 
+// Ostinato: versions/mapping-26.3-1.21.11.txt (26.3 Mojang names -> 1.21.11 Yarn names) is not committed, because it is
+// derived from Mojang's names. When it is missing it is fetched once from the TenorClef commit where it was last
+// edited, checked against its SHA-256, and kept untracked (.gitignore). Edit the local copy freely; to fetch from
+// somewhere else pass -Ptc.mapping263.url=<url> (no checksum check then). See docs/DEVELOPMENT.md.
+val mapping263 = file("versions/mapping-26.3-1.21.11.txt")
+if (!mapping263.isFile && !providers.gradleProperty("no26").isPresent) {
+    val custom = providers.gradleProperty("tc.mapping263.url").orNull
+    val url = custom ?: "https://raw.githubusercontent.com/vexrypt-rgb/TenorClef/01faac19f93ea1407502a37512130a2cd1189174/versions/mapping-26.3-1.21.11.txt"
+    val bytes = java.net.URI(url).toURL().readBytes()
+    val got = java.security.MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it) }
+    if (custom == null && got != "f591058266141045fec2677a8c5d41500e67c52a3e4230a15eb71edae3924398") {
+        throw GradleException("mapping-26.3-1.21.11.txt from $url has SHA-256 $got, expected f5910582...")
+    }
+    mapping263.writeBytes(bytes)
+    logger.lifecycle("Fetched ${mapping263.name} from $url")
+}
 // The preprocess chain is a LINKED LIST and must stay complete.
 // PreprocessPlugin.apply() calls parent.extensions.getByType<RootPreprocessExtension>()
 // for every non-root project, so each version module requires its PARENT to have run

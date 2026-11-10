@@ -27,7 +27,7 @@ preprocess {
 
 // The unobfuscated Loom has no mappings, and its mappingConfiguration getter throws, which the preprocessor
 // probes reflectively. Hand it an identity tiny file instead (26.x names are already the Mojang names);
-// the real 26.3 <-> 1.21.11 renames come from versions/mapping-26.3-1.21.11.txt.
+// the real 26.3 <-> 1.21.11 renames come from versions/mapping-26.3-1.21.11.txt (fetched by root.gradle.kts, not committed).
 class IdentityTinyMappings {
     File tinyMappings
 }

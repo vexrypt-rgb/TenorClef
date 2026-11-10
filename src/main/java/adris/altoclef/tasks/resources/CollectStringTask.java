@@ -45,7 +45,8 @@ public class CollectStringTask extends ResourceTask {
         if (mod.getBlockScanner().anyFound(Blocks.COBWEB)) {
             if (!mod.getItemStorage().hasItem(SWORDS)) {
                 setDebugState("Getting a sword for cobwebs");
-                Item sword = mod.getItemStorage().hasItem(Items.COBBLESTONE, Items.COBBLED_DEEPSLATE, Items.BLACKSTONE) ? Items.STONE_SWORD : Items.WOODEN_SWORD;
+                // Ostinato: COBBLED_DEEPSLATE does not exist before 1.17; the versioned field is a stub there.
+                Item sword = mod.getItemStorage().hasItem(Items.COBBLESTONE, adris.altoclef.multiversion.versionedfields.Items.COBBLED_DEEPSLATE, Items.BLACKSTONE) ? Items.STONE_SWORD : Items.WOODEN_SWORD;
                 return TaskCatalogue.getItemTask(sword, 1);
             }
             setDebugState("Cutting cobwebs for string");

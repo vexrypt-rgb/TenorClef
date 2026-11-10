@@ -63,16 +63,34 @@ public class PlayerSlot extends Slot {
 
     @Override
     public int inventorySlotToWindowSlot(int inventorySlot) {
+        // Ostinato: 2026-10-30. PlayerScreenHandler layout (see the wiki.vg/Inventory link on Slot):
+        // window 0 output, 1-4 craft input, 5-8 armour, 9-35 main, 36-44 hotbar, 45 offhand.
+        // PlayerInventory layout: 0-8 hotbar, 9-35 main, 36 feet .. 39 head, 40 offhand.
+        // Only the hotbar/main cases used to be mapped, so ARMOR_*_SLOT.getInventorySlot() answered 5..8 and
+        // OFFHAND_SLOT answered 9 -- both are real inventory indices of *different* stacks. Armour is stored
+        // feet-first while the window lists head-first, hence 44 - index.
         if (inventorySlot < 9) {
             return inventorySlot + 36;
+        }
+        if (inventorySlot >= 36 && inventorySlot <= 39) {
+            return 44 - inventorySlot; // 36 feet -> 8, 37 legs -> 7, 38 chest -> 6, 39 head -> 5
+        }
+        if (inventorySlot == 40) {
+            return 45;
         }
         return inventorySlot;
     }
 
     @Override
     protected int windowSlotToInventorySlot(int windowSlot) {
-        if (windowSlot >= 36) {
+        if (windowSlot >= 36 && windowSlot <= 44) {
             return windowSlot - 36;
+        }
+        if (windowSlot >= 5 && windowSlot <= 8) {
+            return 44 - windowSlot; // 5 head -> 39, 6 chest -> 38, 7 legs -> 37, 8 feet -> 36
+        }
+        if (windowSlot == 45) {
+            return 40;
         }
         return windowSlot;
     }

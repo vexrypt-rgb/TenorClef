@@ -23,7 +23,9 @@ public class CraftingHelper {
             inventoryItems.add(new ItemStack(stack.getItem(), stack.getCount()));
         }
 
-        for (CraftingRecipe recipe : mod.getCraftingRecipeTracker().getRecipeForItem(item)) {
+        List<CraftingRecipe> recipes = mod.getCraftingRecipeTracker().getRecipeForItem(item);
+        if (recipes == null) return false;
+        for (CraftingRecipe recipe : recipes) {
             if (canCraftItemNow(mod, new ArrayList<>(inventoryItems), recipe, new HashSet<>())) {
                 return true;
             }

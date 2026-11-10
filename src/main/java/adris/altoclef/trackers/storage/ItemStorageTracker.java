@@ -34,6 +34,16 @@ public class ItemStorageTracker extends Tracker {
         containerTrackerConsumer.accept(containers);
     }
 
+    // Ostinato: these three pairs are constants, and the empty case is by far the most common one (no screen open).
+    // They used to be allocated on every getItemCount/hasItem call, i.e. on every task's isFinished/isStartable check.
+    private static final Slot[] NO_CONVERSION_SLOTS = new Slot[0];
+    private static final Slot[] FURNACE_CONVERSION_SLOTS =
+            {FurnaceSlot.INPUT_SLOT_FUEL, FurnaceSlot.INPUT_SLOT_MATERIALS};
+    private static final Slot[] SMOKER_CONVERSION_SLOTS =
+            {SmokerSlot.INPUT_SLOT_FUEL, SmokerSlot.INPUT_SLOT_MATERIALS};
+    private static final Slot[] BLAST_FURNACE_CONVERSION_SLOTS =
+            {BlastFurnaceSlot.INPUT_SLOT_FUEL, BlastFurnaceSlot.INPUT_SLOT_MATERIALS};
+
     private static Slot[] getCurrentConversionSlots() {
         // TODO: Anvil input, anything else...
         if (StorageHelper.isPlayerInventoryOpen()) {
@@ -41,13 +51,13 @@ public class ItemStorageTracker extends Tracker {
         } else if (StorageHelper.isBigCraftingOpen()) {
             return CraftingTableSlot.INPUT_SLOTS;
         } else if (StorageHelper.isFurnaceOpen()) {
-            return new Slot[]{FurnaceSlot.INPUT_SLOT_FUEL, FurnaceSlot.INPUT_SLOT_MATERIALS};
+            return FURNACE_CONVERSION_SLOTS;
         } else if (StorageHelper.isSmokerOpen()) {
-            return new Slot[]{SmokerSlot.INPUT_SLOT_FUEL, SmokerSlot.INPUT_SLOT_MATERIALS};
+            return SMOKER_CONVERSION_SLOTS;
         } else if (StorageHelper.isBlastFurnaceOpen()) {
-            return new Slot[]{BlastFurnaceSlot.INPUT_SLOT_FUEL, BlastFurnaceSlot.INPUT_SLOT_MATERIALS};
+            return BLAST_FURNACE_CONVERSION_SLOTS;
         }
-        return new Slot[0];
+        return NO_CONVERSION_SLOTS;
     }
 
     /**
@@ -55,18 +65,24 @@ public class ItemStorageTracker extends Tracker {
      * (ex. crafting table slots/furnace input, stuff the player is use )
      */
     public int getItemCount(Item... items) {
-        int inConversionSlots = Arrays.stream(getCurrentConversionSlots()).mapToInt(slot -> {
+        // Ostinato: plain loop. The stream version built an int pipeline (and, with no screen open, an empty one)
+        // on every call, and this is asked by every task's isFinished/isStartable.
+        int inConversionSlots = 0;
+        for (Slot slot : getCurrentConversionSlots()) {
             ItemStack stack = StorageHelper.getItemStackInSlot(slot);
             if (ArrayUtils.contains(items, stack.getItem())) {
-                return stack.getCount();
+                inConversionSlots += stack.getCount();
             }
-            return 0;
-        }).reduce(0, Integer::sum);
+        }
         return inventory.getItemCount(true, false, items) + inConversionSlots;
     }
 
     public int getItemCount(ItemTarget... targets) {
-        return Arrays.stream(targets).mapToInt(target -> getItemCount(target.getMatches())).reduce(0, Integer::sum);
+        int total = 0;
+        for (ItemTarget target : targets) {
+            total += getItemCount(target.getMatches());
+        }
+        return total;
     }
 
     /**
@@ -98,10 +114,14 @@ public class ItemStorageTracker extends Tracker {
      * (ex. crafting table slots/furnace input, stuff the player is use )
      */
     public boolean hasItem(Item... items) {
-        return Arrays.stream(getCurrentConversionSlots()).anyMatch(slot -> {
+        // Ostinato: same short-circuit order as the stream it replaces (conversion slots first, then the inventory).
+        for (Slot slot : getCurrentConversionSlots()) {
             ItemStack stack = StorageHelper.getItemStackInSlot(slot);
-            return ArrayUtils.contains(items, stack.getItem());
-        }) || inventory.hasItem(true, items);
+            if (ArrayUtils.contains(items, stack.getItem())) {
+                return true;
+            }
+        }
+        return inventory.hasItem(true, items);
     }
 
     public boolean hasItem(boolean playerInventoryOnly, Item... items) {
@@ -114,11 +134,22 @@ public class ItemStorageTracker extends Tracker {
     }
 
     public boolean hasItemAll(Item... items) {
-        return Arrays.stream(items).allMatch(this::hasItem);
+        // Ostinato: loop instead of a stream; empty input still answers true, as allMatch did.
+        for (Item item : items) {
+            if (!hasItem(item)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public boolean hasItem(ItemTarget... targets) {
-        return Arrays.stream(targets).anyMatch(target -> hasItem(target.getMatches()));
+        for (ItemTarget target : targets) {
+            if (hasItem(target.getMatches())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -296,7 +327,11 @@ public class ItemStorageTracker extends Tracker {
 
     @Override
     protected void updateState() {
-        inventory.updateState();
+        // Ostinato: routed through InventorySubTracker's dirty flag instead of calling its updateState() directly.
+        // Calling it directly would bypass that flag and leave it set, so the next inventory read in the same tick
+        // would scan the whole screen again. (Nothing reaches this method today — no ensureUpdated() call site on
+        // this tracker — so this is dead-path hygiene, not a measured win.)
+        inventory.refresh();
         containers.updateState();
     }
 

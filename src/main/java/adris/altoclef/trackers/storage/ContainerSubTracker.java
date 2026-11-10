@@ -125,6 +125,10 @@ public class ContainerSubTracker extends Tracker {
                 return;
 
             HashMap<BlockPos, ContainerCache> dimCache = containerCaches.get(WorldHelper.getCurrentDimension());
+            if (dimCache == null) {
+                dimCache = new HashMap<>();
+                containerCaches.put(WorldHelper.getCurrentDimension(), dimCache);
+            }
 
             // Container Type Mismatch, reset.
             if (dimCache.containsKey(containerPos)) {
@@ -171,9 +175,11 @@ public class ContainerSubTracker extends Tracker {
     }
 
     public Optional<ContainerCache> getContainerAtPosition(Dimension dimension, BlockPos pos) {
-        Optional<ContainerCache> cache = Optional.ofNullable(containerCaches.get(dimension).getOrDefault(pos, null));
+        HashMap<BlockPos, ContainerCache> dimMap = containerCaches.get(dimension);
+        if (dimMap == null) return Optional.empty();
+        Optional<ContainerCache> cache = Optional.ofNullable(dimMap.getOrDefault(pos, null));
         if (cache.isPresent() && !isContainerCacheValid(dimension, cache.get())) {
-            containerCaches.get(dimension).remove(pos);
+            dimMap.remove(pos);
             return Optional.empty();
         }
         return cache;
@@ -219,7 +225,9 @@ public class ContainerSubTracker extends Tracker {
         List<BlockPos> toRemove = new ArrayList<>();
 
         ContainerCache bestCache = null;
-        for (ContainerCache cache : containerCaches.get(dim).values()) {
+        HashMap<BlockPos, ContainerCache> dimMap = containerCaches.get(dim);
+        if (dimMap == null) return Optional.empty();
+        for (ContainerCache cache : dimMap.values()) {
             if (!isContainerCacheValid(dim, cache)) {
                 toRemove.add(cache.getBlockPos());
                 continue;
@@ -234,7 +242,7 @@ public class ContainerSubTracker extends Tracker {
         }
         // Clear anything invalid
         for (BlockPos remove : toRemove) {
-            containerCaches.get(dim).remove(remove);
+            dimMap.remove(remove);
         }
         return Optional.ofNullable(bestCache);
     }

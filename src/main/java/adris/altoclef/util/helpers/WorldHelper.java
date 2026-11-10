@@ -97,11 +97,13 @@ public interface WorldHelper {
         if (s.getBlock() instanceof FluidBlock) {
             // Only accept still fluids.
             if (!s.getFluidState().isStill() && onlyAcceptStill) return false;
-            int level = s.getFluidState().getLevel();
             // Ignore if there's liquid above, we can't tell if it's a source block or not.
             BlockState above = world.getBlockState(pos.up());
             if (above.getBlock() instanceof FluidBlock) return false;
-            return level == 8;
+            // A source block is, by definition, a still fluid block. `getLevel()` is not portable:
+            // on 1.16.x it returns the raw LEVEL property (source == 0), while on 26.3 it is remapped
+            // to `getAmount()` (source == 8). `isStill()` is correct in every version.
+            return s.getFluidState().isStill();
         }
         return false;
     }

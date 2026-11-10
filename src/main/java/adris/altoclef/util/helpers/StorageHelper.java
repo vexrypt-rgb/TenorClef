@@ -10,6 +10,7 @@ import adris.altoclef.mixins.AbstractFurnaceScreenHandlerAccessor;
 import adris.altoclef.multiversion.item.ItemVer;
 import adris.altoclef.multiversion.ToolMaterialVer;
 import adris.altoclef.multiversion.versionedfields.Blocks;
+import adris.altoclef.tasksystem.Task;
 import adris.altoclef.tasks.CraftInInventoryTask;
 import adris.altoclef.trackers.storage.ItemStorageTracker;
 import adris.altoclef.util.CraftingRecipe;
@@ -137,14 +138,20 @@ public class StorageHelper {
     }
 
     private static boolean miningRequirementMetInner(boolean inventoryOnly, MiningRequirement requirement) {
+        // A golden pickaxe is WOOD tier, not stone and certainly not iron: ToolMaterialVer.getMiningLevel maps
+        // ToolMaterials.GOLD to 0, the same as WOOD (gold is fast and fragile, not deep). It used to be listed under
+        // STONE and IRON here, so a bot holding only a golden pickaxe answered "STONE/IRON met", MineAndCollectTask
+        // skipped SatisfyMiningRequirementTask, and the gather ran on iron ore / gold ore / redstone / diamond for no
+        // drops until its timeout. ResourceTask's satisfiable-block filter (which asks the game itself through
+        // MiningRequirement.getMinimumRequirementForBlock -> isSuitableFor) then kept such targets in the plan.
         return switch (requirement) {
             case HAND -> true;
             case WOOD ->
-                    h(inventoryOnly, Items.WOODEN_PICKAXE) || h(inventoryOnly, Items.STONE_PICKAXE) || h(inventoryOnly, Items.IRON_PICKAXE) || h(inventoryOnly, Items.GOLDEN_PICKAXE) || h(inventoryOnly, Items.DIAMOND_PICKAXE) || h(inventoryOnly, Items.NETHERITE_PICKAXE);
+                    h(inventoryOnly, Items.WOODEN_PICKAXE) || h(inventoryOnly, Items.GOLDEN_PICKAXE) || h(inventoryOnly, Items.STONE_PICKAXE) || h(inventoryOnly, Items.IRON_PICKAXE) || h(inventoryOnly, Items.DIAMOND_PICKAXE) || h(inventoryOnly, Items.NETHERITE_PICKAXE);
             case STONE ->
-                    h(inventoryOnly, Items.STONE_PICKAXE) || h(inventoryOnly, Items.IRON_PICKAXE) || h(inventoryOnly, Items.GOLDEN_PICKAXE) || h(inventoryOnly, Items.DIAMOND_PICKAXE) || h(inventoryOnly, Items.NETHERITE_PICKAXE);
+                    h(inventoryOnly, Items.STONE_PICKAXE) || h(inventoryOnly, Items.IRON_PICKAXE) || h(inventoryOnly, Items.DIAMOND_PICKAXE) || h(inventoryOnly, Items.NETHERITE_PICKAXE);
             case IRON ->
-                    h(inventoryOnly, Items.IRON_PICKAXE) || h(inventoryOnly, Items.GOLDEN_PICKAXE) || h(inventoryOnly, Items.DIAMOND_PICKAXE) || h(inventoryOnly, Items.NETHERITE_PICKAXE);
+                    h(inventoryOnly, Items.IRON_PICKAXE) || h(inventoryOnly, Items.DIAMOND_PICKAXE) || h(inventoryOnly, Items.NETHERITE_PICKAXE);
             case DIAMOND ->
                     h(inventoryOnly, Items.DIAMOND_PICKAXE) || h(inventoryOnly, Items.NETHERITE_PICKAXE);
             default -> {
@@ -716,7 +723,8 @@ public class StorageHelper {
         }
         // Consider Cursor slot only if we have our player inventory open AND we're not crafting it...
         if (StorageHelper.isPlayerInventoryOpen() && withItem.matches(getItemStackInCursorSlot().getItem())) {
-            if (!mod.getUserTaskChain().getCurrentTask().thisOrChildSatisfies(task -> {
+            Task current = mod.getUserTaskChain().getCurrentTask();
+            if (current == null || !current.thisOrChildSatisfies(task -> {
                 if (task instanceof CraftInInventoryTask invCraft) {
                     return withItem.matches(invCraft.getRecipeTarget().getOutputItem());
                 }

@@ -379,27 +379,19 @@ public class BotBehaviour {
             // Kinda jank but it works.
             synchronized (sa.getBreakMutex()) {
                 synchronized (sa.getPlaceMutex()) {
-                    sa.getBreakAvoiders().clear();
-                    sa.getBreakAvoiders().addAll(toAvoidBreaking);
-                    sa.getBlocksToAvoidBreaking().clear();
-                    sa.getBlocksToAvoidBreaking().addAll(blocksToAvoidBreaking);
-                    sa.getPlaceAvoiders().clear();
-                    sa.getPlaceAvoiders().addAll(toAvoidPlacing);
-                    sa.getProtectedItems().clear();
-                    sa.getProtectedItems().addAll(protectedItems);
+                    replaceWithoutEmptying(sa.getBreakAvoiders(), toAvoidBreaking);
+                    replaceWithoutEmptying(sa.getBlocksToAvoidBreaking(), blocksToAvoidBreaking);
+                    replaceWithoutEmptying(sa.getPlaceAvoiders(), toAvoidPlacing);
+                    replaceWithoutEmptying(sa.getProtectedItems(), protectedItems);
                     synchronized (sa.getPropertiesMutex()) {
-                        sa.getForceWalkOnPredicates().clear();
-                        sa.getForceWalkOnPredicates().addAll(allowWalking);
-                        sa.getForceAvoidWalkThroughPredicates().clear();
-                        sa.getForceAvoidWalkThroughPredicates().addAll(avoidWalkingThrough);
-                        sa.getForceUseToolPredicates().clear();
-                        sa.getForceUseToolPredicates().addAll(forceUseTools);
+                        replaceWithoutEmptying(sa.getForceWalkOnPredicates(), allowWalking);
+                        replaceWithoutEmptying(sa.getForceAvoidWalkThroughPredicates(), avoidWalkingThrough);
+                        replaceWithoutEmptying(sa.getForceUseToolPredicates(), forceUseTools);
                     }
                 }
             }
             synchronized (sa.getGlobalHeuristicMutex()) {
-                sa.getGlobalHeuristics().clear();
-                sa.getGlobalHeuristics().addAll(globalHeuristics);
+                replaceWithoutEmptying(sa.getGlobalHeuristics(), globalHeuristics);
             }
 
 
@@ -411,6 +403,30 @@ public class BotBehaviour {
 
             // Minecraft
             MinecraftClient.getInstance().options.pauseOnLostFocus = pauseOnLostFocus;
+        }
+
+        /**
+         * Makes {@code live} hold the contents of {@code target} without ever passing through an empty state.
+         *
+         * <p>The readers of these collections do not take the mutexes held around this call: Ostinato's pathfinder
+         * asks {@code shouldAvoidBreaking} for every block it considers (with an "both empty => false" fast path) and
+         * {@code isItemProtected} for every item it might discard. The previous {@code clear()} followed by
+         * {@code addAll()} therefore left a window in which every protected block looked breakable and every
+         * protected item looked disposable — the harmful direction. Adding the missing entries first and pruning the
+         * stale ones afterwards keeps the live collection a superset of the target for the whole call, so the only
+         * possible transient error is protecting one entry too many, which is fail-safe.
+         *
+         * <p>The final contents are unchanged: after the prune, {@code live} holds exactly the target's elements.
+         * Duplicates already present in {@code live} are left alone (they cannot be introduced here, and these
+         * collections are only ever queried for membership).
+         */
+        private static <T> void replaceWithoutEmptying(Collection<T> live, Collection<T> target) {
+            for (T t : target) {
+                if (!live.contains(t)) {
+                    live.add(t);
+                }
+            }
+            live.retainAll(target);
         }
     }
 }

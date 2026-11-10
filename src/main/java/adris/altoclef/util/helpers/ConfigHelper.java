@@ -126,16 +126,13 @@ public class ConfigHelper {
             return result;
         }
 
-        try {
-            FileInputStream fis = new FileInputStream(loadFrom);
-            Scanner sc = new Scanner(fis);    //file to be scanned
-            //returns true if there is another line to read
+        try (FileInputStream fis = new FileInputStream(loadFrom);
+             Scanner sc = new Scanner(fis)) {
             while (sc.hasNextLine()) {
                 String line = trimComment(sc.nextLine()).trim();
                 if (line.isEmpty()) continue;
                 result.addLine(line);
             }
-            sc.close();
         } catch (IOException e) {
             Debug.logError("Failed to load list config file ("+loadFrom+")",e);
             return null;

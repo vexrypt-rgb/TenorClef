@@ -64,4 +64,20 @@ public abstract class Blocks extends net.minecraft.block.Blocks {
     //$$ public static Block DRIPSTONE_BLOCK = UNSUPPORTED;
     //#endif
 
+    // Ostinato: the ground blocks the farm tasks (FarmSugarCaneTask, ReplantTreesTask) name as plantable.
+    // Declared here so a source file can reference them on every version; unsupported ones answer isSupported() == false.
+    //#if MC <= 11605
+    //$$ public static Block ROOTED_DIRT = UNSUPPORTED;
+    //$$ public static Block MOSS_BLOCK = UNSUPPORTED;
+    //#endif
+
+    //#if MC <= 11802
+    //$$ public static Block MUD = UNSUPPORTED;
+    //$$ public static Block MUDDY_MANGROVE_ROOTS = UNSUPPORTED;
+    //#endif
+
+    //#if MC <= 11904
+    //$$ public static Block SUSPICIOUS_SAND = UNSUPPORTED;
+    //#endif
+
 }

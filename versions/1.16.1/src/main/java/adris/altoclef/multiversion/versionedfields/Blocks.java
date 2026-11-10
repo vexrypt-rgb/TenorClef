@@ -60,6 +60,13 @@ public class Blocks {
     public static Block DEEPSLATE = UNSUPPORTED;
     public static Block COBBLED_DEEPSLATE = UNSUPPORTED;
     public static Block DRIPSTONE_BLOCK = UNSUPPORTED;
+    // Ostinato: ground blocks the farm tasks name (1.17+/1.19+/1.20+). Absent in 1.16.x, so a stub keeps the
+    // 1.16.1 tree compiling; isSupported() is false for them, so a 1.16.1 farm never matches one.
+    public static Block ROOTED_DIRT = UNSUPPORTED;
+    public static Block MOSS_BLOCK = UNSUPPORTED;
+    public static Block MUD = UNSUPPORTED;
+    public static Block MUDDY_MANGROVE_ROOTS = UNSUPPORTED;
+    public static Block SUSPICIOUS_SAND = UNSUPPORTED;
 
 
 

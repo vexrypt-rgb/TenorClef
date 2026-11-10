@@ -81,6 +81,7 @@ public class MazeCeilingPlaceTask extends Task {
     private BlockPos equipLogged; // Ostinato: run89 diagnostic, once per cell
     private int refusedClicks; private boolean nudging; // Ostinato: run93 refused place clicks / re-centering on the stand
     private final Predicate<BlockPos> stray; private BlockPos clearing; private int clears; // Ostinato: run100
+    private boolean pocketMine; // Ostinato: run141. clearing is the lid or the column occluder, not a stray
 
     public MazeCeilingPlaceTask(BlockPos target, Block[] toPlace) {
         this(target, toPlace, p -> false);
@@ -142,8 +143,11 @@ public class MazeCeilingPlaceTask extends Task {
         }
         mod.getClientBaritone().getBuilderProcess().onLostControl();
         if (clearing != null) { // Ostinato: run100, mining scaffolding that hides the target (see strayInTheWay)
-            if (stray.test(clearing)) { stopNudge(mod); release(mod); setDebugState("Clearing scaffolding " + clearing.toShortString()); return new DestroyBlockTask(clearing); }
-            clearing = null; badStands.clear(); going = null; walkStand = null;
+            // Ostinato: run141. A pocket opener (coal lid, or the cobble the old stand walked into) is not a stray.
+            // The next tick used to drop it and clear badStands, so the same solid stand was walked at again.
+            if (!support(mod, clearing)) { clearing = null; pocketMine = false; going = null; walkStand = null; }
+            else if (stray.test(clearing) || pocketMine) { stopNudge(mod); release(mod); setDebugState("Clearing scaffolding " + clearing.toShortString()); return new DestroyBlockTask(clearing); }
+            else { clearing = null; badStands.clear(); going = null; walkStand = null; }
         }
         // Ostinato: run141 mono_yellow seals. Furnish cladding boxed the bot in at -25,85,5 (Baritone open set 0, feet
         // unchanged for 67 seals): every stand was no-progress and every seal SEAL-LEFT-OPEN. Dig out toward the stand.
@@ -446,7 +450,66 @@ public class MazeCeilingPlaceTask extends Task {
             return pillar;
         }
         // Ostinato: run118. The old fallback cleared badStands here, which put the same unreachable stand back on top.
-        return new BlockPos(target.getX(), target.getY() - 2, target.getZ());
+        BlockPos blind = new BlockPos(target.getX(), target.getY() - 2, target.getZ());
+        // Ostinato: run141. Seal -35,94,-22 is air between dirt and coal. blind is the cobble at y=92, which is not a
+        // stand, so this walked at a solid four times (no-progress dist=3.5) and skipped. Mine the face already in
+        // reach (that cobble), then the dirt under the hole, and place against the coal.
+        if (clears < 8 && mod.getWorld().getBlockState(target).isAir()
+                && support(mod, target.down()) && support(mod, target.up())
+                && !standSees(mod, blind)) {
+            BlockPos opener = pocketOpener(mod);
+            if (opener != null) {
+                clears++;
+                clearing = opener;
+                pocketMine = true;
+                System.out.println("MAZETEST FURNISH ceiling-open-pocket " + opener.toShortString() + " for " + target.toShortString()
+                        + " was=" + net.minecraft.registry.Registries.BLOCK.getId(mod.getWorld().getBlockState(opener).getBlock()).getPath());
+                return mod.getPlayer().getBlockPos();
+            }
+        }
+        return blind;
+    }
+
+    // Ostinato: run141. Lid and side first when the eye can already hit a non-place block; otherwise the nearest
+    // hittable solid in this column (the cobble the fallback used to path into).
+    private BlockPos pocketOpener(AltoClef mod) {
+        java.util.List<BlockPos> cells = new java.util.ArrayList<>();
+        java.util.List<Boolean> column = new java.util.ArrayList<>();
+        cells.add(target.up()); column.add(false);
+        cells.add(target.down()); column.add(false);
+        for (Direction d : new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST}) {
+            cells.add(target.offset(d)); column.add(false);
+        }
+        int feetY = mod.getPlayer().getBlockPos().getY();
+        int lo = Math.min(feetY, target.getY() - 1);
+        int hi = Math.max(feetY, target.getY() - 1);
+        java.util.List<BlockPos> col = new java.util.ArrayList<>();
+        for (int y = lo; y <= hi; y++) {
+            if (y == target.getY()) continue;
+            col.add(new BlockPos(target.getX(), y, target.getZ()));
+        }
+        col.sort(java.util.Comparator.comparingInt(p -> Math.abs(p.getY() - feetY)));
+        for (BlockPos p : col) { cells.add(p); column.add(true); }
+        int n = cells.size();
+        boolean[] solid = new boolean[n], place = new boolean[n], hit = new boolean[n], bedrock = new boolean[n], colFlag = new boolean[n];
+        for (int i = 0; i < n; i++) {
+            BlockPos p = cells.get(i);
+            colFlag[i] = column.get(i);
+            if (p.equals(target)) continue;
+            Block b = mod.getWorld().getBlockState(p).getBlock();
+            solid[i] = support(mod, p);
+            place[i] = ArrayUtils.contains(toPlace, b);
+            bedrock[i] = b == net.minecraft.block.Blocks.BEDROCK;
+            hit[i] = solid[i] && canHit(mod, p);
+        }
+        int pick = MazePocketOpen.choose(solid, place, hit, bedrock, colFlag);
+        return pick < 0 ? null : cells.get(pick);
+    }
+
+    private boolean canHit(AltoClef mod, BlockPos pos) {
+        Vec3d eye = mod.getPlayer().getEyePos();
+        Vec3d p = visiblePoint(mod, pos);
+        return eye.distanceTo(p) <= REACH && rayHitsBlock(mod, eye, p, pos);
     }
 
     private BlockPos exitDig; private static int exitDigs; // Ostinato: run141, static: shared across seal cells per session

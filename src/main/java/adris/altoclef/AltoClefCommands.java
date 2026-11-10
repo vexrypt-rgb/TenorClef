@@ -79,7 +79,9 @@ public class AltoClefCommands {
                 new GroundZeroCommand(),
                 new WarpCommand(),
                 new PathBenchCommand(),
-                new ShowcaseCommand()
+                new ShowcaseCommand(),
+                new FugueCommand(),
+                new FugueBenchCommand()
         );
     }
 }

@@ -65,7 +65,14 @@ public class PlanRunnerTask extends Task {
 
     @Override
     public boolean isFinished() {
-        return executor != null && executor.getStatus() == GoalStatus.SUCCESS;
+        // Ostinato: 2026-10-30. This is the only "done" signal SingleTaskChain has (it checks isFinished() ||
+        // stopped() before every tick), so it must cover every terminal goal status. It used to answer
+        // "status == SUCCESS", and a FAILED goal then kept the user chain ticking a dead task forever:
+        // fail() records FAILURE without ending the task, nothing sets stopped(), and UserTaskChain.onTaskFinish
+        // -- which runs the runUserTask callback that @goal and the agent runtime wait on -- is only reached
+        // through here. Task.tick will not turn this into SUCCESS: TaskResultMapper.resolve keeps a recorded
+        // FAILURE/CANCELLED terminal even when isFinished() is true (see HolePillarTask for the same convention).
+        return executor != null && executor.getStatus().isTerminal();
     }
 
     @Override

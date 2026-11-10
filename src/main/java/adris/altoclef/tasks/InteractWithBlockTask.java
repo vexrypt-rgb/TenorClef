@@ -168,6 +168,7 @@ public class InteractWithBlockTask extends Task {
     private static Goal createGoalForInteract(BlockPos target, int reachDistance, Direction interactSide, Vec3i interactOffset, boolean walkInto) {
 
         boolean sideMatters = interactSide != null;
+        BlockPos block = target;
         if (sideMatters) {
             Vec3i offs = interactSide.getVector();
             if (offs.getY() == -1) {
@@ -182,7 +183,10 @@ public class InteractWithBlockTask extends Task {
         } else {
             if (sideMatters) {
                 // Make sure we're on the right side of the block.
-                Goal sideGoal = new GoalBlockSide(target, interactSide, 1);
+                // Ostinato: #allblocks. The side is relative to the block clicked, not to the stand cell next to it:
+                // "beside the stand cell" and "in the stand cell" can never both hold, so a directed click (opening a
+                // container from a chosen face) never reached its goal and wandered off.
+                Goal sideGoal = new GoalBlockSide(block, interactSide, 0);
                 return new GoalAnd(sideGoal, new GoalNear(target.add(interactOffset), reachDistance));
             } else {
                 // TODO: Cleaner method of picking which side to approach from. This is only here for the lava stuff.
@@ -330,6 +334,17 @@ public class InteractWithBlockTask extends Task {
                     mod.log("trying to press shift");
                 }
 
+                if (waitingForClickTicks % 100 == 0) {
+                    // Ostinato: #allblocks. Why the click is held back (container opens kept stalling here).
+                    Debug.logInternal("[interact] waiting for click at " + target.toShortString()
+                            + ": paused=" + mod.getExtraBaritoneSettings().isInteractionPaused()
+                            + " eat=" + mod.getFoodChain().needsToEat()
+                            + " blocking=" + mod.getPlayer().isBlocking()
+                            + " cursor=" + StorageHelper.getItemStackInCursorSlot()
+                            + " reach=" + getCurrentReach().isPresent()
+                            + " looking=" + LookHelper.isLookingAt(mod, target)
+                            + " screen=" + adris.altoclef.multiversion.ScreenVer.current(net.minecraft.client.MinecraftClient.getInstance()));
+                }
                 if (waitingForClickTicks > 10*20) {
                     mod.log("trying to wander");
                     waitingForClickTicks = 0;

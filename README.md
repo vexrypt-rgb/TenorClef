@@ -71,6 +71,7 @@ TenorClef commands use `@`. Ostinato / Baritone commands use `#`.
 | `@pathbench …` | Path / travel benches (see below) |
 | `#help` | Ostinato / Baritone commands |
 | `#swarm …` | Multi-bot link and region builds (Ostinato) |
+| `@allblocks …` / `#allblocks …` | Survival collection run: one of every item into labeled chests, every block on a grid ([guide](docs/guides/allblocks.md)) |
 | `@swarm …` | TenorClef front end for `#swarm`: `on`/`off`, `status`, `ping`, `reload`, `build`, `stop`, `set <setting> <value>`, `menu` |
 
 Full command and settings notes: [usage.md](usage.md). Settings live under

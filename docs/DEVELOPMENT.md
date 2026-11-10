@@ -128,3 +128,10 @@ No `org.gradle.java.home` pin.
 ### Related: Ostinato `1.16.1` Tests
 
 Ostinato branch `1.16.1` runs `.github/workflows/run_tests.yml` on JDK 8. That job has been flaky/red independently of TenorClef. Prefer documenting + `continue-on-error` there until a dedicated JDK8/Gradle 4.9 test fix lands; TenorClef's `:1.16.1:compileJava` remains the required legacy gate.
+
+## The 26.3 mapping file
+
+`versions/mapping-26.3-1.21.11.txt` (26.3 Mojang names to 1.21.11 Yarn names, used by the preprocessor link
+in `root.gradle.kts`) is not committed. The first configure that needs it downloads it from TenorClef commit
+`01faac19` and checks SHA-256 `f5910582...`; after that the local, untracked copy is used, so offline builds work.
+To use your own copy, put it at that path, or pass `-Ptc.mapping263.url=<url>`. Build with `-Pno26` to skip 26.3.

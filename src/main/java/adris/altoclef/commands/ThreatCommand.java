@@ -23,6 +23,11 @@ public class ThreatCommand extends Command {
 
     @Override
     protected void call(AltoClef mod, ArgParser parser) throws CommandException {
+        adris.altoclef.threat.OstinatoThreatBridge.View intelligence =
+                adris.altoclef.threat.OstinatoThreatBridge.read(mod.getClientBaritone());
+        mod.log("Ostinato intelligence: " + intelligence.status + " tick=" + intelligence.tick
+                + " highest=" + intelligence.highestLevel);
+        for (String source : intelligence.sources) mod.log("  " + source);
         ThreatMonitor monitor = mod.getThreatMonitor();
         if (monitor == null) {
             mod.log("ThreatMonitor not initialized");

@@ -1,4 +1,5 @@
 {
+ "WARNING": "PUBLIC TEST-ONLY KEY MATERIAL. The keys and passphrase below are published on purpose for interop tests with sigil.py. Never use them for real messages.",
  "circle": {
   "name": "Night.Watch",
   "slug": "nigh",

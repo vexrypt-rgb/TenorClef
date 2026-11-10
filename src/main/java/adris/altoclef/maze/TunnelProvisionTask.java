@@ -241,7 +241,13 @@ public class TunnelProvisionTask extends Task {
     private static boolean usablePick() {
         if (mod().getItemStorage() == null) return false;
         for (net.minecraft.item.ItemStack s : mod().getItemStorage().getItemStacksPlayerInventory(false)) {
+            // Ostinato: the pickaxe item tag only exists as a typed TagKey from 1.20.5 on; below that the tag is
+            // reached through stack.isIn(...) with a different holder, so classify by class instead.
+            //#if MC >= 12005
             if (s.isEmpty() || !ItemHelper.stackIn(s, net.minecraft.registry.tag.ItemTags.PICKAXES)) continue;
+            //#else
+            //$$ if (s.isEmpty() || !(s.getItem() instanceof net.minecraft.item.PickaxeItem)) continue;
+            //#endif
             if (s.getMaxDamage() <= 0 || s.getMaxDamage() - s.getDamage() > 2) return true;
         }
         return false;

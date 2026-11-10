@@ -82,6 +82,11 @@ public class BlockScanner {
     }
 
 
+    /** Undoes {@link #requestBlockUnreachable} for one position. */
+    public void forgetUnreachable(BlockPos pos) {
+        blacklist.forget(pos);
+    }
+
     public boolean isUnreachable(BlockPos pos) {
         return blacklist.unreachable(pos);
     }
@@ -210,7 +215,9 @@ public class BlockScanner {
     }
 
     public boolean anyFoundWithinDistance(Vec3d pos, double distance, Block... blocks) {
-        Optional<BlockPos> blockPos = getNearestBlock(blocks);
+        // Was getNearestBlock(blocks), which picks relative to the player, so a non-player pos could miss a block that
+        // is in range of it (or accept one that is not). No caller used this overload; fixed so the next one is right.
+        Optional<BlockPos> blockPos = getNearestBlock(pos, blocks);
         return blockPos.map(value -> value.isWithinDistance(pos, distance)).orElse(false);
     }
 
@@ -219,7 +226,7 @@ public class BlockScanner {
     }
 
     public double distanceToClosest(Vec3d pos, Block... blocks) {
-        Optional<BlockPos> blockPos = getNearestBlock(blocks);
+        Optional<BlockPos> blockPos = getNearestBlock(pos, blocks); // see anyFoundWithinDistance(Vec3d, ...)
         return blockPos.map(value ->  Math.sqrt(BlockPosVer.getSquaredDistance(value, pos))).orElse(Double.POSITIVE_INFINITY);
     }
 
@@ -321,47 +328,158 @@ public class BlockScanner {
 
     private void scanCloseBlocks() {
         for (Map.Entry<Block, HashSet<BlockPos>> entry : cachedScannedBlocks.entrySet()) {
-            if (!trackedBlocks.containsKey(entry.getKey())) {
-                trackedBlocks.put(entry.getKey(), new HashSet<>());
-            }
-            trackedBlocks.get(entry.getKey()).clear();
-
-            trackedBlocks.get(entry.getKey()).addAll(entry.getValue());
+            HashSet<BlockPos> tracked = trackedBlocks.computeIfAbsent(entry.getKey(), k -> new HashSet<>());
+            tracked.clear();
+            tracked.addAll(entry.getValue());
         }
-
-        HashMap<Block, HashSet<BlockPos>> map = new HashMap<>();
 
         BlockPos pos = mod.getPlayer().getBlockPos();
         World world = mod.getPlayer().getWorld();
+        Vec3d playerPos = mod.getPlayer().getPos();
+        // This runs on every client tick over the 17x16x17 box around the player. It used to ask the world for the
+        // state of every cell twice (once for the block, once for the air test); one lookup now answers both.
+        int cx = pos.getX(), cy = pos.getY(), cz = pos.getZ();
 
-        for (int x = pos.getX() - 8; x <= pos.getX() + 8; x++) {
-            for (int y = pos.getY() - 8; y < pos.getY() + 8; y++) {
-                for (int z = pos.getZ() - 8; z <= pos.getZ() + 8; z++) {
+        // Collect the CACHED_POSITIONS_PER_BLOCK nearest cells per block type directly, in one pass.
+        // This used to build a HashMap<Block, HashSet<BlockPos>> holding EVERY non-air cell of the box (stone, dirt,
+        // gravel... thousands of positions and hash nodes, with the dominant type's set resized to a 4096-slot array
+        // every tick), and then throw away all but 40 of each type. The retained result is the same 40-nearest set.
+        // The metric is the one the previous selection used: WorldHelper.toVec3d(pos), i.e. the block centre.
+        NearestPerKey<Block> nearest = new NearestPerKey<>(CACHED_POSITIONS_PER_BLOCK,
+                (x, y, z) -> BaritoneHelper.calculateGenericHeuristic(playerPos.x, playerPos.y, playerPos.z,
+                        x + 0.5, y + 0.5, z + 0.5));
+
+        for (int x = cx - 8; x <= cx + 8; x++) {
+            for (int y = cy - 8; y < cy + 8; y++) {
+                for (int z = cz - 8; z <= cz + 8; z++) {
                     BlockPos p = new BlockPos(x, y, z);
                     BlockState state = world.getBlockState(p);
-                    if (world.getBlockState(p).isAir()) continue;
+                    if (state.isAir()) continue;
 
-                    Block block = state.getBlock();
-
-                    if (map.containsKey(block)) {
-                        map.get(block).add(p);
-                    } else {
-                        HashSet<BlockPos> set = new HashSet<>();
-                        set.add(p);
-                        map.put(block, set);
-                    }
+                    nearest.offer(state.getBlock(), p);
                 }
             }
         }
 
-        for (Map.Entry<Block, HashSet<BlockPos>> entry : map.entrySet()) {
-            getFirstFewPositions(entry.getValue(),mod.getPlayer().getPos());
+        for (Map.Entry<Block, BlockPos[]> entry : nearest.drain().entrySet()) {
+            HashSet<BlockPos> tracked = trackedBlocks.computeIfAbsent(entry.getKey(), k -> new HashSet<>());
+            Collections.addAll(tracked, entry.getValue());
+        }
+    }
 
-            if (!trackedBlocks.containsKey(entry.getKey())) {
-                trackedBlocks.put(entry.getKey(), new HashSet<>());
+    /**
+     * Keeps, per key, the {@code cap} positions nearest to a fixed point under an injected distance metric.
+     *
+     * <p>Each bucket is a max-heap on distance whose root is the FARTHEST retained position, so a new candidate only
+     * costs one comparison in the common case (it is farther than everything already kept, i.e. rejected) and a
+     * sift-down of {@code log2(cap)} in the rare case it displaces the root. The alternative — accumulate every
+     * candidate into a set and select afterwards — allocates a hash node per candidate and then discards all but
+     * {@code cap} of them, which is what this replaced.
+     *
+     * <p>Generic over the key and over the metric so it can be exercised without a Minecraft world or a bootstrapped
+     * registry (Baritone's heuristic reads {@code BaritoneAPI.getSettings()}).
+     */
+    static final class NearestPerKey<K> {
+
+        /** Distance from the selection origin to the cell at {@code (x, y, z)}. */
+        @FunctionalInterface
+        interface Metric {
+            double distance(int x, int y, int z);
+        }
+
+        private final int cap;
+        private final Metric metric;
+        private final HashMap<K, Bucket> buckets = new HashMap<>();
+
+        NearestPerKey(int cap, Metric metric) {
+            if (cap <= 0) throw new IllegalArgumentException("cap must be positive: " + cap);
+            this.cap = cap;
+            this.metric = metric;
+        }
+
+        void offer(K key, BlockPos p) {
+            double d = metric.distance(p.getX(), p.getY(), p.getZ());
+            Bucket bucket = buckets.get(key);
+            if (bucket == null) {
+                bucket = new Bucket(cap);
+                buckets.put(key, bucket);
+            }
+            bucket.offer(p, d);
+        }
+
+        /**
+         * Returns the retained positions per key and releases the buckets. Order within a bucket is heap order.
+         */
+        Map<K, BlockPos[]> drain() {
+            HashMap<K, BlockPos[]> out = new HashMap<>(buckets.size() * 2);
+            for (Map.Entry<K, Bucket> entry : buckets.entrySet()) {
+                out.put(entry.getKey(), entry.getValue().toArray());
+            }
+            buckets.clear();
+            return out;
+        }
+
+        /** Bounded max-heap on distance; {@code dist[0]} is the largest retained distance. */
+        private static final class Bucket {
+            private final BlockPos[] pos;
+            private final double[] dist;
+            private int size;
+
+            Bucket(int cap) {
+                pos = new BlockPos[cap];
+                dist = new double[cap];
             }
 
-            trackedBlocks.get(entry.getKey()).addAll(entry.getValue());
+            void offer(BlockPos p, double d) {
+                if (size < pos.length) {
+                    pos[size] = p;
+                    dist[size] = d;
+                    siftUp(size);
+                    size++;
+                } else if (d < dist[0]) {
+                    // Strictly nearer than the farthest kept one; on a tie the incumbent stays, so the result is
+                    // deterministic in scan order (the priority queue this replaced broke ties arbitrarily).
+                    pos[0] = p;
+                    dist[0] = d;
+                    siftDown(0);
+                }
+            }
+
+            private void siftUp(int i) {
+                while (i > 0) {
+                    int parent = (i - 1) >>> 1;
+                    if (dist[parent] >= dist[i]) break;
+                    swap(i, parent);
+                    i = parent;
+                }
+            }
+
+            private void siftDown(int i) {
+                while (true) {
+                    int left = (i << 1) + 1;
+                    if (left >= size) return;
+                    int right = left + 1;
+                    int child = (right < size && dist[right] > dist[left]) ? right : left;
+                    if (dist[i] >= dist[child]) return;
+                    swap(i, child);
+                    i = child;
+                }
+            }
+
+            private void swap(int a, int b) {
+                BlockPos tp = pos[a];
+                pos[a] = pos[b];
+                pos[b] = tp;
+                double td = dist[a];
+                dist[a] = dist[b];
+                dist[b] = td;
+            }
+
+            BlockPos[] toArray() {
+                BlockPos[] out = new BlockPos[size];
+                System.arraycopy(pos, 0, out, 0, size);
+                return out;
+            }
         }
     }
 
@@ -429,7 +547,18 @@ public class BlockScanner {
 
     //TODO rename
     private void getFirstFewPositions(HashSet<BlockPos> set, Vec3d playerPos) {
-        Queue<BlockPos> queue = new PriorityQueue<>(Comparator.comparingDouble((pos) -> -BaritoneHelper.calculateGenericHeuristic(playerPos, WorldHelper.toVec3d(pos))));
+        // Ostinato: a bucket that already fits in the cache needs no work at all. The selection below only ever
+        // removes the farthest entries; when there are none to remove the set keeps the same elements, and a HashSet's
+        // iteration order depends on the hashes, not on the order the elements were added, so skipping is a no-op.
+        // This is the common case: only the two or three dominant blocks of the 17x16x17 box exceed the cap.
+        if (set.size() <= CACHED_POSITIONS_PER_BLOCK) {
+            return;
+        }
+        // Same metric as WorldHelper.toVec3d + calculateGenericHeuristic, on plain doubles: this used to build a Vec3d
+        // for every candidate, i.e. one allocation per non-air cell of the per-tick box.
+        Queue<BlockPos> queue = new PriorityQueue<>(Comparator.comparingDouble((pos) ->
+                -BaritoneHelper.calculateGenericHeuristic(playerPos.x, playerPos.y, playerPos.z,
+                        pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5)));
 
         for (BlockPos pos : set) {
             queue.add(pos);

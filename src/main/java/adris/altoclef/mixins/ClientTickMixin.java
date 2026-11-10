@@ -1,4 +1,4 @@
-package adris.altoclef.mixins;
+﻿package adris.altoclef.mixins;
 
 import adris.altoclef.multiversion.ScreenVer;
 
@@ -37,7 +37,7 @@ public final class ClientTickMixin {
             altoClefKtickProven = true;
             System.out.println("TENORCLEF: MIXIN OK ClientTickMixin injected into MinecraftClient.tick()");
         }
-        // S174 — drive the reroll from HERE, not from TitleScreen.tick().
+        // S174 â€” drive the reroll from HERE, not from TitleScreen.tick().
         //
         // The reroll used to depend on the title screen appearing after mc.disconnect().
         // Run W proved it does not: a correct S165 reset at 23:35:27 re-armed the state and
@@ -48,6 +48,9 @@ public final class ClientTickMixin {
         // Keep the TitleScreen path too: when the disconnect DOES reach the title screen,
         // AutoWorldCreateMixin handles creation itself and clears the flag via setCreated()
         // before this poll can act. This is a backstop, not a replacement.
+        try { adris.altoclef.util.AutoWorldBootstrap.onClientTick(); } catch (Throwable t) {
+            System.out.println("TENORCLEF: HARNESS: AUTOWORLD bootstrap tick error " + t);
+        }
         if (AutoWorldState.needsRerollDrive()) {
             MinecraftClient self = MinecraftClient.getInstance();
             if (self == null) {
@@ -60,7 +63,7 @@ public final class ClientTickMixin {
                 // after the disconnect. Kick creation here.
                 if (!altoClefRerollLogged) {
                     altoClefRerollLogged = true;
-                    Debug.logHarness("AUTOWORLD: reroll drive — client has no world and no "
+                    Debug.logHarness("AUTOWORLD: reroll drive â€” client has no world and no "
                             + "TitleScreen; forcing a fresh-world create from the client tick");
                 }
                 AutoWorldState.clearRerollDrive();
@@ -68,16 +71,16 @@ public final class ClientTickMixin {
                 AutoWorldState.setDelay(0);
             } else if (++altoClefRerollPoll > 20 * 45) {
                 // 45s and the client is still sitting in the old world: the disconnect never
-                // took effect. Say so loudly rather than hanging silently for 40 minutes —
+                // took effect. Say so loudly rather than hanging silently for 40 minutes â€”
                 // that silence is what made run W look like a harness fault instead of a bug.
                 AutoWorldState.clearRerollDrive();
-                Debug.logHarness("AUTOWORLD: reroll drive gave up after 45s — client still in "
+                Debug.logHarness("AUTOWORLD: reroll drive gave up after 45s â€” client still in "
                         + "a world (screen=" + (ScreenVer.current(self) == null
                         ? "null" : ScreenVer.current(self).getClass().getSimpleName())
                         + "), the reset cannot proceed. Screen and world are both stuck.");
             }
         }
-        // S175 — client-thread liveness probe. This mixin is the only hook guaranteed to
+        // S175 â€” client-thread liveness probe. This mixin is the only hook guaranteed to
         // fire on EVERY client tick regardless of screen or world state, which makes it the
         // right place to prove the client thread is still turning. The actual stall
         // detection runs on a separate daemon thread (see T2Deadman) because a thread that

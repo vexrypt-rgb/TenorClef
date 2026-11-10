@@ -39,7 +39,8 @@ public final class MazeFurnishPlan {
         this.summary = summary;
         this.survival = survival;
         this.steps = List.copyOf(steps);
-        this.airCells = airCells.clone();
+        // Ostinato: 2026-11-02. An older job, or a job whose carved-cell array is null, is an empty room.
+        this.airCells = airCells == null ? new int[0] : airCells.clone();
     }
 
     /**
@@ -111,6 +112,23 @@ public final class MazeFurnishPlan {
             steps.add(new Step(s.kind(), s.x(), s.y(), s.z(), ids, s.contents()));
         }
         System.out.println("MAZETEST FURNISH stone-layer y=" + cladY + " deepslate -> cobblestone");
+        return new MazeFurnishPlan(plan.summary, plan.survival, steps, plan.airCells);
+    }
+
+    /**
+     * Ostinato: 2026-11-02. Quartz, white concrete and prismarine become overworld white tiles
+     * ({@link MazePalette#WHITE_TILES}). Other ids stay in the plan's order.
+     */
+    public static MazeFurnishPlan survivalPalette(MazeFurnishPlan plan) {
+        boolean changed = false;
+        java.util.List<Step> steps = new java.util.ArrayList<>();
+        for (Step s : plan.steps) {
+            java.util.List<String> ids = MazePalette.survivalIds(s.blockIds());
+            if (!ids.equals(s.blockIds())) changed = true;
+            steps.add(new Step(s.kind(), s.x(), s.y(), s.z(), ids, s.contents()));
+        }
+        if (!changed) return plan;
+        System.out.println("MAZETEST FURNISH palette survival-whites");
         return new MazeFurnishPlan(plan.summary, plan.survival, steps, plan.airCells);
     }
 

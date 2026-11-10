@@ -57,7 +57,15 @@ public final class MazeFurnishBridge {
     private static void cancel() {
         AltoClef mod = AltoClef.getInstance();
         if (mod != null && mod.getUserTaskChain().getCurrentTask() instanceof MazeFurnishTask) {
-            mod.getUserTaskChain().cancel(mod);
+            // Ostinato calls this on an explicit stop AND on a furnish timeout (MazeProcess.FURNISH_LIMIT, 40 min of
+            // ticks), and the drive keeps running afterwards. UserTaskChain.cancel(mod) is the *user* cancel: it calls
+            // TaskRunner.disable(), which stops every chain (mob defense, food, MLG, survival, death menu) and leaves
+            // the runner inactive until the next runTask -- so one stuck room silently switched survival off for the
+            // rest of the session. It also reaches onTaskFinish, which logs "User task FINISHED" and publishes
+            // TaskFinishedEvent for a job that was cancelled. Drop only this task instead: Task.stop() records
+            // CANCELLED and runs MazeFurnishTask.onStop (MazeRooms.end, autoTool restore, behaviour pop), the user
+            // chain goes inactive, and TaskRunner falls through to whichever survival chain has the highest priority.
+            mod.getUserTaskChain().setTask(null);
         }
     }
 

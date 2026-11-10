@@ -24,7 +24,13 @@ public final class TunnelProvisionBridge {
                         return accept(args[0]);
                     case "busy": {
                         AltoClef mod = AltoClef.getInstance();
-                        return mod != null && mod.getUserTaskChain().isActive();
+                        // Ostinato: 2026-10-30. ITunnelProvisioner.busy() is "the last accepted provision job is still
+                        // running"; isActive() is true for ANY user task. There is one user chain, so a maze furnish or
+                        // a stuck recovery that replaces TunnelProvisionTask kills the job while busy() keeps saying
+                        // "still running": TunnelProcess.isActive() then defers every tick and Phase.PROVISION is held
+                        // until the unrelated task ends, after which afterProvision() assumes the kit was gathered.
+                        // Narrow to the job, the way MazeFurnishBridge.busy() already does.
+                        return mod != null && mod.getUserTaskChain().getCurrentTask() instanceof TunnelProvisionTask;
                     }
                     case "name":
                     case "toString":

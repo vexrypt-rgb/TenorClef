@@ -12,6 +12,7 @@ public class TaskRunner {
     private boolean active;
 
     private TaskChain cachedCurrentTaskChain = null;
+    private final GraceNoteTaskGate graceNote = new GraceNoteTaskGate();
 
     public String statusReport = " (no chain running) ";
 
@@ -23,6 +24,21 @@ public class TaskRunner {
     public void tick() {
         if (!active || !AltoClef.inGame()) {
             statusReport = " (no chain running) ";
+            return;
+        }
+
+        GraceNoteTaskGate.Decision emergency = graceNote.poll(mod.getClientBaritone());
+        if (emergency == GraceNoteTaskGate.Decision.WAIT) {
+            // Do not run priority callbacks either: some chains issue inputs while computing priority.
+            statusReport = graceNote.status();
+            return;
+        }
+        if (emergency == GraceNoteTaskGate.Decision.REPLAN) {
+            // Cleanup callbacks may change movement: defer them until release is actually observed.
+            if (cachedCurrentTaskChain != null) cachedCurrentTaskChain.onInterrupt(null);
+            cachedCurrentTaskChain = null;
+            System.out.println("TENORCLEF: " + graceNote.status());
+            statusReport = graceNote.status();
             return;
         }
 

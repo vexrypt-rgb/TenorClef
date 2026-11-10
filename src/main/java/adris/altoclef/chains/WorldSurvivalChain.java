@@ -1,13 +1,16 @@
 package adris.altoclef.chains;
 
 import adris.altoclef.AltoClef;
+import adris.altoclef.Debug;
 import adris.altoclef.tasks.DoToClosestBlockTask;
 import adris.altoclef.tasks.InteractWithBlockTask;
+import adris.altoclef.tasks.construction.DestroyBlockTask;
 import adris.altoclef.tasks.construction.PutOutFireTask;
 import adris.altoclef.tasks.movement.EnterNetherPortalTask;
 import adris.altoclef.tasks.movement.EscapeFromLavaTask;
 import adris.altoclef.tasks.movement.GetToBlockTask;
 import adris.altoclef.tasks.movement.SafeRandomShimmyTask;
+import adris.altoclef.tasksystem.Task;
 import adris.altoclef.tasksystem.TaskRunner;
 import adris.altoclef.util.ItemTarget;
 import adris.altoclef.util.helpers.LookHelper;
@@ -30,6 +33,8 @@ public class WorldSurvivalChain extends SingleTaskChain {
     private final TimerGame wasInLavaTimer = new TimerGame(1);
     private final TimerGame portalStuckTimer = new TimerGame(5);
     private boolean wasAvoidingDrowning;
+    /** Ostinato: S309. Owns the drowning swim until dry footing, not until the eyes clear. */
+    private final DrowningEscapeLatch drowningEscape = new DrowningEscapeLatch();
 
     private BlockPos _extinguishWaterPosition;
 
@@ -52,9 +57,39 @@ public class WorldSurvivalChain extends SingleTaskChain {
         handleDrowning(mod);
         // Ostinato: runs 23/25 drowned while Mob Defense pathed underwater (swim-up only fires when not pathing). Below half
         // air, surfacing outranks combat (70).
-        if (mod.getModSettings().shouldAvoidDrowning() && mod.getPlayer().isSubmergedInWater() && mod.getPlayer().getAir() < mod.getPlayer().getMaxAir() * 2 / 3) { // Ostinato: 1/2 -> 2/3 (run39 drowned)
-            setTask(new adris.altoclef.tasks.movement.GetOutOfWaterTask());
-            return 100;
+        // Ostinato: S309. testrun-20261103-094642: that interrupt dropped the instant the eyes cleared, so
+        // GetOutOfWater and DestroyBlock swapped every few seconds and the bot never left the pond.
+        // Hold the swim until dry footing (or no progress), and let it path through water.
+        if (mod.getModSettings().shouldAvoidDrowning()) {
+            boolean trigger = mod.getPlayer().isSubmergedInWater()
+                    && mod.getPlayer().getAir() < mod.getPlayer().getMaxAir() * 2 / 3; // Ostinato: 1/2 -> 2/3 (run39 drowned)
+            boolean dryGrounded = !mod.getPlayer().isTouchingWater() && mod.getPlayer().isOnGround();
+            boolean wasLatched = drowningEscape.isLatched();
+            DrowningEscapeLatch.Decision drown = drowningEscape.tick(trigger, dryGrounded,
+                    mod.getPlayer().getBlockX(), mod.getPlayer().getBlockY(), mod.getPlayer().getBlockZ(),
+                    System.currentTimeMillis());
+            if (drown == DrowningEscapeLatch.Decision.HOLD) {
+                if (!wasLatched) {
+                    Debug.logMessage("S309 drowning escape held until dry footing at "
+                            + mod.getPlayer().getBlockX() + "," + mod.getPlayer().getBlockY() + ","
+                            + mod.getPlayer().getBlockZ());
+                }
+                DestroyBlockTask.suspendDryApproach(mod);
+                setTask(new adris.altoclef.tasks.movement.GetOutOfWaterTask());
+                return 100;
+            }
+            if (drown == DrowningEscapeLatch.Decision.DONE_DRY) {
+                Debug.logMessage("S309 drowning escape dry at "
+                        + mod.getPlayer().getBlockX() + "," + mod.getPlayer().getBlockY() + ","
+                        + mod.getPlayer().getBlockZ());
+                setTask(null);
+            } else if (drown == DrowningEscapeLatch.Decision.GIVE_UP) {
+                Debug.logMessage("S309 drowning escape no progress at "
+                        + mod.getPlayer().getBlockX() + "," + mod.getPlayer().getBlockY() + ","
+                        + mod.getPlayer().getBlockZ());
+                blacklistPondMine(mod);
+                setTask(null);
+            }
         }
 
         // Lava Escape
@@ -120,10 +155,38 @@ public class WorldSurvivalChain extends SingleTaskChain {
         return Float.NEGATIVE_INFINITY;
     }
 
+    /**
+     * Ostinato: S309. A mine target within 8 blocks is the pond the swim could not leave. A log 100 blocks
+     * away is transit (S299) and is left alone.
+     */
+    private void blacklistPondMine(AltoClef mod) {
+        try {
+            Task t = mod.getUserTaskChain().getCurrentTask();
+            int guard = 0;
+            while (t != null && guard++ < 16) {
+                if (t instanceof DestroyBlockTask destroy
+                        && destroy.getPos().isWithinDistance(mod.getPlayer().getPos(), 8)) {
+                    Debug.logMessage("S309 pond stall: blacklisting " + destroy.getPos().toShortString()
+                            + " so mining does not walk back into the same water");
+                    mod.getBlockScanner().requestBlockUnreachable(destroy.getPos(), 0);
+                    return;
+                }
+                t = t.getSub();
+            }
+        } catch (Throwable ignored) {}
+    }
+
     private void handleDrowning(AltoClef mod) {
         // Swim
         boolean avoidedDrowning = false;
         if (mod.getModSettings().shouldAvoidDrowning()) {
+            // Ostinato: S312. A path underwater used to skip this jump until the player drowned.
+            boolean airCritical = mod.getPlayer().isSubmergedInWater()
+                    && mod.getPlayer().getAir() < mod.getPlayer().getMaxAir() * 2 / 3;
+            if (airCritical) {
+                mod.getClientBaritone().getPathingBehavior().forceCancel();
+                mod.getClientBaritone().getCustomGoalProcess().onLostControl();
+            }
             if (!mod.getClientBaritone().getPathingBehavior().isPathing()) {
                 if (mod.getPlayer().isTouchingWater() && mod.getPlayer().getAir() < mod.getPlayer().getMaxAir()) {
                     // Swim up!
@@ -163,8 +226,9 @@ public class WorldSurvivalChain extends SingleTaskChain {
     }
 
     private boolean isStuckInNetherPortal() {
+        Task current = AltoClef.getInstance().getUserTaskChain().getCurrentTask();
         return WorldHelper.isInNetherPortal()
-                && !AltoClef.getInstance().getUserTaskChain().getCurrentTask().thisOrChildSatisfies(task -> task instanceof EnterNetherPortalTask);
+                && (current == null || !current.thisOrChildSatisfies(task -> task instanceof EnterNetherPortalTask));
     }
 
     @Override

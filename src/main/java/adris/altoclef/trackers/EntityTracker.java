@@ -201,10 +201,23 @@ public class EntityTracker extends Tracker {
 
     public List<ItemEntity> getDroppedItems() {
         ensureUpdated();
-        return itemDropLocations.values().stream().reduce(new ArrayList<>(), (result, drops) -> {
-            result.addAll(drops);
-            return result;
-        });
+        return flattenValues(itemDropLocations);
+    }
+
+    /**
+     * Flattens per-bucket lists into a single pre-sized list, in the map's iteration order.
+     * Package-visible so it can be exercised without a running Minecraft client.
+     */
+    static <V> List<V> flattenValues(Map<?, List<V>> buckets) {
+        int total = 0;
+        for (List<V> values : buckets.values()) {
+            total += values.size();
+        }
+        List<V> flat = new ArrayList<>(total);
+        for (List<V> values : buckets.values()) {
+            flat.addAll(values);
+        }
+        return flat;
     }
 
     public boolean entityFound(Predicate<Entity> shouldAccept, Class... types) {
@@ -335,13 +348,12 @@ public class EntityTracker extends Tracker {
 
             // Loop through all entities and track 'em
             for (Entity entity : MinecraftClient.getInstance().world.getEntities()) {
+                if (entity == null || !entity.isAlive()) {
+                    continue;
+                }
 
                 // Catalogue based on type. Some types may get "squashed" or combined into one.
-                Class type = entity.getClass();
-                type = squashType(type);
-
-                //noinspection ConstantConditions
-                if (entity == null || !entity.isAlive()) continue;
+                Class type = squashType(entity.getClass());
 
                 // Don't catalogue our own player.
                 if (type == PlayerEntity.class && entity.equals(mod.getPlayer())) continue;

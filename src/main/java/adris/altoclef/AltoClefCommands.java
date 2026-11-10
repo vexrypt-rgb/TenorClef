@@ -80,6 +80,8 @@ public class AltoClefCommands {
                 new WarpCommand(),
                 new PathBenchCommand(),
                 new ShowcaseCommand(),
+                new FugueCommand(),
+                new FugueBenchCommand(),
                 new AllBlocksCommand() // Ostinato: @allblocks (also Ostinato #allblocks)
         );
     }

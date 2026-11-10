@@ -155,7 +155,8 @@ public class MineAndCollectTask extends ResourceTask {
         if (!anyPick) return null; // SatisfyMiningRequirementTask covers the truly-missing case.
         boolean hasWood = mod.getItemStorage().hasItem(Items.WOODEN_PICKAXE);
         Item want = Items.STONE_PICKAXE;
-        if (!hasWood && !mod.getItemStorage().hasItem(Items.COBBLESTONE, Items.COBBLED_DEEPSLATE, Items.BLACKSTONE)) {
+        // Ostinato: COBBLED_DEEPSLATE does not exist before 1.17; the versioned field is a stub there (isSupported false).
+        if (!hasWood && !mod.getItemStorage().hasItem(Items.COBBLESTONE, adris.altoclef.multiversion.versionedfields.Items.COBBLED_DEEPSLATE, Items.BLACKSTONE)) {
             want = Items.WOODEN_PICKAXE;
         }
         // Ostinato: run60 pick-refresh spam. Log once per 30s; stdout only, not chat.
@@ -218,6 +219,7 @@ public class MineAndCollectTask extends ResourceTask {
         private final MovementProgressChecker progressChecker = new MovementProgressChecker();
         private final Task _pickupTask;
         private BlockPos miningPos;
+        private BlockPos parkAnchor; private int parkTicks; // Ostinato: parked-far stall check
 
         public MineOrCollectTask(Block[] blocks, ItemTarget[] targets) {
             _blocks = blocks;
@@ -308,7 +310,17 @@ public class MineAndCollectTask extends ResourceTask {
             if (mod.getClientBaritone().getPathingBehavior().isPathing()) {
                 progressChecker.reset();
             }
-            if (miningPos != null && !progressChecker.check(mod)) {
+            // Ostinato: mono_yellow LIGHT FAIL. A log 32 blocks out with no path (open set 0 every recalc) kept
+            // isPathing() flickering true, so the reset above never let the checker fire and the furnish chain sat
+            // 90s on "Getting to block... reach=false". Stood still away from the block for 15s = unreachable.
+            boolean parked = false;
+            if (miningPos != null) {
+                BlockPos feet = mod.getPlayer().getBlockPos();
+                if (parkAnchor == null || parkAnchor.getSquaredDistance(feet) > 4) { parkAnchor = feet; parkTicks = 0; }
+                else if (miningPos.getSquaredDistance(feet) > 36 && ++parkTicks > 300) parked = true;
+            } else { parkAnchor = null; parkTicks = 0; }
+            if (miningPos != null && (parked || !progressChecker.check(mod))) {
+                parkAnchor = null; parkTicks = 0;
                 mod.getClientBaritone().getPathingBehavior().forceCancel();
                 Debug.logMessage("Failed to mine block. Suggesting it may be unreachable.");
                 mod.getBlockScanner().requestBlockUnreachable(miningPos, 1); // Ostinato: 2 -> 1 (fail twice, move on)

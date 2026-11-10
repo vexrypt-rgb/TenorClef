@@ -1,5 +1,7 @@
 package adris.altoclef.tasks.resources;
 
+import adris.altoclef.multiversion.blockpos.BlockPosVer;
+
 import adris.altoclef.AltoClef;
 import adris.altoclef.Debug;
 import adris.altoclef.TaskCatalogue;
@@ -160,7 +162,21 @@ public class CollectBucketLiquidTask extends ResourceTask {
                 }
             }
 
-            return WorldHelper.isSourceBlock(blockPos, false);
+            if (!WorldHelper.isSourceBlock(blockPos, false)) return false;
+            // S300: lava only - skip lavafall/column sources (lava stacked above, nothing beside it,
+            // or air/flow below). Those are what S211 stalled on (055030: y=55 lavafall, y=-55 shaft).
+            if (toCollect == Blocks.LAVA) {
+                if (above == Blocks.LAVA) return false;
+                var below = mod.getWorld().getBlockState(blockPos.down());
+                if (below.isAir() || (below.getBlock() == Blocks.LAVA && !below.getFluidState().isStill())) return false;
+                int pool = 0;
+                for (Direction d : Direction.Type.HORIZONTAL) {
+                    var n = mod.getWorld().getBlockState(blockPos.offset(d));
+                    if (n.getBlock() == Blocks.LAVA && n.getFluidState().isStill()) pool++;
+                }
+                if (pool == 0) return false;
+            }
+            return true;
         };
 
         // Find nearest water and right click it
@@ -177,7 +193,11 @@ public class CollectBucketLiquidTask extends ResourceTask {
                     playerGround = mod.getPlayer().isOnGround();
                 } catch (Throwable ignored) {}
 
-                if (ShoreStandSelector.shouldEscapeBeforeInteract(playerWet, playerGround)) {
+                // S301: 063736 swam at 112,62,93 ~50 blocks from the y=50 lake and the wet-bob
+                // timeout blacklisted 4 lake sources it was nowhere near, then S211 fired. Same as
+                // S299 for logs: only escape/blacklist when actually beside the source.
+                boolean nearSource = BlockPosVer.isWithinDistance(mod.getPlayer().getBlockPos(), blockPos, 6);
+                if (nearSource && ShoreStandSelector.shouldEscapeBeforeInteract(playerWet, playerGround)) {
                     wetBobTicks += 3; // S212: 3 up per wet tick, 1 down per dry tick
                     // Long bob with no progress: blacklist this source and wander (TIMEOUT recovery path).
                     if (wetBobTicks >= WET_BOB_BLACKLIST_TICKS) {

@@ -143,10 +143,26 @@ public abstract class Task {
         first = true;
         active = false;
         stopped = true;
+        // An outcome copied from a child is not this task's own terminal decision: the task was still running (the
+        // task system never ends a task on a child failure by itself), so a stop accepted now is a cancellation.
+        // Without this, a cancel landing on the tick a child failed reported FAILURE (Fugue v1.1 B05). The task's own
+        // fail()/blocked()/succeed() set before the stop still win, and so does a copied outcome once the task's own
+        // finish predicate holds (that one was already terminal when the stop arrived).
         if (explicitResult == null
                 || explicitResult == TaskResult.RUNNING
-                || explicitResult == TaskResult.RETRY) {
+                || explicitResult == TaskResult.RETRY
+                || (absorbedFromChild && explicitResult != TaskResult.SUCCESS && !finishedForStop())) {
             explicitResult = TaskResult.CANCELLED;
+            absorbedFromChild = false;
+        }
+    }
+
+    /** {@link #isFinished()} for {@link #stop}; stops can arrive while the world is gone, which reads as not finished. */
+    private boolean finishedForStop() {
+        try {
+            return isFinished();
+        } catch (RuntimeException e) {
+            return false;
         }
     }
 

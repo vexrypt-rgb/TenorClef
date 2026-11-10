@@ -40,6 +40,8 @@ public class DeathMenuChain extends TaskChain {
     private boolean reconnecting = false;
     private int deathCount = 0;
     private Class<? extends Screen> prevScreen = null;
+    private final DeathCommandQueue deathCommands = new DeathCommandQueue();
+    private Object deathCommandWorld; // the world the pending death commands belong to
 
 
     public DeathMenuChain(TaskRunner runner) {
@@ -112,21 +114,15 @@ public class DeathMenuChain extends TaskChain {
                     }
                     MinecraftClient.getInstance().player.requestRespawn();
                     MinecraftClient.getInstance().setScreen(null);
+                    // Was `while (player.isAlive());` per command, on the render thread: a player reading alive here
+                    // (healed or respawned before this tick) hung the client forever. Queued; run below, never blocking.
+                    java.util.List<String> commands = new java.util.ArrayList<>();
                     for (String i : mod.getModSettings().getDeathCommand().split(" & ")) {
                         String command = i.replace("{deathmessage}", deathMessage);
-                        String prefix = mod.getModSettings().getCommandPrefix();
-                        while (MinecraftClient.getInstance().player.isAlive()) ;
-                        if (!command.isEmpty()) {
-                            if (command.startsWith(prefix)) {
-                                AltoClef.getCommandExecutor().execute(command, () -> {
-                                }, Throwable::printStackTrace);
-                            } else if (command.startsWith("/")) {
-                                PlayerVer.sendChatCommand(MinecraftClient.getInstance().player, command.substring(1));
-                            } else {
-                                PlayerVer.sendChatMessage(MinecraftClient.getInstance().player, command);
-                            }
-                        }
+                        if (!command.isEmpty()) commands.add(command);
                     }
+                    deathCommands.schedule(commands);
+                    deathCommandWorld = MinecraftClient.getInstance().world;
                 } else {
                     // Cancel if we die and are not auto-respawning.
                     mod.cancelUserTask();
@@ -160,9 +156,33 @@ public class DeathMenuChain extends TaskChain {
                 }
             }
         }
+        if (deathCommands.hasPending()) {
+            String outcome = deathCommands.tick(deathCommandState(), this::runDeathCommand);
+            if (outcome.equals("discarded")) Debug.logMessage("Death commands discarded: left the world before they ran.");
+            else if (outcome.equals("ran-after-hold")) Debug.logMessage("Death commands ran after respawn.");
+        }
         if (screen != null)
             prevScreen = screen.getClass();
         return Float.NEGATIVE_INFINITY;
+    }
+
+    private DeathCommandQueue.PlayerState deathCommandState() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (!AltoClef.inGame() || client.player == null || client.world != deathCommandWorld) return DeathCommandQueue.PlayerState.NO_PLAYER;
+        return client.player.isAlive() ? DeathCommandQueue.PlayerState.ALIVE : DeathCommandQueue.PlayerState.DEAD;
+    }
+
+    private void runDeathCommand(String command) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null) return;
+        if (command.startsWith(AltoClef.getInstance().getModSettings().getCommandPrefix())) {
+            AltoClef.getCommandExecutor().execute(command, () -> {
+            }, Throwable::printStackTrace);
+        } else if (command.startsWith("/")) {
+            PlayerVer.sendChatCommand(client.player, command.substring(1));
+        } else {
+            PlayerVer.sendChatMessage(client.player, command);
+        }
     }
 
     @Override

@@ -1,5 +1,6 @@
 package adris.altoclef.trackers.storage;
 
+import adris.altoclef.multiversion.ScreenVer;
 import adris.altoclef.trackers.Tracker;
 import adris.altoclef.trackers.TrackerManager;
 import adris.altoclef.util.helpers.ItemHelper;
@@ -9,6 +10,7 @@ import adris.altoclef.util.slots.CursorSlot;
 import adris.altoclef.util.slots.PlayerSlot;
 import adris.altoclef.util.slots.Slot;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
@@ -36,8 +38,47 @@ public class InventorySubTracker extends Tracker {
 
     private ScreenHandler _prevScreenHandler;
 
+    // ------------------------------------------------------------------------------------------------------------
+    // Ostinato: unchanged-screen fast path.
+    //
+    // TrackerManager.tick() marks EVERY tracker dirty on every client tick, so updateState() runs once per tick
+    // even when the player is standing still. The old body rebuilt four HashMaps, one ArrayList per distinct item
+    // and one Slot wrapper per window slot every single time: for a 46-slot player inventory that is ~46 Slot
+    // objects + ~46 hash inserts + ~10 lists per tick, i.e. the largest per-tick allocation left in TenorClef.
+    //
+    // Two caches remove it without weakening the snapshot:
+    //
+    //   _slots      the immutable Slot wrappers for the current (handler, screen, slot count) triple. Slot is a
+    //               value object built from a window index, so the same window slot yields the same Slot every
+    //               tick; only a screen change invalidates the array.
+    //   _scratch /  the previous tick's (Item, count) for every window slot. If they all match, the four published
+    //   _lastItems  maps still describe exactly what is on screen and are KEPT — nothing is allocated. The check is
+    //   _lastCounts exact (Item identity + int count), not a hash, so a hash collision cannot hide a change.
+    //
+    // A rebuild is forced whenever the handler, the screen or the slot count changed, because those decide the slot
+    // classification (crafting output ignored, player-vs-container split), not just the contents.
+    private Slot[] _slots;
+    private ScreenHandler _slotsHandler;
+    private Screen _slotsScreen;
+    private int _slotsCount = -1;
+
+    private ItemStack[] _scratch;
+    private Item[] _lastItems;
+    private int[] _lastCounts;
+    private boolean _hasSnapshot;
+
     public InventorySubTracker(TrackerManager manager) {
         super(manager);
+    }
+
+    /**
+     * Refresh through the dirty flag rather than by calling {@link #updateState()} behind its back. Nothing calls
+     * {@link ItemStorageTracker#updateState()} today (that tracker has no {@code ensureUpdated()} call site), so this
+     * is currently unused — but if that path is ever revived it must not scan a screen that is already up to date,
+     * and it must not leave this tracker's flag set for the next reader to scan a second time.
+     */
+    void refresh() {
+        ensureUpdated();
     }
 
     private static boolean shouldIgnoreSlotForContainer(Slot slot) {
@@ -200,7 +241,74 @@ public class InventorySubTracker extends Tracker {
 
     @Override
     protected void updateState() {
-        _prevScreenHandler = MinecraftClient.getInstance().player != null ? MinecraftClient.getInstance().player.currentScreenHandler : null;
+        MinecraftClient mc = MinecraftClient.getInstance();
+        ClientPlayerEntity player = mc.player;
+        ScreenHandler handler = player != null ? player.currentScreenHandler : null;
+        _prevScreenHandler = handler;
+
+        if (handler == null) {
+            // Nothing on screen: publish empty maps once, then stay put.
+            if (_hasSnapshot || !itemCountsPlayer.isEmpty() || !itemCountsContainer.isEmpty()) {
+                itemToSlotPlayer = new HashMap<>();
+                itemToSlotContainer = new HashMap<>();
+                itemCountsPlayer = new HashMap<>();
+                itemCountsContainer = new HashMap<>();
+            }
+            forgetSnapshot();
+            return;
+        }
+
+        final int n = handler.slots.size();
+        final Screen screen = ScreenVer.current(mc);
+        final boolean slotsRebuilt = _slots == null || _slotsHandler != handler
+                || _slotsScreen != screen || _slotsCount != n;
+        if (slotsRebuilt) {
+            Slot[] slots = new Slot[n];
+            for (int i = 0; i < n; i++) {
+                slots[i] = Slot.getFromCurrentScreen(i);
+            }
+            _slots = slots;
+            _slotsHandler = handler;
+            _slotsScreen = screen;
+            _slotsCount = n;
+        }
+        final Slot[] slots = _slots;
+
+        if (_scratch == null || _scratch.length != n) {
+            _scratch = new ItemStack[n];
+            _lastItems = new Item[n];
+            _lastCounts = new int[n];
+            _hasSnapshot = false;
+        }
+
+        boolean changed = slotsRebuilt || !_hasSnapshot;
+        for (int i = 0; i < n; i++) {
+            Slot slot = slots[i];
+            if (slot == null) {
+                // Unreachable: getCurrentType() maps every ContainerType to a Slot. Keep the snapshot aligned anyway.
+                _scratch[i] = ItemStack.EMPTY;
+                _lastItems[i] = Items.AIR;
+                _lastCounts[i] = 0;
+                continue;
+            }
+            ItemStack stack = StorageHelper.getItemStackInSlot(slot);
+            _scratch[i] = stack;
+            Item item = stack.getItem();
+            int count = stack.getCount();
+            if (!changed && (_lastItems[i] != item || _lastCounts[i] != count)) {
+                changed = true;
+            }
+            _lastItems[i] = item;
+            _lastCounts[i] = count;
+        }
+        _hasSnapshot = true;
+
+        if (!changed) {
+            // Every window slot holds the same item and the same count as when the published maps were built, and
+            // the handler/screen/slot count that decide slot classification are unchanged too. Rebuilding would
+            // produce byte-identical maps, so keep them.
+            return;
+        }
 
         // Build into FRESH maps and publish them by swapping the field references at the
         // very end. The old code cleared the shared maps in place and refilled them, which
@@ -224,21 +332,16 @@ public class InventorySubTracker extends Tracker {
         HashMap<Item, Integer> countsPlayer = new HashMap<>();
         HashMap<Item, Integer> countsContainer = new HashMap<>();
 
-        ScreenHandler handler = null;
-        if (MinecraftClient.getInstance().player != null) {
-            handler = MinecraftClient.getInstance().player.currentScreenHandler;
-        }
-        if (handler != null) {
-            for (Slot slot : Slot.getCurrentScreenSlots()) {
-                // Ignore cursor slot, that's handled separately.
-                if (slot.equals(CursorSlot.SLOT))
-                    continue;
-                ItemStack stack = StorageHelper.getItemStackInSlot(slot);
-                // Add separately if we're in a container vs player inventory.
-                if (!shouldIgnoreSlotForContainer(slot)) {
-                    registerItem(stack, slot, slot.isSlotInPlayerInventory(),
-                            slotsPlayer, slotsContainer, countsPlayer, countsContainer);
-                }
+        for (int i = 0; i < n; i++) {
+            Slot slot = slots[i];
+            // Ignore cursor slot, that's handled separately.
+            if (slot == null || slot.equals(CursorSlot.SLOT)) {
+                continue;
+            }
+            // Add separately if we're in a container vs player inventory.
+            if (!shouldIgnoreSlotForContainer(slot)) {
+                registerItem(_scratch[i], slot, slot.isSlotInPlayerInventory(),
+                        slotsPlayer, slotsContainer, countsPlayer, countsContainer);
             }
         }
 
@@ -248,13 +351,28 @@ public class InventorySubTracker extends Tracker {
         itemCountsContainer = countsContainer;
     }
 
+    /** Drop the caches that describe a particular screen, so the next scan starts from scratch. */
+    private void forgetSnapshot() {
+        _slots = null;
+        _slotsHandler = null;
+        _slotsScreen = null;
+        _slotsCount = -1;
+        _scratch = null;
+        _lastItems = null;
+        _lastCounts = null;
+        _hasSnapshot = false;
+    }
+
     @Override
-    protected void reset() {
-        // Swap, don't clear in place — same reasoning as updateState().
+    protected synchronized void reset() {
+        // Swap, don't clear in place — same reasoning as updateState(). synchronized: TrackerManager.tick() resets
+        // every tracker from the client thread without a lock, and updateState() now reads the scan caches, so an
+        // unsynchronised reset could null them in the middle of a scan on another thread.
         itemToSlotPlayer = new HashMap<>();
         itemToSlotContainer = new HashMap<>();
         itemCountsPlayer = new HashMap<>();
         itemCountsContainer = new HashMap<>();
+        forgetSnapshot();
     }
 
     @Override

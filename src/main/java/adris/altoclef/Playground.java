@@ -252,17 +252,17 @@ public class Playground {
                     int unobtainable = 0;
                     int total = 0;
                     File f = new File(fname);
-                    FileWriter fw = new FileWriter(f);
-                    for (Identifier id : Registries.ITEM.getIds()) {
-                        Item item = Registries.ITEM.get(id);
-                        if (!TaskCatalogue.isObtainable(item)) {
-                            ++unobtainable;
-                            fw.write(item.getTranslationKey() + "\n");
+                    try (FileWriter fw = new FileWriter(f)) {
+                        for (Identifier id : Registries.ITEM.getIds()) {
+                            Item item = Registries.ITEM.get(id);
+                            if (!TaskCatalogue.isObtainable(item)) {
+                                ++unobtainable;
+                                fw.write(item.getTranslationKey() + "\n");
+                            }
+                            total++;
                         }
-                        total++;
+                        fw.flush();
                     }
-                    fw.flush();
-                    fw.close();
                     Debug.logMessage(unobtainable + " / " + total + " unobtainable items. Wrote a list of items to \"" + f.getAbsolutePath() + "\".");
                 } catch (IOException e) {
                     Debug.logWarning(e.toString());

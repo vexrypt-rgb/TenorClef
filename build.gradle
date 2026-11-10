@@ -27,7 +27,7 @@ preprocess {
 
 // The unobfuscated Loom has no mappings, and its mappingConfiguration getter throws, which the preprocessor
 // probes reflectively. Hand it an identity tiny file instead (26.x names are already the Mojang names);
-// the real 26.3 <-> 1.21.11 renames come from versions/mapping-26.3-1.21.11.txt.
+// the real 26.3 <-> 1.21.11 renames come from versions/mapping-26.3-1.21.11.txt (fetched by root.gradle.kts, not committed).
 class IdentityTinyMappings {
     File tinyMappings
 }
@@ -54,7 +54,9 @@ tasks.withType(JavaCompile).configureEach {
     }
 }
 
-// The 26.3 classes are Java 25, so its tests run on the JDK 25 toolchain too.
+// The 26.3 classes are Java 25, so its tests and client/server runs use the JDK 25 toolchain too.
+// Loom's runClient otherwise inherits the Gradle JVM (21), which rejects
+// --sun-misc-unsafe-memory-access=allow and dies before the window opens.
 if (unobfuscated) {
     tasks.withType(Test).configureEach {
         javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }

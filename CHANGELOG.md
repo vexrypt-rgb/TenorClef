@@ -1,4 +1,7 @@
-# Unreleased
+# TenorClef 0.28.0
+
+Pairs with Ostinato v1.27.0 (26.3): `libs/baritone-unoptimized-fabric-ostinato-26.3.jar` is the v1.27.0 release jar. New 26.3 work
+now happens in the monorepo [vexrypt-rgb/ostinato-tenorclef](https://github.com/vexrypt-rgb/ostinato-tenorclef).
 
 - **`@allblocks` / Ostinato `#allblocks`** (26.3): a survival collection run. One of every obtainable item goes into
   labeled chests and one of every placeable block onto a grid next to them, from the bot's own gathering (never a
@@ -15,6 +18,24 @@
 - **26.3 `runClient`** runs on the JDK 25 toolchain (Gradle stays on 21); before, the client would not start.
 - Tools: `tools/allblocks/verify_world.py` checks a run against the save (chest contents, grid blocks, cheats off);
   `tools/allblocks/render_area.py` draws the chest room and grid from the save with the game's textures.
+- **Maze furnishing** with Ostinato's `#maze`: survival palette, deepslate and tuff blocks, ceiling lights and seals
+  from reachable stands (pillar and dig-out fallbacks, boxed-in dig-out), containers and barrels, tunnel
+  provisioning, pocket opening, junk-drop guard, tree replanting with clearance.
+- **Speedrun 26.3 fixes** (S294 to S314): water and lava escape bounds, portal lava site rules, iron and tool stall
+  watchdogs, emergency food at hunger 6 or less, resume after a chain interrupt, AutoWorld on 26.3.
+- **Correctness**: a golden pickaxe counts as wood tier only; copper pickaxes count as stone tier. A cancel that lands
+  on the tick a child failed reports CANCELLED. `@goal` ends on any terminal status (it used to tick a failed goal
+  forever). Death-menu handling moved off the render thread.
+- **Performance**: cheaper block scanning, entity tracking, inventory snapshots and slot mapping each tick.
+- **Grace Note gate**: chains pause while Ostinato's Grace Note owns input (only when Grace Note is live).
+  `@threat` prints Ostinato's threat view.
+- **Fugue** (opt-in `@fugue`, `@fuguebench`): dependency-aware sub-task coordination. Evaluated as inconclusive (v1)
+  and its stall recovery as a regression (v1.1), so recovery stays off. See `FUGUE_V1_HANDOFF.md`,
+  `FUGUE_V11_HANDOFF.md`.
+- **26.3 `runClient`** runs on the JDK 25 toolchain.
+- **Build**: `versions/mapping-26.3-1.21.11.txt` is no longer committed; `root.gradle.kts` fetches it from a pinned commit and checks its SHA-256.
+- **Experimental features stay off**: Fugue is opt-in (`@fugue`) and its recovery is off; the Grace Note gate does
+  nothing unless Ostinato's Grace Note runs live.
 
 # TenorClef 0.26.2
 

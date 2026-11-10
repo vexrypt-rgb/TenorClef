@@ -180,6 +180,33 @@ public class EarlyOverworldSpeedrunTask extends Task {
 
         // ---------- Priority 1: Basic wood tools ----------
         if (!hasBasicTools) {
+            // Ostinato: S307. testrun-20261103-083032: stone pick broke mid-iron (no table/sticks, nearby logs
+            // blacklisted) and getItem(STONE_PICKAXE) sat silent 11+ min. Inventory-progress watchdog -> wander.
+            if (toolStallWander != null) {
+                if (!toolStallWander.isFinished() && System.currentTimeMillis() < toolStallWanderUntilMs) {
+                    setDebugState("S307 tool stall: wandering for fresh logs/stone");
+                    return toolStallWander;
+                }
+                toolStallWander = null;
+                toolStallLastProgressMs = System.currentTimeMillis();
+            }
+            int toolSig = StorageHelper.getItemCount(mod, ItemHelper.LOG) * 1000
+                    + StorageHelper.getItemCount(mod, ItemHelper.PLANKS) * 100
+                    + StorageHelper.getItemCount(mod, Items.STICK) * 10
+                    + StorageHelper.getItemCount(mod, Items.CRAFTING_TABLE);
+            long nowMs = System.currentTimeMillis();
+            if (toolSig != toolStallLastSig || toolStallLastProgressMs == 0) {
+                toolStallLastSig = toolSig;
+                toolStallLastProgressMs = nowMs;
+            } else if (nowMs - toolStallLastProgressMs > 75_000) {
+                Debug.logMessage("[S307] basic tools stalled 75s (sig=" + toolSig + ") - close screen + rescan + wander");
+                StorageHelper.closeScreen();
+                mod.getBlockScanner().reset();
+                toolStallWander = new TimeoutWanderTask(40, true);
+                toolStallWanderUntilMs = nowMs + 30_000;
+                toolStallLastProgressMs = nowMs;
+                return toolStallWander;
+            }
             setDebugState("Getting basic wood tools");
             return ensureBasicTools();
         }
@@ -243,16 +270,36 @@ public class EarlyOverworldSpeedrunTask extends Task {
         if (!hasIronPick) {
             boolean canMineIron = StorageHelper.miningRequirementMetInventory(mod, MiningRequirement.STONE)
                     || StorageHelper.miningRequirementMetInventory(mod, MiningRequirement.IRON);
+            if (ironStallWander != null) {
+                if (!ironStallWander.isFinished() && System.currentTimeMillis() < ironStallWanderUntilMs) {
+                    setDebugState("Iron stall: wandering for a new ore route");
+                    return ironStallWander;
+                }
+                ironStallWander = null;
+                ironPickTimer.reset();
+            }
             if (canMineIron) {
                 if (!ironPickTimerStarted) {
                     ironPickTimerStarted = true;
                     ironPickTimer.reset();
                     Debug.logMessage("EarlyOverworld: starting iron pick (stone tools ready)");
-                } else if (ironPickTimer.elapsed()) {
+                }
+                // Ostinato: S296. The >90s wander fired at 04:04:48 (testrun-20261103-035940) while 3 raw iron sat in the
+                // just-placed furnace, so the bot walked off and lost the iron (3/3 -> 0/3). Iron progress resets the
+                // stall timer, and once we hold enough iron the smelt/craft is never interrupted by the wander.
+                int ironNow = StorageHelper.getItemCount(mod, Items.RAW_IRON, Items.IRON_ORE, Items.IRON_INGOT);
+                if (ironNow != ironTimerLastCount) {
+                    ironTimerLastCount = ironNow;
+                    ironPickTimer.reset();
+                }
+                if (ironNow < 3 && ironPickTimer.elapsed()) {
                     Debug.logMessage("EarlyOverworld: iron pick >90s - close screen + wander");
                     StorageHelper.closeScreen();
                     ironPickTimer.reset();
-                    return new TimeoutWanderTask(24, true);
+                    // Ostinato: S296 keep returning the same wander until it finishes (was dropped after one tick).
+                    ironStallWander = new TimeoutWanderTask(24, true);
+                    ironStallWanderUntilMs = System.currentTimeMillis() + 25_000;
+                    return ironStallWander;
                 }
             } else {
                 ironPickTimerStarted = false;
@@ -339,17 +386,25 @@ public class EarlyOverworldSpeedrunTask extends Task {
                 Debug.logMessage("EarlyOverworld: portal build stalled without water/lava - abort hard-reset Construct"
                         + " (empty=" + empty + " water=" + water + " lava=" + lava + ")");
                 hardResetUi();
-                if (goToNetherTask instanceof DefaultGoToDimensionTask dim) {
-                    dim.hardResetPortalBuild();
-                    goToNetherTask.stop();
-                } else if (goToNetherTask != null) {
-                    goToNetherTask.stop();
+                // S302: 065856 held an empty bucket and was wandering for water; this reset fired
+                // every 90s for 7+ min, restarting the water search (and its wander) from scratch
+                // each time. With an empty bucket in hand the search itself is the progress - keep it.
+                if (empty > 0) {
+                    portalPhaseTimer.reset();
+                    Debug.logMessage("EarlyOverworld: [S302] keeping water/lava search (empty bucket in hand)");
+                } else {
+                    if (goToNetherTask instanceof DefaultGoToDimensionTask dim) {
+                        dim.hardResetPortalBuild();
+                        goToNetherTask.stop();
+                    } else if (goToNetherTask != null) {
+                        goToNetherTask.stop();
+                    }
+                    // Drop cached dimension task so next enterNether() gets a fresh Construct
+                    goToNetherTask = null;
+                    portalPhaseTimerStarted = false;
+                    portalPhaseTimer.reset();
+                    return new TimeoutWanderTask(16, true);
                 }
-                // Drop cached dimension task so next enterNether() gets a fresh Construct
-                goToNetherTask = null;
-                portalPhaseTimerStarted = false;
-                portalPhaseTimer.reset();
-                return new TimeoutWanderTask(16, true);
             }
             // Progress exists - keep going but reset the watchdog
             portalPhaseTimer.reset();
@@ -537,6 +592,14 @@ public class EarlyOverworldSpeedrunTask extends Task {
         hasBasicArmor = true;
         return null;
     }
+
+    private Task toolStallWander = null; // Ostinato: S307
+    private long toolStallWanderUntilMs = 0;
+    private long toolStallLastProgressMs = 0;
+    private int toolStallLastSig = -1;
+    private int ironTimerLastCount = -1; // Ostinato: S296
+    private Task ironStallWander = null; // Ostinato: S296
+    private long ironStallWanderUntilMs = 0;
 
     private Task ensureIronPick() {
         // Hard gate: never chase iron with only a wooden pick

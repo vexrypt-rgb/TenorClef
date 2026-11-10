@@ -81,7 +81,10 @@ public class MazeBarrelFillTask extends Task {
             // which SlotHandler turns into a PICKUP at -999 = throw the stack out. Fill flipped between
             // "Filling" and "No fill items left" while the barrel stayed empty server-side.
             var h = mod.getPlayer().currentScreenHandler;
-            net.minecraft.item.ItemStack cursor = h.getCursorStack();
+            // Ostinato: 1.16.x keeps the cursor on the PlayerInventory, not the ScreenHandler, and the version rewrite
+            // only fires on a direct `player.currentScreenHandler` receiver - not on a local alias. This helper is the
+            // version-safe read of the same handler, so the run54 intent (open handler, not the cached slots) stands.
+            net.minecraft.item.ItemStack cursor = adris.altoclef.util.helpers.StorageHelper.getItemStackInCursorSlot();
             if (!cursor.isEmpty()) {
                 for (net.minecraft.screen.slot.Slot s : h.slots) {
                     if (!(s.inventory instanceof net.minecraft.entity.player.PlayerInventory) && s.getStack().isEmpty()) {

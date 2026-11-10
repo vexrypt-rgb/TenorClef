@@ -608,6 +608,10 @@ public class Settings implements IFailableConfigFile {
 
     /** Public, non-static accessor used by the mixin path before an AltoClef instance exists. */
     public static boolean isAutoLoadWorldEnabled() {
+        String prop = System.getProperty("tenorclef.autoload.world");
+        if (prop != null && !prop.isBlank()) {
+            return Boolean.parseBoolean(prop.trim());
+        }
         return readBoolFromDisk("autoLoadWorld");
     }
 

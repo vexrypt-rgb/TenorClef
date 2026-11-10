@@ -8,6 +8,9 @@ tasks, and a modern Fabric target.
 TenorClef is not affiliated with AltoClef, Marvion, or MiranCZ. Those projects are
 the upstream history of this fork.
 
+> **New work happens in the monorepo:** 26.3 development of TenorClef and Ostinato now lives in
+> [vexrypt-rgb/ostinato-tenorclef](https://github.com/vexrypt-rgb/ostinato-tenorclef). This repository keeps the
+> releases, the older Minecraft lines (1.21.11, 1.21.4, 1.16.1) and the full history.
 ## Supported versions
 
 TenorClef always runs on [Ostinato](https://github.com/vexrypt-rgb/Ostinato), so it is only built
@@ -15,7 +18,7 @@ for the Minecraft versions Ostinato is built for:
 
 | Minecraft | Status | Ostinato | Notes |
 | --- | --- | --- | --- |
-| 26.3 | Primary | `main` (`libs/baritone-unoptimized-fabric-ostinato-26.3.jar`, release jar `ostinato-mc26.3-unoptimized-fabric-1.23.0.jar`) | Default build target; needs a JDK 25 toolchain; CI runs the unit tests on it |
+| 26.3 | Primary | `main` (`libs/baritone-unoptimized-fabric-ostinato-26.3.jar`, release jar `ostinato-mc26.3-unoptimized-fabric-*.jar` from Ostinato v1.27.0) | Default build target; needs a JDK 25 toolchain; CI runs the unit tests on it |
 | 1.21.11 | Supported | branch `1.21.11` (`libs/baritone-unoptimized-fabric-ostinato-1.21.11.jar`) | CI runs the unit tests on it |
 | 1.21.4 | Supported | branch `1.21.4` (`libs/baritone-unoptimized-fabric-1.21.4.jar`) | Anarchy target; vanilla recipe-book crafting disabled (1.21.2+ servers do not sync recipes) |
 | 1.16.1 | Legacy | branch `1.16.1` (`libs/baritone-unoptimized-fabric-1.16.1.jar`) | Legacy pairing |
@@ -38,6 +41,12 @@ Each release lists the matching Ostinato jar in its notes (see [CHANGELOG.md](CH
 build from source using the instructions below rather than downloading an upstream
 AltoClef jar.
 
+### Experimental features are off by default
+
+Fugue (`@fugue`, dependency-aware sub-task coordination) is opt-in and its stall recovery stays off. The Grace Note
+task gate only acts when Ostinato's Grace Note runs live (`-Dostinato.graceNote=live`); by default it is in
+`observe` mode and TenorClef behaves as before. Ostinato's own experiments (Presto, Legato, Maestro, Cadenza,
+Secondo, the Ostinato 2.0 study flags) default to `false`; see the Ostinato README.
 ## Build from source
 
 TenorClef uses Java 21 for the current modern modules. On Windows run:

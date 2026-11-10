@@ -281,7 +281,7 @@ public class FoodChain extends SingleTaskChain {
                 // Raw cookables wait for the furnace unless we are in real trouble.
                 Item it = stack.getItem();
                 if ((it == Items.PORKCHOP || it == Items.BEEF || it == Items.CHICKEN || it == Items.MUTTON || it == Items.RABBIT
-                        || it == Items.COD || it == Items.SALMON || it == Items.POTATO) && health > 8 && hunger > 4) continue;
+                        || it == Items.COD || it == Items.SALMON || it == Items.POTATO) && health > 8 && hunger > 6) continue; // S303: hunger 6 = no sprint; eat raw rather than crawl
 
                 // Ignore spider eyes
                 if (stack.getItem() == Items.SPIDER_EYE) {

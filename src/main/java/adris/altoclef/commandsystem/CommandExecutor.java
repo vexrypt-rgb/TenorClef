@@ -79,26 +79,36 @@ public class CommandExecutor {
         }
     }
 
-    /** True when the unified registry ran {@code body}. False means this class should run it. */
+    /** True when the unified registry handled {@code body}. False means this class should run it. */
+    // Ostinato: through the public baritone.api ISwarm.localAt hook (Ostinato v1.28.0-beta.2+), no reflection
+    // into Ostinato internals. Only 26.3 has the command center; the older lines' jars lack the method.
     private static boolean dispatchLocalAt(String line, Runnable body) {
-        try {
-            Class<?> type = Class.forName("baritone.swarm.center.UnifiedChat");
-            Object ran = type.getMethod("localAt", String.class, Runnable.class).invoke(null, line, body);
-            return Boolean.TRUE.equals(ran);
-        } catch (ClassNotFoundException absent) {
-            return false;
-        } catch (java.lang.reflect.InvocationTargetException invoked) {
-            Throwable cause = invoked.getCause();
-            if (cause instanceof RuntimeException runtime) {
-                throw runtime;
-            }
-            if (cause instanceof Error error) {
-                throw error;
-            }
-            return true;
-        } catch (Throwable ignored) {
-            return false;
-        }
+        //#if MC >= 260000
+        //$$ baritone.api.swarm.ISwarm swarm;
+        //$$ try {
+        //$$     baritone.api.IBaritone primary = baritone.api.BaritoneAPI.getProvider().getPrimaryBaritone();
+        //$$     swarm = primary == null ? null : primary.getSwarm();
+        //$$ } catch (RuntimeException | LinkageError absent) {
+        //$$     return false; // Ostinato is not loaded or not ready: run it here, as before
+        //$$ }
+        //$$ if (swarm == null) {
+        //$$     return false;
+        //$$ }
+        //$$ boolean[] started = {false};
+        //$$ try {
+        //$$     return swarm.localAt(line, () -> {
+        //$$         started[0] = true;
+        //$$         body.run();
+        //$$     });
+        //$$ } catch (LinkageError older) {
+        //$$     if (started[0]) {
+        //$$         throw older; // thrown by the command itself
+        //$$     }
+        //$$     return false; // an Ostinato build without localAt
+        //$$ }
+        //#else
+        return false;
+        //#endif
     }
 
     public void execute(String line, Runnable onFinish, Consumer<CommandException> getException) {

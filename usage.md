@@ -17,6 +17,7 @@ Commands are prefixed with `@`. Here's a list along with their functions:
 | `scan`                 | Logs the nearest given block currently found be `BlockScanner`.                                                        | `@scan dirt`  |
 | `status`               | Prints the status of the currently executing command. Mostly useful when running through `/msg`.                       |               |
 | `stop`                 | Forcefully stops the currently running command. The shortcut `CTRL+K` also achieves this.                              |               |
+| `swarm`                | Front end for Ostinato `#swarm`. With `swarmCommandProtocol` on: `@swarm send <bot> <command...>`, `@swarm outcome <id>`, `@swarm cancel <id>`. The flag defaults off and those three do not send. | `@swarm status` |
 | `test {testname}`      | Runs a "test" command. These vary, and will be described below.                                                        |               |
 
 

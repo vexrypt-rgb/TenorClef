@@ -2,6 +2,8 @@ package adris.altoclef.swarm;
 
 import adris.altoclef.AltoClef;
 import adris.altoclef.Debug;
+import baritone.api.BaritoneAPI;
+import baritone.api.IBaritone;
 
 import java.util.Set;
 
@@ -117,9 +119,67 @@ public final class SwarmRuntime {
         }
     }
 
+    private static boolean protocolHookAttempted;
+
+    /**
+     * Publish safety latches and the {@code @} hook. Reflection only: a stock Baritone jar has none of
+     * these methods, and this class must still compile against that jar. No effect while the protocol is off.
+     */
+    private static void noteProtocolSafety() {
+        try {
+            IBaritone primary = BaritoneAPI.getProvider().getPrimaryBaritone();
+            if (primary == null || primary.getSwarm() == null) {
+                return;
+            }
+            Object swarm = primary.getSwarm();
+            if (!protocolHookAttempted) {
+                protocolHookAttempted = true;
+                try {
+                    Class<?> hookType = Class.forName("baritone.api.swarm.protocol.ExternalCommandHook");
+                    Object proxy = java.lang.reflect.Proxy.newProxyInstance(
+                            hookType.getClassLoader(),
+                            new Class<?>[]{hookType},
+                            new SwarmProtocolHook());
+                    swarm.getClass().getMethod("setExternalCommandHook", hookType).invoke(swarm, proxy);
+                } catch (Throwable ignoredHook) {
+                    // This Baritone build has no Phase 1 hook.
+                }
+            }
+            AltoClef mod = AltoClef.getInstance();
+            if (mod == null) {
+                return;
+            }
+            invokeBool(swarm, "noteOwnerEmergency", mod.isPaused());
+            // Ostinato: FoodChain.isActive() and MobDefenseChain.isActive() always return
+            // true ("always checking"). Using them here latched localSurvival on every
+            // TenorClef client and refused every swarm command as outranked-by-local-survival.
+            boolean eating = mod.getFoodChain() != null
+                    && (mod.getFoodChain().isTryingToEat() || mod.getFoodChain().needsToEat());
+            adris.altoclef.chains.MobDefenseChain defense = mod.getMobDefenseChain();
+            boolean defending = defense != null && (defense.isShielding() || defense.isDoingAcrobatics()
+                    || defense.isPuttingOutFire() || defense.getPriority() > 0);
+            invokeBool(swarm, "noteLocalSurvival", eating || defending);
+            boolean danger = false;
+            if (mod.getPlayer() != null) {
+                danger = mod.getPlayer().isOnFire()
+                        || mod.getPlayer().isInLava()
+                        || mod.getPlayer().getAir() < 40
+                        || mod.getPlayer().getHealth() <= 6.0f;
+            }
+            invokeBool(swarm, "noteImmediateSafety", danger);
+        } catch (Throwable ignored) {
+            // Baritone is not ready, or this build has no protocol methods. The link still ticks.
+        }
+    }
+
+    private static void invokeBool(Object swarm, String name, boolean value) throws Exception {
+        swarm.getClass().getMethod(name, boolean.class).invoke(swarm, Boolean.valueOf(value));
+    }
+
     public static synchronized void tick() {
         long now = System.currentTimeMillis();
         try {
+            noteProtocolSafety();
             if (leader != null) leader.tick(now);
             if (worker != null) worker.tick(now);
             if (leader != null && ("local".equals(leaderName) || Boolean.getBoolean("tenorclef.swarm.log"))) {

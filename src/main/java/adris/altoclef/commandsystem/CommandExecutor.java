@@ -47,20 +47,68 @@ public class CommandExecutor {
         }
         Command command = commands[index];
         String part = parts[index];
-        try {
-            if (command == null) {
-                getException.accept(new RuntimeCommandException("Invalid command:" + part));
-                executeRecursive(commands, parts, index + 1, onFinish, getException);
-            } else {
-                command.run(mod, part.strip(), () -> executeRecursive(commands, parts, index + 1, onFinish, getException));
-            }
-        } catch (CommandException ae) {
-            try {
-                getException.accept(new RuntimeCommandException(ae.getMessage() + "\nUsage: " + command.getHelpRepresentation(new StringReader(part).nextOrEmpty()), ae));
-            } catch (RuntimeCommandException e) {
-                throw new IllegalStateException("Should not happen!");
-            }
+        if (command == null) {
+            getException.accept(new RuntimeCommandException("Invalid command:" + part));
+            executeRecursive(commands, parts, index + 1, onFinish, getException);
+            return;
         }
+        // Ostinato: local @ chat admits through the unified registry when that class is installed.
+        // The registry does not read permission for local chat. A missing class keeps the old path.
+        // command.run throws a checked CommandException, so the runnable catches it here. An outer
+        // catch cannot see that exception (Java 25 rejects a catch the try body cannot throw).
+        String stripped = part.strip();
+        Runnable next = () -> executeRecursive(commands, parts, index + 1, onFinish, getException);
+        Runnable body = () -> {
+            try {
+                command.run(mod, stripped, next);
+            } catch (CommandException ae) {
+                report(command, part, ae, getException);
+            }
+        };
+        if (!dispatchLocalAt(stripped, body)) {
+            body.run();
+        }
+    }
+
+    // Ostinato: same usage line the old catch printed.
+    private static void report(Command command, String part, CommandException error, Consumer<CommandException> getException) {
+        try {
+            getException.accept(new RuntimeCommandException(error.getMessage() + "\nUsage: " + command.getHelpRepresentation(new StringReader(part).nextOrEmpty()), error));
+        } catch (RuntimeCommandException e) {
+            throw new IllegalStateException("Should not happen!");
+        }
+    }
+
+    /** True when the unified registry handled {@code body}. False means this class should run it. */
+    // Ostinato: through the public baritone.api ISwarm.localAt hook (Ostinato v1.28.0-beta.2+), no reflection
+    // into Ostinato internals. Only 26.3 has the command center; the older lines' jars lack the method.
+    private static boolean dispatchLocalAt(String line, Runnable body) {
+        //#if MC >= 260000
+        //$$ baritone.api.swarm.ISwarm swarm;
+        //$$ try {
+        //$$     baritone.api.IBaritone primary = baritone.api.BaritoneAPI.getProvider().getPrimaryBaritone();
+        //$$     swarm = primary == null ? null : primary.getSwarm();
+        //$$ } catch (RuntimeException | LinkageError absent) {
+        //$$     return false; // Ostinato is not loaded or not ready: run it here, as before
+        //$$ }
+        //$$ if (swarm == null) {
+        //$$     return false;
+        //$$ }
+        //$$ boolean[] started = {false};
+        //$$ try {
+        //$$     return swarm.localAt(line, () -> {
+        //$$         started[0] = true;
+        //$$         body.run();
+        //$$     });
+        //$$ } catch (LinkageError older) {
+        //$$     if (started[0]) {
+        //$$         throw older; // thrown by the command itself
+        //$$     }
+        //$$     return false; // an Ostinato build without localAt
+        //$$ }
+        //#else
+        return false;
+        //#endif
     }
 
     public void execute(String line, Runnable onFinish, Consumer<CommandException> getException) {
